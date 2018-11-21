@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<data>
+    <!-- format: <string id="<unique_number>"> Message </string> -->
+    <string id="1">Welcome to JCAppStore</string>
+    <string id="2">No card reader detected.</string>
+    <string id="3">Unable to create local App Store directory.</string>
+    <string id="4">Error while parsing arguments</string>
+    <string id="5">Constructor : Error while parsing arguments</string>
+    <string id="6">refresh</string>
+    <string id="7">Restart JCPlayStore to see the difference.</string>
+    <string id="8">Delete</string>
+    <string id="9">Please provide correct CAP file path.</string>
+    <string id="10">Installing Applet...</string>
+    <string id="11">Please select a CAP file</string>
+    <string id="12">Please provide proper AID.</string>
+    <string id="13">Deleting</string>
+    <string id="14">Applet</string>
+    <string id="15">Item</string>
+    <string id="16">Select CAP File</string>
+    <string id="17">CAP File</string>
+    <string id="18">List Installed Applets</string>
+    <string id="19">&lt;Please provide CAP file path&gt;</string>
+    <string id="20">Warning: no keys given, using default test key </string>
+    <string id="21">Could not connect to </string>
+    <string id="22">Card is not present!!!</string>
+    <string id="23">CAP loaded</string>
+    <string id="24">Loading failed. Are you sure the CAP file (JC version, packages, sizes) is compatible with your card?</string>
+    <string id="25">CAP contains more than one applet, specify the right one with --</string>
+    <string id="26">WARNING: Applet </string>
+    <string id="27"> already present on card</string>
+    <string id="28"> installed.</string>
+    <string id="29">Install</string>
+    <string id="30">&lt;Please provide AID&gt;</string>
+    <string id="31">Selected Package AID </string>
+    <string id="32">Version: </string>
+    <string id="33">contains following applications</string>
+    <string id="34">Would you like to delete?</string>
+    <string id="35">Deleted successfully.</string>
+    <string id="36">Could not delete AID</string>
+    <string id="37">(not present on card)</string>
+    <string id="38">Deletion not allowed. Some app still active?</string>
+    <string id="39">Parent:  </string>
+    <string id="40">From:    </string>
+    <string id="41">Privs:   </string>
+    <string id="42">Reader:</string>
+    <string id="43">ATR:</string>
+    <string id="44">Connect</string>
+    <string id="45">List</string>
+    <string id="50">Card Reader List:</string>
+    <string id="51">Go</string>
+    <string id="52">Command:</string>
+    <string id="53">Status:</string>
+    <string id="54">File</string>
+    <string id="55">Tasks</string>
+
+    <string id="57">Setting</string>
+    <string id="58">Warning</string>
+    <string id="59">Verbose</string>
+    <string id="60">Debug</string>
+    <string id="61">Warning</string>
+    <!-- left menu -->
+    <string id="70">My card</string>
+    <string id="71">Applet Store</string>
+    <string id="72">Search...</string>
+
+    <!-- main menu -->
+    <string id="90">Readers</string>
+    <string id="91">Refresh Card Readers</string>
+    <string id="92">Searches for available card readers from default srouce.</string>
+
+</data>
