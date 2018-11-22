@@ -13,12 +13,8 @@ import java.awt.*;
  */
 public class CustomButton extends JButton {
 
-    private Color hoverBackgroundColor;
-    private Color pressedBackgroundColor;
-
-
     private CompoundBorder innerChoosed = BorderFactory.createCompoundBorder(
-            new MatteBorder(new Insets(0, 5,0 , 0), Color.BLUE),
+            new MatteBorder(new Insets(0, 5,0 , 0), Color.RED),
             new EmptyBorder(new Insets(4, 8,4 , 4)));
     private CompoundBorder choosedBorder = BorderFactory.createCompoundBorder(
             innerChoosed,
@@ -30,11 +26,12 @@ public class CustomButton extends JButton {
         setUI(new CustomButtonUI());
         setFont(CustomFont.plain);
         setHorizontalAlignment(SwingConstants.LEFT);
-        setMinimumSize(new Dimension(180, 35));
-        setMaximumSize(new Dimension(180, 35));
-        setOpaque(false);
-        setContentAreaFilled(false);
+        setMinimumSize(new Dimension(Integer.MAX_VALUE, 35));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        //setOpaque(false);
+        //setContentAreaFilled(false);
         setIcon(new ImageIcon("src/main/resources/img/" + imgName));
+        setBackground(Color.BLUE);
     }
 
     public void setBorder(boolean isDefaultChoosed) {
@@ -52,7 +49,4 @@ public class CustomButton extends JButton {
 //        }
 //    }
 
-    @Override
-    public void setContentAreaFilled(boolean b) {
-    }
 }

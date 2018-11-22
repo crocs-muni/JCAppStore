@@ -1,16 +1,12 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.ui.Menu;
-import jdk.nashorn.internal.ir.Terminal;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author Jiří Horák
@@ -19,7 +15,9 @@ import java.util.HashMap;
 
 public class AppletStore extends JFrame {
 
-    public Terminals terminals = new Terminals("");
+    public Terminals terminals = new Terminals(""); //TODO terminal reader?
+    public Menu menu;
+    TabbedPaneSimulator window;
 
     private AppletStore() {
         setup();
@@ -66,10 +64,10 @@ public class AppletStore extends JFrame {
         pane.setLayout(new BorderLayout());
         setContentPane(pane);
         //add the content window
-        TabbedPaneSimulator window = new TabbedPaneSimulator(this);
+        window = new TabbedPaneSimulator(this);
         pane.add(window.get(), BorderLayout.CENTER);
         //add the menu
-        Menu menu = new Menu(this);
+        menu = new Menu(this);
         setJMenuBar(menu);
         // set default window properties
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,8 +75,18 @@ public class AppletStore extends JFrame {
         setVisible(true);
     }
 
+    //search for present terminals and card
+    public void refresh(boolean refreshEvenIfReadersFound) {
+        //refresh only if bool true || terminals not found
+        if (refreshEvenIfReadersFound || !terminals.isFound()) {
+            terminals.update();
+            window.localPanel.init();
+            menu.resetTerminalButtonGroup();
+        }
+    }
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws IOException {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

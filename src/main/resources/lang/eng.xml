@@ -4,7 +4,7 @@
     <string id="1">Welcome to JCAppStore</string>
     <string id="2">No card reader detected.</string>
     <string id="3">Unable to create local App Store directory.</string>
-    <string id="4">Error while parsing arguments</string>
+    <string id="4">No internet connection.</string>
     <string id="5">Constructor : Error while parsing arguments</string>
     <string id="6">refresh</string>
     <string id="7">Restart JCPlayStore to see the difference.</string>
@@ -52,6 +52,7 @@
     <string id="53">Status:</string>
     <string id="54">File</string>
     <string id="55">Tasks</string>
+    <string id="56">Available card reader</string>
 
     <string id="57">Setting</string>
     <string id="58">Warning</string>

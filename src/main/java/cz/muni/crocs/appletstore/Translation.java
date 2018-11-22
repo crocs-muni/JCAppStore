@@ -36,7 +36,7 @@ public class Translation {
             data = new TreeMap<>();
             NodeList nodes = document.getElementsByTagName("string");
             parseData(nodes);
-            return !(data == null || data.size() < 1); //if data null, doesn't call the second one
+            return !(data == null || data.size() < 1);
         } catch (javax.xml.parsers.ParserConfigurationException | org.xml.sax.SAXException ex) {
             ex.printStackTrace();
         } catch (java.io.IOException ex) {

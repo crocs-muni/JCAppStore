@@ -1,7 +1,9 @@
-package cz.muni.crocs.appletstore.ui;
+package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.AppletStore;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,8 +24,9 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
     private JMenu submenu;
     private AppletStore context;
-    private JRadioButtonMenuItem rbMenuItem;
-    private JCheckBoxMenuItem cbMenuItem;
+
+    private JMenu readers;
+    private ButtonGroup readersPresent = new ButtonGroup();
 
     public Menu(AppletStore parent) {
         context = parent;
@@ -68,12 +71,23 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
-        menuItem.setForeground(new Color(0x000000));
-        menuItem.setBackground(new Color(0xffffff));
+        setItemLook(menuItem, descripton);
         menuItem.setMargin(new Insets(4, 4, 4, 4));
-        menuItem.setFont(CustomFont.plain);
-        menuItem.getAccessibleContext().setAccessibleDescription(descripton);
         return menuItem;
+    }
+
+    private void setItemLook(Component component, String descripton) {
+        component.setForeground(new Color(0x000000));
+        component.setBackground(new Color(0xffffff));
+        component.setFont(CustomFont.plain);
+        component.getAccessibleContext().setAccessibleDescription(descripton);
+    }
+
+    private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
+        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
+        setItemLook(rbMenuItem, descripton);
+        rbMenuItem.setMargin(new Insets(4, 4, 4, 4));
+        return rbMenuItem;
     }
 
 
@@ -120,29 +134,11 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 //Build second menu in the menu bar.
         add(new CustomJmenu("Another Menu", "This menu does nothing", KeyEvent.VK_N));
 
-        menu = new CustomJmenu(Config.translation.get(90), "", KeyEvent.VK_R);
-        item = menuItemWithKeyShortcut(refreshReaders(), Config.translation.get(92), KeyEvent.VK_R, InputEvent.ALT_MASK);
-        item.setIcon(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
-        menu.add(item);
-        menu.addSeparator();
+        //BUILD READERS MENU
+        readers = new CustomJmenu(Config.translation.get(90), "", KeyEvent.VK_R);
 
-
-        //TODO enable refresh
-        if (context.terminals.isFound()) {
-            ButtonGroup group = new ButtonGroup();
-            for (String name : context.terminals.getTerminals().keySet()) {
-                //todo set selected
-                rbMenuItem = new JRadioButtonMenuItem(name);
-                group.add(rbMenuItem);
-                menu.add(rbMenuItem);
-            }
-        } else {
-            item = menuItemDisabled(Config.translation.get(2), "");
-            item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader.png"));
-            item.setEnabled(false);
-            menu.add(item);
-        }
-        add(menu);
+        resetTerminalButtonGroup(); //possible to call multiple times in order to refresh readers in a menu
+        add(readers);
 
 //right shift
         add(Box.createGlue());
@@ -176,11 +172,35 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
 
+    public void resetTerminalButtonGroup() {
+        readers.removeAll(); //TODO dont recreate refresh button
+        JMenuItem refreshItem = menuItemWithKeyShortcut(refreshReaders(), Config.translation.get(92), KeyEvent.VK_R, InputEvent.ALT_MASK);
+        refreshItem.setIcon(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
+        readers.add(refreshItem);
+        readers.addSeparator();
+        if (context.terminals.isFound()) {
+            readersPresent = new ButtonGroup();
+            for (String name : context.terminals.getTerminals().keySet()) {
+                //todo set selected
+                JRadioButtonMenuItem item = selectableMenuItem(name, Config.translation.get(56));
+                readersPresent.add(item);
+                readers.add(item);
+            }
+            readersPresent.setSelected(((JRadioButtonMenuItem)readers.getMenuComponent(2)).getModel(), true);
+        } else {
+            JMenuItem item = menuItemDisabled(Config.translation.get(2), "");
+            item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
+            item.setEnabled(false);
+            readers.add(item);
+        }
+    }
+
+
     private AbstractAction refreshReaders() {
         return new AbstractAction(Config.translation.get(91)) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                context.terminals.update();
+                context.refresh(true);
             }
         };
     }

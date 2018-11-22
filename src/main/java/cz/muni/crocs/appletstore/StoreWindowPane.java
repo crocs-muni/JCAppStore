@@ -1,21 +1,20 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
+import cz.muni.crocs.appletstore.util.InternetConnection;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
-public class LocalWindowPane extends JPanel {
+public class StoreWindowPane extends JPanel {
 
     private AppletStore context;
 
-    public LocalWindowPane(AppletStore context) {
+    public StoreWindowPane(AppletStore context) {
         this.context = context;
         setOpaque(false);
         init();
@@ -24,16 +23,16 @@ public class LocalWindowPane extends JPanel {
     public void init() {
         removeAll();
         revalidate();
-        if (context.terminals.isFound()) {
+        if (InternetConnection.isAvailable()) {
             setupWindow();
         } else {
-            noReaders();
+            noConnection();
         }
     }
 
-    private void noReaders() {
+    private void noConnection() {
         setLayout(new GridBagLayout());
-        add(new ErrorPane(2, "no-reader.png"));
+        add(new ErrorPane(4, "wifi_off.png"));
     }
 
     private void setupWindow() {
