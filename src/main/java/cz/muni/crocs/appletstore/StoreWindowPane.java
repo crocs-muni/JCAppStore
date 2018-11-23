@@ -22,12 +22,14 @@ public class StoreWindowPane extends JPanel {
 
     public void init() {
         removeAll();
-        revalidate();
         if (InternetConnection.isAvailable()) {
             setupWindow();
         } else {
             noConnection();
         }
+        //TODO doesn't remove the no readers found error pane on second attempt
+        revalidate();
+        repaint();
     }
 
     private void noConnection() {

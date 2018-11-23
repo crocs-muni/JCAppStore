@@ -19,10 +19,10 @@ public class Config {
     public static final String LANG_DIR = "src/main/resources/lang/";
 
     //TODO: update urls
-    public static final String REMOTE_DIR_INFO = "www.github.cz/info/";
+    public static final String REMOTE_DIR_INFO = "https://www.github.com/";
     public static final String FILE_LIST_SOURCE = "file_list.xml";
     public static final String CONTAINER_FILE_LIST_TAG = "files";
-    public static final String REMOTE_DIR_CONTENT = "www.github.cz/content/";
+    public static final String REMOTE_DIR_CONTENT = "https://www.github.com/";
 
     public static final String APP_DATA_DIR = getSystemEnv();
     public static final String APPLET_INFO_DIR = "/remoteDir";

@@ -37,7 +37,9 @@ public class LocalWindowPane extends JPanel {
     }
 
     private void setupWindow() {
-
+        setLayout(new GridBagLayout());
+        add(new ErrorPane(8, "shop.png"));
+        setBackground(Color.GREEN);
     }
 
 }

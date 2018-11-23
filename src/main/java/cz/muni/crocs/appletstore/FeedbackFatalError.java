@@ -14,17 +14,26 @@ import java.util.Properties;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Feedback {
+public class FeedbackFatalError {
     //TODO send us some info
-    public Feedback(String title, String message, String descrpition,
-                    boolean notifyUs, final int messageType, Component parent) {
+    public FeedbackFatalError(String title, String message, String descrpition,
+                              boolean notifyUs, final int messageType, Component parent) {
 
         if (notifyUs) {
               System.out.println(JOptionPane.showConfirmDialog(parent, message));
 
-//            if (JOptionPane.showConfirmDialog(parent, message) == 0) {
-//                mail(message + "\n\nDesctiprtion:\n" + descrpition);
-//            }
+              int result = JOptionPane.showConfirmDialog(parent, message);
+              switch (result) {
+                  case 0: //accepts
+                  case 1: //rejects
+                  case 2: //closes
+                  default:
+                      System.exit(result);
+              }
+            if (JOptionPane.showConfirmDialog(parent, message) == 0) {
+                mail(message + "\n\nDesctiprtion:\n" + descrpition);
+                //TODO close on confirm
+            }
         } else {
             JOptionPane.showMessageDialog(null, message, title, messageType);
         }

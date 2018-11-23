@@ -5,8 +5,6 @@ import cz.muni.crocs.appletstore.ui.CustomFont;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * @author Jiří Horák
@@ -93,8 +91,7 @@ public class AppletStore extends JFrame {
                 try {
                     new AppletStore();
                 } catch (Exception e) {
-                    //TODO close system exit
-                    new Feedback("Title", "Message", e.getMessage(), true,
+                    new FeedbackFatalError("Title", "Message", e.getMessage(), true,
                             JOptionPane.QUESTION_MESSAGE, null);
                     e.printStackTrace();
                 }

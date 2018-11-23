@@ -1,11 +1,12 @@
 package cz.muni.crocs.appletstore;
 
 import apdu4j.TerminalManager;
+import jdk.nashorn.internal.ir.Terminal;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GlobalPlatform;
 
+
 import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
@@ -25,43 +26,111 @@ public class Terminals {
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
     private String reader;
 
-    private boolean found = false;
+    private boolean readerFound = false;
+    private boolean cardInserted = false;
 
     public Terminals(String reader) {
         this.reader = reader;
     }
 
     public void update() {
-        found = checkTerminals();
+        readerFound = checkTerminals();
     }
 
     public boolean isFound() {
+        return readerFound;
+    }
+
+    public boolean isCard() {
+        return cardInserted;
+    }
+
+    //set card found value and return that value in one step
+    private boolean cardIsFound(boolean found) {
+        cardInserted = found;
         return found;
+    }
+
+    /**
+     * Look into terminal list to get the card
+     * @param terminal terminal to look into
+     * @return true if card inserted
+     * @throws CardException returns false
+     */
+    private boolean checkCardInTerminal(CardTerminal terminal) throws CardException{
+        return terminal.isCardPresent();
+    }
+
+    /**
+     * Look into terminal list to get the card
+     * @param terminal terminal to look into
+     * @return true if card inserted
+     */
+    public boolean checkCardPresence(CardTerminal terminal) {
+        if (terminal == null) return cardIsFound(false);
+        try {
+            return cardIsFound(checkCardInTerminal(terminal));
+
+        } catch (CardException e) {
+            //TODO report
+            return cardIsFound(false);
+        }
+    }
+
+    /**
+     * Search all terminals for a presence of any card
+     * @return terminal of a card inserted, null otherwise
+     */
+    public CardTerminal checkCardPresence() {
+        boolean foundCard = false;
+        try {
+            for (CardTerminal term : cardReaderMap.values()) {
+                if(checkCardInTerminal(term)) {
+                    return term;
+                }
+            }
+        } catch (CardException e) {
+            //TODO report
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Check for card presence in a specific terminal name
+     * @param terminal name of terminal to llok into
+     * @return true if card found, false otherwise
+     */
+    public boolean checkCardPresence(String terminal) {
+        return checkCardPresence(cardReaderMap.get(terminal));
     }
 
     private boolean checkTerminals() {
         cardReaderMap.clear();
-        found = false;
+        readerFound = false;
+        cardInserted = false;
         try {
             final TerminalFactory tf;
-            //tf = TerminalManager.getTerminalFactory(reader);
-            tf = TerminalFactory.getDefault();
+            //tf = TerminalFactory.getDefault();  //TODO the differemce?
+            tf = TerminalManager.getTerminalFactory(null); //TODO get provider Specification in a // jar:class:args form
             CardTerminals terminals = tf.terminals();
             // List terminals if needed
             System.out.println("# Detected readers from " + tf.getProvider().getName());
 
             int number = 0;
-            for (CardTerminal term : terminals.list()) {
+            for (CardTerminal term : terminals.list()) { //TODO cardException list failed with getDefult(), processes 0x times otherwise
                 number++;
                 cardReaderMap.put(term.getName(), term);
-                System.out.println((term.isCardPresent() ? "[*] " : "[ ] ") + term.getName());
+                //check for a card presence and set presence if found
+                boolean found = checkCardPresence(term);
+                System.out.println((found ? "[*] " : "[ ] ") + term.getName());
             }
 
             if (number == 0) {
                 System.out.println("no readers.");
                 return false;
             }
-        } catch (CardException ex) {
+        } catch (CardException | NoSuchAlgorithmException ex) {
             //TODO ask changed to getdefault and on exception return false
 //            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
 //            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
@@ -69,6 +138,37 @@ public class Terminals {
         }
         return true;
     }
+
+//    private boolean checkTerminals() {
+//        cardReaderMap.clear();
+//        found = false;
+//        try {
+//            final TerminalFactory tf;
+//            //tf = TerminalManager.getTerminalFactory(reader);
+//            tf = TerminalFactory.getDefault();
+//            CardTerminals terminals = tf.terminals();
+//            // List terminals if needed
+//            System.out.println("# Detected readers from " + tf.getProvider().getName());
+//
+//            int number = 0;
+//            for (CardTerminal term : terminals.list()) { //TODO cardException list failed with getDefult(), processes 0x times otherwise
+//                number++;
+//                cardReaderMap.put(term.getName(), term);
+//                System.out.println((term.isCardPresent() ? "[*] " : "[ ] ") + term.getName());
+//            }
+//
+//            if (number == 0) {
+//                System.out.println("no readers.");
+//                return false;
+//            }
+//        } catch (CardException ex) {
+//            //TODO ask changed to getdefault and on exception return false
+////            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
+////            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
+//            return false;
+//        }
+//        return true;
+//    }
 
 //    public CardDetails getCardDetails(StringBuilder statusMessage) {
 //        if (cardReaderListComboBox.getSelectedItem() == null) {
