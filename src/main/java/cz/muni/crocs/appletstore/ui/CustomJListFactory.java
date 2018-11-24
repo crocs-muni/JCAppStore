@@ -8,9 +8,9 @@ import javax.swing.*;
  */
 public class CustomJListFactory {
 
-    private JList list = new JList();
+    private JList<ListItem> list = new JList<>();
 
-    DefaultListModel<ListItem> model = new DefaultListModel<>();
+    private DefaultListModel<ListItem> model = new DefaultListModel<>();
 
     public CustomJListFactory add (String text, String imageUrl) {
         model.addElement(new ListItem(text, new ImageIcon(imageUrl)));
@@ -23,10 +23,10 @@ public class CustomJListFactory {
 
     public void setCellSize(int width, int height) {
         list.setFixedCellWidth(width);
-        list.setFixedCellWidth(height);
+        list.setFixedCellHeight(height);
     }
 
-    public JList build() {
+    public JList<ListItem> build() {
         list.setCellRenderer(new CusomRenderer());
         list.setModel(model);
         return list;

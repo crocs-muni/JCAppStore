@@ -13,6 +13,7 @@ import java.awt.image.Kernel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -48,15 +49,19 @@ public class BackgroundImage {
     }
 
     private void applyFilter() {
-        float ninth = 1.0f / 8.0f;
-        float[] blurMatrix = {
-                ninth, ninth, ninth,
-                ninth, ninth, ninth,
-                ninth, ninth, ninth
-        };
-        BufferedImageOp filter = new ConvolveOp(new Kernel(3, 3, blurMatrix),
-                ConvolveOp.EDGE_NO_OP, null);
-        filter.filter(background, null);
+
+
+        int radius = 8;
+        int size = radius * 2 + 1;
+        float weight = 1.0f / (size * size);
+        float[] data = new float[size * size];
+        Arrays.fill(data, weight);
+
+        Kernel kernel = new Kernel(size, size, data);
+        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+        //tbi is BufferedImage
+        BufferedImage i = op.filter(background, null);
+        background = i;
     }
 
     public BufferedImage get() {

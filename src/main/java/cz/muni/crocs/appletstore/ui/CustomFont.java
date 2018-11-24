@@ -15,6 +15,7 @@ public class CustomFont {
 
     public static void refresh() {
         try {
+            //TODO custom font or let the Courier?
             //bold = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/fonts/x.ttf"));
             plain = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/fonts/x.ttf"));
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

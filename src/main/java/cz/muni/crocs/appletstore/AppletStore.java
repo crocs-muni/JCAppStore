@@ -1,10 +1,13 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.util.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * @author Jiří Horák
@@ -14,7 +17,9 @@ import java.io.IOException;
 public class AppletStore extends JFrame {
 
     public Terminals terminals = new Terminals(""); //TODO terminal reader?
+    //main menu
     public Menu menu;
+    //main window under menu
     TabbedPaneSimulator window;
 
     private AppletStore() {
@@ -57,13 +62,16 @@ public class AppletStore extends JFrame {
         int height = screenSize.height;
         int width = screenSize.width;
         setSize((int) (width / 1.5), (int) (height / 1.5));
+        //get main container
+        //JPanel mainContainer = new JPanel();
 
-        JPanel pane = new JPanel();
-        pane.setLayout(new BorderLayout());
-        setContentPane(pane);
-        //add the content window
+
+        BackgroundImgPanel mainContainer = new BackgroundImgPanel();
+        mainContainer.setLayout(new BorderLayout());
+        setContentPane(mainContainer);
+
         window = new TabbedPaneSimulator(this);
-        pane.add(window.get(), BorderLayout.CENTER);
+        mainContainer.add(window.get(), BorderLayout.CENTER);
         //add the menu
         menu = new Menu(this);
         setJMenuBar(menu);
@@ -72,6 +80,7 @@ public class AppletStore extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
 
     //search for present terminals and card
     public void refresh(boolean refreshEvenIfReadersFound) {
@@ -85,15 +94,18 @@ public class AppletStore extends JFrame {
 
 
     public static void main(String[] args) throws IOException {
+        Logger.load();
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
                     new AppletStore();
                 } catch (Exception e) {
-                    new FeedbackFatalError("Title", "Message", e.getMessage(), true,
+                    new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,
                             JOptionPane.QUESTION_MESSAGE, null);
-                    e.printStackTrace();
+
+                    Logger.log(Level.SEVERE, e);
                 }
             }
         });

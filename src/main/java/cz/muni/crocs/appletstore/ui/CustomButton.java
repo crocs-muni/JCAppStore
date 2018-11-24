@@ -14,7 +14,7 @@ import java.awt.*;
 public class CustomButton extends JButton {
 
     private CompoundBorder innerChoosed = BorderFactory.createCompoundBorder(
-            new MatteBorder(new Insets(0, 5,0 , 0), Color.RED),
+            new MatteBorder(new Insets(0, 5,0 , 0), Color.BLACK),
             new EmptyBorder(new Insets(4, 8,4 , 4)));
     private CompoundBorder choosedBorder = BorderFactory.createCompoundBorder(
             innerChoosed,
@@ -31,7 +31,6 @@ public class CustomButton extends JButton {
         //setOpaque(false);
         //setContentAreaFilled(false);
         setIcon(new ImageIcon("src/main/resources/img/" + imgName));
-        setBackground(Color.BLUE);
     }
 
     public void setBorder(boolean isDefaultChoosed) {

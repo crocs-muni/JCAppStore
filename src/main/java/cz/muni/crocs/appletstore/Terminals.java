@@ -1,21 +1,13 @@
 package cz.muni.crocs.appletstore;
 
 import apdu4j.TerminalManager;
-import jdk.nashorn.internal.ir.Terminal;
-import pro.javacard.gp.GPException;
-import pro.javacard.gp.GlobalPlatform;
 
-
-import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
-import javax.swing.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Jiří Horák

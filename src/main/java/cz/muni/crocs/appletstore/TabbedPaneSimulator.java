@@ -1,16 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.CustomButton;
-import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.ui.InputHintTextField;
-
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * @author Jiří Horák
@@ -35,6 +26,7 @@ public class TabbedPaneSimulator {
 
     private void createPanes() {
         container = new JPanel();
+        container.setOpaque(false);
         container.setLayout(new BorderLayout());
 
         leftMenu = new LeftMenu(this);
@@ -42,12 +34,12 @@ public class TabbedPaneSimulator {
         localPanel = new LocalWindowPane(context);
         localPanel.setVisible(true); //screen visible by default
         storePanel = new StoreWindowPane(context);
-        storePanel.setOpaque(false);
         storePanel.setVisible(false); //not visible by default
         //container for local and store panes
         content = new JPanel();
         content.setBackground(Color.WHITE); //white background
         content.setLayout(new OverlayLayout(content));
+        content.setOpaque(false);
         content.add(localPanel);
         content.add(storePanel);
 

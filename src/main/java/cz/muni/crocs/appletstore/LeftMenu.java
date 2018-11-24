@@ -30,6 +30,8 @@ public class LeftMenu extends JPanel {
     private CustomButton local = new CustomButton("creditcard.png");
     private CustomButton remote = new CustomButton("shop.png");
 
+    private Color choosedButtonBG = new Color(255, 255, 255, 60);
+
     private boolean isLocal = true;
 
     private TabbedPaneSimulator parent;
@@ -37,8 +39,10 @@ public class LeftMenu extends JPanel {
     public LeftMenu(TabbedPaneSimulator parent) {
         this.parent = parent;
 
-        setBackground(Color.YELLOW);
-        container.setBackground(Color.BLUE);
+        setBackground(new Color(255, 255, 255, 65));
+//        container.setBackground(Color.BLUE);
+        //setOpaque(false);
+        container.setOpaque(false);
 
 
         setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
@@ -58,6 +62,7 @@ public class LeftMenu extends JPanel {
 
         searchPane = new JPanel();
         searchPane.setLayout(new FlowLayout());
+        searchPane.setOpaque(false);
         //set margin and size
         searchPane.setBorder(new CompoundBorder(
                 new EmptyBorder(5, 15, 15, 15), //outer margin
@@ -73,19 +78,23 @@ public class LeftMenu extends JPanel {
         //create search icon
         searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
         searchIcon.setBorder(new EmptyBorder(5, 5, 5,5 ));
+        searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
         //add search to left menu container
         container.add(searchPane, gbc);
 
         //init button for local storage
         setButton(local, Config.translation.get(70), true); //TODO more terminals or cards?
+        local.setBackground(choosedButtonBG);
         container.add(local, gbc);
         //init button for store
         setButton(remote, Config.translation.get(71), false);
+        remote.setOpaque(false);
         container.add(remote, gbc);
 
-        scroll = new JScrollPane(container); //TODO scroll modify bars
-        add(scroll, BorderLayout.NORTH);
+//        scroll = new JScrollPane(container); //TODO scroll modify bars
+//        scroll.setOpaque(false);
+        add(container, BorderLayout.NORTH);
     }
 
     /**
@@ -120,6 +129,10 @@ public class LeftMenu extends JPanel {
                     isLocal = true;
                     setChoosed();
                     parent.setLocalPaneVisible();
+
+                    local.setOpaque(true);
+                    local.setBackground(choosedButtonBG);
+                    remote.setOpaque(false);
                      //init only if no readers
                 }
             }
@@ -131,6 +144,10 @@ public class LeftMenu extends JPanel {
                     isLocal = false;
                     setChoosed();
                     parent.setStorePaneVisible();
+
+                    remote.setOpaque(true);
+                    remote.setBackground(choosedButtonBG);
+                    local.setOpaque(false);
                 }
             }
         });

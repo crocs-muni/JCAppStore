@@ -13,7 +13,6 @@ import java.awt.event.FocusListener;
  */
 public class InputHintTextField extends JTextField implements FocusListener {
 
-
     private final String hint;
     private boolean showingHint;
 
@@ -24,7 +23,6 @@ public class InputHintTextField extends JTextField implements FocusListener {
         this.setText(hint);
         this.setBorder(null);
         this.setOpaque(false);
-        super.addFocusListener(this);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class InputHintTextField extends JTextField implements FocusListener {
     @Override
     public void focusGained(FocusEvent e) {
         if (this.getText().isEmpty()) {
-            super.setText("");
+            setText("");
             showingHint = false;
         }
     }
@@ -43,13 +41,13 @@ public class InputHintTextField extends JTextField implements FocusListener {
     @Override
     public void focusLost(FocusEvent e) {
         if (this.getText().isEmpty()) {
-            super.setText(hint);
+            setText(hint);
             showingHint = true;
         }
     }
 
     @Override
     public String getText() {
-        return showingHint ? "" : super.getText();
+        return showingHint ? "" : getText();
     }
 }

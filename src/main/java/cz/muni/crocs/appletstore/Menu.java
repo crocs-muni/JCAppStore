@@ -1,7 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.AppletStore;
-import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
