@@ -1,13 +1,20 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
-import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.util.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.swing.*;
-import java.awt.*;
+import cz.muni.crocs.appletstore.ui.CustomFont;
+
+import javax.swing.SwingUtilities;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.JOptionPane;
+import java.awt.Toolkit;
+import java.awt.Dimension;
+import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.logging.Level;
 
 /**
  * @author Jiří Horák
@@ -16,6 +23,7 @@ import java.util.logging.Level;
 
 public class AppletStore extends JFrame {
 
+    private static final Logger logger = LogManager.getLogger(AppletStore.class);
     public Terminals terminals = new Terminals(""); //TODO terminal reader?
     //main menu
     public Menu menu;
@@ -26,6 +34,18 @@ public class AppletStore extends JFrame {
         setup();
         setUI();
         initComponents();
+
+        //save options on close
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                try {
+                    Config.saveOptions();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    //TODO handle
+                }
+            }
+        });
     }
 
     private void setup() {
@@ -65,13 +85,9 @@ public class AppletStore extends JFrame {
         //get main container
         //JPanel mainContainer = new JPanel();
 
-
-        BackgroundImgPanel mainContainer = new BackgroundImgPanel();
-        mainContainer.setLayout(new BorderLayout());
-        setContentPane(mainContainer);
-
         window = new TabbedPaneSimulator(this);
-        mainContainer.add(window.get(), BorderLayout.CENTER);
+        setContentPane(window);
+
         //add the menu
         menu = new Menu(this);
         setJMenuBar(menu);
@@ -92,10 +108,12 @@ public class AppletStore extends JFrame {
         }
     }
 
+    public void redraw() {
+        this.getContentPane().repaint();
+    }
+
 
     public static void main(String[] args) throws IOException {
-        Logger.load();
-
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -105,7 +123,8 @@ public class AppletStore extends JFrame {
                     new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,
                             JOptionPane.QUESTION_MESSAGE, null);
 
-                    Logger.log(Level.SEVERE, e);
+                    logger.error("Fatal Error: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });

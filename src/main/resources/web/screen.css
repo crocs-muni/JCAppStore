@@ -1,0 +1,39 @@
+body {
+    padding: 50px;
+    background: transparent;
+    overflow-x: hidden;
+}
+
+#grid-container {
+    display: grid;
+    grid-template-columns: 30vw 1fr 15vw;
+}
+
+.container {
+    height : 160px;
+    width : 120px;
+    margin: 5px;
+    display: inline-block;
+    text-align: center;
+    float: left;
+}
+
+.container:hover {
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);
+}
+
+.icon {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto;
+    background-size: cover;
+    position: absolute;
+    padding: 10px;
+}
+
+.title {
+    position: relative;
+    top: 110px;
+}

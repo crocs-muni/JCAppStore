@@ -45,16 +45,18 @@ public class Terminals {
 
     /**
      * Look into terminal list to get the card
+     *
      * @param terminal terminal to look into
      * @return true if card inserted
      * @throws CardException returns false
      */
-    private boolean checkCardInTerminal(CardTerminal terminal) throws CardException{
+    private boolean checkCardInTerminal(CardTerminal terminal) throws CardException {
         return terminal.isCardPresent();
     }
 
     /**
      * Look into terminal list to get the card
+     *
      * @param terminal terminal to look into
      * @return true if card inserted
      */
@@ -71,13 +73,14 @@ public class Terminals {
 
     /**
      * Search all terminals for a presence of any card
+     *
      * @return terminal of a card inserted, null otherwise
      */
     public CardTerminal checkCardPresence() {
         boolean foundCard = false;
         try {
             for (CardTerminal term : cardReaderMap.values()) {
-                if(checkCardInTerminal(term)) {
+                if (checkCardInTerminal(term)) {
                     return term;
                 }
             }
@@ -90,6 +93,7 @@ public class Terminals {
 
     /**
      * Check for card presence in a specific terminal name
+     *
      * @param terminal name of terminal to llok into
      * @return true if card found, false otherwise
      */
@@ -130,37 +134,6 @@ public class Terminals {
         }
         return true;
     }
-
-//    private boolean checkTerminals() {
-//        cardReaderMap.clear();
-//        found = false;
-//        try {
-//            final TerminalFactory tf;
-//            //tf = TerminalManager.getTerminalFactory(reader);
-//            tf = TerminalFactory.getDefault();
-//            CardTerminals terminals = tf.terminals();
-//            // List terminals if needed
-//            System.out.println("# Detected readers from " + tf.getProvider().getName());
-//
-//            int number = 0;
-//            for (CardTerminal term : terminals.list()) { //TODO cardException list failed with getDefult(), processes 0x times otherwise
-//                number++;
-//                cardReaderMap.put(term.getName(), term);
-//                System.out.println((term.isCardPresent() ? "[*] " : "[ ] ") + term.getName());
-//            }
-//
-//            if (number == 0) {
-//                System.out.println("no readers.");
-//                return false;
-//            }
-//        } catch (CardException ex) {
-//            //TODO ask changed to getdefault and on exception return false
-////            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
-////            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
-//            return false;
-//        }
-//        return true;
-//    }
 
 //    public CardDetails getCardDetails(StringBuilder statusMessage) {
 //        if (cardReaderListComboBox.getSelectedItem() == null) {
@@ -212,6 +185,23 @@ public class Terminals {
 
     public CardTerminal getTerminal(String name) {
         return cardReaderMap.get(name);
+    }
+
+    /**
+     * Select terminal as a main one, check if contains a card
+     * @param name terminal to set as a main terminal
+     * @return true if terminal found or card presence detecting didn't fail, false otherwise
+     */
+    public boolean selectTerminal(String name) {
+        CardTerminal terminal = cardReaderMap.get(name);
+        if (terminal == null) return false;
+        try {
+            cardInserted = checkCardInTerminal(terminal);
+        } catch (CardException e) {
+            cardInserted = false;
+            return false;
+        }
+        return true;
     }
 
     public TreeMap<String, CardTerminal> getTerminals() {

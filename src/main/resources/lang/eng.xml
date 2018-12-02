@@ -5,7 +5,7 @@
     <string id="2">No card reader detected.</string>
     <string id="3">Unable to create local App Store directory.</string>
     <string id="4">No internet connection.</string>
-    <string id="5">Constructor : Error while parsing arguments</string>
+    <string id="5">No card in selected reader.</string>
     <string id="6">refresh</string>
     <string id="7">Restart JCPlayStore to see the difference.</string>
     <string id="8">Delete</string>
@@ -59,6 +59,7 @@
     <string id="59">Verbose</string>
     <string id="60">Debug</string>
     <string id="61">Warning</string>
+    <string id="62">Loading...</string>
     <!-- left menu -->
     <string id="70">My card</string>
     <string id="71">Applet Store</string>

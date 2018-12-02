@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="screen.css" />
+
+    <script language="javascript">
+
+        function add(title, imageUrl) {
+            //create wrapper
+            var container = document.createElement('div');
+            container.className = 'container';
+            //icon image
+            var icon = document.createElement('div');
+            icon.style.backgroundImage = 'url(\''+imageUrl+'\')';
+            icon.className = 'icon';
+            container.appendChild(icon);
+            //title
+            container.insertAdjacentHTML('beforeend', '<span class=\"title\">' + title + '</span>');
+            document.getElementById('grid-container').appendChild(container);
+            //document.body.appendChild(container);
+        }
+
+    </script>
+
+</head>
+<body>
+
+<div id="grid-container">
+</div>
+
+</body>
+</html>

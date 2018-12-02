@@ -2,8 +2,8 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.GridBagLayout;
 
 /**
  * @author Jiří Horák
@@ -12,9 +12,11 @@ import java.awt.*;
 public class LocalWindowPane extends JPanel {
 
     private AppletStore context;
+    private JPanel currentPanel = null;
 
     public LocalWindowPane(AppletStore context) {
         this.context = context;
+        setLayout(new GridBagLayout());
         setOpaque(false);
         init();
     }
@@ -22,22 +24,27 @@ public class LocalWindowPane extends JPanel {
     public void init() {
         removeAll();
         revalidate();
+        //if (currentPanel != null) remove(currentPanel);
+
         if (context.terminals.isFound()) {
-            setupWindow();
+            if (context.terminals.isCard()) {
+                //terminal and card found
+                setupWindow();
+            } else {
+                //card not in terminal
+                addError("no-card.png", 5);
+            }
         } else {
-            noReaders();
+            addError("no-reader.png", 2);
         }
     }
 
-    private void noReaders() {
-        setLayout(new GridBagLayout());
-        add(new ErrorPane(2, "no-reader.png"));
+    private void addError(String imageName, int translationId) {
+        add(new ErrorPane(translationId, imageName));
     }
 
     private void setupWindow() {
-        setLayout(new GridBagLayout());
-        add(new ErrorPane(8, "shop.png"));
-        setBackground(Color.GREEN);
+//        currentPanel = new LoadingPane();
+//        add(currentPanel);
     }
-
 }

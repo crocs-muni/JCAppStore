@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
 import javax.imageio.ImageIO;
-import javax.mail.FolderNotFoundException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -32,7 +33,7 @@ public class Icons {
         }
     };
 
-    public static ArrayList<BufferedImage> getImages() throws FolderNotFoundException {
+    public static ArrayList<BufferedImage> getImages() throws IOException {
         ArrayList<BufferedImage> icons = new ArrayList<>();
         if (DIR.isDirectory()) {
             for (final File f : Objects.requireNonNull(DIR.listFiles(IMAGE_FILTER))) {
@@ -46,7 +47,7 @@ public class Icons {
                 }
             }
         } else {
-            throw new FolderNotFoundException();
+            throw new IOException();
         }
         return icons;
     }

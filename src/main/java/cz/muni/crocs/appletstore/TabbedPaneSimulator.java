@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,11 +9,9 @@ import java.awt.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class TabbedPaneSimulator {
+public class TabbedPaneSimulator extends BackgroundImgPanel {
 
-    AppletStore context;
-
-    private JPanel container;
+    private AppletStore context;
     private LeftMenu leftMenu;
 
     //to switch panes
@@ -21,13 +21,11 @@ public class TabbedPaneSimulator {
 
     public TabbedPaneSimulator(AppletStore context) {
         this.context = context;
+        setLayout(new BorderLayout());
         createPanes();
     }
 
     private void createPanes() {
-        container = new JPanel();
-        container.setOpaque(false);
-        container.setLayout(new BorderLayout());
 
         leftMenu = new LeftMenu(this);
         //switching between localEnvironment and store panes
@@ -43,10 +41,9 @@ public class TabbedPaneSimulator {
         content.add(localPanel);
         content.add(storePanel);
 
-        container.add(leftMenu, BorderLayout.WEST);
-        container.add(content, BorderLayout.CENTER);
+        add(leftMenu, BorderLayout.WEST);
+        add(content, BorderLayout.CENTER);
     }
-
 
     public void setLocalPaneVisible() {
         localPanel.setVisible(true);
@@ -60,12 +57,7 @@ public class TabbedPaneSimulator {
         storePanel.init(); //always
     }
 
-    public JPanel get() {
-        return container;
-    }
-
     public boolean isLocal() {
         return leftMenu.isLocal();
     }
-    //** FORM GENERATED CODE IN A BINARY FILE **//
 }
