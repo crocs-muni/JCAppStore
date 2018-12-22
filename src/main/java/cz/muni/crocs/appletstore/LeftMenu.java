@@ -76,7 +76,7 @@ public class LeftMenu extends JPanel {
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
         //create search icon
-        searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
+        searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR +  "search.png"));
         searchIcon.setBorder(new EmptyBorder(5, 5, 5,5 ));
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
@@ -128,7 +128,7 @@ public class LeftMenu extends JPanel {
                 if (!isLocal) {
                     isLocal = true;
                     setChoosed();
-                    parent.setLocalPaneVisible();
+                    parent.setUpdateLocalPaneVisible();
 
                     local.setOpaque(true);
                     local.setBackground(choosedButtonBG);
@@ -143,7 +143,7 @@ public class LeftMenu extends JPanel {
                 if (isLocal) {
                     isLocal = false;
                     setChoosed();
-                    parent.setStorePaneVisible();
+                    parent.setUpdateStorePaneVisible();
 
                     remote.setOpaque(true);
                     remote.setBackground(choosedButtonBG);

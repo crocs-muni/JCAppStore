@@ -17,12 +17,12 @@ import java.util.Arrays;
  * @author Jiří Horák
  * @version 1.0
  */
-public class BackgroundImage {
+public class BackgroundImageLoader {
 
     private BufferedImage background = null;
     private String imgName = "bg.jpg";
 
-    public BackgroundImage(String imgName, Component panel) {
+    public BackgroundImageLoader(String imgName, Component panel) {
         load(imgName, 1);
         MediaTracker mediaTracker = new MediaTracker(panel);
         mediaTracker.addImage(background, 0);
@@ -38,7 +38,7 @@ public class BackgroundImage {
     private void save() {
         try {
             //TODO ask how works the system dirs
-            File outputfile = new File(Config.IMAGE_DIR + imgName);
+            File outputfile = new File(Config.IMAGE_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
         } catch (IOException e) {
             Config.options.put("background", "bg.jpg");
@@ -47,7 +47,7 @@ public class BackgroundImage {
 
     private void load(String name, int tries) {
         try {
-            background = ImageIO.read(new File(Config.IMAGE_DIR + name));
+            background = ImageIO.read(new File(Config.IMAGE_DIR, name));
             DataBuffer dataBuffer = background.getData().getDataBuffer();
             long sizeInBytes = ((long)dataBuffer.getSize()) * 4L;
             if (sizeInBytes > 1024L * 1024L * 2L) { //size greater than
@@ -70,7 +70,8 @@ public class BackgroundImage {
         Arrays.fill(data, weight);
 
         Kernel kernel = new Kernel(size, size, data);
-        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+        //ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_ZERO_FILL, null);
         background = op.filter(background, null);;
     }
 

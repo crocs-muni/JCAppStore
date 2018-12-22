@@ -32,7 +32,7 @@ public class OptionsLoader {
 
     private void setDefaults() {
         Config.options.clear();
-        Config.options.put(Config.OPT_KEY_LANGUAGE, "eng");
+        Config.options.put(Config.OPT_KEY_LANGUAGE, "en");
         Config.options.put(Config.OPT_KEY_BACKGROUND, "bg.jpg");
         Config.options.put(Config.OPT_KEY_GITHUB_LATEST_VERSION, "none");
     }

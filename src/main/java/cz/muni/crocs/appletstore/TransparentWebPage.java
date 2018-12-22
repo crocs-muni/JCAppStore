@@ -17,9 +17,9 @@ import java.lang.reflect.Field;
  */
 public class TransparentWebPage {
 
-    WebView webview;
-    Scene scene;
-    WebEngine webengine;
+    private WebView webview;
+    private Scene scene;
+    private WebEngine webengine;
 
     public TransparentWebPage(){
         webview = new WebView();
@@ -32,16 +32,15 @@ public class TransparentWebPage {
     class DocListener implements ChangeListener<Document> {
         @Override
         public void changed(ObservableValue<? extends Document> observable, Document oldValue, Document newValue) {
-            try {
-                // Use reflection to retrieve the WebEngine's private 'page' field.
-                Field f = webengine.getClass().getDeclaredField("page");
-                f.setAccessible(true);
-                com.sun.webkit.WebPage page = (com.sun.webkit.WebPage) f.get(webengine);
-                page.setBackgroundColor((new java.awt.Color(0, 0, 0, 0)).getRGB());
-
-            } catch (Exception e) {
-            }
-
+//            try {
+//                // Use reflection to retrieve the WebEngine's private 'page' field.
+//                Field f = webengine.getClass().getDeclaredField("page");
+//                f.setAccessible(true);
+//                com.sun.webkit.WebPage page = (com.sun.webkit.WebPage) f.get(webengine);
+//                page.setBackgroundColor((new java.awt.Color(0, 0, 0, 0)).getRGB());
+//
+//            } catch (Exception e) {
+//            }
         }
     }
 

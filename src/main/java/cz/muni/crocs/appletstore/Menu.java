@@ -176,7 +176,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         refreshItem.setIcon(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
         readers.add(refreshItem);
         readers.addSeparator();
-        if (context.terminals.isFound()) {
+        if (context.terminals.getState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
             for (String name : context.terminals.getTerminals().keySet()) {
                 //todo set selected
@@ -195,12 +195,14 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
 
     private AbstractAction refreshReaders() {
-        return new AbstractAction(Config.translation.get(91)) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                context.refresh(true);
-            }
-        };
+        //todo delete no need refreshes itself
+//        return new AbstractAction(Config.translation.get(91)) {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                context.refresh(true);
+//            }
+//        };
+        return null;
     }
 
 

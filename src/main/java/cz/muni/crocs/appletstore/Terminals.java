@@ -15,41 +15,23 @@ import java.util.TreeMap;
  */
 public class Terminals {
 
+    public enum TerminalState {
+        NO_READER, NO_CARD, OK
+    }
+
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
     private String reader;
 
-    private boolean readerFound = false;
-    private boolean cardInserted = false;
+    private TerminalState state = TerminalState.NO_READER;
 
     public Terminals(String reader) {
         this.reader = reader;
     }
 
-    public void update() {
-        readerFound = checkTerminals();
+    public TerminalState getState() {
+        return state;
     }
 
-    public boolean isFound() {
-        return readerFound;
-    }
-
-    public boolean isCard() {
-        return cardInserted;
-    }
-
-    //set card found value and return that value in one step
-    private boolean cardIsFound(boolean found) {
-        cardInserted = found;
-        return found;
-    }
-
-    /**
-     * Look into terminal list to get the card
-     *
-     * @param terminal terminal to look into
-     * @return true if card inserted
-     * @throws CardException returns false
-     */
     private boolean checkCardInTerminal(CardTerminal terminal) throws CardException {
         return terminal.isCardPresent();
     }
@@ -58,16 +40,17 @@ public class Terminals {
      * Look into terminal list to get the card
      *
      * @param terminal terminal to look into
-     * @return true if card inserted
      */
-    public boolean checkCardPresence(CardTerminal terminal) {
-        if (terminal == null) return cardIsFound(false);
+    public void checkCardPresence(CardTerminal terminal) {
+        if (terminal == null) {
+            state = TerminalState.NO_READER;
+            return;
+        }
         try {
-            return cardIsFound(checkCardInTerminal(terminal));
-
+            state = (checkCardInTerminal(terminal)) ? TerminalState.OK : TerminalState.NO_CARD;
         } catch (CardException e) {
             //TODO report
-            return cardIsFound(false);
+            state = TerminalState.NO_CARD;
         }
     }
 
@@ -77,7 +60,6 @@ public class Terminals {
      * @return terminal of a card inserted, null otherwise
      */
     public CardTerminal checkCardPresence() {
-        boolean foundCard = false;
         try {
             for (CardTerminal term : cardReaderMap.values()) {
                 if (checkCardInTerminal(term)) {
@@ -98,38 +80,36 @@ public class Terminals {
      * @return true if card found, false otherwise
      */
     public boolean checkCardPresence(String terminal) {
-        return checkCardPresence(cardReaderMap.get(terminal));
+        checkCardPresence(cardReaderMap.get(terminal));
+        return state == TerminalState.OK;
     }
 
-    private boolean checkTerminals() {
+    public boolean checkTerminals() {
         cardReaderMap.clear();
-        readerFound = false;
-        cardInserted = false;
         try {
             final TerminalFactory tf;
             //tf = TerminalFactory.getDefault();  //TODO the differemce?
             tf = TerminalManager.getTerminalFactory(null); //TODO get provider Specification in a // jar:class:args form
             CardTerminals terminals = tf.terminals();
-            // List terminals if needed
-            System.out.println("# Detected readers from " + tf.getProvider().getName());
+
+            //System.out.println("# Detected readers from " + tf.getProvider().getName());
 
             int number = 0;
             for (CardTerminal term : terminals.list()) { //TODO cardException list failed with getDefult(), processes 0x times otherwise
                 number++;
                 cardReaderMap.put(term.getName(), term);
-                //check for a card presence and set presence if found
-                boolean found = checkCardPresence(term);
-                System.out.println((found ? "[*] " : "[ ] ") + term.getName());
+                checkCardPresence(term);
             }
 
             if (number == 0) {
-                System.out.println("no readers.");
+                state = TerminalState.NO_READER;
                 return false;
             }
         } catch (CardException | NoSuchAlgorithmException ex) {
             //TODO ask changed to getdefault and on exception return false
 //            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
 //            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
+            state = TerminalState.NO_READER;
             return false;
         }
         return true;
@@ -196,9 +176,9 @@ public class Terminals {
         CardTerminal terminal = cardReaderMap.get(name);
         if (terminal == null) return false;
         try {
-            cardInserted = checkCardInTerminal(terminal);
+            checkCardInTerminal(terminal);
         } catch (CardException e) {
-            cardInserted = false;
+            state = TerminalState.NO_CARD;
             return false;
         }
         return true;

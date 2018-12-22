@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.ErrorPane;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.JPanel;
 import java.awt.GridBagLayout;
@@ -13,29 +15,29 @@ public class LocalWindowPane extends JPanel {
 
     private AppletStore context;
     private JPanel currentPanel = null;
+    private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
 
     public LocalWindowPane(AppletStore context) {
         this.context = context;
         setLayout(new GridBagLayout());
         setOpaque(false);
-        init();
     }
 
-    public void init() {
+    public void updatePanes(Terminals.TerminalState state) {
         removeAll();
         revalidate();
-        //if (currentPanel != null) remove(currentPanel);
-
-        if (context.terminals.isFound()) {
-            if (context.terminals.isCard()) {
-                //terminal and card found
+        System.out.println(state);
+        switch (state) {
+            case OK:
                 setupWindow();
-            } else {
-                //card not in terminal
+                break;
+            case NO_CARD:
                 addError("no-card.png", 5);
-            }
-        } else {
-            addError("no-reader.png", 2);
+                break;
+            case NO_READER:
+                addError("no-reader.png", 2);
+                break;
+            default:
         }
     }
 
@@ -44,7 +46,6 @@ public class LocalWindowPane extends JPanel {
     }
 
     private void setupWindow() {
-//        currentPanel = new LoadingPane();
-//        add(currentPanel);
+
     }
 }

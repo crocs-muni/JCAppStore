@@ -33,7 +33,7 @@ public class BackgroundImgPanel extends JPanel {
 
     private void loadDefault() {
 //        //first run to blur the default image, otherwise just load
-//        BackgroundImage imgBuilder = new BackgroundImage("bg.jpg", this);
+//        BackgroundImageLoader imgBuilder = new BackgroundImageLoader("bg.jpg", this);
 //        bg = imgBuilder.get();
         try {
             bg = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));

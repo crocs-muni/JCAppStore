@@ -29,24 +29,22 @@ public class InternetConnection {
      */
     public static String[] checkAndGetLatestReleaseVersion(String currentVersion) {
         try {
-            final URL url = new URL("https://api.github.com/repos/ShareX/ShareX/releases/latest");
+            final URL url = new URL(Config.REMOTE_STORE_LATEST_URL);
             final URLConnection conn = url.openConnection();
             conn.connect();
             JsonParser jp = new JsonParser();
             JsonElement root = jp.parse(new InputStreamReader((InputStream) conn.getContent()));
             conn.getInputStream().close();
-
-            JsonArray assets = root.getAsJsonObject().get("assets").getAsJsonArray();
-            JsonObject latest = assets.get(0).getAsJsonObject();
+            JsonObject latest = root.getAsJsonObject();
 
             String latestVersion = latest.get("name").getAsString();
             //TODO check the folder emptiness before returning OK
             if (currentVersion.equals(latestVersion)) {
-                return new String[] {"ok", "", ""};
+                return new String[] {"ok", latest.get("zipball_url").getAsString(), latestVersion};
             }
-            return new String[] {latest.get("browser_download_url").getAsString(), latestVersion, latest.get("size").getAsString()};
+            return new String[] {"nok", latest.get("zipball_url").getAsString(), latestVersion};
         } catch (IOException | NullPointerException e) {
-            return null;
+            return null; //todo add some prevence
         }
     }
 }

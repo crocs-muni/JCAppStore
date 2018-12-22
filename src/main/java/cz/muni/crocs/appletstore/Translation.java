@@ -40,7 +40,7 @@ public class Translation {
         } catch (javax.xml.parsers.ParserConfigurationException | org.xml.sax.SAXException ex) {
             ex.printStackTrace();
         } catch (java.io.IOException ex) {
-            init("eng", 0);
+            init("en", 0);
         }
         return false;
     }

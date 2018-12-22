@@ -16,7 +16,7 @@ import java.util.Objects;
  */
 public class Icons {
 
-    private static final File DIR = new File(Config.IMAGE_DIR + "/icons");
+    private static final File DIR = new File(Config.IMAGE_DIR, "/icons");
     private static final String[] EXTENSIONS = new String[]{
             "gif", "png", "bmp" //supported formats
     };

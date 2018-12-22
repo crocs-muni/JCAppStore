@@ -16,13 +16,15 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
 
     //to switch panes
     private JPanel content;
-    public LocalWindowPane localPanel;
-    public StoreWindowPane storePanel;
+    LocalWindowPane localPanel;
+    StoreWindowPane storePanel;
+    private boolean isLocalPaneDiplayed;
 
     public TabbedPaneSimulator(AppletStore context) {
         this.context = context;
         setLayout(new BorderLayout());
         createPanes();
+        context.checkTerminalsRoutine();
     }
 
     private void createPanes() {
@@ -30,9 +32,11 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         leftMenu = new LeftMenu(this);
         //switching between localEnvironment and store panes
         localPanel = new LocalWindowPane(context);
-        localPanel.setVisible(true); //screen visible by default
+        //once start the pane
+        localPanel.updatePanes(context.terminals.getState());
         storePanel = new StoreWindowPane(context);
-        storePanel.setVisible(false); //not visible by default
+        //default store hidden
+        setUpdateLocalPaneVisible();
         //container for local and store panes
         content = new JPanel();
         content.setBackground(Color.WHITE); //white background
@@ -45,16 +49,21 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         add(content, BorderLayout.CENTER);
     }
 
-    public void setLocalPaneVisible() {
-        localPanel.setVisible(true);
-        storePanel.setVisible(false);
-        context.refresh(false);
+    public boolean isLocalPaneDiplayed() {
+        return isLocalPaneDiplayed;
     }
 
-    public void setStorePaneVisible() {
+    public void setUpdateLocalPaneVisible() {
+        localPanel.setVisible(true);
+        storePanel.setVisible(false);
+        isLocalPaneDiplayed = true;
+    }
+
+    public void setUpdateStorePaneVisible() {
         localPanel.setVisible(false);
         storePanel.setVisible(true);
-        storePanel.init(); //always
+        isLocalPaneDiplayed = false;
+        storePanel.run(); //always
     }
 
     public boolean isLocal() {

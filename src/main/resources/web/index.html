@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!--<base href="file:///C:/Users/Jiří/Documents/JCAPPStore/store/Resources/" />-->
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>JCAppStore</title>
 
     <link rel="stylesheet" href="screen.css" />
 
     <script language="javascript">
 
-        function add(title, imageUrl) {
+        function add(title, imageUrl, version, author) {
             //create wrapper
             var container = document.createElement('div');
-            container.className = 'container';
+            container.className = 'ico-container';
+            container.addEventListener('click', function() {
+                item.loadItem();
+            });
+
             //icon image
             var icon = document.createElement('div');
             icon.style.backgroundImage = 'url(\''+imageUrl+'\')';
-            icon.className = 'icon';
+            icon.className = 'ico-icon';
             container.appendChild(icon);
             //title
-            container.insertAdjacentHTML('beforeend', '<span class=\"title\">' + title + '</span>');
+            title = (title.length < 31) ? title : title.substr(0, 28) + "...";
+            container.insertAdjacentHTML('beforeend', '<span class=\"ico-title\"><b>' + title + '</b></span><br>');
+            container.insertAdjacentHTML('beforeend', '<span class=\"ico-version\"><b>' + version + '</b></span>');
+            container.insertAdjacentHTML('beforeend', '<span class=\"ico-author\"><b>' + author + '</b></span>');
             document.getElementById('grid-container').appendChild(container);
             //document.body.appendChild(container);
         }
 
     </script>
-
 </head>
 <body>
 
