@@ -6,5 +6,9 @@ package cz.muni.crocs.appletstore.iface;
  */
 public interface Searchable {
 
-    //todo: method for searching in store
+    /**
+     * Display all items with reference to given string
+     * @param query search query for items to look for
+     */
+    void showItems(String query);
 }

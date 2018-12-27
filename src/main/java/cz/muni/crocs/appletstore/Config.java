@@ -24,9 +24,17 @@ public class Config {
     public static final String OPT_KEY_BACKGROUND = "background";
     //system path separator
     public static final String SEP = File.separator;
+
+    //app external data cache folders
+    public static final String APP_ROOT_DIR = getSystemEnvAndSetup();
+    public static final File APP_DATA_DIR = checkFolders(APP_ROOT_DIR + SEP + "data");
+    public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + SEP + "store");
+    public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + SEP + "my_applets");
+
     //app internal dirs
     public static final String IMAGE_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"img"+SEP;
     public static final String LANG_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"lang"+SEP;
+
     //store hierarchy
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
     public static final String REMOTE_STORE_LATEST_URL = "https://api.github.com/repos/petrs/JCAppStoreContent/releases/latest";
@@ -41,12 +49,7 @@ public class Config {
     public static final String JSON_TAG_DESC = "description";
     public static final String JSON_TAG_URL = "url";
     public static final String JSON_TAG_USAGE = "usage";
-
-    //app external data cache folders
-    public static final String APP_ROOT_DIR = getSystemEnvAndSetup();
-    public static final File APP_DATA_DIR = checkFolders(APP_ROOT_DIR + SEP + "data");
-    public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + SEP + "store");
-    public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + SEP + "my_applets");
+    public static final String RESOURCES = Config.APP_STORE_DIR + Config.SEP + "Resources" + Config.SEP;
 
     private final static String TERMINALS = "terminals";
 

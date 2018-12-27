@@ -45,6 +45,7 @@ public class LeftMenu extends JPanel {
         container.setOpaque(false);
 
 
+
         setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
         setLayout(new BorderLayout());
         buildMenuComponents();
@@ -149,6 +150,12 @@ public class LeftMenu extends JPanel {
                     remote.setBackground(choosedButtonBG);
                     local.setOpaque(false);
                 }
+            }
+        });
+        searchIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                parent.getSearchablePane().showItems(searchInput.getText());
             }
         });
     }

@@ -5,13 +5,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cz.muni.crocs.appletstore.Config;
+import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * @author Jiří Horák
@@ -41,27 +41,27 @@ public class JSONStoreParser {
         return true;
     }
 
-    public static HashMap<String, HashMap<String, String>> getDefaultValues() throws FileNotFoundException {
+    public static HashMap<String, JsonObject> getValues() throws FileNotFoundException {
         File file = getFileInfo(); //safe
         if (file == null) return null;
 
-        HashMap<String, HashMap<String, String>> result = new HashMap<>();
+        HashMap<String, JsonObject> result = new HashMap<>();
 
         JsonParser jp = new JsonParser();
         JsonElement root = jp.parse(new InputStreamReader(new FileInputStream(file)));
         JsonArray applets = root.getAsJsonArray();
         for (JsonElement applet : applets) {
-            HashMap<String, String> appletInfo = new HashMap<>();
+//            HashMap<String, String> appletInfo = new HashMap<>();
             JsonObject item = applet.getAsJsonObject();
-            appletInfo.put(Config.JSON_TAG_TITLE, item.get(Config.JSON_TAG_TITLE).getAsString());
-            appletInfo.put(Config.JSON_TAG_ICON, item.get(Config.JSON_TAG_ICON).getAsString());
-            appletInfo.put(Config.JSON_TAG_AUTHOR, item.get(Config.JSON_TAG_AUTHOR).getAsString());
-            JsonArray versions = item.get(Config.JSON_TAG_VERSION).getAsJsonArray();
-            appletInfo.put(Config.JSON_TAG_VERSION, versions.get(versions.size()-1).getAsJsonObject().keySet().iterator().next());
-            result.put(item.get(Config.JSON_TAG_NAME).getAsString(), appletInfo);
+            result.put(item.get(Config.JSON_TAG_NAME).getAsString(), item);
+            //todo: return object and not data
+//            appletInfo.put(Config.JSON_TAG_TITLE, item.get(Config.JSON_TAG_TITLE).getAsString());
+//            appletInfo.put(Config.JSON_TAG_ICON, item.get(Config.JSON_TAG_ICON).getAsString());
+//            appletInfo.put(Config.JSON_TAG_AUTHOR, item.get(Config.JSON_TAG_AUTHOR).getAsString());
+//            JsonArray versions = item.get(Config.JSON_TAG_VERSION).getAsJsonArray();
+//            appletInfo.put(Config.JSON_TAG_VERSION, versions.get(versions.size()-1).getAsJsonObject().keySet().iterator().next());
+//            result.put(item.get(Config.JSON_TAG_NAME).getAsString(), appletInfo);
         }
         return result;
     }
-
-
 }

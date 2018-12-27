@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 
 import javax.swing.*;
@@ -64,6 +65,10 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         storePanel.setVisible(true);
         isLocalPaneDiplayed = false;
         storePanel.run(); //always
+    }
+
+    public Searchable getSearchablePane() {
+        return storePanel;
     }
 
     public boolean isLocal() {

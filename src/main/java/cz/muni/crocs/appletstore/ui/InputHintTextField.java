@@ -1,8 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -14,27 +12,30 @@ import java.awt.event.FocusListener;
 public class InputHintTextField extends JTextField implements FocusListener {
 
     private final String hint;
-    private boolean showingHint;
+    private boolean isHint;
 
     public InputHintTextField(final String hint) {
         super(hint);
         this.hint = hint;
-        this.showingHint = true;
-        this.setText(hint);
-        this.setBorder(null);
-        this.setOpaque(false);
+        isHint = true;
+        setBorder(null);
+        setOpaque(false);
+        addFocusListener(this);
+        addActionListener(listener -> {
+
+        });
     }
 
     @Override
     protected void paintBorder(Graphics g) {
-        //delete
+        //deleted
     }
 
     @Override
     public void focusGained(FocusEvent e) {
-        if (this.getText().isEmpty()) {
+        if (getText().isEmpty() || getText().equals(hint)) {
             setText("");
-            showingHint = false;
+            isHint = false;
         }
     }
 
@@ -42,12 +43,12 @@ public class InputHintTextField extends JTextField implements FocusListener {
     public void focusLost(FocusEvent e) {
         if (this.getText().isEmpty()) {
             setText(hint);
-            showingHint = true;
+            isHint = true;
         }
     }
 
     @Override
     public String getText() {
-        return showingHint ? "" : getText();
+        return isHint ? "" : super.getText();
     }
 }
