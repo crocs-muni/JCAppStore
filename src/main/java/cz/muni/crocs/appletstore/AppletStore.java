@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.Terminals;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +28,7 @@ public class AppletStore extends JFrame {
     private static final Logger logger = LogManager.getLogger(AppletStore.class);
 
     private TabbedPaneSimulator window;
-    public final Terminals terminals = new Terminals(""); //TODO terminal reader?
+    private CardManager manager = new CardManager();
     //main menu
     public Menu menu;
     //main window under menu
@@ -50,6 +52,10 @@ public class AppletStore extends JFrame {
         });
     }
 
+    public Terminals terminals() {
+        return manager.getTerminals();
+    }
+
     private void setup() {
         CustomFont.refresh(); //load font
         try {
@@ -60,11 +66,16 @@ public class AppletStore extends JFrame {
             Config.options.put("bg", "bg.jpeg");
             e.printStackTrace();
         }
-        terminals.checkTerminals();
+        manager.getTerminals().checkTerminals();
     }
 
     private void setUI() {
-        setDefaultLookAndFeelDecorated(false);
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            //ignore
+        }
+        //setDefaultLookAndFeelDecorated(false);
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);
         UIManager.put("Menu.foreground", Color.WHITE);
@@ -96,6 +107,8 @@ public class AppletStore extends JFrame {
     public void checkTerminalsRoutine() {
 
         new Thread(() -> {
+
+            Terminals terminals = manager.getTerminals();
 
             while (window.isLocalPaneDiplayed()) {
                 final Terminals.TerminalState state = terminals.getState();

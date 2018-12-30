@@ -9,6 +9,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -87,10 +88,12 @@ public class LeftMenu extends JPanel {
         //init button for local storage
         setButton(local, Config.translation.get(70), true); //TODO more terminals or cards?
         local.setBackground(choosedButtonBG);
+        local.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(local, gbc);
         //init button for store
         setButton(remote, Config.translation.get(71), false);
         remote.setOpaque(false);
+        remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(remote, gbc);
 
 //        scroll = new JScrollPane(container); //TODO scroll modify bars
@@ -152,9 +155,17 @@ public class LeftMenu extends JPanel {
                 }
             }
         });
+        //searching icon on click search
         searchIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                parent.getSearchablePane().showItems(searchInput.getText());
+            }
+        });
+        //searching on enter press
+        searchInput.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 parent.getSearchablePane().showItems(searchInput.getText());
             }
         });

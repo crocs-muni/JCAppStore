@@ -34,7 +34,7 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         //switching between localEnvironment and store panes
         localPanel = new LocalWindowPane(context);
         //once start the pane
-        localPanel.updatePanes(context.terminals.getState());
+        localPanel.updatePanes(context.terminals().getState());
         storePanel = new StoreWindowPane(context);
         //default store hidden
         setUpdateLocalPaneVisible();

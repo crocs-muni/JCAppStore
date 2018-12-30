@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class BackgroundImgPanel extends JPanel {
 
-    BufferedImage bg;
+    private BufferedImage bg;
 
     public BackgroundImgPanel() {
         String bgImagname = Config.options.get(Config.OPT_KEY_BACKGROUND);
@@ -23,12 +23,16 @@ public class BackgroundImgPanel extends JPanel {
             loadDefault();
         } else {
             try {
-                bg = ImageIO.read(new File(Config.IMAGE_DIR + bgImagname));
+                bg = ImageIO.read(new File(bgImagname));
             } catch (IOException e) {
                 e.printStackTrace();
                 loadDefault();
             }
         }
+    }
+
+    public void setNewBackground(BufferedImage newBackground) {
+        bg = newBackground;
     }
 
     private void loadDefault() {

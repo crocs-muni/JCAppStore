@@ -7,8 +7,7 @@ package cz.muni.crocs.appletstore.iface;
 public interface CallBack {
 
     /**
-     * Enables the callback execution
+     * Enables the callback abstract
      */
     void callBack();
-
 }

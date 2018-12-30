@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

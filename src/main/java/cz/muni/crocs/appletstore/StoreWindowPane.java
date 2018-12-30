@@ -83,6 +83,8 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
 
     @Override
     public void showItems(String query) {
+        if (!(state == StoreState.OK)) return;
+
         if (query.isEmpty()) {
             showPanel(items);
         } else {
@@ -240,6 +242,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
                     dataSet.get(Config.JSON_TAG_ICON).getAsString(),
                     dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
                     versions.get(versions.size()-1).getAsJsonObject().keySet().iterator().next());
+            item.setCursor(new Cursor(Cursor.HAND_CURSOR));
             item.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -253,15 +256,22 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
     }
 
     private void showInfo(JsonObject dataSet) {
-        info = new StoreItemInfo(dataSet);
+        info = new StoreItemInfo(dataSet, this);
         storeScroll.setViewportView(info);
     }
 
     private void showPanel(Collection<StoreItem> sortedItems) {
-        //todo empty input -> show dialog nothing found
         storeLayout.removeAll();
-        for (StoreItem item : sortedItems) {
-            storeLayout.add(item);
+        if (sortedItems.size() == 0) {
+            try {
+                storeLayout.add(new StoreItem(Config.translation.get(113), "no_results.png", "", ""));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (StoreItem item : sortedItems) {
+                storeLayout.add(item);
+            }
         }
         storeLayout.revalidate();
         storeScroll.setViewportView(storeLayout);

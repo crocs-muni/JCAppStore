@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -91,11 +92,31 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
     //TODO menu into func and return menu
     private void buildMenu() {
-        JMenuItem item;
-//Create the menu bar.
-//Build the first menu.
-        CustomJmenu menu = new CustomJmenu("A menu", "Description", KeyEvent.VK_A);
+
+        CustomJmenu menu = new CustomJmenu(Config.translation.get(93), "", KeyEvent.VK_A);
         add(menu);
+
+        menu.add(menuItemWithKeyShortcut(new AbstractAction(Config.translation.get(114)) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("asdasf");
+                Settings settings = new Settings(context);
+                Object[] options = { Config.translation.get(115), Config.translation.get(116) };
+
+                int result = JOptionPane.showOptionDialog(null, settings, Config.translation.get(114),
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                        null, options, null);
+                if (result == JOptionPane.YES_OPTION){
+                    settings.apply();
+                }
+            }
+        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+
+//        settings.setFont(CustomFont.plain);
+//        settings.setForeground(Color.WHITE);
+//        settings.setMargin(new Insets(0,0 ,0 ,0 ));
+
+
         //a group of JMenuItems
 //        menu.add(menuItemWithKeyShortcut("First", "Description", KeyEvent.VK_1, InputEvent.ALT_MASK));
 //        menu.add(menuItemNoShortcut("Second", "Description"));
@@ -138,6 +159,8 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         resetTerminalButtonGroup(); //possible to call multiple times in order to refresh readers in a menu
         add(readers);
 
+
+
 //right shift
         add(Box.createGlue());
 
@@ -176,9 +199,9 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         refreshItem.setIcon(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
         readers.add(refreshItem);
         readers.addSeparator();
-        if (context.terminals.getState() != Terminals.TerminalState.NO_READER) {
+        if (context.terminals().getState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
-            for (String name : context.terminals.getTerminals().keySet()) {
+            for (String name : context.terminals().getTerminals().keySet()) {
                 //todo set selected
                 JRadioButtonMenuItem item = selectableMenuItem(name, Config.translation.get(56));
                 readersPresent.add(item);

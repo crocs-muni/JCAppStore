@@ -23,7 +23,8 @@ public class ErrorPane extends JPanel {
         error.setAlignmentX(Component.CENTER_ALIGNMENT);
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
-        JLabel errorMsg = new JLabel(Config.translation.get(translationId));
+        JLabel errorMsg = new JLabel("<html><div style=\"width:100%;\">"
+                + Config.translation.get(translationId) + "</div></html>");
         errorMsg.setFont(CustomFont.plain.deriveFont(20f));
         errorMsg.setForeground(Color.BLACK);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);

@@ -11,10 +11,19 @@ public class CustomJmenu extends JMenu {
 
     public CustomJmenu(String title, String description, int mnemonic) {
         super("<html><p style='margin:5'>" + title + "</p></html>");
+        defaultSettings(description, mnemonic);
+    }
+
+    public CustomJmenu(AbstractAction action, String description, int mnemonic) {
+        super(action);
+        defaultSettings(description, mnemonic);
+    }
+
+    private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
         setFont(CustomFont.plain);
-        //setForeground(new Color(0xFFFFFF));
+        setForeground(Color.WHITE);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }
 

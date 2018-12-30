@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore;
+package cz.muni.crocs.appletstore.card;
 
 import apdu4j.TerminalManager;
 

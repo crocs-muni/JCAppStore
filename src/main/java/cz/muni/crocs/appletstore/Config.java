@@ -35,7 +35,7 @@ public class Config {
     public static final String IMAGE_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"img"+SEP;
     public static final String LANG_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"lang"+SEP;
 
-    //store hierarchy
+    //store constants
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
     public static final String REMOTE_STORE_LATEST_URL = "https://api.github.com/repos/petrs/JCAppStoreContent/releases/latest";
     public static final String FILE_INFO_PREFIX = "info_";
@@ -45,7 +45,6 @@ public class Config {
     public static final String JSON_TAG_ICON = "icon";
     public static final String JSON_TAG_VERSION = "version";
     public static final String JSON_TAG_AUTHOR = "author";
-    public static final String JSON_TAG_INFO = "info";
     public static final String JSON_TAG_DESC = "description";
     public static final String JSON_TAG_URL = "url";
     public static final String JSON_TAG_USAGE = "usage";
