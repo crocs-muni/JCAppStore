@@ -92,6 +92,8 @@
     <string id="118">Change</string>
     <string id="119">default</string>
     <string id="120">Restore default</string>
+    <string id="121">Language</string>
+    <string id="122">Changes will apply after an restart.</string>
 
     <!--store -->
     <string id="130">Website</string>

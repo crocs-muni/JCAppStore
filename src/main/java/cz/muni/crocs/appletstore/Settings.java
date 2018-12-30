@@ -2,8 +2,9 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImageLoader;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.ui.CustomJmenu;
+import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -15,7 +16,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -27,6 +27,14 @@ public class Settings extends JPanel {
 
     private String bgImg = Config.options.get(Config.OPT_KEY_BACKGROUND);
     private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
+
+
+    private final Tuple[] langs = new Tuple[]{
+            new Tuple<>("en", "English"),
+            new Tuple<>("cz", "Česky")
+    };
+    private JComboBox<Tuple<String, String>> languageBox;
+
     private AppletStore context;
 
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
@@ -36,8 +44,17 @@ public class Settings extends JPanel {
     public Settings(AppletStore context) {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
-//        setBackground(new Color(255, 255, 255, 105));
         setLayout(new MigLayout("fillx"));
+
+        JLabel langTitle = new JLabel(Config.translation.get(121));
+        langTitle.setFont(CustomFont.plain);
+        add(langTitle);
+
+        languageBox = new JComboBox<>(langs);
+        CustomComboBoxItem listItems = new CustomComboBoxItem();
+        languageBox.setMaximumRowCount(4);
+        languageBox.setRenderer(listItems);
+        add(languageBox, "align right, span 2, growx, wrap");
 
         JLabel bgTitle = new JLabel(Config.translation.get(117));
         bgTitle.setFont(CustomFont.plain);
@@ -105,12 +122,20 @@ public class Settings extends JPanel {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this);
             ((BackgroundImgPanel) context.getContentPane()).setNewBackground(loader.get());
         }
+    }
 
+    private void saveLanguage() {
+        if (langs[languageBox.getSelectedIndex()].first.equals(Config.options.get(Config.OPT_KEY_LANGUAGE))) return;
+        Config.options.put(Config.OPT_KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
+        showAlertChange();
     }
 
     public void apply() {
         saveBackgroundImage();
+        saveLanguage();
     }
 
-
+    private void showAlertChange() {
+        JOptionPane.showMessageDialog(null, Config.translation.get(122));
+    }
 }
