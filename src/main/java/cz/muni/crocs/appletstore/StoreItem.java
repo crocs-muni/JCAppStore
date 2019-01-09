@@ -1,6 +1,8 @@
-package cz.muni.crocs.appletstore.ui;
+package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.ui.CustomFont;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;

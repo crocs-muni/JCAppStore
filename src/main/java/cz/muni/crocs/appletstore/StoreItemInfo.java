@@ -1,19 +1,19 @@
-package cz.muni.crocs.appletstore.ui;
+package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
-import javafx.scene.effect.DropShadow;
+import cz.muni.crocs.appletstore.ui.CustomButtonUI;
+import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.xml.crypto.dsig.Transform;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,6 +26,10 @@ import java.net.URISyntaxException;
  * @version 1.0
  */
 public class StoreItemInfo extends JPanel {
+
+    JComboBox<String> versionComboBox;
+    JComboBox<String> compilerVersionComboBox;
+
 
     public StoreItemInfo(JsonObject dataSet, Searchable store) {
         setOpaque(false);
@@ -76,7 +80,7 @@ public class StoreItemInfo extends JPanel {
 
         JLabel urlTitle = new JLabel(Config.translation.get(130));
         urlTitle.setFont(titleFont);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        urlTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(urlTitle, "span 2,  gapleft 40, gaptop 20");
 
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
@@ -104,6 +108,42 @@ public class StoreItemInfo extends JPanel {
         installInfo.setOpaque(true);
         installInfo.setFont(textFont);
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
+
+        JLabel versionTitle = new JLabel(Config.translation.get(133));
+        versionTitle.setFont(titleFont);
+        versionTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        add(versionTitle); //todo span 2
+
+        String[] versions = JSONStoreParser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
+        versionComboBox = new JComboBox<>(versions);
+        versionComboBox.setMaximumRowCount(4);
+        //todo disables the build combobox exchange...?
+        //versionComboBox.setSelectedItem(dataSet.get(Config.JSON_TAG_LATEST).getAsString());
+        versionComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String[] compilerVersions = JSONStoreParser.jsonArrayToDataArray(
+                        dataSet.getAsJsonObject(Config.JSON_TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()));
+                compilerVersionComboBox.setModel(new JComboBox<>(compilerVersions).getModel());
+            }
+        });
+        add(versionComboBox, "align right");
+
+        JsonObject builds = dataSet.getAsJsonObject(Config.JSON_TAG_BUILD);
+
+
+        String[] compilerVersions = JSONStoreParser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
+        compilerVersionComboBox = new JComboBox<>(compilerVersions);
+        add(compilerVersionComboBox, "align right");
+
+
+        JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + Config.translation.get(28) + "</div></html>");
+        customInstall.setUI(new CustomButtonUI());
+        customInstall.setFont(CustomFont.plain.deriveFont(Font.BOLD, 18f));
+        customInstall.setForeground(Color.WHITE);
+        customInstall.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        customInstall.setBackground(new Color(170, 166, 167));
+        add(customInstall, "align left, wrap");
     }
 
     //todo or java resize approach new Label(imageIcon)

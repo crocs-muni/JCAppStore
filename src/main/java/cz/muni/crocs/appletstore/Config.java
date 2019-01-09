@@ -43,7 +43,9 @@ public class Config {
     public static final String JSON_TAG_NAME = "name";
     public static final String JSON_TAG_TITLE = "title";
     public static final String JSON_TAG_ICON = "icon";
-    public static final String JSON_TAG_VERSION = "version";
+    public static final String JSON_TAG_LATEST = "latest";
+    public static final String JSON_TAG_VERSION = "versions";
+    public static final String JSON_TAG_BUILD = "builds";
     public static final String JSON_TAG_AUTHOR = "author";
     public static final String JSON_TAG_DESC = "description";
     public static final String JSON_TAG_URL = "url";

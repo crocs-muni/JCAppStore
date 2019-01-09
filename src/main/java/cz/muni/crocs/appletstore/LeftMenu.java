@@ -41,11 +41,8 @@ public class LeftMenu extends JPanel {
         this.parent = parent;
 
         setBackground(new Color(255, 255, 255, 65));
-//        container.setBackground(Color.BLUE);
         //setOpaque(false);
         container.setOpaque(false);
-
-
 
         setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
         setLayout(new BorderLayout());

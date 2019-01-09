@@ -40,6 +40,4 @@ public class CardManager {
     public void uninstall(String AID) {
 
     }
-
-
 }

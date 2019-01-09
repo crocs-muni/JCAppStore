@@ -54,9 +54,8 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
 
     @Override
     protected void done() {
-      //  parent.update();
+      //  do nothing
     }
-
 
     /**
      * Check if the folder is not damaged by user or system
@@ -64,7 +63,7 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
      * @return true if not necessary to re-download
      */
     private static boolean checkNotEmpty() {
-        //TODO try to be more sophisticated about the file content, eg. lookup specific file
+        //TODO try to be more sophisticated about the file contents, eg. lookup specific file/s
         String[] files = Config.APP_STORE_DIR.list();
         if (files != null && files.length == 0) {
             return false;

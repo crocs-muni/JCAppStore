@@ -1,14 +1,11 @@
 package cz.muni.crocs.appletstore;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
-import cz.muni.crocs.appletstore.ui.StoreItem;
-import cz.muni.crocs.appletstore.ui.StoreItemInfo;
 import cz.muni.crocs.appletstore.util.Cleaner;
 import cz.muni.crocs.appletstore.util.DownloaderWorker;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
@@ -46,12 +43,10 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
     private volatile StoreState state = UNINITIALIZED;
     private GridBagConstraints constraints;
 
-
     private JPanel storeLayout = new JPanel();
     private JScrollPane storeScroll = new JScrollPane();
     private StoreItemInfo info;
     private ArrayList<StoreItem> items = new ArrayList<>();
-
 
     public StoreWindowPane(AppletStore context) {
         this.context = context;
@@ -176,13 +171,13 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         }).start();
     }
 
+
     /**
      * Checks the internet connection and the last version downloaded from github
      * if needed, updates the data
      * runs the window setup
      */
     private void init() {
-        //todo check for internet connection every time
         DownloaderWorker workerThread = new DownloaderWorker(this);
         addLoading(workerThread);
         workerThread.execute();
@@ -221,6 +216,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
             loadStore();
         } catch (IOException e) {
             e.printStackTrace();
+            //todo handle, log
         }
         putNewPane(storeScroll, true);
     }
@@ -236,12 +232,11 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         }
 
         for (JsonObject dataSet : data.values()) {
-            JsonArray versions = dataSet.get(Config.JSON_TAG_VERSION).getAsJsonArray();
 
             StoreItem item = new StoreItem(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
                     dataSet.get(Config.JSON_TAG_ICON).getAsString(),
                     dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
-                    versions.get(versions.size()-1).getAsJsonObject().keySet().iterator().next());
+                    dataSet.get(Config.JSON_TAG_LATEST).getAsString());
             item.setCursor(new Cursor(Cursor.HAND_CURSOR));
             item.addMouseListener(new MouseAdapter() {
                 @Override
@@ -267,6 +262,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
                 storeLayout.add(new StoreItem(Config.translation.get(113), "no_results.png", "", ""));
             } catch (IOException e) {
                 e.printStackTrace();
+                //todo handle, log
             }
         } else {
             for (StoreItem item : sortedItems) {

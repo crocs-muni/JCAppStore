@@ -88,17 +88,20 @@
     <string id="114">Settings</string>
     <string id="115">OK</string>
     <string id="116">Cancel</string>
-    <string id="117">Background</string>
+    <string id="117">Background:</string>
     <string id="118">Change</string>
     <string id="119">default</string>
     <string id="120">Restore default</string>
-    <string id="121">Language</string>
+    <string id="121">Language:</string>
     <string id="122">Changes will apply after an restart.</string>
+    <string id="123">Change event notification</string>
+    <string id="124">Blur amount:</string>
 
     <!--store -->
     <string id="130">Website</string>
     <string id="131">Installation guide</string>
     <string id="132">Author: </string>
+    <string id="133">Custom installation</string>
 
     <!--exceptions-->
     <string id="150">Installation error: file </string><string id="151"> doesn't exist.</string>

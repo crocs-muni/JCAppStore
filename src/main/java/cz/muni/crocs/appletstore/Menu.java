@@ -30,11 +30,14 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     public Menu(AppletStore parent) {
         context = parent;
 
+        //black background with margin and no border bar
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
+        setBorder(null);
+
         buildMenu();
 
-
+        //set action events
 //TODO: for each menu
 //        for (int pos = 0; pos < menu.getItemCount(); ++pos) {
 //            menu.getItem(pos).addActionListener(this);
@@ -54,9 +57,24 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
      * @param inputEventMask InputEvent constant - mask for accelerated access
      * @return
      */
+    private JMenuItem menuItemWithKeyShortcutAndIcon(AbstractAction action, String imagePath,
+                                                     String descripton, int keyEvent, int inputEventMask) {
+        JMenuItem menuItem = menuItemWithKeyShortcut(action, descripton, keyEvent,inputEventMask);
+        menuItem.setIcon(new ImageIcon(imagePath));
+
+        return menuItem;
+    }
+
+    /**
+     * @param action         action to perform
+     * @param keyEvent       KeyEvent key constant
+     * @param inputEventMask InputEvent constant - mask for accelerated access
+     * @return
+     */
     private JMenuItem menuItemWithKeyShortcut(AbstractAction action, String descripton,
                                                int keyEvent, int inputEventMask) {
         JMenuItem menuItem = menuItemNoShortcut(action, descripton);
+
         menuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
         return menuItem;
     }
@@ -67,28 +85,27 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         return menuItem;
     }
 
-
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
-        menuItem.setMargin(new Insets(4, 4, 4, 4));
         return menuItem;
     }
 
-    private void setItemLook(Component component, String descripton) {
+    private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
-        component.setFont(CustomFont.plain);
+        component.setFont(CustomFont.plain.deriveFont(10f));
         component.getAccessibleContext().setAccessibleDescription(descripton);
+        component.setMargin(new Insets(4, 4, 4, 4));
+        Dimension preferred = component.getPreferredSize();
+        component.setPreferredSize(new Dimension(200, (int)preferred.getHeight()));
     }
 
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
         JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
         setItemLook(rbMenuItem, descripton);
-        rbMenuItem.setMargin(new Insets(4, 4, 4, 4));
         return rbMenuItem;
     }
-
 
     //TODO menu into func and return menu
     private void buildMenu() {
@@ -96,13 +113,11 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         CustomJmenu menu = new CustomJmenu(Config.translation.get(93), "", KeyEvent.VK_A);
         add(menu);
 
-        menu.add(menuItemWithKeyShortcut(new AbstractAction(Config.translation.get(114)) {
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(Config.translation.get(114)) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("asdasf");
                 Settings settings = new Settings(context);
                 Object[] options = { Config.translation.get(115), Config.translation.get(116) };
-
                 int result = JOptionPane.showOptionDialog(null, settings, Config.translation.get(114),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                         null, options, null);
@@ -110,7 +125,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
                     settings.apply();
                 }
             }
-        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
 //        settings.setFont(CustomFont.plain);
 //        settings.setForeground(Color.WHITE);
@@ -122,7 +137,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 //        menu.add(menuItemNoShortcut("Second", "Description"));
 //        menu.add(menuItemNoShortcut("Third", "Description"));
         //a group of radio button menu items
-        menu.addSeparator();
+       // menu.addSeparator();
 
 //
 //
@@ -150,7 +165,6 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 //                KeyEvent.VK_2, InputEvent.ALT_MASK));
 
 
-//Build second menu in the menu bar.
         add(new CustomJmenu("Another Menu", "This menu does nothing", KeyEvent.VK_N));
 
         //BUILD READERS MENU
@@ -160,45 +174,40 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         add(readers);
 
 
-
-//right shift
-        add(Box.createGlue());
-
-        menu = new CustomJmenu("", "Minimize", KeyEvent.VK_UNDEFINED);
-        menu.setIcon(new ImageIcon("src/main/resources/img/minimize.png"));
-        menu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() >= 1) {
-                    context.setState(JFrame.ICONIFIED);
-                }
-            }
-        });
-        menu.setHorizontalAlignment(SwingConstants.RIGHT);
-        add(menu);
-
-        menu = new CustomJmenu("", "Exit", KeyEvent.VK_UNDEFINED);
-        menu.setIcon(new ImageIcon("src/main/resources/img/close_white.png"));
-
-        menu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() >= 1) {
-                    System.exit(0);
-                }
-            }
-        });
-        menu.setHorizontalAlignment(SwingConstants.RIGHT);
-        add(menu);
+//        add(Box.createGlue());
+//
+//        menu = new CustomJmenu("", "Minimize", KeyEvent.VK_UNDEFINED);
+//        menu.setIcon(new ImageIcon("src/main/resources/img/minimize.png"));
+//        menu.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                if (e.getClickCount() >= 1) {
+//                    context.setState(JFrame.ICONIFIED);
+//                }
+//            }
+//        });
+//        menu.setHorizontalAlignment(SwingConstants.RIGHT);
+//        add(menu);
+//
+//        menu = new CustomJmenu("", "Exit", KeyEvent.VK_UNDEFINED);
+//        menu.setIcon(new ImageIcon("src/main/resources/img/close_white.png"));
+//
+//        menu.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                if (e.getClickCount() >= 1) {
+//                    System.exit(0);
+//                }
+//            }
+//        });
+//        menu.setHorizontalAlignment(SwingConstants.RIGHT);
+//        add(menu);
     }
 
 
     public void resetTerminalButtonGroup() {
         readers.removeAll(); //TODO dont recreate refresh button
-        JMenuItem refreshItem = menuItemWithKeyShortcut(refreshReaders(), Config.translation.get(92), KeyEvent.VK_R, InputEvent.ALT_MASK);
-        refreshItem.setIcon(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
-        readers.add(refreshItem);
-        readers.addSeparator();
+
         if (context.terminals().getState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
             for (String name : context.terminals().getTerminals().keySet()) {
@@ -215,19 +224,6 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             readers.add(item);
         }
     }
-
-
-    private AbstractAction refreshReaders() {
-        //todo delete no need refreshes itself
-//        return new AbstractAction(Config.translation.get(91)) {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                context.refresh(true);
-//            }
-//        };
-        return null;
-    }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {

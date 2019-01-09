@@ -26,6 +26,7 @@ import java.io.IOException;
 public class Settings extends JPanel {
 
     private String bgImg = Config.options.get(Config.OPT_KEY_BACKGROUND);
+    private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
 
 
@@ -44,42 +45,37 @@ public class Settings extends JPanel {
     public Settings(AppletStore context) {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
-        setLayout(new MigLayout("fillx"));
+        setLayout(new MigLayout("fillx, gap 5px 5px"));
+        addBackground();
+        addLanguage();
+    }
 
-        JLabel langTitle = new JLabel(Config.translation.get(121));
-        langTitle.setFont(CustomFont.plain);
-        add(langTitle);
-
-        languageBox = new JComboBox<>(langs);
-        CustomComboBoxItem listItems = new CustomComboBoxItem();
-        languageBox.setMaximumRowCount(4);
-        languageBox.setRenderer(listItems);
-        add(languageBox, "align right, span 2, growx, wrap");
-
-        JLabel bgTitle = new JLabel(Config.translation.get(117));
-        bgTitle.setFont(CustomFont.plain);
-        add(bgTitle);
+    private void addBackground() {
+        addTitleLabel(Config.translation.get(117), "span 3, wrap");
 
         String path = Config.options.get(Config.OPT_KEY_BACKGROUND);
         if (path.equals(defaultBgPath)) {
             path = Config.translation.get(119);
+            slider.setEnabled(false);
         }
+        cutString(path);
 
-        if (path.length() > 50) {
-            int len = path.length();
-            path = "..." + path.substring(len - 47, len);
-        }
         JLabel bgValue = new JLabel("<html>" + path + "</html>");
-        bgValue.setFont(CustomFont.plain);
+        bgValue.setFont(CustomFont.plain.deriveFont(12f));
         bgValue.setBorder(frame);
         bgValue.setBackground(Color.WHITE);
         bgValue.setOpaque(true);
+        add(bgValue, "span 3, growx, wrap");
+
+        add(new JLabel()); //empty space
 
         JButton defaultBg = new JButton(new AbstractAction(Config.translation.get(120)) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 bgImg = Config.translation.get(119);
                 bgValue.setText(bgImg);
+                slider.setValue(1);
+                slider.setEnabled(false);
             }
         });
         add(defaultBg, "align right");
@@ -95,13 +91,41 @@ public class Settings extends JPanel {
                 int r = fileChooser.showOpenDialog(null);
                 if (r == JFileChooser.APPROVE_OPTION) {
                     bgImg = fileChooser.getSelectedFile().getAbsolutePath();
-                    bgValue.setText(bgImg);
+                    bgValue.setText(cutString(bgImg));
+                    slider.setEnabled(true);
                 }
             }
         });
         add(getNewBg, "align right, wrap");
 
-        add(bgValue, "span 3, growx, wrap");
+        //blur option
+        addTitleLabel(Config.translation.get(124), "");
+        slider.setEnabled(false);
+        add(slider, "w 180, align right, span 2, wrap");
+    }
+
+    private void addLanguage() {
+        addTitleLabel(Config.translation.get(121), "");
+
+        languageBox = new JComboBox<>(langs);
+        CustomComboBoxItem listItems = new CustomComboBoxItem();
+        languageBox.setMaximumRowCount(4);
+        languageBox.setRenderer(listItems);
+        add(languageBox, "align right, span 2, w 180, wrap");
+    }
+
+    private void addTitleLabel(String titleText, String constraints) {
+        JLabel title = new JLabel(titleText);
+        title.setFont(CustomFont.plain);
+        add(title, constraints);
+    }
+
+    private String cutString(String value) {
+        if (value.length() > 45) {
+            int len = value.length();
+            value = "..." + value.substring(len - 42, len);
+        }
+        return value;
     }
 
 
@@ -119,7 +143,7 @@ public class Settings extends JPanel {
                 e.printStackTrace();
             }
         } else {
-            BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this);
+            BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());
             ((BackgroundImgPanel) context.getContentPane()).setNewBackground(loader.get());
         }
     }
@@ -128,6 +152,7 @@ public class Settings extends JPanel {
         if (langs[languageBox.getSelectedIndex()].first.equals(Config.options.get(Config.OPT_KEY_LANGUAGE))) return;
         Config.options.put(Config.OPT_KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
         showAlertChange();
+        //Config.translation = new Translation(Config.options.get(Config.OPT_KEY_LANGUAGE));
     }
 
     public void apply() {
@@ -135,7 +160,14 @@ public class Settings extends JPanel {
         saveLanguage();
     }
 
+    /**
+     * Change alert notification
+     * display: changes will apply
+     */
     private void showAlertChange() {
-        JOptionPane.showMessageDialog(null, Config.translation.get(122));
+        JOptionPane.showMessageDialog(null,
+                Config.translation.get(122),
+                Config.translation.get(123),
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -10,7 +10,7 @@ import java.awt.*;
 public class CustomJmenu extends JMenu {
 
     public CustomJmenu(String title, String description, int mnemonic) {
-        super("<html><p style='margin:5'>" + title + "</p></html>");
+        super("<html><p style='margin: 3 8'>" + title + "</p></html>");
         defaultSettings(description, mnemonic);
     }
 
@@ -22,7 +22,7 @@ public class CustomJmenu extends JMenu {
     private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
-        setFont(CustomFont.plain);
+        setFont(CustomFont.plain.deriveFont(12f));
         setForeground(Color.WHITE);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }

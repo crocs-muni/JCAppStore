@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import cz.muni.crocs.appletstore.ui.CustomFont;
 
+import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -16,6 +17,7 @@ import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -81,10 +83,16 @@ public class AppletStore extends JFrame {
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.selectionBackground", Color.WHITE);
         UIManager.put("Menu.selectionForeground", Color.BLACK);
+        UIManager.put("Bar.background", Color.BLACK);
     }
 
     private void initComponents() {
-
+        try {
+            setIconImage(ImageIO.read(new File(Config.IMAGE_DIR + "icon.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+            //Ignore
+        }
         // make the frame half the height and width
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int height = screenSize.height;

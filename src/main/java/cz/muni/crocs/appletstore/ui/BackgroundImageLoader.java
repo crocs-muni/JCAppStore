@@ -11,6 +11,7 @@ import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 
 /**
@@ -22,17 +23,21 @@ public class BackgroundImageLoader {
     private BufferedImage background = null;
     private String imgName = "bg.jpg";
 
-    public BackgroundImageLoader(String imgName, Component panel) {
-        System.out.println("laoding...");
+    private final int radius = 5;
+    private final int size = radius * 2 + 1;
+    private final int blurAmount;
+
+    public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
         load(imgName);
+        this.blurAmount = blurAmount;
         MediaTracker mediaTracker = new MediaTracker(panel);
         mediaTracker.addImage(background, 0);
-        System.out.println("loaded...");
         try {
             mediaTracker.waitForAll();
-            applyFilter();
+            if (blurAmount > 0) applyFilter(blurAmount);
             save();
         } catch (InterruptedException e) {
+            //todo show error message!!!!!!!!!!!!!!!
             e.printStackTrace();
             defaultBg();
         }
@@ -43,8 +48,6 @@ public class BackgroundImageLoader {
             //TODO ask how works the system dirs
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
-            System.out.println("saving...");
-            System.out.println(Config.APP_DATA_DIR + Config.SEP +imgName);
             Config.options.put(Config.OPT_KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
         } catch (IOException e) {
             defaultBg();
@@ -58,7 +61,6 @@ public class BackgroundImageLoader {
 
     private void load(String name) {
         try {
-            System.out.println("progress loading...");
             background = ImageIO.read(new File(name));
         } catch (IOException e) {
             //TODO possible error handling? show user message?
@@ -66,27 +68,46 @@ public class BackgroundImageLoader {
         }
     }
 
-    private void applyFilter() {
-        System.out.println("filter...");
-        int radius = 8;
-        int size = radius * 2 + 1;
-        float weight = 1.0f / (size * size);
-        float[] data = new float[size * size];
-        Arrays.fill(data, weight);
+    private float[] gaussianMatrix() {
+        final double sigma = 8d;
+        double sum = 0;
 
-        Kernel kernel = new Kernel(size, size, data);
+        float[] data = new float[size * size];
+        int index = 0;
+        for (int i = -radius; i <= radius; ++i){
+            for (int j = -radius; j <= radius; ++j) {
+                data[index] = (float)
+                        (Math.exp( (i * i + j * j) / (-2 * sigma * sigma)) / (2 * Math.PI * sigma * sigma));
+                sum += data[index];
+                ++index;
+            }
+        }
+        //NORMALIZE
+        for (int i = 0; i < size; ++i){
+            for (int j = 0; j < size; ++j) {
+                data[i * size + j] = (float)(data[i * size + j] / sum);
+                System.out.print(data[i * size + j] + "  ");
+            }
+            System.out.println();
+        }
+        System.out.println(Arrays.toString(data));
+        return data;
+    }
+
+    private void applyFilter(int blurAmount) {
+        Kernel kernel = new Kernel(size, size, gaussianMatrix());
         ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-        background = op.filter(background, null);
-//        int doubleEdgeSize = size * 2;
-//        BufferedImage cut = new BufferedImage(
-//                background.getWidth() - doubleEdgeSize,
-//                background.getHeight() - doubleEdgeSize,
-//                BufferedImage.TYPE_INT_ARGB);
-//
-//        Graphics2D graphics2D = cut.createGraphics();
-//        graphics2D.drawImage(background, null, size, size);
-//        graphics2D.dispose();
-//        background = cut;
+        for (; blurAmount > 0; --blurAmount) {
+            background = op.filter(background, null);
+        }
+        int width = background.getWidth() - size * 2;
+        int height = background.getHeight() - size * 2;
+
+        BufferedImage cut = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = cut.createGraphics();
+        graphics2D.drawImage(background, 0, 0, width, height, size, size, width, height, null);
+        graphics2D.dispose();
+        background = cut;
     }
     public BufferedImage get() {
         return background;

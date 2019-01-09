@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * @author Jiří Horák
@@ -61,6 +62,18 @@ public class JSONStoreParser {
 //            JsonArray versions = item.get(Config.JSON_TAG_VERSION).getAsJsonArray();
 //            appletInfo.put(Config.JSON_TAG_VERSION, versions.get(versions.size()-1).getAsJsonObject().keySet().iterator().next());
 //            result.put(item.get(Config.JSON_TAG_NAME).getAsString(), appletInfo);
+        }
+        return result;
+    }
+
+    public static String[] jsonArrayToDataArray(JsonArray array) {
+        if (array == null) return null;
+        int len = array.size();
+
+        String[] result = new String[len];
+        for (int i = 0; i < len; i++) {
+            //todo try simpler
+            result[i] = array.get(i).getAsString();
         }
         return result;
     }

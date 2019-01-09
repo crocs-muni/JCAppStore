@@ -13,7 +13,7 @@ import java.awt.*;
 public class LoadingPane extends JPanel {
 
     private final int width = 300;
-    private final int height = 40;
+    private final int height = 5;
     private int progress = 0;
     private int messageId = 64;
     private Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
