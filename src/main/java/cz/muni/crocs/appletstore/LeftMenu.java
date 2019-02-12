@@ -129,7 +129,7 @@ public class LeftMenu extends JPanel {
                 if (!isLocal) {
                     isLocal = true;
                     setChoosed();
-                    parent.setUpdateLocalPaneVisible();
+                    parent.setLocalPanelVisible();
 
                     local.setOpaque(true);
                     local.setBackground(choosedButtonBG);

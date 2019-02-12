@@ -5,6 +5,8 @@ import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -96,7 +98,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         component.setBackground(new Color(0xffffff));
         component.setFont(CustomFont.plain.deriveFont(10f));
         component.getAccessibleContext().setAccessibleDescription(descripton);
-        component.setMargin(new Insets(4, 4, 4, 4));
+        component.setMargin(new Insets(4, 4, 4, 16));
         Dimension preferred = component.getPreferredSize();
         component.setPreferredSize(new Dimension(200, (int)preferred.getHeight()));
     }
@@ -206,23 +208,32 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
 
     public void resetTerminalButtonGroup() {
-        readers.removeAll(); //TODO dont recreate refresh button
-
-        if (context.terminals().getState() != Terminals.TerminalState.NO_READER) {
+        readers.removeAll();
+//        readers.
+        if (context.manager().getTerminalState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
-            for (String name : context.terminals().getTerminals().keySet()) {
-                //todo set selected
+            for (String name : context.manager().getTerminals()) {
                 JRadioButtonMenuItem item = selectableMenuItem(name, Config.translation.get(56));
+                //set selected reader
+                if (name.equals(context.manager().getSelectedTerminalName())) {
+                    item.setSelected(true);
+                }
+                item.addActionListener(selectReaderListener());
                 readersPresent.add(item);
                 readers.add(item);
             }
-            readersPresent.setSelected(((JRadioButtonMenuItem)readers.getMenuComponent(2)).getModel(), true);
+            readers.repaint();
+
         } else {
             JMenuItem item = menuItemDisabled(Config.translation.get(2), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
             readers.add(item);
         }
+    }
+
+    private ActionListener selectReaderListener() {
+        return e -> context.manager().setSelectedTerminal(e.getActionCommand());
     }
 
     @Override

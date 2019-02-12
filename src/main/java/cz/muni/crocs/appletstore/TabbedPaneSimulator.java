@@ -25,7 +25,7 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         this.context = context;
         setLayout(new BorderLayout());
         createPanes();
-        context.checkTerminalsRoutine();
+        context.checkTerminalsRoutine(); //just once for the whole app
     }
 
     private void createPanes() {
@@ -34,10 +34,10 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         //switching between localEnvironment and store panes
         localPanel = new LocalWindowPane(context);
         //once start the pane
-        localPanel.updatePanes(context.terminals().getState());
+        localPanel.updatePanes(context.manager().getTerminalState());
         storePanel = new StoreWindowPane(context);
         //default store hidden
-        setUpdateLocalPaneVisible();
+        setLocalPanelVisible();
         //container for local and store panes
         content = new JPanel();
         content.setBackground(Color.WHITE); //white background
@@ -54,7 +54,7 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         return isLocalPaneDiplayed;
     }
 
-    public void setUpdateLocalPaneVisible() {
+    public void setLocalPanelVisible() {
         localPanel.setVisible(true);
         storePanel.setVisible(false);
         isLocalPaneDiplayed = true;
@@ -68,7 +68,7 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
     }
 
     public Searchable getSearchablePane() {
-        return storePanel;
+        return (storePanel.isVisible()) ? storePanel : localPanel;
     }
 
     public boolean isLocal() {

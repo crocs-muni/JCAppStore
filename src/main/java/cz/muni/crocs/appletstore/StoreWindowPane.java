@@ -30,7 +30,6 @@ import java.util.concurrent.TimeoutException;
 
 import static cz.muni.crocs.appletstore.StoreWindowPane.StoreState.*;
 
-
 /**
  * @author Jiří Horák
  * @version 1.0
@@ -53,10 +52,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
-        initLayoutConstraints();
-    }
 
-    private void initLayoutConstraints() {
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.gridwidth = 1;
@@ -273,75 +269,3 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         storeScroll.setViewportView(storeLayout);
     }
 }
-
-//    private WebView view;
-//    private WebEngine engine;
-//    public static final String resources = ("file:///" + Config.APP_STORE_DIR + Config.SEP + "Resources" + Config.SEP)
-//            .replaceAll("\\\\", "/");
-//
-//    private void setupWindow() {
-//        Platform.runLater(() -> {
-//            view = new TransparentWebPage().get();
-//            engine = view.getEngine();
-//            engine.setJavaScriptEnabled(true);
-//
-//            try {
-//                if (!loadStore()) {
-//                    //todo handle
-//                    return;
-//                }
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//                setStatus(UNINITIALIZED);
-//                //todo add error
-//                return;
-//            }
-//            //todo check images from jar file
-//
-//            //remove all errors and loading
-//            removeAll();
-//            //set webpage visible
-//            setScene(view.getScene());
-//            setStatus(OK);
-//        });
-//    }
-//
-//    private boolean loadStore() throws FileNotFoundException {
-//        //todo in thread?
-//        final HashMap<String, HashMap<String, String>> data = JSONStoreParser.getDefaultValues();
-//        if (data == null) {
-//            putNewPane(new ErrorPane(63, "error.png", this), false);
-//            setStatus(UNINITIALIZED);
-//            Cleaner.cleanFolder(Config.APP_STORE_DIR);
-//            return false;
-//        }
-//        final File f = new File("src/main/resources/web/index.html");
-//        try {
-//            engine.load(f.toURI().toURL().toString());
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-//            if (newState == State.SUCCEEDED) {
-//                //let the javascript know when user clicks the icon
-//                JSObject window = (JSObject) engine.executeScript("window");
-//                window.setMember("item", new Bridge());
-//
-//                data.values().forEach((v) -> engine.executeScript("add(\"" +
-//                        v.get(Config.JSON_TAG_TITLE) + "\", \"" + resources +
-//                        v.get(Config.JSON_TAG_ICON) + "\", \"" +
-//                        v.get(Config.JSON_TAG_VERSION) + "\", \"" +
-//                        v.get(Config.JSON_TAG_AUTHOR) + "\")"));
-//            }
-//        });
-//        return true;
-//    }
-//
-//    public class Bridge{
-//        public void loadItem() {
-//            System.out.println("called");
-//            return;
-//        }
-//    }
-

@@ -10,6 +10,9 @@ import java.io.IOException;
  */
 public class CustomFont {
 
+    //no instances
+    private CustomFont() {}
+
     //public static Font bold;
     public static Font plain;
 

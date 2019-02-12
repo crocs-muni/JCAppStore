@@ -9,6 +9,11 @@ import java.util.Objects;
  */
 public class Cleaner {
 
+    /**
+     * Deletes all files inside folder
+     * @param folder folder to clear
+     * @return true if deleting succeeded
+     */
     public static boolean cleanFolder(File folder) {
         boolean res = true;
         for (File f : Objects.requireNonNull(folder.listFiles())){
@@ -17,6 +22,11 @@ public class Cleaner {
         return res;
     }
 
+    /**
+     * Deletes file (folder) recursively
+     * @param path file to recursively delete
+     * @return true if deleting succeeded
+     */
     public static boolean deleteRecursive(File path) {
         if (!path.exists()) return false;
         boolean ret = true;

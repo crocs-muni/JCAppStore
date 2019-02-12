@@ -2,12 +2,17 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
+import sun.misc.IOUtils;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Jiří Horák
@@ -15,8 +20,14 @@ import java.awt.event.MouseEvent;
  */
 public class ErrorPane extends JPanel {
 
+    private BufferedImage bgImg;
+
     public ErrorPane (int translationId, String imgName) {
-        new JPanel();
+//        try {
+//            bgImg = ImageIO.read(new File(Config.IMAGE_DIR + "notifBg.png"));
+//        } catch (IOException e) {
+//            setOpaque(false);
+//        }
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + imgName));
@@ -55,4 +66,13 @@ public class ErrorPane extends JPanel {
         });
         add(panel);
     }
+
+// in case of adding some translucent white bg
+//    @Override
+//    protected void paintComponent(Graphics g) {
+//        //super.paintComponent(g);
+//        if (bgImg != null) {
+//            g.drawImage(bgImg, 0, 0, this);
+//        }
+//    }
 }

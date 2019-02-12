@@ -35,6 +35,13 @@ public class Config {
     public static final String IMAGE_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"img"+SEP;
     public static final String LANG_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"lang"+SEP;
 
+    //database related constants
+    public static final String JC_DB_FILE = "jcappstore.db";
+    public static final String DATABASE_URL = "jdbc:sqlite:" + APP_DATA_DIR + SEP + JC_DB_FILE;
+    public static final String INI_CARD_LIST = "cards.ini";
+    public static final String INI_CARD_TYPES = "types.ini";
+
+
     //store constants
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
     public static final String REMOTE_STORE_LATEST_URL = "https://api.github.com/repos/petrs/JCAppStoreContent/releases/latest";

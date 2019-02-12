@@ -20,13 +20,10 @@ public class Terminals {
     }
 
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
-    private String reader;
+    private String selectedReader = null;
+    private String toSelectReader = null;
 
     private TerminalState state = TerminalState.NO_READER;
-
-    public Terminals(String reader) {
-        this.reader = reader;
-    }
 
     public TerminalState getState() {
         return state;
@@ -34,6 +31,10 @@ public class Terminals {
 
     private boolean checkCardInTerminal(CardTerminal terminal) throws CardException {
         return terminal.isCardPresent();
+    }
+
+    public String getSelectedReaderName() {
+        return selectedReader;
     }
 
     /**
@@ -84,87 +85,58 @@ public class Terminals {
         return state == TerminalState.OK;
     }
 
+    /**
+     * Check for terminal and card presence
+     * readers are assumed to have only one card at time
+     * @return true if state changed (e.g. different reader / card) as default selected
+     */
     public boolean checkTerminals() {
         cardReaderMap.clear();
+
+        TerminalState old = state;
+        boolean needToRefresh;
+
         try {
             final TerminalFactory tf;
-            //tf = TerminalFactory.getDefault();  //TODO the differemce?
-            tf = TerminalManager.getTerminalFactory(null); //TODO get provider Specification in a // jar:class:args form
+            tf = TerminalManager.getTerminalFactory(null);
             CardTerminals terminals = tf.terminals();
 
-            //System.out.println("# Detected readers from " + tf.getProvider().getName());
-
             int number = 0;
-            for (CardTerminal term : terminals.list()) { //TODO cardException list failed with getDefult(), processes 0x times otherwise
+            for (CardTerminal term : terminals.list()) {
                 number++;
                 cardReaderMap.put(term.getName(), term);
-                checkCardPresence(term);
             }
 
             if (number == 0) {
                 state = TerminalState.NO_READER;
-                return false;
+                return old != state;
             }
+            needToRefresh = toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
+                    !cardReaderMap.containsKey(selectedReader);
+            if (needToRefresh) {
+                selectedReader = (toSelectReader != null && cardReaderMap.containsKey(toSelectReader))
+                        ? toSelectReader : cardReaderMap.firstKey();
+                toSelectReader = null;
+            }
+            checkCardPresence(selectedReader);
+
         } catch (CardException | NoSuchAlgorithmException ex) {
             //TODO ask changed to getdefault and on exception return false
 //            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
 //            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
             state = TerminalState.NO_READER;
-            return false;
+            return old != state;
         }
-        return true;
+        return old != state || needToRefresh;
     }
-
-//    public CardDetails getCardDetails(StringBuilder statusMessage) {
-//        if (cardReaderListComboBox.getSelectedItem() == null) {
-//            return null;
-//        }
-//        String reader = cardReaderListComboBox.getSelectedItem().toString();
-//
-//        if (reader != null && reader.length() > 0) {
-//            try {
-//                CardTerminal cardTerminal = terminals.getTerminal(reader);
-//                if (cardTerminal.isCardPresent()) {
-//                    System.out.println("Connect to card");
-//                    //statusMessage.append("Connect to card").append(System.lineSeparator());
-//                    Card card = null;
-//                    CardChannel channel = null;
-//                    try {
-//                        card = cardTerminal.connect("*");
-//                        // We use apdu4j which by default uses jnasmartcardio
-//                        // which uses real SCardBeginTransaction
-//                        card.beginExclusive();
-//                        channel = card.getBasicChannel();
-//                        CardDetails cardDetails = new CardDetails();
-//                        cardDetails.setAtr(card.getATR());
-//                        setCardDetails(channel, cardDetails);
-//                        return cardDetails;
-//                    } catch (CardException e) {
-//                        System.err.println("Could not connect to " + cardTerminal.getName() + ": " + TerminalManager.getExceptionMessage(e));
-//                        statusMessage.append(translate.get(21)).append(cardTerminal.getName()).append(": ").append(TerminalManager.getExceptionMessage(e)).append(System.lineSeparator());
-//                    } catch (GPException ex) {
-//                        Logger.getLogger(JCPlayStoreClient.class.getName()).log(Level.SEVERE, null, ex);
-//                    } finally {
-//                        if (card != null) {
-//                            card.endExclusive();
-//                            card.disconnect(true);
-//                            card = null;
-//                        }
-//                    }
-//                } else {
-//                    System.out.println("Card is not present!!!");
-//                    statusMessage.append(translate.get(22)).append(System.lineSeparator());
-//                }
-//            } catch (CardException ex) {
-//                JOptionPane.showMessageDialog(this, ex.getMessage(), "List", JOptionPane.INFORMATION_MESSAGE);
-//                Logger.getLogger(JCPlayStoreClient.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//        return null;
-//    }
 
     public CardTerminal getTerminal(String name) {
         return cardReaderMap.get(name);
+    }
+
+    public CardTerminal getTerminal() {
+        System.out.println(selectedReader);
+        return cardReaderMap.get(selectedReader);
     }
 
     /**
@@ -172,16 +144,8 @@ public class Terminals {
      * @param name terminal to set as a main terminal
      * @return true if terminal found or card presence detecting didn't fail, false otherwise
      */
-    public boolean selectTerminal(String name) {
-        CardTerminal terminal = cardReaderMap.get(name);
-        if (terminal == null) return false;
-        try {
-            checkCardInTerminal(terminal);
-        } catch (CardException e) {
-            state = TerminalState.NO_CARD;
-            return false;
-        }
-        return true;
+    public void selectTerminal(String name) {
+        toSelectReader = name;
     }
 
     public TreeMap<String, CardTerminal> getTerminals() {

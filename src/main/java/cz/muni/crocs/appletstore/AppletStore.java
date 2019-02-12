@@ -19,6 +19,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Jiří Horák
@@ -34,7 +36,6 @@ public class AppletStore extends JFrame {
     //main menu
     public Menu menu;
     //main window under menu
-
 
     private AppletStore() {
         setup();
@@ -54,8 +55,8 @@ public class AppletStore extends JFrame {
         });
     }
 
-    public Terminals terminals() {
-        return manager.getTerminals();
+    public CardManager manager() {
+        return manager;
     }
 
     private void setup() {
@@ -68,7 +69,7 @@ public class AppletStore extends JFrame {
             Config.options.put("bg", "bg.jpeg");
             e.printStackTrace();
         }
-        manager.getTerminals().checkTerminals();
+        manager.refresh();
     }
 
     private void setUI() {
@@ -115,28 +116,26 @@ public class AppletStore extends JFrame {
     public void checkTerminalsRoutine() {
 
         new Thread(() -> {
+            while (true) {
+                Set<String> readers = new HashSet<>(manager.getTerminals());
+                final Terminals.TerminalState oldState = manager.getTerminalState();
+                if (manager.refresh()) {
+                    final Terminals.TerminalState state = manager.getTerminalState();
 
-            Terminals terminals = manager.getTerminals();
-
-            while (window.isLocalPaneDiplayed()) {
-                final Terminals.TerminalState state = terminals.getState();
-                terminals.checkTerminals();
-                final Terminals.TerminalState newState = terminals.getState();
-                if (newState != state) {
-
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            window.localPanel.updatePanes(newState);
+                    if (!readers.equals(manager.getTerminals()) || oldState != state) {
+                        SwingUtilities.invokeLater(() -> {
+                            window.localPanel.updatePanes(state);
                             menu.resetTerminalButtonGroup();
-                        }
-                    });
-
+                        });
+                    }
                 }
+
 
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     logger.error("Detection routine failed: " + e.getMessage());
+                    //todo continue?
                     checkTerminalsRoutine();
                     break;
                 }
@@ -151,11 +150,11 @@ public class AppletStore extends JFrame {
                 try {
                     new AppletStore();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,
                             JOptionPane.QUESTION_MESSAGE, null);
                     //todo show error
                     logger.error("Fatal Error: " + e.getMessage());
-                    e.printStackTrace();
                 }
             }
         });
