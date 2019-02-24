@@ -32,7 +32,7 @@ public class LoadingPane extends JPanel {
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.translate(this.getWidth() / 2, this.getHeight() / 2);
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(Color.BLACK);
+        graphics2D.setColor(Color.WHITE);
         graphics2D.draw(outline);
 
         Rectangle inline = new Rectangle(-(width/2), -(height/2), width * progress / 100, height);

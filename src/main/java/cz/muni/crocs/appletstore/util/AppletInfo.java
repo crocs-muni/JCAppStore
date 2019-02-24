@@ -22,6 +22,7 @@ public class AppletInfo {
     private String image; //todo check image and put default if not found
     private String version;
     private String author;
+    private boolean hasKeys;
 
     private boolean selected = false;
 
@@ -43,23 +44,19 @@ public class AppletInfo {
         kind = registry.getType();
         domain = registry.getDomain();
 
-        System.out.println(aid.toString());
-        System.out.println(registry.getLifeCycleString());
-        System.out.println("----");
-
         try {
             getAdditionalInfo(cardId);
         } catch (IOException e) {
-            name = aid.toString();
-            image = "no_image.png";
-            version = Config.translation.get(125);
-            author = version;
+            name = ((registry.getType() == GPRegistryEntry.Kind.ExecutableLoadFile) ? "Package" : "Applet") + " ID: " + aid.toString();
+            image = "unknown"; //will be replaced based on its type
+            version = "";
+            author = Config.translation.get(125);
         }
     }
 
     private void getAdditionalInfo(String cardId) throws IOException {
         IniParser parser = new IniParser("", cardId);
-
+        //todo heskeys whether contains sensitive info
     }
 
     public AID getAid() {

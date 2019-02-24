@@ -1,25 +1,23 @@
 package cz.muni.crocs.appletstore.card;
 
+import apdu4j.HexUtils;
 import apdu4j.ISO7816;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.card.command.List;
-import cz.muni.crocs.appletstore.iface.CardCommand;
 import cz.muni.crocs.appletstore.util.AppletInfo;
 import cz.muni.crocs.appletstore.util.IniParser;
 import pro.javacard.gp.GPData;
 import pro.javacard.gp.GPException;
 
+import pro.javacard.gp.GPKey;
 import pro.javacard.gp.GlobalPlatform;
 import pro.javacard.gp.PlaintextKeys;
 
 import javax.smartcardio.Card;
-import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CommandAPDU;
-import javax.smartcardio.ResponseAPDU;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -30,7 +28,9 @@ import java.util.ArrayList;
 public class CardInstance {
 
     public static final String DEFAULT_TEST_KEY = "404142434445464748494A4B4C4D4E4F";
-    private String masterKey = DEFAULT_TEST_KEY;
+    private String masterKey = DEFAULT_TEST_KEY;        //default test key with no emv and DES3 alg
+    private GPKey.Type keyType = GPKey.Type.DES3;
+    private boolean emv = false;
 
     public static final String NO_CARD = "";
     private String id = NO_CARD;
@@ -40,17 +40,19 @@ public class CardInstance {
 
     private ArrayList<AppletInfo> applets;
 
-
     public enum CardState {
-        OP_READY, INITIALIZED, SECURED, LOCKED, TERMINATED, UNAUTHORIZED
+        OK, LOCKED, UNAUTHORIZED, FAILED
     }
-    private CardState state;
+
+    private CardState state = CardState.OK;
+    public String error;
 
     public CardState getState() {
         return state;
     }
 
     public ArrayList<AppletInfo> getApplets() {
+        if (applets == null) return new ArrayList<>();
         return applets;
     }
 
@@ -86,6 +88,7 @@ public class CardInstance {
             this.id = NO_CARD;
             this.details = null;
             this.masterKey = null;
+            this.state = CardState.OK;
             return;
         }
 
@@ -101,9 +104,11 @@ public class CardInstance {
             if (saveDetailsAndCheckMasterKey())
                 getCardListWithMasterPassword();
             else
-                getCardListWithDefaultPassword(false);
+                getCardListWithDefaultPassword();
         } catch (IOException | CardException ex) {
-            state = CardState.UNAUTHORIZED;
+            this.details = null;
+            this.masterKey = null;
+            this.state = CardState.FAILED;
         }
     }
 
@@ -117,10 +122,16 @@ public class CardInstance {
         IniParser parser = new IniParser(Config.INI_CARD_LIST, id);
         if (parser.isHeaderPresent()) {
             masterKey = parser.getValue("MasterKey");
+            keyType = getType(parser.getValue("KeyType").toUpperCase());
+            emv = parser.getValue("EMV").toUpperCase().equals("EMV");
             return !(masterKey == null || masterKey.isEmpty());
         }
         System.out.println("Saving card specific data into ini file: " + id);
-        parser.addValue("MasterKey", "")
+        parser.addValue("MasterKey", "") //todo update if supports custom keys
+                //one of: RAW, DES, DES3, AES, RSAPUB, PSK
+                .addValue("KeyType", "")
+                // uses EMV - YES / NO
+                .addValue("EMV", "")
                 .addValue("ATR", byteArrayToUnitString(details.getAtr().getBytes()))
                 .addValue("CIN", details.getCin())
                 .addValue("IIN", details.getIin())
@@ -133,65 +144,28 @@ public class CardInstance {
     }
 
     /**
-     * Executes any desired command using secure channel
-     * @param command command instance to execute
-     * @param emv true if emv diversification used
-     * @throws CardException unable to perform command
-     */
-    private void executeCommand(GPCommand command, boolean emv) throws CardException {
-        Card card = null;
-        GlobalPlatform context = null;
-
-        try {
-            card = terminal.connect("*");
-            card.beginExclusive();
-            //card.beginExclusive();  todo ask causes error CARD HAS BEEN RESET
-            context = GlobalPlatform.discover(card.getBasicChannel());
-            secureConnect(context, (emv) ? PlaintextKeys.Diversification.EMV : null);
-
-            command.setCardId(id);
-            command.setGP(context);
-            command.execute();
-
-        } catch (GPException e) {
-            if (emv) {
-                switch (e.sw) {
-                    case ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED:
-                    case ISO7816.SW_AUTHENTICATION_METHOD_BLOCKED:
-
-                        state = CardState.LOCKED;
-                        break;
-                    default:
-                        //todo unable to connect
-                }
-            } else {
-                System.out.println("trying -emv");
-                getCardListWithDefaultPassword(true);
-            }
-        } finally {
-            if (card != null) {
-                card.endExclusive();
-                card.disconnect(true);
-            }
-        }
-    }
-
-    /**
      * Open card types INI and searches by ATR for default password
      * todo: separate list from getting default key
      * extract functionality into one connection process
      */
-    private void getCardListWithDefaultPassword(boolean diversification) throws CardException {
+    private void getCardListWithDefaultPassword() throws CardException {
 
         try {
             IniParser parser = new IniParser(Config.INI_CARD_TYPES, byteArrayToUnitString(details.getAtr().getBytes()));
-            if (parser.isHeaderPresent())
+            if (parser.isHeaderPresent()) {
                 masterKey = parser.getValue("MasterKey");
-            if (masterKey == null || masterKey.isEmpty()) masterKey = DEFAULT_TEST_KEY;
+                keyType = getType(parser.getValue("KeyType").toUpperCase());
+                emv = parser.getValue("EMV").toUpperCase().equals("EMV");
+            }
+            if (masterKey == null || masterKey.isEmpty()) {
+                masterKey = DEFAULT_TEST_KEY;
+                keyType = GPKey.Type.DES3;
+                emv = false;
+            }
 
             List list = new List();
-            executeCommand(list, false);
-            applets = list.getApplets();
+            executeCommand(list);
+            applets = list.getResult();
 
         } catch (IOException e) {
             //todo handle
@@ -206,6 +180,49 @@ public class CardInstance {
         //todo
     }
 
+    /**
+     * Executes any desired command using secure channel
+     *
+     * @param command command instance to execute
+     * @throws CardException unable to perform command
+     */
+    public void executeCommand(GPCommand command) throws CardException {
+        Card card = null;
+        GlobalPlatform context = null;
+
+        try {
+            card = terminal.connect("*");
+            context = GlobalPlatform.discover(card.getBasicChannel());
+        } catch (GPException e) {
+            error = e.getMessage();
+            switch (e.sw) {
+                case ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED:
+                case ISO7816.SW_AUTHENTICATION_METHOD_BLOCKED:
+                case 0x6283:
+                    state = CardState.LOCKED;
+                    break;
+                default:
+                    state = CardState.FAILED;
+                    break;
+            }
+            if (card != null) {
+                card.disconnect(true);
+            }
+            return;
+        }
+
+        try {
+            secureConnect(context, (emv) ? PlaintextKeys.Diversification.EMV : null);
+            command.setCardId(id);
+            command.setGP(context);
+            command.execute();
+        } catch (GPException e) {
+            error = e.getMessage();
+            this.state = CardState.UNAUTHORIZED;
+        } finally {
+            card.disconnect(true);
+        }
+    }
 
     /**
      * Assumes that masterKey variable is set. Tries to secure connect with it
@@ -215,14 +232,30 @@ public class CardInstance {
     private void secureConnect(GlobalPlatform context, PlaintextKeys.Diversification diversification)
             throws CardException, GPException {
 
-//        PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(masterKey.getBytes()));
-        PlaintextKeys key = PlaintextKeys.fromMasterKey(GPData.getDefaultKey());
-        //todo masterKey ignored
-        //todo uses DES-3 how do i know which to use for new GPKey()
-
+        PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), keyType));
+        //todo SCP 01/02 not considered!!
         if (diversification != null) key.setDiversifier(diversification);
         //todo mode - now default only
-        context.openSecureChannel(key, null, 0,  GlobalPlatform.defaultMode.clone());
+        context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());
+    }
+
+    private GPKey.Type getType(String type) {
+        switch (type) {
+            case "RAW":
+                return GPKey.Type.RAW;
+            case "DES":
+                return GPKey.Type.DES;
+            case "DES3":
+                return GPKey.Type.DES3;
+            case "AES":
+                return GPKey.Type.AES;
+            case "RSAPUB":
+                return GPKey.Type.RSAPUB;
+            case "PSK":
+                return GPKey.Type.PSK;
+            default:
+                return GPKey.Type.RAW;
+        }
     }
 
     /**

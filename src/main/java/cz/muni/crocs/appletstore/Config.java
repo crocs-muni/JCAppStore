@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
 import javax.swing.filechooser.FileSystemView;
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,7 +41,6 @@ public class Config {
     public static final String INI_CARD_LIST = "cards.ini";
     public static final String INI_CARD_TYPES = "types.ini";
 
-
     //store constants
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
     public static final String REMOTE_STORE_LATEST_URL = "https://api.github.com/repos/petrs/JCAppStoreContent/releases/latest";
@@ -61,6 +60,19 @@ public class Config {
 
     private final static String TERMINALS = "terminals";
 
+    //window context to get into component
+    private static Component window;
+    public static Component getWindow() {
+        return window;
+    }
+    public static void setWindow(Component mainWindow) {
+        window = mainWindow;
+    }
+
+    /**
+     * Gets the default app folder root location
+     * @return
+     */
     public static String getSystemEnvAndSetup() {
         //from  https://stackoverflow.com/questions/8782797/creating-directory-in-application-support-or-appdata
         String appFolder = FileSystemView.getFileSystemView().getDefaultDirectory() + SEP + "JCAppStore";

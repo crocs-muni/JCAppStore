@@ -1,12 +1,10 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -14,11 +12,7 @@ import java.io.IOException;
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreItem extends JPanel {
-
-    private static final Color bg = new Color(255, 255, 255);
-    private static final int iconDimen = 130;
-    private static final int cornerRadius = 30;
+public class StoreItem extends JPanel implements Item {
 
     private String searchQuery;
 
@@ -71,41 +65,14 @@ public class StoreItem extends JPanel {
         add(container, gbc);
     }
 
-    private String adjustLength(String value, int length) {
-        if (value.length() <= length) return value;
-        return value.substring(0, length - 3) + "...";
-    }
-
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        Graphics2D graphics = (Graphics2D) g;
-//        //graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        //Dimension rounded = new Dimension(cornerRadius, cornerRadius);
-//        graphics.setColor(bg);
-//        //graphics.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, rounded.width, rounded.height);
-//        graphics.setStroke(new BasicStroke(2));
-//        graphics.drawRect(1, 1, getWidth() - 2, getHeight() - 1);
-//    }
-
     //todo decide: html approach new Label("html")
     private String getImgAddress(String imgName) {
         File img = new File(Config.RESOURCES + imgName);
-        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "no_img.png");
+        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
         return img.getAbsolutePath();
     }
-    //todo or java resize approach new Label(imageIcon)
-    private ImageIcon getIcon(String image) throws IOException {
-        File img = new File(Config.RESOURCES + image);
-        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "no_img.png");
 
-        BufferedImage newIcon = new BufferedImage(iconDimen, iconDimen, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = newIcon.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(ImageIO.read(img), 0, 0, iconDimen, iconDimen, null);
-        graphics2D.dispose();
-        return new ImageIcon(newIcon);
-    }
-
+    @Override
     public String getSearchQuery() {
         return searchQuery;
     }

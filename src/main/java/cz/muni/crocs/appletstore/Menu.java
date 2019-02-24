@@ -1,12 +1,11 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,8 +13,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * @author Jiří Horák
@@ -171,8 +170,6 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
         //BUILD READERS MENU
         readers = new CustomJmenu(Config.translation.get(90), "", KeyEvent.VK_R);
-
-        resetTerminalButtonGroup(); //possible to call multiple times in order to refresh readers in a menu
         add(readers);
 
 
@@ -206,16 +203,14 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 //        add(menu);
     }
 
-
     public void resetTerminalButtonGroup() {
+        CardManager manager = CardManager.getInstance();
         readers.removeAll();
-//        readers.
-        if (context.manager().getTerminalState() != Terminals.TerminalState.NO_READER) {
+        if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
-            for (String name : context.manager().getTerminals()) {
+            for (String name : manager.getTerminals()) {
                 JRadioButtonMenuItem item = selectableMenuItem(name, Config.translation.get(56));
-                //set selected reader
-                if (name.equals(context.manager().getSelectedTerminalName())) {
+                if (name.equals(manager.getSelectedTerminalName())) {
                     item.setSelected(true);
                 }
                 item.addActionListener(selectReaderListener());
@@ -233,7 +228,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     private ActionListener selectReaderListener() {
-        return e -> context.manager().setSelectedTerminal(e.getActionCommand());
+        return e -> CardManager.getInstance().setSelectedTerminal(e.getActionCommand());
     }
 
     @Override
@@ -244,5 +239,17 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     @Override
     public void itemStateChanged(ItemEvent e) {
         //TODO
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+    }
+
+    @Override
+    public boolean isBorderPainted() {
+        return false;
     }
 }

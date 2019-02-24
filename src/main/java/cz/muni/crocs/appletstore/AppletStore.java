@@ -19,8 +19,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Jiří Horák
@@ -32,10 +30,7 @@ public class AppletStore extends JFrame {
     private static final Logger logger = LogManager.getLogger(AppletStore.class);
 
     private TabbedPaneSimulator window;
-    private CardManager manager = new CardManager();
-    //main menu
-    public Menu menu;
-    //main window under menu
+    private Menu menu;
 
     private AppletStore() {
         setup();
@@ -55,8 +50,8 @@ public class AppletStore extends JFrame {
         });
     }
 
-    public CardManager manager() {
-        return manager;
+    public TabbedPaneSimulator getWindow() {
+        return window;
     }
 
     private void setup() {
@@ -69,7 +64,6 @@ public class AppletStore extends JFrame {
             Config.options.put("bg", "bg.jpeg");
             e.printStackTrace();
         }
-        manager.refresh();
     }
 
     private void setUI() {
@@ -84,7 +78,8 @@ public class AppletStore extends JFrame {
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.selectionBackground", Color.WHITE);
         UIManager.put("Menu.selectionForeground", Color.BLACK);
-        UIManager.put("Bar.background", Color.BLACK);
+        UIManager.put("MenuBar.borderColor", Color.BLACK);
+
     }
 
     private void initComponents() {
@@ -104,7 +99,9 @@ public class AppletStore extends JFrame {
         //add the menu
         menu = new Menu(this);
         setJMenuBar(menu);
-        menu.resetTerminalButtonGroup();
+        //start routine
+        checkTerminalsRoutine();
+        Config.setWindow(this);
         // set default window properties
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -113,18 +110,20 @@ public class AppletStore extends JFrame {
 
     //search for present terminals and card
     //called from the tabbedpanesimulator, it needs the panes already loaded
-    public void checkTerminalsRoutine() {
+    private void checkTerminalsRoutine() {
+        CardManager manager = CardManager.getInstance();
 
         new Thread(() -> {
             while (true) {
-                Set<String> readers = new HashSet<>(manager.getTerminals());
+                // 1st task - refresh card readers and cards
                 final Terminals.TerminalState oldState = manager.getTerminalState();
-                if (manager.refresh()) {
+                int result = manager.refresh(window.localPanel);
+                if (result > 0) {
                     final Terminals.TerminalState state = manager.getTerminalState();
 
-                    if (!readers.equals(manager.getTerminals()) || oldState != state) {
+                    if (oldState != state) {
                         SwingUtilities.invokeLater(() -> {
-                            window.localPanel.updatePanes(state);
+                            if (result == 2) window.localPanel.updatePanes(state);
                             menu.resetTerminalButtonGroup();
                         });
                     }

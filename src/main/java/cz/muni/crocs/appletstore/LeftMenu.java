@@ -1,8 +1,11 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.CustomButton;
+import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
+import cz.muni.crocs.appletstore.ui.NotifLabel;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -20,9 +23,8 @@ import java.awt.event.MouseEvent;
 public class LeftMenu extends JPanel {
 
     //holds the content
-    private JPanel container = new JPanel(new GridBagLayout());;
-    //enables scrolling
-    private JScrollPane scroll;
+    private JPanel container = new JPanel();
+
     //to perform searching
     private JPanel searchPane;
     private InputHintTextField searchInput;
@@ -34,30 +36,26 @@ public class LeftMenu extends JPanel {
     private Color choosedButtonBG = new Color(255, 255, 255, 60);
 
     private boolean isLocal = true;
-
     private TabbedPaneSimulator parent;
 
     public LeftMenu(TabbedPaneSimulator parent) {
         this.parent = parent;
-
         setBackground(new Color(255, 255, 255, 65));
-        //setOpaque(false);
+
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+
         container.setOpaque(false);
 
-        setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
-        setLayout(new BorderLayout());
+        setMaximumSize(new Dimension(240, Integer.MAX_VALUE));
+        setMinimumSize(new Dimension(240, 0));
+        setPreferredSize(new Dimension(240, parent.getHeight()));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
         buildMenuComponents();
         setListeners();
     }
 
     public void buildMenuComponents() {
-        //create panel with search input text window and icon
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.weightx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.anchor = GridBagConstraints.PAGE_START;
 
         searchPane = new JPanel();
         searchPane.setLayout(new FlowLayout());
@@ -80,30 +78,41 @@ public class LeftMenu extends JPanel {
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
         //add search to left menu container
-        container.add(searchPane, gbc);
+        container.add(searchPane);
 
         //init button for local storage
         setButton(local, Config.translation.get(70), true); //TODO more terminals or cards?
         local.setBackground(choosedButtonBG);
         local.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        container.add(local, gbc);
+        container.add(local);
         //init button for store
         setButton(remote, Config.translation.get(71), false);
         remote.setOpaque(false);
         remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        container.add(remote, gbc);
+        container.add(remote);
 
-//        scroll = new JScrollPane(container); //TODO scroll modify bars
-//        scroll.setOpaque(false);
-        add(container, BorderLayout.NORTH);
+        container.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(container);
+        add(Box.createRigidArea(new Dimension(200, 20)));
+    }
+
+    public void addNotification(String msg) {
+        NotifLabel label = new NotifLabel(msg, this);
+        //label.setAlignmentY(Component.TOP_ALIGNMENT);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(label, 2);
+
+        if (getComponentCount() > 25)
+            remove(getComponent(getComponentCount() - 1));
+        revalidate();
     }
 
     /**
      * Sets the "choosed button" border
      */
     private void setChoosed() {
-        (local).setBorder(isLocal);
-        (remote).setBorder(!isLocal);
+        local.setBorder(isLocal);
+        remote.setBorder(!isLocal);
     }
 
     public boolean isLocal() {
@@ -122,7 +131,7 @@ public class LeftMenu extends JPanel {
     }
 
     private void setListeners() {
-        //TODO possible call from toher buttons - refreshing appstore window - make it an action
+        //TODO possible call from oher buttons - refreshing appstore window - make it an action
         local.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

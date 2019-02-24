@@ -20,14 +20,7 @@ import java.io.IOException;
  */
 public class ErrorPane extends JPanel {
 
-    private BufferedImage bgImg;
-
     public ErrorPane (int translationId, String imgName) {
-//        try {
-//            bgImg = ImageIO.read(new File(Config.IMAGE_DIR + "notifBg.png"));
-//        } catch (IOException e) {
-//            setOpaque(false);
-//        }
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + imgName));
@@ -37,7 +30,7 @@ public class ErrorPane extends JPanel {
         JLabel errorMsg = new JLabel("<html><div style=\"width:100%;\">"
                 + Config.translation.get(translationId) + "</div></html>");
         errorMsg.setFont(CustomFont.plain.deriveFont(20f));
-        errorMsg.setForeground(Color.BLACK);
+        errorMsg.setForeground(Color.WHITE);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(errorMsg);
     }
@@ -54,7 +47,7 @@ public class ErrorPane extends JPanel {
 
         JLabel retry = new JLabel(Config.translation.get(112));
         retry.setFont(CustomFont.plain.deriveFont(16f));
-        retry.setForeground(Color.BLACK);
+        retry.setForeground(Color.WHITE);
         panel.add(retry);
 
         panel.setOpaque(false);
@@ -67,12 +60,28 @@ public class ErrorPane extends JPanel {
         add(panel);
     }
 
-// in case of adding some translucent white bg
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        //super.paintComponent(g);
-//        if (bgImg != null) {
-//            g.drawImage(bgImg, 0, 0, this);
-//        }
-//    }
+    public ErrorPane (int translationId, String imgName, JPanel hint, Component parent) {
+        this(translationId, imgName);
+
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
+        panel.add(icon);
+
+        JLabel retry = new JLabel(Config.translation.get(126));
+        retry.setFont(CustomFont.plain.deriveFont(16f));
+        retry.setForeground(Color.WHITE);
+        panel.add(retry);
+
+        panel.setOpaque(false);
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JOptionPane.showMessageDialog(parent, hint, Config.translation.get(translationId), JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        add(panel);
+    }
 }

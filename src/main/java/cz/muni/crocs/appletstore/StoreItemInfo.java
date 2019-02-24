@@ -68,7 +68,7 @@ public class StoreItemInfo extends JPanel {
         install.setBackground(new Color(26, 196, 0));
         add(install, "align right, span 1 2, wrap");
 
-        JLabel author = new JLabel(Config.translation.get(132) + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
+        JLabel author = new JLabel(Config.translation.get(77) + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
         author.setFont(CustomFont.plain.deriveFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
 
@@ -78,7 +78,7 @@ public class StoreItemInfo extends JPanel {
         mainInfo.setFont(textFont);
         add(mainInfo, "span 4, gap 20, wrap");
 
-        JLabel urlTitle = new JLabel(Config.translation.get(130));
+        JLabel urlTitle = new JLabel(Config.translation.get(75));
         urlTitle.setFont(titleFont);
         urlTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(urlTitle, "span 2,  gapleft 40, gaptop 20");
@@ -109,7 +109,7 @@ public class StoreItemInfo extends JPanel {
         installInfo.setFont(textFont);
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
 
-        JLabel versionTitle = new JLabel(Config.translation.get(133));
+        JLabel versionTitle = new JLabel(Config.translation.get(78));
         versionTitle.setFont(titleFont);
         versionTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(versionTitle); //todo span 2
@@ -149,7 +149,7 @@ public class StoreItemInfo extends JPanel {
     //todo or java resize approach new Label(imageIcon)
     private ImageIcon getIcon(String image) {
         File img = new File(Config.RESOURCES + image);
-        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "no_img.png");
+        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
         BufferedImage newIcon = new BufferedImage(120, 120, BufferedImage.TYPE_INT_ARGB);
         //draw image with clip
         Graphics2D graphics2D = newIcon.createGraphics();

@@ -6,6 +6,7 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
+import javax.swing.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.TreeMap;
 
@@ -16,17 +17,20 @@ import java.util.TreeMap;
 public class Terminals {
 
     public enum TerminalState {
-        NO_READER, NO_CARD, OK
+        NO_READER, NO_CARD, LOADING, OK
     }
 
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
     private String selectedReader = null;
     private String toSelectReader = null;
 
-    private TerminalState state = TerminalState.NO_READER;
+    private TerminalState state = TerminalState.LOADING;
 
     public TerminalState getState() {
         return state;
+    }
+    public void setState(TerminalState state) {
+        this.state = state;
     }
 
     private boolean checkCardInTerminal(CardTerminal terminal) throws CardException {
@@ -88,9 +92,11 @@ public class Terminals {
     /**
      * Check for terminal and card presence
      * readers are assumed to have only one card at time
-     * @return true if state changed (e.g. different reader / card) as default selected
+     * @return 0 if no change occured, 1 if terminals changed only, but the current card is still present,
+     * 2 if everything needs refresh
      */
-    public boolean checkTerminals() {
+    public int checkTerminals() {
+        int oldHash = cardReaderMap.keySet().hashCode();
         cardReaderMap.clear();
 
         TerminalState old = state;
@@ -109,7 +115,7 @@ public class Terminals {
 
             if (number == 0) {
                 state = TerminalState.NO_READER;
-                return old != state;
+                return (old != state) ? 2 : 0;
             }
             needToRefresh = toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
                     !cardReaderMap.containsKey(selectedReader);
@@ -121,13 +127,15 @@ public class Terminals {
             checkCardPresence(selectedReader);
 
         } catch (CardException | NoSuchAlgorithmException ex) {
-            //TODO ask changed to getdefault and on exception return false
-//            JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE);
+            //todo logger
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE));
 //            Logger.getLogger(AppletStore.class.getName()).log(Level.SEVERE, null, ex);
             state = TerminalState.NO_READER;
-            return old != state;
+            return (old != state) ? 2 : 0;
         }
-        return old != state || needToRefresh;
+        if (needToRefresh || old != state) return 2;
+        if (cardReaderMap.keySet().hashCode() != oldHash) return 1;
+        return 0;
     }
 
     public CardTerminal getTerminal(String name) {
@@ -135,7 +143,6 @@ public class Terminals {
     }
 
     public CardTerminal getTerminal() {
-        System.out.println(selectedReader);
         return cardReaderMap.get(selectedReader);
     }
 

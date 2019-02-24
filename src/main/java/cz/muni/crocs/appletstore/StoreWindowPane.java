@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.Cleaner;
 import cz.muni.crocs.appletstore.util.DownloaderWorker;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
@@ -107,13 +108,12 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
 
     @Override
     public void run() {
+        if (state != NO_CONNECTION)
+            context.getWindow().closeWarning();
+
         switch (state) {
             case OK:
             case WORKING: //if OK or WORKING, do nothing
-                return;
-            case NO_CONNECTION:
-                setStatus(UNINITIALIZED);
-                putNewPane(new ErrorPane(4, "wifi_off.png", this), false);
                 return;
             case REBUILD: //just re-init store
                 setStatus(OK);
@@ -128,6 +128,10 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
                 putNewPane(new ErrorPane(66, "error.png", this), false);
                 //TODO repeat but set recursion depth | DO NOT CALL from other thread !!!!!!!!!!!
                 //run();
+                return;
+            case NO_CONNECTION:
+                context.getWindow().showWarning(184, Warning.Importance.SEVERE, this);
+                setupWindow();
                 return;
             default:
                 setStatus(WORKING);
@@ -177,6 +181,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         DownloaderWorker workerThread = new DownloaderWorker(this);
         addLoading(workerThread);
         workerThread.execute();
+
         new Thread(() -> {
             try {
                 String result = workerThread.get(200, TimeUnit.SECONDS);
@@ -218,6 +223,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
     }
 
     private boolean loadStore() throws IOException {
+        items.clear();
         //todo in thread?
         final HashMap<String, JsonObject> data = JSONStoreParser.getValues();
         if (data == null) {

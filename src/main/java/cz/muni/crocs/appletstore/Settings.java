@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.BackgroundImageLoader;
+import cz.muni.crocs.appletstore.util.BackgroundImageLoader;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import cz.muni.crocs.appletstore.ui.CustomFont;

@@ -10,7 +10,7 @@ import javax.smartcardio.CardException;
  * @author Jiří Horák
  * @version 1.0
  */
-public interface CardCommand {
+public interface CardCommand<T> {
 
     /**
      * Executes the command on a card

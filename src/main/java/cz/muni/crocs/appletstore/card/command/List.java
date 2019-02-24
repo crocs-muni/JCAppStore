@@ -13,22 +13,16 @@ import java.util.ArrayList;
  * @author Jiří Horák
  * @version 1.0
  */
-public class List extends GPCommand {
-
-    private ArrayList<AppletInfo> applets = new ArrayList<>();
-    private String status = "OP_READY";
-
-    public ArrayList<AppletInfo> getApplets() {
-        return applets;
-    }
+public class List extends GPCommand<ArrayList<AppletInfo>> {
 
     @Override
     public boolean execute() throws CardException, GPException {
+        result = new ArrayList<>();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
         for (GPRegistryEntry entry : registry) {
-            applets.add(new AppletInfo(entry, cardId));
+            result.add(new AppletInfo(entry, cardId));
         }
         return true;
     }

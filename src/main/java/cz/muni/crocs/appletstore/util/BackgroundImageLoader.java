@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.ui;
+package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
 
@@ -6,12 +6,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
-import java.awt.image.DataBuffer;
 import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.stream.IntStream;
 
 
 /**
@@ -25,11 +22,9 @@ public class BackgroundImageLoader {
 
     private final int radius = 5;
     private final int size = radius * 2 + 1;
-    private final int blurAmount;
 
     public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
         load(imgName);
-        this.blurAmount = blurAmount;
         MediaTracker mediaTracker = new MediaTracker(panel);
         mediaTracker.addImage(background, 0);
         try {
@@ -37,7 +32,8 @@ public class BackgroundImageLoader {
             if (blurAmount > 0) applyFilter(blurAmount);
             save();
         } catch (InterruptedException e) {
-            //todo show error message!!!!!!!!!!!!!!!
+            //todo error log
+            Informer.getInstance().showInfo(152);
             e.printStackTrace();
             defaultBg();
         }
@@ -56,7 +52,11 @@ public class BackgroundImageLoader {
 
     private void defaultBg() {
         Config.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
-        System.out.println(Config.IMAGE_DIR + imgName);
+        try {
+            background = ImageIO.read(new File(Config.IMAGE_DIR + imgName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void load(String name) {
@@ -82,15 +82,12 @@ public class BackgroundImageLoader {
                 ++index;
             }
         }
-        //NORMALIZE
+        //NORMALIZE and subtract 0.003 to darken the image
         for (int i = 0; i < size; ++i){
             for (int j = 0; j < size; ++j) {
-                data[i * size + j] = (float)(data[i * size + j] / sum);
-                System.out.print(data[i * size + j] + "  ");
+                data[i * size + j] = (float)(data[i * size + j] / sum - 0.003);
             }
-            System.out.println();
         }
-        System.out.println(Arrays.toString(data));
         return data;
     }
 

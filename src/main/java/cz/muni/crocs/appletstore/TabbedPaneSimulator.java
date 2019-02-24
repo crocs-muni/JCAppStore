@@ -1,7 +1,11 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.Terminals;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.Informer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,24 +25,24 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
     StoreWindowPane storePanel;
     private boolean isLocalPaneDiplayed;
 
+    private Warning warning;
+
     public TabbedPaneSimulator(AppletStore context) {
         this.context = context;
         setLayout(new BorderLayout());
         createPanes();
-        context.checkTerminalsRoutine(); //just once for the whole app
+        Informer.init(this);
     }
 
     private void createPanes() {
 
         leftMenu = new LeftMenu(this);
-        //switching between localEnvironment and store panes
         localPanel = new LocalWindowPane(context);
-        //once start the pane
-        localPanel.updatePanes(context.manager().getTerminalState());
+        //init local panel as it is intended to be visible
+        localPanel.updatePanes(Terminals.TerminalState.LOADING);
         storePanel = new StoreWindowPane(context);
-        //default store hidden
+        //by default store hidden
         setLocalPanelVisible();
-        //container for local and store panes
         content = new JPanel();
         content.setBackground(Color.WHITE); //white background
         content.setLayout(new OverlayLayout(content));
@@ -73,5 +77,25 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
 
     public boolean isLocal() {
         return leftMenu.isLocal();
+    }
+
+    public void showInfo(String info) {
+        if (info == null || info.isEmpty())
+            return;
+        leftMenu.addNotification(info);
+    }
+
+    public void showWarning(int translationId, Warning.Importance status, CallBack callable) {
+        warning = new Warning(translationId, status, callable);
+        add(warning, BorderLayout.NORTH);
+        revalidate();
+    }
+
+    public void closeWarning() {
+        if (warning != null) {
+            remove(warning);
+            warning = null;
+        }
+        revalidate();
     }
 }
