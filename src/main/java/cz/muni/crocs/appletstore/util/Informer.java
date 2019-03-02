@@ -38,8 +38,20 @@ public class Informer {
         context.showInfo(Config.translation.get(translationId));
     }
 
-    public void showWarning(int translationId, Warning.Importance status, CallBack callable) {
-        context.showWarning(translationId, status, callable);
+    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable) {
+        context.showWarning(msg, status, icon, callable);
+    }
+
+    public void showWarningToClose(String msg, Warning.Importance status) {
+        context.showWarning(msg, status, Warning.CallBackIcon.CLOSE, context);
+    }
+
+    public void showWarningToClose(int translationId, Warning.Importance status) {
+        context.showWarning(Config.translation.get(translationId), status, Warning.CallBackIcon.CLOSE, context);
+    }
+
+    public void showWarning(int translationId, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable) {
+        context.showWarning(Config.translation.get(translationId), status, icon, callable);
     }
 
     public void closeWarning() {

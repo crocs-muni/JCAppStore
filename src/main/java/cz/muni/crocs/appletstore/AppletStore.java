@@ -12,13 +12,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
+import javax.swing.text.Style;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.Toolkit;
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * @author Jiří Horák
@@ -32,8 +38,8 @@ public class AppletStore extends JFrame {
     private TabbedPaneSimulator window;
     private Menu menu;
 
-    private AppletStore() {
-        setup();
+    private AppletStore(StyleSheet style) {
+        setup(style);
         setUI();
         initComponents();
 
@@ -54,7 +60,10 @@ public class AppletStore extends JFrame {
         return window;
     }
 
-    private void setup() {
+    private void setup(StyleSheet style) {
+        HTMLEditorKit kit = new HTMLEditorKit();
+        kit.setStyleSheet(style);
+
         CustomFont.refresh(); //load font
         try {
             Config.getFileOptions();
@@ -89,11 +98,8 @@ public class AppletStore extends JFrame {
             e.printStackTrace();
             //Ignore
         }
-        // make the frame half the height and width
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int height = screenSize.height;
-        int width = screenSize.width;
-        setSize((int) (width / 1.5), (int) (height / 1.5));
+
+        setSize(1100, 550);
         window = new TabbedPaneSimulator(this);
         setContentPane(window);
         //add the menu
@@ -115,7 +121,6 @@ public class AppletStore extends JFrame {
 
         new Thread(() -> {
             while (true) {
-                // 1st task - refresh card readers and cards
                 final Terminals.TerminalState oldState = manager.getTerminalState();
                 int result = manager.refresh(window.localPanel);
                 if (result > 0) {
@@ -123,12 +128,12 @@ public class AppletStore extends JFrame {
 
                     if (oldState != state) {
                         SwingUtilities.invokeLater(() -> {
-                            if (result == 2) window.localPanel.updatePanes(state);
+                            if (result == 2)
+                                window.localPanel.updatePanes(state);
                             menu.resetTerminalButtonGroup();
                         });
                     }
                 }
-
 
                 try {
                     Thread.sleep(2000);
@@ -143,11 +148,23 @@ public class AppletStore extends JFrame {
     }
 
     public static void main(String[] args) {
+        final StyleSheet sheet = new StyleSheet();
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    new FileInputStream("src/main/resources/css/default.css")));
+            sheet.loadRules(br, null);
+            br.close();
+        } catch (IOException e) {
+            //todo
+            new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,
+                    JOptionPane.QUESTION_MESSAGE, null);
+        }
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
-                    new AppletStore();
+                    new AppletStore(sheet);
                 } catch (Exception e) {
                     e.printStackTrace();
                     new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,

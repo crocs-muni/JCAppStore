@@ -53,7 +53,8 @@ public class LocalItemInfo extends HintPanel {
         title.setFont(CustomFont.plain.deriveFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
-        rawApdu = new JLabel(Config.translation.get(141), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
+        rawApdu = new JLabel(Config.translation.get(141), new ImageIcon(
+                Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         rawApdu.addMouseListener(new MouseAdapter() {
             @Override
@@ -79,22 +80,24 @@ public class LocalItemInfo extends HintPanel {
         });
         add(rawApdu, "wrap");
 
-        uninstall = new JLabel(Config.translation.get(140), new ImageIcon(Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
+        uninstall = new JLabel(Config.translation.get(140), new ImageIcon(
+                Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!uninstall.isEnabled())
                     return;
-                int result = JOptionPane.showConfirmDialog(
-                        Config.getWindow(),
-                        "<html><p width=\"350\">" + Config.translation.get(142) + " <br />" +
-                                (nfo.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile ?
-                                        Config.translation.get(144) : Config.translation.get(143)) + "</p></html>",
-                        Config.translation.get(8) + nfo.getName(),
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE,
-                        new ImageIcon(Config.IMAGE_DIR + "info.png"));
+
+                DeleteDialogWindow opts = new DeleteDialogWindow(nfo.getAid().toString(), nfo.getKind(), nfo.hasKeys());
+
+                int result = JOptionPane.showOptionDialog(Config.getWindow(),
+                        opts,
+                        Config.translation.get(19),
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        new ImageIcon(Config.IMAGE_DIR + "error.png"),
+                        new String[]{Config.translation.get(18), Config.translation.get(116)}, "error");
 
                 switch (result) {
                     case JOptionPane.NO_OPTION:
@@ -102,6 +105,9 @@ public class LocalItemInfo extends HintPanel {
                         return;
                     case JOptionPane.YES_OPTION: //continue
                 }
+
+                String msg = opts.confirm();
+                //todo show warning if not null
                 //CardManager.getInstance().uninstall();
             }
         });
@@ -110,20 +116,14 @@ public class LocalItemInfo extends HintPanel {
 
     public void set(AppletInfo info) {
         nfo = info;
-        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
-                "The applet or package name.\nThe ID is displayed,if not installed\nfrom appletStore. ");
-        version.setText("<html><p width=\"280\">Version: " + ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
-                "Applet version installed, unknown,\nif not installed from appletStore.");
-        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
-                "Applet or package unique ID.\nApplet usually contains a part of it's\nown package ID.");
-        type.setText("<html><p width=\"280\">Type: " + getType(info.getKind()) + "</p></html>",
-                "Each card consists of several objects:" +
-                        "\nSecurity Domains - applets for management.\nFor example, those applets install and delete\n" +
-                        "other applets. Issuer SD is a SD uploaded\nby the card issuer." +
-                        "\nApplets - the instances of installed\nsoftware from package." +
-                        "\nPackages - the context for each different\napplet installed.");
-        domain.setText("<html><p width=\"280\">Domain assigned: " + ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()),
-                "The security domain assigned\nto this applet.");
+        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>", Config.translation.get(210));
+        version.setText("<html><p width=\"280\">Version: " +
+                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>", Config.translation.get(211));
+        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(), Config.translation.get(212));
+        type.setText("<html><p width=\"280\">Type: " +
+                getType(info.getKind()) + "</p></html>", Config.translation.get(213));
+        domain.setText("<html><p width=\"280\">Domain assigned: " +
+                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()), Config.translation.get(214));
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
     }

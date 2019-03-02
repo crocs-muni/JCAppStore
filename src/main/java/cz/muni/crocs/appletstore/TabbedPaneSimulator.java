@@ -14,7 +14,7 @@ import java.awt.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class TabbedPaneSimulator extends BackgroundImgPanel {
+public class TabbedPaneSimulator extends BackgroundImgPanel implements CallBack {
 
     private AppletStore context;
     private LeftMenu leftMenu;
@@ -23,7 +23,7 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
     private JPanel content;
     LocalWindowPane localPanel;
     StoreWindowPane storePanel;
-    private boolean isLocalPaneDiplayed;
+    private boolean isLocalPaneDisplayed;
 
     private Warning warning;
 
@@ -55,19 +55,19 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
     }
 
     public boolean isLocalPaneDiplayed() {
-        return isLocalPaneDiplayed;
+        return isLocalPaneDisplayed;
     }
 
     public void setLocalPanelVisible() {
         localPanel.setVisible(true);
         storePanel.setVisible(false);
-        isLocalPaneDiplayed = true;
+        isLocalPaneDisplayed = true;
     }
 
     public void setUpdateStorePaneVisible() {
         localPanel.setVisible(false);
         storePanel.setVisible(true);
-        isLocalPaneDiplayed = false;
+        isLocalPaneDisplayed = false;
         storePanel.run(); //always
     }
 
@@ -85,8 +85,8 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
         leftMenu.addNotification(info);
     }
 
-    public void showWarning(int translationId, Warning.Importance status, CallBack callable) {
-        warning = new Warning(translationId, status, callable);
+    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable) {
+        warning = new Warning(msg, status, icon, callable == null ? this : callable);
         add(warning, BorderLayout.NORTH);
         revalidate();
     }
@@ -97,5 +97,11 @@ public class TabbedPaneSimulator extends BackgroundImgPanel {
             warning = null;
         }
         revalidate();
+        repaint();
+    }
+
+    @Override
+    public void callBack() {
+        closeWarning();
     }
 }

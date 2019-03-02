@@ -12,7 +12,6 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,6 +29,10 @@ public class CardManager {
     public static CardManager getInstance() {
         if (instance == null) instance = new CardManager();
         return instance;
+    }
+
+    public CardInstance.CardState getCardState() {
+        return card.getState();
     }
 
     private Terminals terminals = new Terminals();
@@ -96,14 +99,14 @@ public class CardManager {
         }
         if (terminals.getState() == Terminals.TerminalState.OK) {
             try {
-                card.update(CardInstance.getCardInfo(terminals.getTerminal()), terminals.getTerminal());
+                card.update(CardInstance.getCardInfo(terminals.getTerminal()), terminals.getTerminal(), false);
             } catch (CardException e) {
                 card.error = e.getMessage();
                 e.printStackTrace();
                 //todo 80100068 error - card ejected ignore this error
             }
         } else {
-            card.update(null, null);
+            card.update(null, null, false);
         }
         //todo update
         return 2;
@@ -120,29 +123,31 @@ public class CardManager {
 
 
 
-
-
-
-
     public void install(File file, String[] data) throws CardException, IOException {
         if (!file.exists())
             throw new CardException(
                     Config.translation.get(150) + file.getAbsolutePath() + Config.translation.get(151));
 
-        final CAPFile instcap;
+        CAPFile capFile;
         try (FileInputStream fin = new FileInputStream(file)) {
-            instcap = CAPFile.fromStream(fin);
+            capFile = CAPFile.fromStream(fin);
         }
+        install(capFile, data);
+    }
 
+    public void install(final CAPFile file, String[] data) throws CardException {
         //todo dump into log:   instcap.dump( ... logger or other stream ... )
-        GPCommand<Void> install = new Install(instcap, data);
+
+        GPCommand<Void> install = new Install(file, data);
         card.executeCommand(install);
-        terminals.setState(Terminals.TerminalState.LOADING); //set state to different state than OK to force reload
+
         //todo save applet data into ini
 
         // todo search for failures during install and notify user
 
         // todo INMPORTANT note whether applet stores keys - uninstalling will destroy them
+        if (card.getState() == CardInstance.CardState.OK)
+            terminals.setState(Terminals.TerminalState.NO_CARD); //card has been modyfied - reload
     }
 
     public void uninstall(File file) {

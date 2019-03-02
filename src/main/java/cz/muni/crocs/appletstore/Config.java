@@ -26,9 +26,11 @@ public class Config {
     public static final String SEP = File.separator;
 
     //app external data cache folders
+
     public static final String APP_ROOT_DIR = getSystemEnvAndSetup();
     public static final File APP_DATA_DIR = checkFolders(APP_ROOT_DIR + SEP + "data");
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + SEP + "store");
+    public static final File APP_STORE_CAPS_DIR = checkFolders(APP_ROOT_DIR + SEP + "store" + SEP + "JCApplets");
     public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + SEP + "my_applets");
 
     //app internal dirs

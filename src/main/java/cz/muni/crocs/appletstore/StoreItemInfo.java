@@ -1,14 +1,21 @@
 package cz.muni.crocs.appletstore;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.ui.HintLabel;
+import cz.muni.crocs.appletstore.ui.HintPanel;
+import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.Informer;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
+import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,28 +25,25 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreItemInfo extends JPanel {
+public class StoreItemInfo extends HintPanel {
 
-    JComboBox<String> versionComboBox;
-    JComboBox<String> compilerVersionComboBox;
+    private JComboBox<String> versionComboBox;
+    private JComboBox<String> compilerVersionComboBox;
 
+    final Color bg = new Color(255, 255, 255, 80);
+    final Font textFont = CustomFont.plain.deriveFont(14f);
+    final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
 
     public StoreItemInfo(JsonObject dataSet, Searchable store) {
         setOpaque(false);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
-
-        final Color bg = new Color(255, 255, 255, 80);
-        final Font textFont = CustomFont.plain.deriveFont(14f);
-        final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
 
         JLabel back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "back.png"));
         back.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -56,7 +60,8 @@ public class StoreItemInfo extends JPanel {
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 1 2");
 
-        JLabel name = new JLabel(dataSet.get(Config.JSON_TAG_TITLE).getAsString());
+        String app_name = dataSet.get(Config.JSON_TAG_TITLE).getAsString();
+        JLabel name = new JLabel(app_name);
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
@@ -66,57 +71,71 @@ public class StoreItemInfo extends JPanel {
         install.setForeground(Color.WHITE);
         install.setCursor(new Cursor(Cursor.HAND_CURSOR));
         install.setBackground(new Color(26, 196, 0));
+        install.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
+                JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject().get(latestV).getAsJsonArray();
+
+                File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
+                        app_name + Config.SEP + app_name + "_v" + latestV +
+                        "_sdk" + sdks.get(sdks.size() - 1).getAsString() + ".casp");
+                //todo remove casp
+                System.out.println(file.getName());
+                System.out.println(file.getAbsolutePath());
+                if (!file.exists()) {
+                    Informer.getInstance().showWarningToClose(185, Warning.Importance.INFO);
+                }
+            }
+        });
         add(install, "align right, span 1 2, wrap");
 
         JLabel author = new JLabel(Config.translation.get(77) + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
         author.setFont(CustomFont.plain.deriveFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
 
-        JLabel mainInfo = new JLabel("<html><div style=\"margin: 10px; width:650px\">" + dataSet.get(Config.JSON_TAG_DESC).getAsString() + "</div></html>");
+        JTextPane mainInfo = new JTextPane();
+        mainInfo.setContentType("text/html");
+        mainInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_DESC).getAsString() + "</div></html>");
         mainInfo.setBackground(new Color(255, 255, 255, 80));
         mainInfo.setOpaque(true);
-        mainInfo.setFont(textFont);
+        mainInfo.setEditable(false);
+        mainInfo.setBorder(null);
+        ((DefaultCaret)mainInfo.getCaret()).setUpdatePolicy(0);
         add(mainInfo, "span 4, gap 20, wrap");
 
-        JLabel urlTitle = new JLabel(Config.translation.get(75));
-        urlTitle.setFont(titleFont);
-        urlTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        add(urlTitle, "span 2,  gapleft 40, gaptop 20");
+        //WEBSITE
+        addSubTitle(75, 80);
 
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
-        JLabel url = new JLabel("<html><div style=\"margin: 5px;\">" + urlAddress + "</div></html>");
+        JLabel url = new JLabel("<html><div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div></html>");
         url.setOpaque(true);
         url.setBackground(bg);
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        url.setFont(textFont.deriveFont(Font.BOLD));
-        url.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(urlAddress));
-                    } catch (IOException | URISyntaxException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        });
-        add(url, "span 2, gaptop 20, gapleft 40, wrap");
+        url.setFont(textFont);
+        url.addMouseListener(new URLAdapter(urlAddress));
 
-        JLabel installInfo = new JLabel("<html><div style=\"margin: 10px; width:650px\">" + dataSet.get(Config.JSON_TAG_USAGE).getAsString() + "</div></html>");
+        add(url, "span 4, gaptop 10, gapleft 20, wrap");
+
+        //INSTALL
+        addSubTitle(81, 82);
+
+        JTextPane installInfo = new JTextPane();
+        installInfo.setContentType("text/html");
+        installInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_USAGE).getAsString() + "</div></html>");
         installInfo.setBackground(new Color(255, 255, 255, 80));
         installInfo.setOpaque(true);
-        installInfo.setFont(textFont);
+        installInfo.setEditable(false);
+        installInfo.setBorder(null);
+        ((DefaultCaret)installInfo.getCaret()).setUpdatePolicy(0);
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
 
-        JLabel versionTitle = new JLabel(Config.translation.get(78));
-        versionTitle.setFont(titleFont);
-        versionTitle.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        add(versionTitle); //todo span 2
+        //VERSION
+        addSubTitle(78, 79);
 
         String[] versions = JSONStoreParser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
         versionComboBox = new JComboBox<>(versions);
-        versionComboBox.setMaximumRowCount(4);
+        versionComboBox.setMaximumRowCount(7);
         //todo disables the build combobox exchange...?
         //versionComboBox.setSelectedItem(dataSet.get(Config.JSON_TAG_LATEST).getAsString());
         versionComboBox.addActionListener(new ActionListener() {
@@ -131,11 +150,10 @@ public class StoreItemInfo extends JPanel {
 
         JsonObject builds = dataSet.getAsJsonObject(Config.JSON_TAG_BUILD);
 
-
         String[] compilerVersions = JSONStoreParser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
         compilerVersionComboBox = new JComboBox<>(compilerVersions);
+        compilerVersionComboBox.setMaximumRowCount(7);
         add(compilerVersionComboBox, "align right");
-
 
         JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + Config.translation.get(28) + "</div></html>");
         customInstall.setUI(new CustomButtonUI());
@@ -143,8 +161,17 @@ public class StoreItemInfo extends JPanel {
         customInstall.setForeground(Color.WHITE);
         customInstall.setCursor(new Cursor(Cursor.HAND_CURSOR));
         customInstall.setBackground(new Color(170, 166, 167));
-        add(customInstall, "align left, wrap");
+        add(customInstall, "span 2, align right, wrap");
     }
+
+    private void addSubTitle(int translationName, int tralnsationHint) {
+        HintLabel title = new HintLabel(Config.translation.get(translationName), Config.translation.get(tralnsationHint));
+        title.setFont(titleFont);
+        title.setFocusable(true);
+        title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
+        add(title, "span 4, gaptop 20, wrap");
+    }
+
 
     //todo or java resize approach new Label(imageIcon)
     private ImageIcon getIcon(String image) {
@@ -155,18 +182,19 @@ public class StoreItemInfo extends JPanel {
         Graphics2D graphics2D = newIcon.createGraphics();
 
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.setClip(new Arc2D.Float(6, 6, 108, 108, 0, 360, Arc2D.OPEN));
+        graphics2D.setClip(new Arc2D.Float(4, 4, 110, 110, 0, 360, Arc2D.OPEN));
         try {
             graphics2D.drawImage(ImageIO.read(img), 0, 0, 120, 120, null);
         } catch (IOException e) {
             e.printStackTrace();
+            return new ImageIcon(newIcon);
         }
         //remove clip
         graphics2D.setClip(null);
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics2D.setColor(Color.WHITE);
-        graphics2D.setStroke(new BasicStroke(8));
-        graphics2D.drawArc(4, 4, 112, 112, 0, 360);
+        graphics2D.setStroke(new BasicStroke(6));
+        graphics2D.drawArc(3, 3, 113, 113, 0, 360);
         graphics2D.dispose();
         return new ImageIcon(newIcon);
     }

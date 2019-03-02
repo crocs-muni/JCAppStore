@@ -22,12 +22,15 @@ public class AppletInfo {
     private String image; //todo check image and put default if not found
     private String version;
     private String author;
-    private boolean hasKeys;
+    private HasKeys hasKeys;
 
     private boolean selected = false;
 
     public boolean isSelected() {
         return selected;
+    }
+    public HasKeys hasKeys() {
+        return hasKeys;
     }
 
     public void setSelected(boolean selected) {
@@ -89,5 +92,9 @@ public class AppletInfo {
 
     public String getAuthor() {
         return author;
+    }
+
+    public enum HasKeys {
+        PRESENT, NO_KEYS, UNKNOWN
     }
 }

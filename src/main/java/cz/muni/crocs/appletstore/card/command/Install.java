@@ -10,7 +10,7 @@ import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
-import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Modified install process from GPPro
@@ -37,18 +37,32 @@ public class Install extends GPCommand<Void> {
 
     @Override
     public boolean execute() throws CardException, GPException {
-        //todo install parameters
+
+        //todo possibly third param in data null
         GPRegistry registry = context.getRegistry();
-        if (registry.allPackageAIDs().contains(file.getPackageAID())) {
+
+        byte[] installParams;
+        boolean force;
+        String[] aids;
+        if (data == null) {
+            installParams = new byte[0];
+            force = false;
+        } else {
+            installParams = HexUtils.stringToBin(data[0]);
+            force = data[1].equals("yes");
+            aids = Arrays.copyOfRange(data, 2, data.length);
+        }
+
+        if (force && registry.allPackageAIDs().contains(file.getPackageAID())) {
             context.deleteAID(file.getPackageAID(), true);
         }
 
-        byte[] installParams = (data == null) ? new byte[0] : HexUtils.stringToBin(data[0]);
+        //todo delete
         String customId = (data == null) ? null : data[1];
-        boolean force = (data != null) && data[2].equals("yes");
-
         //load onto card
-        if (force && file.getAppletAIDs().size() <= 1) {
+
+        //todo ??? why not load when more applets available??
+        if (file.getAppletAIDs().size() <= 1) {
             try {
                 AID target = null;
 //                if (args.has(OPT_TO)) todo install to specified security domain, not supported i think
@@ -56,8 +70,9 @@ public class Install extends GPCommand<Void> {
                 context.loadCapFile(file, target);
                 System.out.println("CAP loaded");
             } catch (GPException e) {
-                if (e.sw == 0x6985 || e.sw == 0x6A80) {
-                    System.err.println("Loading failed. Are you sure the CAP file (JC version, packages, sizes) is compatible with your card?");
+                if (e.sw == 0x00) {
+                    //to translate message
+                    throw new GPException(Config.translation.get(186));
                 }
                 throw e;
             }

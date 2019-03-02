@@ -41,18 +41,23 @@ public class CardInstance {
     private ArrayList<AppletInfo> applets;
 
     public enum CardState {
-        OK, LOCKED, UNAUTHORIZED, FAILED
+        OK, LOCKED, WORKING, UNAUTHORIZED, FAILED
     }
 
     private CardState state = CardState.OK;
+
+    public int errorByte;
     public String error;
+
+    public String getErrorCause() {
+        return SW.getErrorCause(errorByte, error == null ? Config.translation.get(182) : error);
+    }
 
     public CardState getState() {
         return state;
     }
 
     public ArrayList<AppletInfo> getApplets() {
-        if (applets == null) return new ArrayList<>();
         return applets;
     }
 
@@ -81,7 +86,7 @@ public class CardInstance {
      *
      * @param newDetails of the card: ATR is a must, other optional
      */
-    public void update(CardDetails newDetails, CardTerminal terminal) {
+    public void update(CardDetails newDetails, CardTerminal terminal, boolean force) {
         this.terminal = terminal;
 
         if (newDetails == null || terminal == null) {
@@ -89,11 +94,12 @@ public class CardInstance {
             this.details = null;
             this.masterKey = null;
             this.state = CardState.OK;
+            this.applets = null;
             return;
         }
 
         String newId = getId(newDetails);
-        if (this.id.equals(newId)) {
+        if (this.id.equals(newId) && !force) {
             return;
         }
         details = newDetails;
@@ -109,6 +115,7 @@ public class CardInstance {
             this.details = null;
             this.masterKey = null;
             this.state = CardState.FAILED;
+            this.applets = null;
         }
     }
 
@@ -182,11 +189,14 @@ public class CardInstance {
 
     /**
      * Executes any desired command using secure channel
+     * TODO: (CENC+CMAC) security levels check if meets
      *
      * @param command command instance to execute
      * @throws CardException unable to perform command
      */
     public void executeCommand(GPCommand command) throws CardException {
+        state = CardState.WORKING;
+
         Card card = null;
         GlobalPlatform context = null;
 
@@ -195,16 +205,13 @@ public class CardInstance {
             context = GlobalPlatform.discover(card.getBasicChannel());
         } catch (GPException e) {
             error = e.getMessage();
-            switch (e.sw) {
-                case ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED:
-                case ISO7816.SW_AUTHENTICATION_METHOD_BLOCKED:
-                case 0x6283:
-                    state = CardState.LOCKED;
-                    break;
-                default:
-                    state = CardState.FAILED;
-                    break;
-            }
+            errorByte = e.sw;
+            if (errorByte == 0x6283)
+                state = CardState.LOCKED;
+            else
+                state = CardState.FAILED;
+
+
             if (card != null) {
                 card.disconnect(true);
             }
@@ -216,9 +223,11 @@ public class CardInstance {
             command.setCardId(id);
             command.setGP(context);
             command.execute();
+            this.state = CardState.OK;
         } catch (GPException e) {
             error = e.getMessage();
-            this.state = CardState.UNAUTHORIZED;
+            errorByte = e.sw;
+            this.state = CardState.FAILED;
         } finally {
             card.disconnect(true);
         }
@@ -233,7 +242,7 @@ public class CardInstance {
             throws CardException, GPException {
 
         PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), keyType));
-        //todo SCP 01/02 not considered!!
+        //todo SCP 01/02(3DES)/03(AES) not considered!!
         if (diversification != null) key.setDiversifier(diversification);
         //todo mode - now default only
         context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());

@@ -19,7 +19,18 @@ public class Warning extends JPanel {
         FATAL, SEVERE, INFO
     }
 
-    public Warning(int translationId, Importance status, CallBack callable) {
+    public enum CallBackIcon {
+        RETRY, CLOSE, NO_ICON
+    }
+
+    public Warning(String msg, Importance status, CallBackIcon type, CallBack callable) {
+
+        MouseAdapter call = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                callable.callBack();
+            }
+        };
 
         String image;
         switch (status) {
@@ -39,32 +50,37 @@ public class Warning extends JPanel {
                 image = "info.png";
         }
 
-        ((FlowLayout)getLayout()).setAlignment(FlowLayout.CENTER);
+        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
 
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + image));
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
 
-        JLabel errorMsg = new JLabel("<html><div style=\"width:100%;\">"
-                + Config.translation.get(translationId) + "</div></html>");
+        JLabel errorMsg = new JLabel("<html><div style=\"max-width:90%;\">" + msg + "</div></html>");
         errorMsg.setFont(CustomFont.plain.deriveFont(12f));
         errorMsg.setForeground(Color.BLACK);
         add(errorMsg);
 
-        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
-        add(icon);
+        switch (type) {
+            case CLOSE:
+                JLabel iconClose = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
+                iconClose.setBorder(new EmptyBorder(0, 20, 0, 0));
+                iconClose.addMouseListener(call);
+                add(iconClose);
+                break;
+            case RETRY:
+                JLabel iconRetry = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
+                iconRetry.setBorder(new EmptyBorder(0, 20, 0, 0));
+                add(iconRetry);
 
-        JLabel retry = new JLabel(Config.translation.get(112));
-        retry.setFont(CustomFont.plain.deriveFont(12f));
-        retry.setForeground(Color.BLACK);
-        add(retry);
-
-        retry.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                callable.callBack();
-            }
-        });
-
+                JLabel retry = new JLabel(Config.translation.get(112));
+                retry.setFont(CustomFont.plain.deriveFont(12f));
+                retry.setForeground(Color.BLACK);
+                add(retry);
+                retry.addMouseListener(call);
+                break;
+            default:
+                break;
+        }
     }
 }

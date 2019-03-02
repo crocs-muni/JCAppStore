@@ -44,6 +44,7 @@ public class HintPanel extends JPanel {
         super.paint(g);
         if (hint != null && !hint.isEmpty()) {
             Graphics2D g2d = (Graphics2D)g;
+            // first call the dimen is not known, after second the dimen is computed
             if (hintDimen != null) {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setColor(Color.WHITE);
@@ -59,7 +60,8 @@ public class HintPanel extends JPanel {
         graphics.setFont(hintFont);
         int width = 0;
         int height = 0;
-        for (String line : str.split("\n")) {
+        //todo doesnt work
+        for (String line : str.split("\\\\n")) {
             if (hintDimen != null)
                 graphics.drawString(line, x, y + height);
             Rectangle2D bnds = hintFont.getStringBounds(line, fontRender);

@@ -130,7 +130,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
                 //run();
                 return;
             case NO_CONNECTION:
-                context.getWindow().showWarning(184, Warning.Importance.SEVERE, this);
+                context.getWindow().showWarning(Config.translation.get(184), Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
                 setupWindow();
                 return;
             default:
