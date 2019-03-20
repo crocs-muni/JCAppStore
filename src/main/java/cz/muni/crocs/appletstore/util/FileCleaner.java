@@ -7,7 +7,7 @@ import java.util.Objects;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Cleaner {
+public class FileCleaner {
 
     /**
      * Deletes all files inside folder

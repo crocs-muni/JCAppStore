@@ -15,5 +15,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
+    compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
     compile group: 'com.github.martinpaljak', name: 'globalplatformpro', version: '18.09.14'
+    compile group: 'com.miglayout', name: 'miglayout', version: '3.7.4'
+    compile group: 'org.ini4j', name: 'ini4j', version: '0.5.4'
+    compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '4.1.2'
 }

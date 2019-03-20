@@ -13,7 +13,7 @@ import java.awt.geom.Ellipse2D;
  */
 public class LoadingPaneCircle extends JPanel {
 
-    CircleAnimation animation = new CircleAnimation();
+    private CircleAnimation animation = new CircleAnimation();
 
     public LoadingPaneCircle() {
         setOpaque(false);

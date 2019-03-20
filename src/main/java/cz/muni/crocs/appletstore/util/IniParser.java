@@ -24,12 +24,13 @@ public class IniParser {
         this.header = header;
     }
 
-    public IniParser(String filename,  String header) throws IOException {
-        this(new File(Config.APP_DATA_DIR + Config.SEP + filename), header);
+    public IniParser(String path,  String header) throws IOException {
+        this(new File(path), header);
     }
 
     public String getValue(String key) {
-        return ini.get(header, key, String.class);
+        String value = ini.get(header, key, String.class);
+        return (value == null) ? "" : value.trim();
     }
 
     public IniParser addValue(String key, String value) {

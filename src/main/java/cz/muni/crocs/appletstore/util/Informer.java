@@ -2,12 +2,9 @@ package cz.muni.crocs.appletstore.util;
 
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.TabbedPaneSimulator;
+import cz.muni.crocs.appletstore.MainPanel;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
-
-import javax.sound.sampled.Line;
-import java.awt.*;
 
 /**
  * @author Jiří Horák
@@ -16,13 +13,13 @@ import java.awt.*;
 public class Informer {
 
     private static Informer informer = null;
-    private TabbedPaneSimulator context;
+    private MainPanel context;
 
-    private Informer(TabbedPaneSimulator context) {
+    private Informer(MainPanel context) {
         this.context = context;
     }
 
-    public static void init(TabbedPaneSimulator parent) {
+    public static void init(MainPanel parent) {
         informer = new Informer(parent);
     }
 

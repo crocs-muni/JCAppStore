@@ -37,7 +37,6 @@ public class Install extends GPCommand<Void> {
 
     @Override
     public boolean execute() throws CardException, GPException {
-
         //todo possibly third param in data null
         GPRegistry registry = context.getRegistry();
 
@@ -50,6 +49,7 @@ public class Install extends GPCommand<Void> {
         } else {
             installParams = HexUtils.stringToBin(data[0]);
             force = data[1].equals("yes");
+            //todo only one?
             aids = Arrays.copyOfRange(data, 2, data.length);
         }
 
@@ -68,6 +68,7 @@ public class Install extends GPCommand<Void> {
 //                if (args.has(OPT_TO)) todo install to specified security domain, not supported i think
 //                    target = AID.fromString(args.valueOf(OPT_TO));
                 context.loadCapFile(file, target);
+
                 System.out.println("CAP loaded");
             } catch (GPException e) {
                 if (e.sw == 0x00) {
@@ -102,8 +103,6 @@ public class Install extends GPCommand<Void> {
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
         privs.add(GPRegistryEntry.Privilege.CardReset);
 //        if (args.has(OPT_TERMINATE)) {
-        privs.add(GPRegistryEntry.Privilege.CardLock);
-        privs.add(GPRegistryEntry.Privilege.CardTerminate);
 
         // Remove existing default app
         if (force && (registry.getDefaultSelectedAID() != null && privs.has(GPRegistryEntry.Privilege.CardReset))) {

@@ -1,13 +1,14 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
-import apdu4j.ISO7816;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.card.command.List;
 import cz.muni.crocs.appletstore.util.AppletInfo;
 import cz.muni.crocs.appletstore.util.IniParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPData;
 import pro.javacard.gp.GPException;
 
@@ -27,34 +28,67 @@ import java.util.ArrayList;
  */
 public class CardInstance {
 
+    private static final Logger logger = LoggerFactory.getLogger(CardInstance.class);
+
     public static final String DEFAULT_TEST_KEY = "404142434445464748494A4B4C4D4E4F";
-    private String masterKey = DEFAULT_TEST_KEY;        //default test key with no emv and DES3 alg
-    private GPKey.Type keyType = GPKey.Type.DES3;
-    private boolean emv = false;
+
+    private String masterKey;
+    private String keyType;
+    private String divesifier;
+    private boolean auth = true;
 
     public static final String NO_CARD = "";
     private String id = NO_CARD;
+    public static final int CUSTOM_ERROR_BYTE = 0;
 
     private CardDetails details;
     private CardTerminal terminal;
-
     private ArrayList<AppletInfo> applets;
 
+    //CARD STATE
     public enum CardState {
-        OK, LOCKED, WORKING, UNAUTHORIZED, FAILED
+        OK, WORKING, FAILED
     }
-
     private CardState state = CardState.OK;
-
-    public int errorByte;
-    public String error;
-
-    public String getErrorCause() {
-        return SW.getErrorCause(errorByte, error == null ? Config.translation.get(182) : error);
-    }
-
     public CardState getState() {
         return state;
+    }
+
+    //ERROR DETECTION
+    private int errorByte;
+    private int errorTitle;
+    private String error;
+    public void setError(int errorByte, int errorTitleId, String errorBody) {
+        this.errorByte = errorByte;
+        this.errorTitle = errorTitleId;
+        this.error = errorBody;
+    }
+    public String getErrorBody() {
+        return error;
+    }
+    public int getErrorTitleId() {
+        return errorTitle;
+    }
+    public int getErrorByte() {
+        return errorByte;
+    }
+
+    /**
+     * Force to reload card by deleting card id
+     */
+    public void setRefresh() {
+        this.id = NO_CARD;
+    }
+    private void cleanWith(CardState state) {
+        this.details = null;
+        this.masterKey = null;
+        this.state = state;
+        this.applets = null;
+    }
+    private void setTestPasword404f() {
+        masterKey = DEFAULT_TEST_KEY;
+        keyType = "DES3";
+        divesifier = "";
     }
 
     public ArrayList<AppletInfo> getApplets() {
@@ -65,19 +99,47 @@ public class CardInstance {
      * Performs the only insecure channel use
      * to get data from inserted card
      */
-    public static CardDetails getCardInfo(CardTerminal terminal) throws CardException {
-        Card card = terminal.connect("*");
+    public CardDetails getCardInfo(CardTerminal terminal) {
+        try {
+            //todo use logging card terminal?
+            Card card = terminal.connect("*");
 
-        card.beginExclusive();
-        GetDetails command = new GetDetails(card.getBasicChannel());
-        command.execute();
-        card.endExclusive();
+            card.beginExclusive();
+            GetDetails command = new GetDetails(card.getBasicChannel());
+            command.execute();
+            card.endExclusive();
 
-        CardDetails details = command.getOuput();
-        details.setAtr(card.getATR());
+            CardDetails details = command.getOuput();
+            details.setAtr(card.getATR());
 
-        card.disconnect(false);
-        return details;
+            card.disconnect(false);
+            return details;
+
+        } catch (CardException e) {
+            state = CardState.FAILED;
+
+            String errormsg = e.getMessage().substring(36);
+            System.out.println("PODIVEJ SE" + errormsg);
+
+//            System.out.println(e.getCause().getMessage());
+//            System.out.println(e.getCause().toString());
+//            System.out.println(e.getCause().fillInStackTrace().toString());
+//            System.out.println(e.getCause().getLocalizedMessage());
+
+            //todo ugly, but no code management
+            switch (errormsg) {
+                case "SCardConnect got response 0x80100066":
+                    setError(CUSTOM_ERROR_BYTE, 187, Config.translation.get(188));
+                case "SCardConnect got response 0x80100068":
+                    //card ejected ignore this error
+                    cleanWith(CardState.OK);
+                    setRefresh();
+                default:
+                    setError(CUSTOM_ERROR_BYTE, 10, Config.translation.get(35) + e.getMessage());
+            }
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -90,11 +152,7 @@ public class CardInstance {
         this.terminal = terminal;
 
         if (newDetails == null || terminal == null) {
-            this.id = NO_CARD;
-            this.details = null;
-            this.masterKey = null;
-            this.state = CardState.OK;
-            this.applets = null;
+            cleanWith(state);
             return;
         }
 
@@ -108,14 +166,29 @@ public class CardInstance {
 
         try {
             if (saveDetailsAndCheckMasterKey())
-                getCardListWithMasterPassword();
+                getCardListWithSavedPassword();
             else
                 getCardListWithDefaultPassword();
+
+            updateCardAuth(true);
         } catch (IOException | CardException ex) {
-            this.details = null;
-            this.masterKey = null;
-            this.state = CardState.FAILED;
-            this.applets = null;
+            updateCardAuth(false);
+            logger.warn("Secure channel failed: ", ex);
+            cleanWith(CardState.FAILED);
+        }
+    }
+
+    private void updateCardAuth(boolean authenticated) {
+        try {
+            IniParser parser = new IniParser(Config.INI_CARD_LIST, id);
+            parser.addValue(Config.INI_KEY, masterKey)
+                    .addValue(Config.INI_KEY_TYPE, keyType)
+                    .addValue(Config.INI_DIVERSIFIER, divesifier)
+                    .addValue(Config.INI_AUTHENTICATED, authenticated ? "true" : "false")
+                    .store();
+        } catch (IOException e) {
+            e.printStackTrace();
+            //todo make some unified notification system
         }
     }
 
@@ -128,53 +201,51 @@ public class CardInstance {
     private boolean saveDetailsAndCheckMasterKey() throws IOException {
         IniParser parser = new IniParser(Config.INI_CARD_LIST, id);
         if (parser.isHeaderPresent()) {
-            masterKey = parser.getValue("MasterKey");
-            keyType = getType(parser.getValue("KeyType").toUpperCase());
-            emv = parser.getValue("EMV").toUpperCase().equals("EMV");
+            masterKey = parser.getValue(Config.INI_KEY);
+            keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
+            divesifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
+            auth = parser.getValue(Config.INI_AUTHENTICATED).toLowerCase().equals("true");
             return !(masterKey == null || masterKey.isEmpty());
         }
-        System.out.println("Saving card specific data into ini file: " + id);
-        parser.addValue("MasterKey", "") //todo update if supports custom keys
+
+        logger.info("Card " + id + " saved into card list database.");
+        parser.addValue(Config.INI_KEY, "")
                 //one of: RAW, DES, DES3, AES, RSAPUB, PSK
-                .addValue("KeyType", "")
-                // uses EMV - YES / NO
-                .addValue("EMV", "")
-                .addValue("ATR", byteArrayToUnitString(details.getAtr().getBytes()))
-                .addValue("CIN", details.getCin())
-                .addValue("IIN", details.getIin())
-                .addValue("CPLC", (details.getCplc() == null) ? null : details.getCplc().toString())
-                .addValue("CardData", details.getCardData())
-                .addValue("CardCapabilities", details.getCardCapabilities())
-                .addValue("KeyInfo", details.getKeyInfo())
+                .addValue(Config.INI_KEY_TYPE, "")
+                //one of: <no_value>, EMV, KDF3, VISA2
+                .addValue(Config.INI_DIVERSIFIER, "")
+                .addValue(Config.INI_AUTHENTICATED, "")
+                .addValue(Config.INI_ATR, byteArrayToHexSpaces(details.getAtr().getBytes()))
+                .addValue(Config.INI_CIN, details.getCin())
+                .addValue(Config.INI_IIN, details.getIin())
+                .addValue(Config.INI_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
+                .addValue(Config.INI_DATA, details.getCardData())
+                .addValue(Config.INI_CAPABILITIES, details.getCardCapabilities())
+                .addValue(Config.INI_KEY_INFO, details.getKeyInfo())
                 .store();
         return false;
     }
 
     /**
      * Open card types INI and searches by ATR for default password
-     * todo: separate list from getting default key
      * extract functionality into one connection process
      */
     private void getCardListWithDefaultPassword() throws CardException {
 
         try {
-            IniParser parser = new IniParser(Config.INI_CARD_TYPES, byteArrayToUnitString(details.getAtr().getBytes()));
+            IniParser parser = new IniParser(Config.INI_CARD_TYPES, byteArrayToHexSpaces(details.getAtr().getBytes()));
             if (parser.isHeaderPresent()) {
-                masterKey = parser.getValue("MasterKey");
-                keyType = getType(parser.getValue("KeyType").toUpperCase());
-                emv = parser.getValue("EMV").toUpperCase().equals("EMV");
+                masterKey = parser.getValue(Config.INI_KEY);
+                keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
+                divesifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
             }
             if (masterKey == null || masterKey.isEmpty()) {
-                masterKey = DEFAULT_TEST_KEY;
-                keyType = GPKey.Type.DES3;
-                emv = false;
+                setTestPasword404f();
             }
-
-            List list = new List();
-            executeCommand(list);
-            applets = list.getResult();
+            getCardListWithSavedPassword();
 
         } catch (IOException e) {
+
             //todo handle
             e.printStackTrace();
         }
@@ -183,8 +254,16 @@ public class CardInstance {
     /**
      * Open card types INI and searches by ATR for default password
      */
-    private void getCardListWithMasterPassword() {
-        //todo
+    private void getCardListWithSavedPassword() throws CardException {
+        if (! auth) {
+            cleanWith(CardState.FAILED);
+            setError(CUSTOM_ERROR_BYTE, 182, Config.translation.get(181));
+            return;
+        }
+
+        List list = new List();
+        executeCommand(list);
+        applets = list.getResult();
     }
 
     /**
@@ -203,14 +282,11 @@ public class CardInstance {
         try {
             card = terminal.connect("*");
             context = GlobalPlatform.discover(card.getBasicChannel());
+
         } catch (GPException e) {
             error = e.getMessage();
             errorByte = e.sw;
-            if (errorByte == 0x6283)
-                state = CardState.LOCKED;
-            else
-                state = CardState.FAILED;
-
+            state = CardState.FAILED;
 
             if (card != null) {
                 card.disconnect(true);
@@ -219,15 +295,19 @@ public class CardInstance {
         }
 
         try {
-            secureConnect(context, (emv) ? PlaintextKeys.Diversification.EMV : null);
+            secureConnect(context);
             command.setCardId(id);
             command.setGP(context);
             command.execute();
             this.state = CardState.OK;
         } catch (GPException e) {
+            logger.warn("Secure channel failed: ", e);
+            e.printStackTrace();
             error = e.getMessage();
             errorByte = e.sw;
-            this.state = CardState.FAILED;
+
+            cleanWith(CardState.FAILED);
+            updateCardAuth(false);
         } finally {
             card.disconnect(true);
         }
@@ -238,17 +318,40 @@ public class CardInstance {
      * If successful, loads the card contents
      * This method may brick the card if bad masterKey set
      */
-    private void secureConnect(GlobalPlatform context, PlaintextKeys.Diversification diversification)
-            throws CardException, GPException {
+    private void secureConnect(GlobalPlatform context) throws CardException, GPException {
 
-        PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), keyType));
-        //todo SCP 01/02(3DES)/03(AES) not considered!!
-        if (diversification != null) key.setDiversifier(diversification);
-        //todo mode - now default only
+        PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), getType(keyType)));
+        //todo correct?
+        key.setDiversifier(getDivesifier(divesifier));
+
+        //todo !!! ASK mode - now default only
         context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());
     }
 
-    private GPKey.Type getType(String type) {
+    /**
+     * Convert string type to actual object
+     * @param diversifier diversification name
+     * @return PlaintextKeys.Diversification diversification object
+     */
+    private static PlaintextKeys.Diversification getDivesifier(String diversifier) {
+        switch (diversifier) {
+            case "EMV":
+                return PlaintextKeys.Diversification.EMV;
+            case "KDF3":
+                return PlaintextKeys.Diversification.KDF3;
+            case "VISA2":
+                return PlaintextKeys.Diversification.VISA2;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Convert string type to actual object
+     * @param type type of key
+     * @return GPKey.Type key type
+     */
+    private static GPKey.Type getType(String type) {
         switch (type) {
             case "RAW":
                 return GPKey.Type.RAW;
@@ -270,15 +373,15 @@ public class CardInstance {
     /**
      * Convert array to single unit
      *
-     * @param array to convert
-     * @return items without delimiters in a string
+     * @param data to convert
+     * @return byte string in hex, bytes separated by space
      */
-    private String byteArrayToUnitString(byte[] array) {
+    private static String byteArrayToHexSpaces(byte[] data) {
         StringBuilder builder = new StringBuilder();
-        for (byte b : array) {
-            builder.append(b);
+        for (byte b : data) {
+            builder.append(String.format("%02X", b)).append(" ");
         }
-        return builder.toString();
+        return builder.substring(0, builder.length() - 1);
     }
 
     /**
@@ -288,9 +391,9 @@ public class CardInstance {
      * @return card id
      */
     private String getId(CardDetails details) {
-        return "ATR:" + byteArrayToUnitString(details.getAtr().getBytes()) + ":ICSN:" +
+        return "ATR=" + byteArrayToHexSpaces(details.getAtr().getBytes()) + ", ICSN=" +
                 ((details.getCplc() == null) ?
-                        "null" : byteArrayToUnitString(details.getCplc().get(GPData.CPLC.Field.ICSerialNumber)));
+                        "null" : byteArrayToHexSpaces(details.getCplc().get(GPData.CPLC.Field.ICSerialNumber)));
     }
 
     @Override

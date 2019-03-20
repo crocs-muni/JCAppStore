@@ -40,6 +40,7 @@ public class StoreItemInfo extends HintPanel {
     final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
 
     public StoreItemInfo(JsonObject dataSet, Searchable store) {
+        super(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
         setOpaque(false);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

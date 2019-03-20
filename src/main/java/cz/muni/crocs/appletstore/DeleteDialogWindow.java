@@ -29,7 +29,6 @@ public class DeleteDialogWindow extends JPanel {
     private GPRegistryEntry.Kind kind;
 
 
-
     public DeleteDialogWindow(String aid, GPRegistryEntry.Kind kind, AppletInfo.HasKeys hasKeys) {
 
         this.keys = hasKeys;
@@ -54,7 +53,6 @@ public class DeleteDialogWindow extends JPanel {
         });
         add(advanced, "wrap");
 
-
         add(forceUninstall);
         forceUninstall.setEnabled(false);
         add(new JLabel(Config.translation.get(146)), "span 4, wrap");
@@ -73,14 +71,18 @@ public class DeleteDialogWindow extends JPanel {
      */
     public String confirm() {
         if (keys == AppletInfo.HasKeys.PRESENT) {
-            return Config.translation.get(26) + Config.translation.get(30) + Config.translation.get(148);
+            return Config.translation.get(26) + Config.translation.get(31) + Config.translation.get(148);
         }
         if (keys == AppletInfo.HasKeys.UNKNOWN) {
-            return Config.translation.get(26) + Config.translation.get(31) + Config.translation.get(148);
+            return Config.translation.get(26) + Config.translation.get(30) + Config.translation.get(148);
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {
             return Config.translation.get(167); //todo allow deleting SD?
         }
         return null;
+    }
+
+    public boolean willForce() {
+        return advanced.isSelected() && forceUninstall.isSelected();
     }
 }

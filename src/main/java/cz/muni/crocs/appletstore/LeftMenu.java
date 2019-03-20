@@ -1,11 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.CustomButton;
-import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
 import cz.muni.crocs.appletstore.ui.NotifLabel;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -36,9 +34,9 @@ public class LeftMenu extends JPanel {
     private Color choosedButtonBG = new Color(255, 255, 255, 60);
 
     private boolean isLocal = true;
-    private TabbedPaneSimulator parent;
+    private MainPanel parent;
 
-    public LeftMenu(TabbedPaneSimulator parent) {
+    public LeftMenu(MainPanel parent) {
         this.parent = parent;
         setBackground(new Color(255, 255, 255, 65));
 

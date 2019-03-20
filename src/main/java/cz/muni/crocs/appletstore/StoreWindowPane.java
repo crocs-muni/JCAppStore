@@ -7,7 +7,7 @@ import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.Cleaner;
+import cz.muni.crocs.appletstore.util.FileCleaner;
 import cz.muni.crocs.appletstore.util.DownloaderWorker;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
@@ -229,7 +229,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         if (data == null) {
             putNewPane(new ErrorPane(63, "error.png", this), false);
             setStatus(UNINITIALIZED);
-            Cleaner.cleanFolder(Config.APP_STORE_DIR);
+            FileCleaner.cleanFolder(Config.APP_STORE_DIR);
             return false;
         }
 

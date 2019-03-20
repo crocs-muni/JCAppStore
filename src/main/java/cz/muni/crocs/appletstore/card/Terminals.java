@@ -24,7 +24,7 @@ public class Terminals {
     private String selectedReader = null;
     private String toSelectReader = null;
 
-    private TerminalState state = TerminalState.LOADING;
+    private volatile TerminalState state = TerminalState.LOADING;
 
     public TerminalState getState() {
         return state;

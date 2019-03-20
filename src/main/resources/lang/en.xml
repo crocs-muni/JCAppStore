@@ -11,7 +11,7 @@
     <string id="7">Restart JCPlayStore to see the difference.</string>
     <string id="8">Remove </string>
     <string id="9">Send command (APDU) to </string>
-    <string id="10">Unknown error has occurred during requested process. </string>
+    <string id="10">Unknown error has occurred.</string>
     <string id="11">For more info, search 'SW </string>
     <string id="12"> </string>
     <string id="13">Deleting</string>
@@ -21,28 +21,29 @@
     <string id="17">Applet IDs: </string>
     <string id="18">Delete </string>
     <string id="19">DELETE APPLET </string>
-    <string id="20"> </string>
+    <string id="20">Delete anyway</string>
     <string id="21">Could not connect to </string>
     <string id="22">Card is not present!</string>
     <string id="23">CAP loaded</string>
     <string id="24">Loading failed. Are you sure the CAP file (JC version, packages, sizes) is compatible with your card?</string>
     <string id="25">CAP contains more than one applet, specify the right one with --</string>
-    <string id="26">WARNING: Applet </string>
+    <string id="26">Applet </string>
     <string id="27"> already present on card</string>
     <string id="28">INSTALL</string>
     <string id="29">Install</string>
     <string id="30">may contain </string>
     <string id="31">contains </string>
     <string id="32">Version: </string>
-    <string id="33"> </string>
-    <string id="34"> </string>
-    <string id="35"> </string>
+    <string id="33">Quit </string>
+    <string id="34">Show hints </string>
+    <!-- todo remove in eng as it is in eng -->
+    <string id="35">Unable to translate: </string>
     <string id="36"> </string>
-    <string id="37">(not present on card)</string>
+    <string id="37"> </string>
     <string id="38"> </string>
-    <string id="39">Parent:  </string>
-    <string id="40">From:    </string>
-    <string id="41">Privs:   </string>
+    <string id="39"> </string>
+    <string id="40"> </string>
+    <string id="41"> </string>
     <string id="42">Reader:</string>
     <string id="43">ATR:</string>
     <string id="44">Connect</string>
@@ -59,7 +60,7 @@
     <string id="58">Warning</string>
     <string id="59">Verbose</string>
     <string id="60">Debug</string>
-    <string id="61">Warning</string>
+
     <string id="62">Loading...</string>
 
     <string id="63">Loading failed: no data found. Please, try to reopen the store.</string>
@@ -147,11 +148,12 @@
     <string id="163">Applet or package not found. For more info, search 'SW 0x6A82'.</string>
     <string id="164">Referenced data not found. For more info, search 'SW 0x6982'.</string>
     <string id="165">Unable to process requested action. The card is LOCKED. For more info, search 'SW 0x6283'.</string>
-    <string id="166">Requested action not supported (maybe locked card?). For more info, search 'SW 0x6A81'.</string>
+    <string id="166">Requested action not supported (this card life-cycle state is probably LOCKED). For more info, search 'SW 0x6A81'.</string>
     <string id="167">Unable to delete security domain.</string>
 
     <!--hints formatted in html-->
     <string id="170">Card is in initialized state.</string>
+    <string id="171">This card has been initialized. <!--todo desctibe--></string>
     <string id="172">Card is in secured state.</string>
     <string id="173"><p>This card has been secured. This means that the card has been marked as ready to work in
         hostile environment. We cannot work with such a card and the transformation process is irreversible.</p></string>
@@ -166,19 +168,27 @@
     <string id="178">Card life cycle state not detected.</string>
     <string id="179"><p>Card life cycle state can tell us whether the card is ready for installing, deleteing and other
     management, or whether the card is no longer manageable. We were unable to determine this information and
-    therefore we will not support this card to avoid any possible damage.</p></string>
+    therefore we will not support this card to avoid any possible damage. Re-plugging the card could help, as fetching card info might (rarely) fail.</p></string>
     <string id="180">Card authentication failed.</string>
     <string id="181"><p>We were unable to guess the key (password) for this card. It means the card can have either
     custom key set, or the default card master key set by the card issuer is unique (there is no rule for
     default test keys). Unfortunately, we do not support custom key feature yet. If interested, raise
-    github enhancement. WARNING: do not try again with the same key, or the card will potentially get blocked.</p></string>
-    <string id="182">Action failed.</string>
+    github enhancement. Optionally, edit cards.ini file and set correct card key and auth = true.
+        <br /> WARNING: do not try again with the same key, or the card will potentially get blocked.</p></string>
+    <string id="182">Communication with card failed.</string>
     <string id="183">The following error has occured: </string>
 
     <string id="184"><p>Internet connection failed. The store displayed is the last saved store version. The store
         data might not be accurate.</p></string>
     <string id="185"><p>Unable to find requested file for install. Try to re-download the store or choose different version or sdk.</p></string>
     <string id="186">Package already present on this card. It can be re-installed using advanced 'force install' option.</string>
+    <string id="187">Card is not responding</string>
+    <string id="188">Communication with card failed. Either the card is not responding or hardware failure occurred. You can try to re-plug the card.</string>
+    <string id="189"></string>
+    <string id="190"></string>
+    <string id="191"></string>
+    <string id="192"></string>
+    <string id="193"></string>
 
     <!--keywords-->
     <string id="200">install,applet</string>

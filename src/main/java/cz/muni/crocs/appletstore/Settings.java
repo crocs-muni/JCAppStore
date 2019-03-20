@@ -29,12 +29,13 @@ public class Settings extends JPanel {
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
 
-
     private final Tuple[] langs = new Tuple[]{
             new Tuple<>("en", "English"),
             new Tuple<>("cz", "Česky")
     };
     private JComboBox<Tuple<String, String>> languageBox;
+
+    private JCheckBox hintEnabled = new JCheckBox();
 
     private AppletStore context;
 
@@ -48,6 +49,7 @@ public class Settings extends JPanel {
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         addBackground();
         addLanguage();
+        addHint();
     }
 
     private void addBackground() {
@@ -114,6 +116,12 @@ public class Settings extends JPanel {
         add(languageBox, "align right, span 2, w 180, wrap");
     }
 
+    private void addHint() {
+        addTitleLabel(Config.translation.get(34), "");
+        hintEnabled.setSelected(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
+        add(hintEnabled, "align left, span 2, w 180, wrap");
+    }
+
     private void addTitleLabel(String titleText, String constraints) {
         JLabel title = new JLabel(titleText);
         title.setFont(CustomFont.plain);
@@ -155,9 +163,14 @@ public class Settings extends JPanel {
         //Config.translation = new Translation(Config.options.get(Config.OPT_KEY_LANGUAGE));
     }
 
+    private void saveHint() {
+        Config.options.put(Config.OPT_KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
+    }
+
     public void apply() {
         saveBackgroundImage();
         saveLanguage();
+        saveHint();
     }
 
     /**

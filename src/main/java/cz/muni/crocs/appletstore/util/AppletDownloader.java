@@ -3,22 +3,16 @@ package cz.muni.crocs.appletstore.util;
 import cz.muni.crocs.appletstore.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.util.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
@@ -43,7 +37,7 @@ public class AppletDownloader {
 
     public boolean run() {
         parent.setLoaderMessage(65);
-        Cleaner.cleanFolder(Config.APP_STORE_DIR);
+        FileCleaner.cleanFolder(Config.APP_STORE_DIR);
         if (!downloadZip(address)) {
             System.out.println("failed to download");
             parent.setLoaderMessage(110);

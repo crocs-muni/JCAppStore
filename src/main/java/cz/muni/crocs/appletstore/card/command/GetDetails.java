@@ -2,8 +2,8 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.CardDetails;
 import cz.muni.crocs.appletstore.iface.CardCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
@@ -16,7 +16,7 @@ import static pro.javacard.gp.GPData.getData;
  * @author Jiří Horák
  */
 public class GetDetails implements CardCommand {
-    private static final Logger logger = LoggerFactory.getLogger(GetDetails.class);
+    private static final Logger logger = LogManager.getLogger(GetDetails.class);
 
     private CardChannel channel;
     private CardDetails details;

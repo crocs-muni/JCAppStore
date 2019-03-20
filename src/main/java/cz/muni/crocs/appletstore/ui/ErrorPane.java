@@ -27,8 +27,7 @@ public class ErrorPane extends JPanel {
         error.setAlignmentX(Component.CENTER_ALIGNMENT);
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
-        JLabel errorMsg = new JLabel("<html><div style=\"width:100%;\">"
-                + Config.translation.get(translationId) + "</div></html>");
+        JLabel errorMsg = new JLabel(Config.translation.get(translationId));
         errorMsg.setFont(CustomFont.plain.deriveFont(20f));
         errorMsg.setForeground(Color.WHITE);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -60,28 +59,18 @@ public class ErrorPane extends JPanel {
         add(panel);
     }
 
-    public ErrorPane (int translationId, String imgName, JPanel hint, Component parent) {
+    public ErrorPane (int translationId, int hintId, String imgName) {
+        this(translationId, Config.translation.get(hintId), imgName);
+    }
+
+    public ErrorPane (int translationId, String message, String imgName) {
         this(translationId, imgName);
 
-        JPanel panel = new JPanel();
-        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
-        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
-        panel.add(icon);
-
-        JLabel retry = new JLabel(Config.translation.get(126));
-        retry.setFont(CustomFont.plain.deriveFont(16f));
-        retry.setForeground(Color.WHITE);
-        panel.add(retry);
-
-        panel.setOpaque(false);
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(parent, hint, Config.translation.get(translationId), JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        add(panel);
+        JLabel hint = new JLabel("<html><p width=\"400\" align=\"center\">" + message + "</p></html>");
+        hint.setBorder(new EmptyBorder(20, 20, 20, 20));
+        hint.setFont(CustomFont.plain.deriveFont(16f));
+        hint.setAlignmentX(Component.CENTER_ALIGNMENT);
+        hint.setForeground(Color.WHITE);
+        add(hint);
     }
 }

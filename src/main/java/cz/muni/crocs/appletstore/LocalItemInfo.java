@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.util.AppletInfo;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
 
+import javax.smartcardio.CardException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -29,7 +30,12 @@ public class LocalItemInfo extends HintPanel {
     private JLabel uninstall;
     private JLabel rawApdu;
 
-    public LocalItemInfo() {
+    private LocalWindowPane parent;
+
+    public LocalItemInfo(LocalWindowPane parent) {
+        super(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
+        this.parent = parent;
+
         setOpaque(false);
         setLayout(new MigLayout());
 
@@ -86,20 +92,10 @@ public class LocalItemInfo extends HintPanel {
         uninstall.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!uninstall.isEnabled())
-                    return;
+                if (!uninstall.isEnabled()) return;
 
                 DeleteDialogWindow opts = new DeleteDialogWindow(nfo.getAid().toString(), nfo.getKind(), nfo.hasKeys());
-
-                int result = JOptionPane.showOptionDialog(Config.getWindow(),
-                        opts,
-                        Config.translation.get(19),
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        new ImageIcon(Config.IMAGE_DIR + "error.png"),
-                        new String[]{Config.translation.get(18), Config.translation.get(116)}, "error");
-
-                switch (result) {
+                switch (showDialog(Config.translation.get(19), opts, "delete.png", 18, 116)) {
                     case JOptionPane.NO_OPTION:
                     case JOptionPane.CLOSED_OPTION:
                         return;
@@ -107,11 +103,35 @@ public class LocalItemInfo extends HintPanel {
                 }
 
                 String msg = opts.confirm();
-                //todo show warning if not null
-                //CardManager.getInstance().uninstall();
+                if (msg != null) {
+                    switch (showDialog(Config.translation.get(58), msg, "error.png", 20, 116)) {
+                        case JOptionPane.NO_OPTION:
+                        case JOptionPane.CLOSED_OPTION:
+                            return;
+                        case JOptionPane.YES_OPTION: //continue
+                    }
+                }
+                try {
+                    CardManager.getInstance().uninstall(nfo, opts.willForce());
+                    parent.setupWindow();
+                } catch (CardException e1) {
+                    e1.printStackTrace();
+                    //todo log and notify
+                }
+
             }
         });
         add(uninstall, "wrap");
+    }
+
+    private int showDialog(String title, Object msg, String imgname, int confirmBtn, int cancelBtn) {
+        return JOptionPane.showOptionDialog(Config.getWindow(),
+                msg,
+                title,
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + imgname),
+                new String[]{Config.translation.get(confirmBtn), Config.translation.get(cancelBtn)}, "error");
     }
 
     public void set(AppletInfo info) {
@@ -124,7 +144,7 @@ public class LocalItemInfo extends HintPanel {
                 getType(info.getKind()) + "</p></html>", Config.translation.get(213));
         domain.setText("<html><p width=\"280\">Domain assigned: " +
                 ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()), Config.translation.get(214));
-        uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile);
+        uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
     }
 

@@ -1,9 +1,10 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
+import cz.muni.crocs.appletstore.ui.AbsoluteHorizontalWindowFillLayout;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.UserLogger;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.Informer;
 
@@ -14,12 +15,28 @@ import java.awt.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class TabbedPaneSimulator extends BackgroundImgPanel implements CallBack {
+public class MainPanel extends BackgroundImgPanel implements CallBack {
 
+    /**
+     * Layout hierarchy:
+     * Main Panel [overlayout]
+     *    userLogger
+     *    main [borderlayout]
+     *        leftMenu
+     *        content [overlayout]
+     *            storePanel
+     *            localPanel
+     */
     private AppletStore context;
     private LeftMenu leftMenu;
+    private JPanel loggerContainer;
+    private UserLogger userLogger;
+    private JPanel main;
 
-    //to switch panes
+
+    /*
+    Content panel holds both local and store panels as over layout, switches the visibility
+     */
     private JPanel content;
     LocalWindowPane localPanel;
     StoreWindowPane storePanel;
@@ -27,31 +44,48 @@ public class TabbedPaneSimulator extends BackgroundImgPanel implements CallBack 
 
     private Warning warning;
 
-    public TabbedPaneSimulator(AppletStore context) {
+    public MainPanel(AppletStore context) {
         this.context = context;
-        setLayout(new BorderLayout());
-        createPanes();
+
+        createHierarchy();
         Informer.init(this);
     }
 
-    private void createPanes() {
+    private void createHierarchy() {
+        AbsoluteHorizontalWindowFillLayout absLayout =
+                new AbsoluteHorizontalWindowFillLayout(this, context);
+        //setLayout(absLayout);
+        setLayout(new OverlayLayout(this));
 
-        leftMenu = new LeftMenu(this);
         localPanel = new LocalWindowPane(context);
-        //init local panel as it is intended to be visible
-        localPanel.updatePanes(Terminals.TerminalState.LOADING);
         storePanel = new StoreWindowPane(context);
-        //by default store hidden
-        setLocalPanelVisible();
+
         content = new JPanel();
-        content.setBackground(Color.WHITE); //white background
         content.setLayout(new OverlayLayout(content));
         content.setOpaque(false);
         content.add(localPanel);
         content.add(storePanel);
+        leftMenu = new LeftMenu(this);
 
-        add(leftMenu, BorderLayout.WEST);
-        add(content, BorderLayout.CENTER);
+        main = new JPanel(new BorderLayout());
+        main.setOpaque(false);
+        main.add(leftMenu, BorderLayout.WEST);
+        main.add(content, BorderLayout.CENTER);
+
+        //by default store hidden
+        setLocalPanelVisible();
+
+        userLogger = new UserLogger(context, absLayout, 1, new Point(0, AppletStore.PREFFERED_HEIGHT - 92));
+        userLogger.setOpaque(false);
+
+        JPanel p = new JPanel();
+        p.setOpaque(false);
+        //splitPane.setOneTouchExpandable(true);
+
+        add(main);
+        absLayout.addAbsolutePositioned(1, 0, 0);
+//        add(userLogger);
+//        absLayout.addAbsolutePositioned(0, 0, AppletStore.PREFFERED_HEIGHT - 92);
     }
 
     public boolean isLocalPaneDiplayed() {

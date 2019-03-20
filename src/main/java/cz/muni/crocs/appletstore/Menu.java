@@ -13,8 +13,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.util.Enumeration;
-import java.util.Set;
 
 /**
  * @author Jiří Horák
@@ -127,6 +125,13 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
                 }
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+
+        menu.add(menuItemNoShortcut(new AbstractAction(Config.translation.get(33)) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        }, Config.IMAGE_DIR + "close_black.png"));
 
 //        settings.setFont(CustomFont.plain);
 //        settings.setForeground(Color.WHITE);

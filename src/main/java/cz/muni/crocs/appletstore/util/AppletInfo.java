@@ -22,7 +22,7 @@ public class AppletInfo {
     private String image; //todo check image and put default if not found
     private String version;
     private String author;
-    private HasKeys hasKeys;
+    private HasKeys hasKeys = HasKeys.UNKNOWN;
 
     private boolean selected = false;
 

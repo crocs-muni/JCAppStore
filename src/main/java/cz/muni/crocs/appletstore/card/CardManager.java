@@ -1,14 +1,15 @@
 package cz.muni.crocs.appletstore.card;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.LocalWindowPane;
+import cz.muni.crocs.appletstore.card.command.Delete;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.Install;
 import cz.muni.crocs.appletstore.util.AppletInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
-
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
@@ -16,12 +17,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Set;
-
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class CardManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(CardManager.class);
 
     private CardManager() {}
     private static CardManager instance;
@@ -37,7 +39,7 @@ public class CardManager {
 
     private Terminals terminals = new Terminals();
     //our card representation
-    private CardInstance card = new CardInstance();
+    private /*volatile*/ CardInstance card = new CardInstance();
 
     private AID selectedAID = null;
 
@@ -85,43 +87,49 @@ public class CardManager {
         return card;
     }
 
+    public String getErrorCauseTitle() {
+        return Config.translation.get(card.getErrorTitleId());
+    }
+
+    public String getErrorCause() {
+        return SW.getErrorCause(card.getErrorByte(),
+                card.getErrorBody() == null ? Config.translation.get(182) : card.getErrorBody());
+    }
+
+    public int needsCardRefresh() {
+        if (card.getState() == CardInstance.CardState.WORKING)
+            return 0;
+        return terminals.checkTerminals();
+    }
     /**
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessarry steps to be ready to work with
      * @return @link Terminals::checkTerminals()
      */
-    public int refresh(LocalWindowPane parent) {
-        int result = terminals.checkTerminals();
-        if (result != 2) return result;
+    public void refreshCard() {
+        if (card.getState() == CardInstance.CardState.WORKING)
+            return;
 
-        if (parent != null) {
-            parent.updatePanes(Terminals.TerminalState.LOADING);
-        }
         if (terminals.getState() == Terminals.TerminalState.OK) {
-            try {
-                card.update(CardInstance.getCardInfo(terminals.getTerminal()), terminals.getTerminal(), false);
-            } catch (CardException e) {
-                card.error = e.getMessage();
-                e.printStackTrace();
-                //todo 80100068 error - card ejected ignore this error
-            }
+            card.update(card.getCardInfo(terminals.getTerminal()), terminals.getTerminal(), false);
         } else {
             card.update(null, null, false);
         }
         //todo update
-        return 2;
     }
 
     public Integer getCardLifeCycle() {
-        for (AppletInfo info : card.getApplets()) {
+        java.util.List<AppletInfo> infoList = card.getApplets();
+        if (infoList == null)
+            return 0;
+
+        for (AppletInfo info : infoList) {
             if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
                 return info.getLifecycle();
             }
         }
         return null;
     }
-
-
 
     public void install(File file, String[] data) throws CardException, IOException {
         if (!file.exists())
@@ -136,27 +144,49 @@ public class CardManager {
     }
 
     public void install(final CAPFile file, String[] data) throws CardException {
+
+        if (card.getState() == CardInstance.CardState.WORKING) return;
+        file.dump(System.out);
         //todo dump into log:   instcap.dump( ... logger or other stream ... )
 
-        GPCommand<Void> install = new Install(file, data);
-        card.executeCommand(install);
 
-        //todo save applet data into ini
 
+        //new Thread(() -> {
+            GPCommand<Void> install = new Install(file, data);
+            card.executeCommand(install);
+
+            card.setRefresh();
+            if (card.getState() == CardInstance.CardState.OK)
+                terminals.setState(Terminals.TerminalState.NO_CARD);
+
+            //todo save applet data into ini
+
+            // todo search for failures during install and notify user
+
+            // todo INMPORTANT note whether applet stores keys - uninstalling will destroy them
+
+
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        //}).start();
+
+    }
+
+    public void uninstall(AppletInfo nfo, boolean force) throws CardException {
+        if (card.getState() == CardInstance.CardState.WORKING) return;
+
+        GPCommand<Void> delete = new Delete(nfo, force);
+        card.executeCommand(delete);
+        //todo remove applet data into ini
         // todo search for failures during install and notify user
-
-        // todo INMPORTANT note whether applet stores keys - uninstalling will destroy them
+        card.setRefresh();
         if (card.getState() == CardInstance.CardState.OK)
-            terminals.setState(Terminals.TerminalState.NO_CARD); //card has been modyfied - reload
+            terminals.setState(Terminals.TerminalState.NO_CARD);
     }
 
-    public void uninstall(File file) {
-
-    }
-
-    public void uninstall(String AID) {
-
-    }
 
     public void sendApdu(String AID) {
 

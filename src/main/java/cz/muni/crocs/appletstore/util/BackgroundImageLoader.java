@@ -5,10 +5,13 @@ import cz.muni.crocs.appletstore.Config;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 
 /**
@@ -20,16 +23,20 @@ public class BackgroundImageLoader {
     private BufferedImage background = null;
     private String imgName = "bg.jpg";
 
-    private final int radius = 5;
-    private final int size = radius * 2 + 1;
+    private int radius;
+    private int size;
 
     public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
+        System.out.println(blurAmount);
+        radius = (blurAmount == 0) ? 0 : 2 + blurAmount * 2;
+        size = radius * 2 + 1;
+
         load(imgName);
         MediaTracker mediaTracker = new MediaTracker(panel);
         mediaTracker.addImage(background, 0);
         try {
             mediaTracker.waitForAll();
-            if (blurAmount > 0) applyFilter(blurAmount);
+            if (blurAmount > 0) applyFilter();
             save();
         } catch (InterruptedException e) {
             //todo error log
@@ -82,21 +89,28 @@ public class BackgroundImageLoader {
                 ++index;
             }
         }
-        //NORMALIZE and subtract 0.003 to darken the image
+        //NORMALIZE
         for (int i = 0; i < size; ++i){
             for (int j = 0; j < size; ++j) {
-                data[i * size + j] = (float)(data[i * size + j] / sum - 0.003);
+                data[i * size + j] = (float)(data[i * size + j] / sum);
+                System.out.print(data[i * size + j] + ", ");
             }
+            System.out.println();
         }
         return data;
     }
 
-    private void applyFilter(int blurAmount) {
-        Kernel kernel = new Kernel(size, size, gaussianMatrix());
-        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-        for (; blurAmount > 0; --blurAmount) {
-            background = op.filter(background, null);
+    private void applyFilter() {
+        BufferedImageOp filter;
+        //darken todo doesnt work?
+        background = new RescaleOp(.5f, 0f, null).filter(background, null);
+
+        if (radius == 0) {
+            return;
         }
+        filter = new ConvolveOp(new Kernel(size, size, gaussianMatrix()), ConvolveOp.EDGE_NO_OP, null);
+        background = filter.filter(background, null);
+
         int width = background.getWidth() - size * 2;
         int height = background.getHeight() - size * 2;
 
