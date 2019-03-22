@@ -1,10 +1,9 @@
 package cz.muni.crocs.appletstore.card;
 
-import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.Delete;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.Install;
-import cz.muni.crocs.appletstore.util.AppletInfo;
+import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -24,14 +23,6 @@ import java.util.Set;
 public class CardManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardManager.class);
-
-    private CardManager() {}
-    private static CardManager instance;
-
-    public static CardManager getInstance() {
-        if (instance == null) instance = new CardManager();
-        return instance;
-    }
 
     public CardInstance.CardState getCardState() {
         return card.getState();
@@ -88,12 +79,12 @@ public class CardManager {
     }
 
     public String getErrorCauseTitle() {
-        return Config.translation.get(card.getErrorTitleId());
+        return card.getErrorTitle();
     }
 
     public String getErrorCause() {
         return SW.getErrorCause(card.getErrorByte(),
-                card.getErrorBody() == null ? Config.translation.get(182) : card.getErrorBody());
+                card.getErrorBody() == null ? Sources.language.get("E_communication") : card.getErrorBody());
     }
 
     public int needsCardRefresh() {
@@ -134,7 +125,7 @@ public class CardManager {
     public void install(File file, String[] data) throws CardException, IOException {
         if (!file.exists())
             throw new CardException(
-                    Config.translation.get(150) + file.getAbsolutePath() + Config.translation.get(151));
+                    Sources.language.get("E_install_no_file_1") + file.getAbsolutePath() + Sources.language.get("E_install_no_file_2"));
 
         CAPFile capFile;
         try (FileInputStream fin = new FileInputStream(file)) {

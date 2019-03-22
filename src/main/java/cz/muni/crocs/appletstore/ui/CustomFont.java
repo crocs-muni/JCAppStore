@@ -14,19 +14,18 @@ public class CustomFont {
     private CustomFont() {}
 
     //public static Font bold;
-    public static Font plain;
+    public static Font plain = refresh();
 
-    public static void refresh() {
+    public static Font refresh() {
+        Font f;
         try {
-            //TODO custom font or let the Courier?
-            //bold = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/fonts/x.ttf"));
-            plain = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/fonts/x.ttf"));
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            //ge.registerFont(bold);
-            ge.registerFont(plain);
+            f = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/fonts/x.ttf"));
         } catch (IOException | FontFormatException e) {
-            plain = new Font("Courier", Font.PLAIN, 14);
+            f = new Font("Courier", Font.PLAIN, 14);
         }
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(f);
+        return f;
     }
 
     /**

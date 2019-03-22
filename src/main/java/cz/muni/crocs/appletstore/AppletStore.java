@@ -5,6 +5,7 @@ import cz.muni.crocs.appletstore.card.Terminals;
 
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
+import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,20 +46,16 @@ public class AppletStore extends JFrame {
     private MainPanel window;
     private Menu menu;
 
-    private AppletStore(StyleSheet style) {
-        setup(style);
-        setUI();
+    public AppletStore() {
+        logger.info("------- App started");
+
+        setup();
         initComponents();
 
         //save options on close
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                try {
-                    Config.saveOptions();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                    //TODO handle
-                }
+                new OptionsManager(Sources.options).save();
             }
         });
     }
@@ -78,23 +75,9 @@ public class AppletStore extends JFrame {
         return window;
     }
 
-    private void setup(StyleSheet style) {
+    private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
-        kit.setStyleSheet(style);
-
-        CustomFont.refresh(); //load font
-        try {
-            Config.getFileOptions();
-        } catch (IOException e) {
-            Config.options.put(Config.OPT_KEY_LANGUAGE, "en");
-            Config.options.put(Config.OPT_KEY_BACKGROUND, "bg.jpeg");
-            Config.options.put(Config.OPT_KEY_GITHUB_LATEST_VERSION, "none");
-            Config.options.put(Config.OPT_KEY_HINT, "true");
-            logger.warn("Getting options failed: " + e);
-        }
-    }
-
-    private void setUI() {
+        kit.setStyleSheet(Sources.sheet);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -108,6 +91,7 @@ public class AppletStore extends JFrame {
         UIManager.put("Menu.selectionForeground", Color.BLACK);
         UIManager.put("MenuBar.borderColor", Color.BLACK);
     }
+
 
     private void initComponents() {
         try {
@@ -135,7 +119,7 @@ public class AppletStore extends JFrame {
     //search for present terminals and card
     //called from the tabbedpanesimulator, it needs the panes already loaded
     private void checkTerminalsRoutine() {
-        CardManager manager = CardManager.getInstance();
+        CardManager manager = Sources.manager;
 
         //todo will close on app exit?
         new Thread(() -> {
@@ -167,36 +151,5 @@ public class AppletStore extends JFrame {
                 }
             }
         }).start();
-    }
-
-    public static void main(String[] args) {
-
-        logger.info("------- App started");
-
-        //todo move into some source - init - class loader
-        final StyleSheet sheet = new StyleSheet();
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream("src/main/resources/css/default.css")));
-            sheet.loadRules(br, null);
-            br.close();
-        } catch (IOException e) {
-
-            new FeedbackFatalError("Oops, something went wrong", "Failed to read style data: ", e.getMessage(), true,
-                    JOptionPane.QUESTION_MESSAGE, null);
-        }
-
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new AppletStore(sheet);
-            } catch (Exception e) {
-                //todo force logger to dump data into file before its send (maybe its happening just to make sure)
-                new FeedbackFatalError("Fatal Error", e.getMessage(), e.getMessage(), true,
-                        JOptionPane.QUESTION_MESSAGE, null);
-                logger.error("Fatal Error: ", e);
-                e.printStackTrace();
-            }
-
-        });
     }
 }

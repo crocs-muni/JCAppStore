@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.card.command;
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
@@ -26,7 +27,7 @@ public class Install extends GPCommand<Void> {
 
     public Install(CAPFile f, String[] data) {
         if (data != null && data.length != 3)
-            throw new IllegalArgumentException(Config.translation.get(153));
+            throw new IllegalArgumentException(Sources.language.get("E_install_invalid_data"));
         this.file = f;
         this.data = data;
     }
@@ -73,7 +74,7 @@ public class Install extends GPCommand<Void> {
             } catch (GPException e) {
                 if (e.sw == 0x00) {
                     //to translate message
-                    throw new GPException(Config.translation.get(186));
+                    throw new GPException(Sources.language.get("E_pkg_present"));
                 }
                 throw e;
             }

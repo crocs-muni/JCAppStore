@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
+import cz.muni.crocs.appletstore.util.Sources;
 
 import javax.swing.*;
 import java.awt.*;
@@ -109,15 +110,15 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     //TODO menu into func and return menu
     private void buildMenu() {
 
-        CustomJmenu menu = new CustomJmenu(Config.translation.get(93), "", KeyEvent.VK_A);
+        CustomJmenu menu = new CustomJmenu(Sources.language.get("file"), "", KeyEvent.VK_A);
         add(menu);
 
-        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(Config.translation.get(114)) {
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(Sources.language.get("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Settings settings = new Settings(context);
-                Object[] options = { Config.translation.get(115), Config.translation.get(116) };
-                int result = JOptionPane.showOptionDialog(null, settings, Config.translation.get(114),
+                Object[] options = { Sources.language.get("ok"), Sources.language.get("cancel") };
+                int result = JOptionPane.showOptionDialog(null, settings, Sources.language.get("settings"),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                         null, options, null);
                 if (result == JOptionPane.YES_OPTION){
@@ -126,7 +127,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
-        menu.add(menuItemNoShortcut(new AbstractAction(Config.translation.get(33)) {
+        menu.add(menuItemNoShortcut(new AbstractAction(Sources.language.get("quit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -174,7 +175,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         add(new CustomJmenu("Another Menu", "This menu does nothing", KeyEvent.VK_N));
 
         //BUILD READERS MENU
-        readers = new CustomJmenu(Config.translation.get(90), "", KeyEvent.VK_R);
+        readers = new CustomJmenu(Sources.language.get("readers"), "", KeyEvent.VK_R);
         add(readers);
 
 
@@ -209,12 +210,12 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     public void resetTerminalButtonGroup() {
-        CardManager manager = CardManager.getInstance();
+        CardManager manager = Sources.manager;
         readers.removeAll();
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
             for (String name : manager.getTerminals()) {
-                JRadioButtonMenuItem item = selectableMenuItem(name, Config.translation.get(56));
+                JRadioButtonMenuItem item = selectableMenuItem(name, Sources.language.get("reader_avail"));
                 if (name.equals(manager.getSelectedTerminalName())) {
                     item.setSelected(true);
                 }
@@ -225,7 +226,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             readers.repaint();
 
         } else {
-            JMenuItem item = menuItemDisabled(Config.translation.get(2), "");
+            JMenuItem item = menuItemDisabled(Sources.language.get("no_reader"), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
             readers.add(item);
@@ -233,7 +234,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     private ActionListener selectReaderListener() {
-        return e -> CardManager.getInstance().setSelectedTerminal(e.getActionCommand());
+        return e -> Sources.manager.setSelectedTerminal(e.getActionCommand());
     }
 
     @Override

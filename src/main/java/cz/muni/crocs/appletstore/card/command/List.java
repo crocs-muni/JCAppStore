@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import cz.muni.crocs.appletstore.iface.CardCommand;
-import cz.muni.crocs.appletstore.util.AppletInfo;
+import cz.muni.crocs.appletstore.card.AppletInfo;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;

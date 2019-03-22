@@ -36,20 +36,20 @@ public class AppletDownloader {
     }
 
     public boolean run() {
-        parent.setLoaderMessage(65);
+        parent.setLoaderMessage("downloading");
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
         if (!downloadZip(address)) {
             System.out.println("failed to download");
-            parent.setLoaderMessage(110);
+            parent.setLoaderMessage(Sources.language.get("failed"));
             return false;
         }
         if (downloaded != size || !unZipIt()) {
             System.out.println("failed to unzip");
 
-            parent.setLoaderMessage(110);
+            parent.setLoaderMessage(Sources.language.get("failed"));
             return false;
         }
-        parent.setLoaderMessage(111);
+        parent.setLoaderMessage(Sources.language.get("done"));
         zipFile.delete();
         return true;
     }
@@ -98,7 +98,7 @@ public class AppletDownloader {
     Corrected errors, the srouce code on the website is wrong, at least for windows.
      */
     private boolean unZipIt() {
-        parent.setLoaderMessage(69);
+        parent.setLoaderMessage(Sources.language.get("unzip"));
         ZipInputStream input;
         ZipEntry entry;
         try {

@@ -5,8 +5,8 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.card.command.List;
-import cz.muni.crocs.appletstore.util.AppletInfo;
 import cz.muni.crocs.appletstore.util.IniParser;
+import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPData;
@@ -56,17 +56,17 @@ public class CardInstance {
 
     //ERROR DETECTION
     private int errorByte;
-    private int errorTitle;
+    private String errorTitle;
     private String error;
-    public void setError(int errorByte, int errorTitleId, String errorBody) {
+    public void setError(int errorByte, String errorTitle, String errorBody) {
         this.errorByte = errorByte;
-        this.errorTitle = errorTitleId;
+        this.errorTitle = errorTitle;
         this.error = errorBody;
     }
     public String getErrorBody() {
         return error;
     }
-    public int getErrorTitleId() {
+    public String getErrorTitle() {
         return errorTitle;
     }
     public int getErrorByte() {
@@ -129,13 +129,13 @@ public class CardInstance {
             //todo ugly, but no code management
             switch (errormsg) {
                 case "SCardConnect got response 0x80100066":
-                    setError(CUSTOM_ERROR_BYTE, 187, Config.translation.get(188));
+                    setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_no_reponse"), Sources.language.get("E_card_no_response"));
                 case "SCardConnect got response 0x80100068":
                     //card ejected ignore this error
                     cleanWith(CardState.OK);
                     setRefresh();
                 default:
-                    setError(CUSTOM_ERROR_BYTE, 10, Config.translation.get(35) + e.getMessage());
+                    setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_unkown"), Sources.language.get("W_no_translation") + e.getMessage());
             }
             e.printStackTrace();
         }
@@ -156,7 +156,7 @@ public class CardInstance {
             return;
         }
 
-        String newId = getId(newDetails);
+        String newId = CardDetails.getId(newDetails);
         if (this.id.equals(newId) && !force) {
             return;
         }
@@ -215,7 +215,7 @@ public class CardInstance {
                 //one of: <no_value>, EMV, KDF3, VISA2
                 .addValue(Config.INI_DIVERSIFIER, "")
                 .addValue(Config.INI_AUTHENTICATED, "")
-                .addValue(Config.INI_ATR, byteArrayToHexSpaces(details.getAtr().getBytes()))
+                .addValue(Config.INI_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
                 .addValue(Config.INI_CIN, details.getCin())
                 .addValue(Config.INI_IIN, details.getIin())
                 .addValue(Config.INI_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
@@ -233,11 +233,14 @@ public class CardInstance {
     private void getCardListWithDefaultPassword() throws CardException {
 
         try {
-            IniParser parser = new IniParser(Config.INI_CARD_TYPES, byteArrayToHexSpaces(details.getAtr().getBytes()));
+            IniParser parser = new IniParser(Config.INI_CARD_TYPES,
+                    CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
             if (parser.isHeaderPresent()) {
                 masterKey = parser.getValue(Config.INI_KEY);
                 keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
                 divesifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
+            } else {
+                throw new CardException("Could not auto-detect the card master key.");
             }
             if (masterKey == null || masterKey.isEmpty()) {
                 setTestPasword404f();
@@ -257,7 +260,7 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws CardException {
         if (! auth) {
             cleanWith(CardState.FAILED);
-            setError(CUSTOM_ERROR_BYTE, 182, Config.translation.get(181));
+            setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_communication"), Sources.language.get("H_authentication"));
             return;
         }
 
@@ -370,31 +373,7 @@ public class CardInstance {
         }
     }
 
-    /**
-     * Convert array to single unit
-     *
-     * @param data to convert
-     * @return byte string in hex, bytes separated by space
-     */
-    private static String byteArrayToHexSpaces(byte[] data) {
-        StringBuilder builder = new StringBuilder();
-        for (byte b : data) {
-            builder.append(String.format("%02X", b)).append(" ");
-        }
-        return builder.substring(0, builder.length() - 1);
-    }
 
-    /**
-     * Computes the card ID
-     *
-     * @param details details to get data for id
-     * @return card id
-     */
-    private String getId(CardDetails details) {
-        return "ATR=" + byteArrayToHexSpaces(details.getAtr().getBytes()) + ", ICSN=" +
-                ((details.getCplc() == null) ?
-                        "null" : byteArrayToHexSpaces(details.getCplc().get(GPData.CPLC.Field.ICSerialNumber)));
-    }
 
     @Override
     public int hashCode() {

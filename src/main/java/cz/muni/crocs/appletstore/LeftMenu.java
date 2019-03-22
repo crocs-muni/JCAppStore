@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.ui.CustomButton;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
 import cz.muni.crocs.appletstore.ui.NotifLabel;
+import cz.muni.crocs.appletstore.util.Sources;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -65,7 +66,7 @@ public class LeftMenu extends JPanel {
         searchPane.setMaximumSize( new Dimension(Integer.MAX_VALUE, 60));
         searchPane.setOpaque(false); //transparent ?? or color
         //set search intpu text
-        searchInput = new InputHintTextField(Config.translation.get(72));
+        searchInput = new InputHintTextField(Sources.language.get("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
         searchInput.setFont(CustomFont.plain);
         searchInput.setPreferredSize(new Dimension(160, 30));
@@ -79,12 +80,12 @@ public class LeftMenu extends JPanel {
         container.add(searchPane);
 
         //init button for local storage
-        setButton(local, Config.translation.get(70), true); //TODO more terminals or cards?
+        setButton(local, Sources.language.get("my_card"), true); //TODO more terminals or cards?
         local.setBackground(choosedButtonBG);
         local.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(local);
         //init button for store
-        setButton(remote, Config.translation.get(71), false);
+        setButton(remote, Sources.language.get("app_store"), false);
         remote.setOpaque(false);
         remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(remote);

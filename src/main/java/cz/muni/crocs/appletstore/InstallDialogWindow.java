@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.util.Sources;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
@@ -32,13 +33,13 @@ public class InstallDialogWindow extends JPanel {
     public InstallDialogWindow(CAPFile file) {
 
         setLayout(new MigLayout("width 250px"));
-        add(new JLabel("<html><p width=\"600\">" + Config.translation.get(131) + "</p></html>"),
+        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("W_do_not_unplug") + "</p></html>"),
                 "wrap, span 5, gapbottom 10");
 
-        add(new JLabel("<html><p width=\"600\">" + Config.translation.get(16) + file.getPackageAID().toString() +
+        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("pkg_id") + file.getPackageAID().toString() +
                "</p></html>"), "wrap, span 5, gapbottom 20");
 
-        JLabel more = new JLabel(Config.translation.get(132));
+        JLabel more = new JLabel(Sources.language.get("advanced_settings"));
         more.setFont(CustomFont.plain.deriveFont(Font.BOLD, 12f));
         add(more, "span 2");
 
@@ -50,9 +51,11 @@ public class InstallDialogWindow extends JPanel {
                 enableAll(advanced.isSelected());
             }
         });
-        add(advanced, "wrap");
+        add(advanced);
 
-        add(new JLabel(Config.translation.get(133)), "span 2");
+        add(getHint("H_advanced_syntax", "300"), "wrap");
+
+        add(new JLabel(Sources.language.get("install_params")), "span 2");
         installParams.setEnabled(false);
         installParams.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -71,18 +74,18 @@ public class InstallDialogWindow extends JPanel {
             }
         });
         add(installParams, "span 3, wrap");
-        add(getHint(134), "span 5, wrap");
+        add(getHint("H_install_params", "600"), "span 5, wrap");
 
-        add(new JLabel(Config.translation.get(137)), "span 2");
+        add(new JLabel(Sources.language.get("applet_ids")), "span 2");
 
         addAllAppletCustomAIDSFields(file.getAppletAIDs());
 
-        add(getHint(138), "span 5, wrap");
+        add(getHint("H_default_aid", "600"), "span 5, wrap");
 
         add(forceInstall);
         forceInstall.setEnabled(false);
-        add(new JLabel(Config.translation.get(135)), "span 4, wrap");
-        add(getHint(136), "span 5, wrap");
+        add(new JLabel(Sources.language.get("force_install")), "span 4, wrap");
+        add(getHint("H_force_install", "600"), "span 5, wrap");
     }
 
     private void addAllAppletCustomAIDSFields(List<AID> applets) {
@@ -136,15 +139,17 @@ public class InstallDialogWindow extends JPanel {
         }
     }
 
-    private JLabel getHint(int translationId) {
-        JLabel hint = new JLabel("<html><p width=\"600\">" + Config.translation.get(translationId) + "</p></html>");
+    private JLabel getHint(String langKey, String width) {
+        JLabel hint = new JLabel("<html><p width=\"" +
+                width + "\">" + Sources.language.get(langKey) + "</p></html>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
 
     public String[] getAdditionalInfo() {
         if (advanced.isSelected())
-            return new String[]{installParams.getText(), forceInstall.isSelected() ? "yes" : "no", getSelectedAID()};
+            return new String[]{installParams.getText(),
+                    forceInstall.isSelected() ? "yes" : "no", getSelectedAID()};
         return null;
     }
 

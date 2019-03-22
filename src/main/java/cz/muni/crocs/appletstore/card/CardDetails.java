@@ -73,4 +73,30 @@ public class CardDetails {
     public void setKeyInfo(byte[] keyInfo) {
         this.keyInfo = keyInfo;
     }
+
+    /**
+     * Convert array to single unit
+     *
+     * @param data to convert
+     * @return byte string in hex, bytes separated by space
+     */
+    public static String byteArrayToHexSpaces(byte[] data) {
+        StringBuilder builder = new StringBuilder();
+        for (byte b : data) {
+            builder.append(String.format("%02X", b)).append(" ");
+        }
+        return builder.substring(0, builder.length() - 1);
+    }
+
+    /**
+     * Computes the card ID
+     *
+     * @param details details to get data for id
+     * @return card id
+     */
+    public static String getId(CardDetails details) {
+        return "ATR=" + byteArrayToHexSpaces(details.getAtr().getBytes()) + ", ICSN=" +
+                ((details.getCplc() == null) ?
+                        "null" : byteArrayToHexSpaces(details.getCplc().get(GPData.CPLC.Field.ICSerialNumber)));
+    }
 }

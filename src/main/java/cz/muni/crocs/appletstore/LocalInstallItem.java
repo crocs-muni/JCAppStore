@@ -3,18 +3,11 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 
-import cz.muni.crocs.appletstore.util.AppletInfo;
-import pro.javacard.gp.GPRegistryEntry;
+import cz.muni.crocs.appletstore.util.Sources;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author Jiří Horák
@@ -37,13 +30,13 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
         add(Box.createRigidArea(new Dimension(50, 20)));
 
-        JLabel title = new JLabel(Config.translation.get(128));
+        JLabel title = new JLabel(Sources.language.get("CAP_install_applet"));
         title.setFont(CustomFont.plain.deriveFont(16f));
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(title);
 
-        title = new JLabel(Config.translation.get(129));
+        title = new JLabel(Sources.language.get("from_pc"));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setForeground(Color.WHITE);
         add(title);
@@ -51,7 +44,7 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
     @Override
     public String getSearchQuery() {
-        return Config.translation.get(200);
+        return Sources.language.get("install_kwords");
     }
 
     @Override

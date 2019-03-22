@@ -184,11 +184,7 @@
     <string id="186">Package already present on this card. It can be re-installed using advanced 'force install' option.</string>
     <string id="187">Card is not responding</string>
     <string id="188">Communication with card failed. Either the card is not responding or hardware failure occurred. You can try to re-plug the card.</string>
-    <string id="189"></string>
-    <string id="190"></string>
-    <string id="191"></string>
-    <string id="192"></string>
-    <string id="193"></string>
+
 
     <!--keywords-->
     <string id="200">install,applet</string>

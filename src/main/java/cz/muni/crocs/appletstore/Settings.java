@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.util.BackgroundImageLoader;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 
@@ -25,7 +26,7 @@ import java.io.IOException;
  */
 public class Settings extends JPanel {
 
-    private String bgImg = Config.options.get(Config.OPT_KEY_BACKGROUND);
+    private String bgImg = Sources.options.get(Config.OPT_KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
 
@@ -53,11 +54,11 @@ public class Settings extends JPanel {
     }
 
     private void addBackground() {
-        addTitleLabel(Config.translation.get(117), "span 3, wrap");
+        addTitleLabel(Sources.language.get("background"), "span 3, wrap");
 
-        String path = Config.options.get(Config.OPT_KEY_BACKGROUND);
+        String path = Sources.options.get(Config.OPT_KEY_BACKGROUND);
         if (path.equals(defaultBgPath)) {
-            path = Config.translation.get(119);
+            path = Sources.language.get("default");
             slider.setEnabled(false);
         }
         cutString(path);
@@ -71,10 +72,10 @@ public class Settings extends JPanel {
 
         add(new JLabel()); //empty space
 
-        JButton defaultBg = new JButton(new AbstractAction(Config.translation.get(120)) {
+        JButton defaultBg = new JButton(new AbstractAction(Sources.language.get("reset_default")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                bgImg = Config.translation.get(119);
+                bgImg = Sources.language.get("default");
                 bgValue.setText(bgImg);
                 slider.setValue(1);
                 slider.setEnabled(false);
@@ -82,7 +83,7 @@ public class Settings extends JPanel {
         });
         add(defaultBg, "align right");
 
-        JButton getNewBg = new JButton(new AbstractAction(Config.translation.get(118)) {
+        JButton getNewBg = new JButton(new AbstractAction(Sources.language.get("change")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
@@ -101,13 +102,13 @@ public class Settings extends JPanel {
         add(getNewBg, "align right, wrap");
 
         //blur option
-        addTitleLabel(Config.translation.get(124), "");
+        addTitleLabel(Sources.language.get("blur"), "");
         slider.setEnabled(false);
         add(slider, "w 180, align right, span 2, wrap");
     }
 
     private void addLanguage() {
-        addTitleLabel(Config.translation.get(121), "");
+        addTitleLabel(Sources.language.get("language"), "");
 
         languageBox = new JComboBox<>(langs);
         CustomComboBoxItem listItems = new CustomComboBoxItem();
@@ -117,8 +118,8 @@ public class Settings extends JPanel {
     }
 
     private void addHint() {
-        addTitleLabel(Config.translation.get(34), "");
-        hintEnabled.setSelected(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
+        addTitleLabel(Sources.language.get("enable_hints"), "");
+        hintEnabled.setSelected(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
         add(hintEnabled, "align left, span 2, w 180, wrap");
     }
 
@@ -138,12 +139,12 @@ public class Settings extends JPanel {
 
 
     private void saveBackgroundImage() {
-        if (bgImg.equals(Config.options.get(Config.OPT_KEY_BACKGROUND))) {
+        if (bgImg.equals(Sources.options.get(Config.OPT_KEY_BACKGROUND))) {
             return;
         }
-        if (bgImg.equals(Config.translation.get(119))) {
+        if (bgImg.equals(Sources.language.get("default"))) {
             try {
-                Config.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
+                Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
                 ((BackgroundImgPanel) context.getContentPane()).setNewBackground(
                         ImageIO.read(new File(defaultBgPath)));
             } catch (IOException e) {
@@ -157,14 +158,14 @@ public class Settings extends JPanel {
     }
 
     private void saveLanguage() {
-        if (langs[languageBox.getSelectedIndex()].first.equals(Config.options.get(Config.OPT_KEY_LANGUAGE))) return;
-        Config.options.put(Config.OPT_KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
+        if (langs[languageBox.getSelectedIndex()].first.equals(Sources.options.get(Config.OPT_KEY_LANGUAGE))) return;
+        Sources.options.put(Config.OPT_KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
         showAlertChange();
         //Config.translation = new Translation(Config.options.get(Config.OPT_KEY_LANGUAGE));
     }
 
     private void saveHint() {
-        Config.options.put(Config.OPT_KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
+        Sources.options.put(Config.OPT_KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
     }
 
     public void apply() {
@@ -179,8 +180,8 @@ public class Settings extends JPanel {
      */
     private void showAlertChange() {
         JOptionPane.showMessageDialog(null,
-                Config.translation.get(122),
-                Config.translation.get(123),
+                Sources.language.get("reset_to_apply"),
+                Sources.language.get("reset_to_apply_title"),
                 JOptionPane.INFORMATION_MESSAGE);
     }
 }

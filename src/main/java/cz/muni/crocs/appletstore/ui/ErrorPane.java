@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.util.Sources;
 import sun.misc.IOUtils;
 
 import javax.imageio.ImageIO;
@@ -20,22 +21,22 @@ import java.io.IOException;
  */
 public class ErrorPane extends JPanel {
 
-    public ErrorPane (int translationId, String imgName) {
+    public ErrorPane (String title, String imgName) {
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + imgName));
         error.setAlignmentX(Component.CENTER_ALIGNMENT);
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
-        JLabel errorMsg = new JLabel(Config.translation.get(translationId));
+        JLabel errorMsg = new JLabel(title);
         errorMsg.setFont(CustomFont.plain.deriveFont(20f));
         errorMsg.setForeground(Color.WHITE);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(errorMsg);
     }
 
-    public ErrorPane (int translationId, String imgName, CallBack callable) {
-        this(translationId, imgName);
+    public ErrorPane (String titleKey, String imgName, CallBack callable) {
+        this(titleKey, imgName);
 
         JPanel panel = new JPanel();
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -44,7 +45,7 @@ public class ErrorPane extends JPanel {
         JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
         panel.add(icon);
 
-        JLabel retry = new JLabel(Config.translation.get(112));
+        JLabel retry = new JLabel(Sources.language.get("retry"));
         retry.setFont(CustomFont.plain.deriveFont(16f));
         retry.setForeground(Color.WHITE);
         panel.add(retry);
@@ -59,12 +60,8 @@ public class ErrorPane extends JPanel {
         add(panel);
     }
 
-    public ErrorPane (int translationId, int hintId, String imgName) {
-        this(translationId, Config.translation.get(hintId), imgName);
-    }
-
-    public ErrorPane (int translationId, String message, String imgName) {
-        this(translationId, imgName);
+    public ErrorPane (String title, String message, String imgName) {
+        this(title, imgName);
 
         JLabel hint = new JLabel("<html><p width=\"400\" align=\"center\">" + message + "</p></html>");
         hint.setBorder(new EmptyBorder(20, 20, 20, 20));

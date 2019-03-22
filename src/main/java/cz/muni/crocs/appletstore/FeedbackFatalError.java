@@ -13,6 +13,7 @@ import java.io.File;
 
 /**
  * //TODO implement or remove
+ * //todo language
  *
  * @author Jiří Horák
  * @version 1.0

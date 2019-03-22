@@ -33,7 +33,7 @@ public class JSONStoreParser {
 
     private static boolean verifyInfoFile() {
         info = new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                + Config.options.get(Config.OPT_KEY_LANGUAGE)
+                + Sources.options.get(Config.OPT_KEY_LANGUAGE)
                 + Config.FILE_INFO_SUFFIX);
         if (!info.exists()) {
             info = new File(Config.APP_STORE_DIR,Config.FILE_INFO_PREFIX + "en" + Config.FILE_INFO_SUFFIX);

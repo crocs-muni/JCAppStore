@@ -19,12 +19,17 @@ public interface ProcessTrackable {
     void updateProgress(int amount);
 
     /**
+     * Return max value
+     */
+    int getMaximum();
+
+    /**
      * Set progress safely - won't overcome 100
      * @param amount
      */
     default void safeSetProgress(int amount) {
-        if (amount > 100)
-            updateProgress(100);
+        if (amount > getMaximum())
+            updateProgress(getMaximum());
         else
             updateProgress(amount);
     }
@@ -36,4 +41,10 @@ public interface ProcessTrackable {
         if (getProgress() < 100)
             updateProgress(getProgress() + 1);
     }
+
+    /**
+     * Get info about progress
+     * @return
+     */
+    String getInfo();
 }

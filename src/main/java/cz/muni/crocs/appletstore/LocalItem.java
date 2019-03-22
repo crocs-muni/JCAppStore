@@ -1,9 +1,9 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.util.AppletInfo;
+import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
@@ -95,7 +95,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         this(
                 (info.getName() == null) ? Arrays.toString(info.getAid().getBytes()) : info.getName(),
                 (info.getImage() == null) ? "wrong-image-name" : info.getImage(),
-                (info.getAuthor() == null) ? Config.translation.get(125) : info.getAuthor(),
+                (info.getAuthor() == null) ? Sources.language.get("unknown") : info.getAuthor(),
                 (info.getVersion() == null) ? "" : info.getVersion(),
                 info
         );

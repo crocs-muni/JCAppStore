@@ -40,7 +40,7 @@ public class BackgroundImageLoader {
             save();
         } catch (InterruptedException e) {
             //todo error log
-            Informer.getInstance().showInfo(152);
+            Informer.getInstance().showInfo("E_image");
             e.printStackTrace();
             defaultBg();
         }
@@ -51,14 +51,14 @@ public class BackgroundImageLoader {
             //TODO ask how works the system dirs
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
-            Config.options.put(Config.OPT_KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
+            Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
         } catch (IOException e) {
             defaultBg();
         }
     }
 
     private void defaultBg() {
-        Config.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
+        Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
         try {
             background = ImageIO.read(new File(Config.IMAGE_DIR + imgName));
         } catch (IOException e) {

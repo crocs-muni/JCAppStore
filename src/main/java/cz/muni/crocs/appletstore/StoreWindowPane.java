@@ -12,6 +12,7 @@ import cz.muni.crocs.appletstore.util.DownloaderWorker;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
 
+import cz.muni.crocs.appletstore.util.Sources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +63,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         constraints.gridy = 0;
     }
 
-    public void setLoadingPaneMessage(int msg) {
+    public void setLoadingPaneMessage(String msg) {
         if (currentComponent instanceof LoadingPane)
             ((LoadingPane) currentComponent).setMessage(msg);
     }
@@ -121,16 +122,16 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
                 return;
             case TIMEOUT:
                 setStatus(UNINITIALIZED);
-                putNewPane(new ErrorPane(67, "error.png", this), false);
+                putNewPane(new ErrorPane(Sources.language.get("E_store_timeout"), "error.png", this), false);
                 return;
             case FAILED:
                 setStatus(UNINITIALIZED);
-                putNewPane(new ErrorPane(66, "error.png", this), false);
+                putNewPane(new ErrorPane(Sources.language.get("E_store_generic"), "error.png", this), false);
                 //TODO repeat but set recursion depth | DO NOT CALL from other thread !!!!!!!!!!!
                 //run();
                 return;
             case NO_CONNECTION:
-                context.getWindow().showWarning(Config.translation.get(184), Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
+                context.getWindow().showWarning(Sources.language.get("W_internet"), Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
                 setupWindow();
                 return;
             default:
@@ -158,7 +159,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
      * Add loading and start a new thread with 0,5 sec progress update
      */
     private void addLoading(DownloaderWorker downloader) {
-        final LoadingPane loadingPane = new LoadingPane();
+        final LoadingPane loadingPane = new LoadingPane(Sources.language.get("waiting_internet"));
         putNewPane(loadingPane, true);
         new Thread(() -> {
             try {
@@ -186,7 +187,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
             try {
                 String result = workerThread.get(200, TimeUnit.SECONDS);
                 if (!result.equals("done")) {
-                    Config.options.put(Config.OPT_KEY_GITHUB_LATEST_VERSION, result);
+                    Sources.options.put(Config.OPT_KEY_GITHUB_LATEST_VERSION, result);
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 setStatus(TIMEOUT);
@@ -227,7 +228,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         //todo in thread?
         final HashMap<String, JsonObject> data = JSONStoreParser.getValues();
         if (data == null) {
-            putNewPane(new ErrorPane(63, "error.png", this), false);
+            putNewPane(new ErrorPane(Sources.language.get("W_store_loading"), "error.png", this), false);
             setStatus(UNINITIALIZED);
             FileCleaner.cleanFolder(Config.APP_STORE_DIR);
             return false;
@@ -261,7 +262,7 @@ public class StoreWindowPane extends JPanel implements Runnable, CallBack, Searc
         storeLayout.removeAll();
         if (sortedItems.size() == 0) {
             try {
-                storeLayout.add(new StoreItem(Config.translation.get(113), "no_results.png", "", ""));
+                storeLayout.add(new StoreItem(Sources.language.get("no_results"), "no_results.png", "", ""));
             } catch (IOException e) {
                 e.printStackTrace();
                 //todo handle, log

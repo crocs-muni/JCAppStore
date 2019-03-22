@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
-import cz.muni.crocs.appletstore.util.AppletInfo;
+import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.util.Sources;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
 
@@ -23,6 +23,7 @@ public class LocalItemInfo extends HintPanel {
 
     private AppletInfo nfo;
     private HintLabel name = new HintLabel();
+    private JLabel author = new JLabel();
     private HintLabel version = new HintLabel();
     private HintLabel id = new HintLabel();;
     private HintLabel type = new HintLabel();
@@ -33,7 +34,7 @@ public class LocalItemInfo extends HintPanel {
     private LocalWindowPane parent;
 
     public LocalItemInfo(LocalWindowPane parent) {
-        super(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
+        super(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
         this.parent = parent;
 
         setOpaque(false);
@@ -42,6 +43,9 @@ public class LocalItemInfo extends HintPanel {
         name.setFont(CustomFont.plain.deriveFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
         add(name, "span 2, wrap");
+
+        author.setBorder(new EmptyBorder(5, 0, 5, 5));
+        add(author, "span 2, wrap");
 
         version.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(version, "span 2, wrap");
@@ -55,11 +59,11 @@ public class LocalItemInfo extends HintPanel {
         domain.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(domain, "span 2, wrap");
 
-        JLabel title = new JLabel(Config.translation.get(139));
+        JLabel title = new JLabel(Sources.language.get("management"));
         title.setFont(CustomFont.plain.deriveFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
-        rawApdu = new JLabel(Config.translation.get(141), new ImageIcon(
+        rawApdu = new JLabel(Sources.language.get("custom_command"), new ImageIcon(
                 Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         rawApdu.addMouseListener(new MouseAdapter() {
@@ -70,7 +74,7 @@ public class LocalItemInfo extends HintPanel {
                 int result = JOptionPane.showConfirmDialog(
                         Config.getWindow(),
                         "TODO" /*todo create insert-apdu pane*/,
-                        Config.translation.get(9) + nfo.getName(),
+                        Sources.language.get("send_APDU_to") + nfo.getName(),
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE,
                         new ImageIcon(Config.IMAGE_DIR + "info.png"));
@@ -86,7 +90,7 @@ public class LocalItemInfo extends HintPanel {
         });
         add(rawApdu, "wrap");
 
-        uninstall = new JLabel(Config.translation.get(140), new ImageIcon(
+        uninstall = new JLabel(Sources.language.get("uninstall"), new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(new MouseAdapter() {
@@ -95,7 +99,7 @@ public class LocalItemInfo extends HintPanel {
                 if (!uninstall.isEnabled()) return;
 
                 DeleteDialogWindow opts = new DeleteDialogWindow(nfo.getAid().toString(), nfo.getKind(), nfo.hasKeys());
-                switch (showDialog(Config.translation.get(19), opts, "delete.png", 18, 116)) {
+                switch (showDialog(Sources.language.get("CAP_delete_applet"), opts, "delete.png", "delete", "cancel")) {
                     case JOptionPane.NO_OPTION:
                     case JOptionPane.CLOSED_OPTION:
                         return;
@@ -104,7 +108,7 @@ public class LocalItemInfo extends HintPanel {
 
                 String msg = opts.confirm();
                 if (msg != null) {
-                    switch (showDialog(Config.translation.get(58), msg, "error.png", 20, 116)) {
+                    switch (showDialog(Sources.language.get("W_"), msg, "error.png", "delete_anyway", "cancel")) {
                         case JOptionPane.NO_OPTION:
                         case JOptionPane.CLOSED_OPTION:
                             return;
@@ -112,7 +116,7 @@ public class LocalItemInfo extends HintPanel {
                     }
                 }
                 try {
-                    CardManager.getInstance().uninstall(nfo, opts.willForce());
+                    Sources.manager.uninstall(nfo, opts.willForce());
                     parent.setupWindow();
                 } catch (CardException e1) {
                     e1.printStackTrace();
@@ -124,26 +128,27 @@ public class LocalItemInfo extends HintPanel {
         add(uninstall, "wrap");
     }
 
-    private int showDialog(String title, Object msg, String imgname, int confirmBtn, int cancelBtn) {
+    private int showDialog(String title, Object msg, String imgname, String confirmBtnKey, String cancelBtnKey) {
         return JOptionPane.showOptionDialog(Config.getWindow(),
                 msg,
                 title,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + imgname),
-                new String[]{Config.translation.get(confirmBtn), Config.translation.get(cancelBtn)}, "error");
+                new String[]{Sources.language.get(confirmBtnKey), Sources.language.get(cancelBtnKey)}, "error");
     }
 
     public void set(AppletInfo info) {
         nfo = info;
-        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>", Config.translation.get(210));
-        version.setText("<html><p width=\"280\">Version: " +
-                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>", Config.translation.get(211));
-        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(), Config.translation.get(212));
-        type.setText("<html><p width=\"280\">Type: " +
-                getType(info.getKind()) + "</p></html>", Config.translation.get(213));
-        domain.setText("<html><p width=\"280\">Domain assigned: " +
-                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()), Config.translation.get(214));
+        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>", Sources.language.get("H_name"));
+        author.setText("<html><p width=\"280\">" + Sources.language.get("author") + info.getAuthor() + "</p></html>");
+        version.setText("<html><p width=\"280\">" + Sources.language.get("version") +
+                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>", Sources.language.get("H_version"));
+        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(), Sources.language.get("H_id"));
+        type.setText("<html><p width=\"280\">" + Sources.language.get("type") +
+                getType(info.getKind()) + "</p></html>", Sources.language.get("H_type"));
+        domain.setText("<html><p width=\"280\">" + Sources.language.get("sd_assigned") +
+                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()), Sources.language.get("H_sd_assinged"));
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
     }

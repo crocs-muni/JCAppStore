@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.Language;
+
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Component;
 import java.io.BufferedReader;
@@ -15,10 +17,10 @@ import java.util.HashMap;
  * @version 1.0
  */
 public class Config {
-    //get translation
-    public static Translation translation;
+
+
+    //public static Translation translation;
     //options map and key values
-    public static HashMap<String, String> options = new HashMap<>();
     public static final String OPT_KEY_LANGUAGE = "lang";
     public static final String OPT_KEY_GITHUB_LATEST_VERSION = "github.latest.version";
     public static final String OPT_KEY_BACKGROUND = "background";
@@ -128,46 +130,7 @@ public class Config {
     }
 
 
-    public static void getFileOptions() throws IOException {
-        if(options.size() != 0) return; //already loaded
-        File file = new File(Config.APP_DATA_DIR + SEP + "jcappstore.options");
 
-        if (!file.createNewFile()) {
-            try (BufferedReader r = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = r.readLine()) != null) {
-                    String[] content = line.split("=");
-                    options.put(content[0], content[1]);
-                }
-            }
-            if (options.size() == 0) {
-                new OptionsLoader(file);
-            }
-        } else {
-            new OptionsLoader(file);
-        }
-        translation = new Translation(options.get("lang"));
-    }
 
-    private static void safeWriter(BufferedWriter writer, String key, String value) {
-        try {
-            writer.write(key + "=" + value + "\n");
-        } catch (IOException e) {
-            //TODO private boolean to set if failed writing to notice an posible notify user?
-            e.printStackTrace();
-        }
-    }
 
-    public static void saveOptions() throws IOException {
-        File file = new File(Config.APP_DATA_DIR + SEP + "jcappstore.options");
-
-        if (!file.createNewFile()) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                options.forEach((key, value) -> safeWriter(writer, key, value));
-            }
-            if (options.size() == 0) {
-                new OptionsLoader(file);
-            }
-        }
-    }
 }

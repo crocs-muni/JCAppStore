@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.util.Sources;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -73,7 +74,7 @@ public class Warning extends JPanel {
                 iconRetry.setBorder(new EmptyBorder(0, 20, 0, 0));
                 add(iconRetry);
 
-                JLabel retry = new JLabel(Config.translation.get(112));
+                JLabel retry = new JLabel(Sources.language.get("retry"));
                 retry.setFont(CustomFont.plain.deriveFont(12f));
                 retry.setForeground(Color.BLACK);
                 add(retry);

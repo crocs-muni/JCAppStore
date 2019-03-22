@@ -11,9 +11,10 @@ import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.AppletInfo;
+import cz.muni.crocs.appletstore.card.AppletInfo;
 
 import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.util.Sources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pro.javacard.CAPFile;
@@ -95,15 +96,15 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
                 int result = JOptionPane.showOptionDialog(context,
                         opts,
-                        Config.translation.get(128),
+                        Sources.language.get("CAP_install_applet"),
                         JOptionPane.OK_CANCEL_OPTION,
                         JOptionPane.INFORMATION_MESSAGE,
                         new ImageIcon(Config.IMAGE_DIR + "error.png"),
-                        new String[]{Config.translation.get(29), Config.translation.get(116)}, "error");
+                        new String[]{Sources.language.get("install"), Sources.language.get("cancel")}, "error");
                 switch (result) {
                     case JOptionPane.YES_OPTION:
                         if (!opts.validAID() || !opts.validInstallParams()) {
-                            Informer.getInstance().showInfo(153);
+                            Informer.getInstance().showInfo("E_install_invalid_data");
                             return;
                         }
                         break;
@@ -116,7 +117,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                 new Thread(() -> {
                     try {
                         String[] additionalInfo = opts.getAdditionalInfo();
-                        CardManager.getInstance().install(file, additionalInfo);
+                        Sources.manager.install(file, additionalInfo);
                     } catch (CardException e1) {
                         //todo notify and log error
                         e1.printStackTrace();
@@ -124,6 +125,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                }).start();
             }
         });
+
+        updatePanes(Sources.manager.getTerminalState());
     }
 
     private CAPFile getCapFile() {
@@ -131,13 +134,13 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         fileChooser.setFileView(new CapFileView());
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(Config.translation.get(130), "cap"));
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(Sources.language.get("cap_files"), "cap"));
         fileChooser.setAcceptAllFileFilterUsed(false);
 
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File cap = fileChooser.getSelectedFile();
             if (!cap.exists()) {
-                Informer.getInstance().showInfo(Config.translation.get(150) + cap.getAbsolutePath() + Config.translation.get(151));
+                Informer.getInstance().showInfo(Sources.language.get("E_install_no_file_1") + cap.getAbsolutePath() + Sources.language.get("E_install_no_file_2"));
                 return null;
             }
 
@@ -145,7 +148,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
             try (FileInputStream fin = new FileInputStream(cap)) {
                 instcap = CAPFile.fromStream(fin);
             } catch (IOException e) {
-                Informer.getInstance().showInfo(Config.translation.get(150) + cap.getAbsolutePath() + Config.translation.get(151));
+                Informer.getInstance().showInfo(Sources.language.get("E_install_no_file_1") + cap.getAbsolutePath() + Sources.language.get("E_install_no_file_1´2"));
             }
             return instcap;
         }
@@ -162,10 +165,10 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                 setupWindow();
                 break;
             case NO_CARD:
-                addError("no-card.png", 5);
+                addError("no-card.png", "no_card");
                 break;
             case NO_READER:
-                addError("no-reader.png", 2);
+                addError("no-reader.png", "no_reader");
                 break;
             case LOADING:
                 add(new LoadingPaneCircle());
@@ -174,13 +177,13 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         }
     }
 
-    private void addError(String imageName, int translationId) {
-        add(new ErrorPane(translationId, imageName));
+    private void addError(String imageName, String titleKey) {
+        add(new ErrorPane(Sources.language.get(titleKey), imageName));
     }
 
-    private JPanel getPanel(int translationId) {
+    private JPanel getPanelByKey(String hintKey) {
         JPanel hint = new JPanel();
-        hint.add(new JLabel("<html><p width=\"250\">" + Config.translation.get(translationId) + "</p></html>"));
+        hint.add(new JLabel("<html><p width=\"250\">" + Sources.language.get(hintKey) + "</p></html>"));
         return hint;
     }
 
@@ -191,7 +194,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
     }
 
     void setupWindow() {
-        CardManager manager = CardManager.getInstance();
+        CardManager manager = Sources.manager;
         CardInstance card = manager.getCard();
 
         switch (card.getState()) {
@@ -203,7 +206,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                 return; //do not update, just stuck the screen
             case FAILED:
                 if (items.isEmpty())
-                    add(new ErrorPane(182, manager.getErrorCause(), "announcement_white.png"));
+                    add(new ErrorPane(Sources.language.get("E_communication"), manager.getErrorCause(), "announcement_white.png"));
                 else
                     Informer.getInstance().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
                 return;
@@ -212,26 +215,26 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
         Integer isdLifeState = manager.getCardLifeCycle();
         if (isdLifeState == null) {
-            add(new ErrorPane(180, 181, "announcement_white.png"));
+            add(new ErrorPane(Sources.language.get("E_authentication"), Sources.language.get("H_authentication"), "announcement_white.png"));
             return;
         }
         switch (isdLifeState) {
             case 0x1:
                 break;
             case 0x7:
-                add(new ErrorPane(170, 171, "announcement_white.png"));
+                add(new ErrorPane(Sources.language.get("E_initialized"), Sources.language.get("H_initialized"), "announcement_white.png"));
                 return;
             case 0xF:
-                add(new ErrorPane(172, 173, "announcement_white.png"));
+                add(new ErrorPane(Sources.language.get("E_secure_state"), Sources.language.get("H_secure_state"), "announcement_white.png"));
                 return;
             case 0x7F:
-                add(new ErrorPane(174, 175, "announcement_white.png"));
+                add(new ErrorPane(Sources.language.get("E_locked"), Sources.language.get("H_locked"), "announcement_white.png"));
                 return;
             case 0xFF:
-                add(new ErrorPane(176, 177, "announcement_white.png"));
+                add(new ErrorPane(Sources.language.get("E_terminated"), Sources.language.get("H_terminated"), "announcement_white.png"));
                 return;
             default:
-                add(new ErrorPane(178, 179, "announcement_white.png"));
+                add(new ErrorPane(Sources.language.get("E_no_life_state"), Sources.language.get("H_no_life_state"), "announcement_white.png"));
                 return;
         }
 
@@ -288,7 +291,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
     private void showPanel(Collection<LocalItem> sortedItems) {
         windowLayout.removeAll();
         if (sortedItems.size() == 0) {
-            windowLayout.add(new LocalItem(Config.translation.get(113), "no_results.png", "", "", null));
+            windowLayout.add(new LocalItem(Sources.language.get("no_results"), "no_results.png", "", "", null));
         } else {
             for (LocalItem item : sortedItems) {
                 windowLayout.add(item);
@@ -315,7 +318,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
     @Override
     protected void paintComponent(Graphics g) {
-        infoLayout.setVisible(CardManager.getInstance().isSelected());
+        infoLayout.setVisible(Sources.manager.isSelected());
         super.paintComponent(g);
     }
 }

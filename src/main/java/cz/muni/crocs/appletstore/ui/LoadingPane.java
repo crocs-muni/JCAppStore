@@ -15,15 +15,16 @@ public class LoadingPane extends JPanel {
     private final int width = 300;
     private final int height = 5;
     private int progress = 0;
-    private int messageId = 64;
+    private String message;
     private Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
 
-    public LoadingPane() {
+    public LoadingPane(String initialMsg) {
         setOpaque(false);
+        this.message = initialMsg;
     }
 
-    public void setMessage(int messageId) {
-        this.messageId = messageId;
+    public void setMessage(String msg) {
+        this.message = msg;
     }
 
     @Override
@@ -32,17 +33,17 @@ public class LoadingPane extends JPanel {
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.translate(this.getWidth() / 2, this.getHeight() / 2);
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(Color.WHITE);
+        graphics2D.setColor(Color.WHITE);;
         graphics2D.draw(outline);
 
         Rectangle inline = new Rectangle(-(width/2), -(height/2), width * progress / 100, height);
         graphics2D.draw(inline);
         graphics2D.fill(inline);
         graphics2D.setFont(CustomFont.plain.deriveFont(Font.BOLD, 15f));
-        if (messageId == 65) {
-            graphics2D.drawString(Config.translation.get(65) + progress + "%", -(width/2), -(height/2) - 20);
+        if (0 < progress && progress < 100) {
+            graphics2D.drawString(message + progress + "%", -(width/2), -(height/2) - 20);
         } else {
-            graphics2D.drawString(Config.translation.get(messageId),  -(width/2), -(height/2) - 20);
+            graphics2D.drawString(message,  -(width/2), -(height/2) - 20);
         }
     }
 

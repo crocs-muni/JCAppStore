@@ -21,7 +21,7 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         this.parent = parent;
     }
 
-    public void setLoaderMessage(int message) {
+    public void setLoaderMessage(String message) {
         parent.setLoadingPaneMessage(message);
     }
 
@@ -30,17 +30,17 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         setProgress(0);
 
         String[] storeInfo = InternetConnection.checkAndGetLatestReleaseVersion(
-                Config.options.get(Config.OPT_KEY_GITHUB_LATEST_VERSION)
+                Sources.options.get(Config.OPT_KEY_GITHUB_LATEST_VERSION)
         );
 
         if (storeInfo == null) {
             setProgress(100);
-            setLoaderMessage(68);
+            setLoaderMessage(Sources.language.get("E_no_internet"));
             parent.setStatus(StoreWindowPane.StoreState.NO_CONNECTION);
             return "done";
         } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
             setProgress(100);
-            setLoaderMessage(111);
+            setLoaderMessage(Sources.language.get("done"));
             parent.setStatus(StoreWindowPane.StoreState.REBUILD);
             return "done";
         }
@@ -78,6 +78,16 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
     @Override
     public void updateProgress(int amount) {
         setProgress(amount);
+    }
+
+    @Override
+    public int getMaximum() {
+        return 100;
+    }
+
+    @Override
+    public String getInfo() {
+        throw new UnsupportedOperationException();
     }
 }
 

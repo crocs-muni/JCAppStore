@@ -10,6 +10,7 @@ import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.Informer;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
+import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
 
@@ -35,12 +36,12 @@ public class StoreItemInfo extends HintPanel {
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
 
-    final Color bg = new Color(255, 255, 255, 80);
-    final Font textFont = CustomFont.plain.deriveFont(14f);
-    final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
+    private final Color bg = new Color(255, 255, 255, 80);
+    private final Font textFont = CustomFont.plain.deriveFont(14f);
+    private final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
 
     public StoreItemInfo(JsonObject dataSet, Searchable store) {
-        super(Config.options.get(Config.OPT_KEY_HINT).equals("true"));
+        super(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
         setOpaque(false);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -66,7 +67,7 @@ public class StoreItemInfo extends HintPanel {
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
-        JButton install = new JButton("<html><div style=\"margin: 1px 10px;\">" + Config.translation.get(28) + "</div></html>");
+        JButton install = new JButton("<html><div style=\"margin: 1px 10px;\">" + Sources.language.get("CAP_install") + "</div></html>");
         install.setUI(new CustomButtonUI());
         install.setFont(CustomFont.plain.deriveFont(Font.BOLD, 20f));
         install.setForeground(Color.WHITE);
@@ -85,13 +86,13 @@ public class StoreItemInfo extends HintPanel {
                 System.out.println(file.getName());
                 System.out.println(file.getAbsolutePath());
                 if (!file.exists()) {
-                    Informer.getInstance().showWarningToClose(185, Warning.Importance.INFO);
+                    Informer.getInstance().showWarningToClose("E_install_not_found", Warning.Importance.INFO);
                 }
             }
         });
         add(install, "align right, span 1 2, wrap");
 
-        JLabel author = new JLabel(Config.translation.get(77) + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
+        JLabel author = new JLabel(Sources.language.get("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
         author.setFont(CustomFont.plain.deriveFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
 
@@ -106,7 +107,7 @@ public class StoreItemInfo extends HintPanel {
         add(mainInfo, "span 4, gap 20, wrap");
 
         //WEBSITE
-        addSubTitle(75, 80);
+        addSubTitle("website", "H_website");
 
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
         JLabel url = new JLabel("<html><div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div></html>");
@@ -119,7 +120,7 @@ public class StoreItemInfo extends HintPanel {
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
 
         //INSTALL
-        addSubTitle(81, 82);
+        addSubTitle("use", "H_use");
 
         JTextPane installInfo = new JTextPane();
         installInfo.setContentType("text/html");
@@ -132,7 +133,7 @@ public class StoreItemInfo extends HintPanel {
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
 
         //VERSION
-        addSubTitle(78, 79);
+        addSubTitle("custom_install", "H_custom_install");
 
         String[] versions = JSONStoreParser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
         versionComboBox = new JComboBox<>(versions);
@@ -156,7 +157,7 @@ public class StoreItemInfo extends HintPanel {
         compilerVersionComboBox.setMaximumRowCount(7);
         add(compilerVersionComboBox, "align right");
 
-        JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + Config.translation.get(28) + "</div></html>");
+        JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + Sources.language.get("CAP_install") + "</div></html>");
         customInstall.setUI(new CustomButtonUI());
         customInstall.setFont(CustomFont.plain.deriveFont(Font.BOLD, 18f));
         customInstall.setForeground(Color.WHITE);
@@ -165,8 +166,8 @@ public class StoreItemInfo extends HintPanel {
         add(customInstall, "span 2, align right, wrap");
     }
 
-    private void addSubTitle(int translationName, int tralnsationHint) {
-        HintLabel title = new HintLabel(Config.translation.get(translationName), Config.translation.get(tralnsationHint));
+    private void addSubTitle(String titleKey, String hintKey) {
+        HintLabel title = new HintLabel(Sources.language.get(titleKey), Sources.language.get(hintKey));
         title.setFont(titleFont);
         title.setFocusable(true);
         title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));

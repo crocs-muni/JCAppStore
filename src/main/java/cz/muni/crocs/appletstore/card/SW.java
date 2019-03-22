@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.util.Sources;
 
 /**
  * SW constants from GPPro
@@ -32,20 +33,20 @@ public class SW {
 
     public static String getErrorCause(int sw, String msg) {
         switch (sw) {
-            case NO_SPECIFIC_DIAGNOSIS: return Config.translation.get(183) + msg + Config.translation.get(11) + sw + "'.";
-            case INVALID_INS: return Config.translation.get(154);
-            case INVALID_CLA: return Config.translation.get(155);
-            case INVALID_P1P2: return Config.translation.get(156);
-            case WRONG_LENGTH_LC: return Config.translation.get(157);
-            case MEMORY_FAIL: return Config.translation.get(158);
-            case MEMORY_FULL: return Config.translation.get(159);
-            case INCORRECT_DATA: return Config.translation.get(160);
-            case SECURITY_STATUS_NOT_SATIFIED: return Config.translation.get(161);
-            case CONDITIONS_OF_USE_NOT_SATISFIED: return Config.translation.get(162);
-            case APP_OR_FILE_NOT_FOUND: return Config.translation.get(163);
-            case REFERENCED_DATA_NOT_FOUND: return Config.translation.get(164);
-            case CARD_LOCKED: return Config.translation.get(165);
-            case FNC_NOT_SUPPORTED: return Config.translation.get(166);
+            case NO_SPECIFIC_DIAGNOSIS: return Sources.language.get("E_generic") + msg + Sources.language.get("search_SW") + sw + "'.";
+            case INVALID_INS: return Sources.language.get("E_invalid_INS");
+            case INVALID_CLA: return Sources.language.get("E_invalid_CLA");
+            case INVALID_P1P2: return Sources.language.get("E_invalid_P1P2");
+            case WRONG_LENGTH_LC: return Sources.language.get("E_invalid_LC");
+            case MEMORY_FAIL: return Sources.language.get("E_invalid_memory");
+            case MEMORY_FULL: return Sources.language.get("E_full_memory");
+            case INCORRECT_DATA: return Sources.language.get("E_invalid_data");
+            case SECURITY_STATUS_NOT_SATIFIED: return Sources.language.get("E_security_failure");
+            case CONDITIONS_OF_USE_NOT_SATISFIED: return Sources.language.get("E_use_failure");
+            case APP_OR_FILE_NOT_FOUND: return Sources.language.get("E_pkg_not_found");
+            case REFERENCED_DATA_NOT_FOUND: return Sources.language.get("E_data_not_found");
+            case CARD_LOCKED: return Sources.language.get("E_action_denied");
+            case FNC_NOT_SUPPORTED: return Sources.language.get("E_action_not_supported");
             default: return msg;
         }
     }

@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
+import cz.muni.crocs.appletstore.util.Sources;
 import org.bouncycastle.util.encoders.BufferedEncoder;
 
 import javax.imageio.ImageIO;
@@ -46,7 +47,7 @@ public class NotifLabel extends JLabel {
                 } else {
                     JOptionPane.showMessageDialog(
                             parent.getParent(), new JLabel("<html><p width=\"250\">" + msg + "</p></html>"),
-                            Config.translation.get(127),
+                            Sources.language.get("event"),
                             JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "label.png"));
                 }
             }

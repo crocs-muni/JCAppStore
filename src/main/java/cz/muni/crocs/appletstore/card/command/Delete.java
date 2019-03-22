@@ -1,17 +1,12 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import apdu4j.HexUtils;
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.AppletInfo;
-import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.AID;
-import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
-import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
-import java.util.Arrays;
 
 /**
  * Modified install process from GPPro
@@ -26,7 +21,7 @@ public class Delete extends GPCommand<Void> {
 
     public Delete(AppletInfo nfo, boolean force) {
         if (nfo == null)
-            throw new IllegalArgumentException(Config.translation.get(153));
+            throw new IllegalArgumentException(Sources.language.get("E_delete_invalid_data"));
         this.toDelete = nfo;
         this.force = force;
     }
