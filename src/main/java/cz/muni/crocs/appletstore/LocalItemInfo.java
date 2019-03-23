@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.action.DeleteAction;
+import cz.muni.crocs.appletstore.action.SendApduAction;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
@@ -8,12 +11,9 @@ import cz.muni.crocs.appletstore.util.Sources;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
 
-import javax.smartcardio.CardException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * @author Jiří Horák
@@ -31,14 +31,17 @@ public class LocalItemInfo extends HintPanel {
     private JLabel uninstall;
     private JLabel rawApdu;
 
-    private LocalWindowPane parent;
+    private SendApduAction send;
+    private DeleteAction delete;
 
-    public LocalItemInfo(LocalWindowPane parent) {
+    public LocalItemInfo(OnEventCallBack<Void, Void, Void> call) {
         super(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
-        this.parent = parent;
 
         setOpaque(false);
         setLayout(new MigLayout());
+
+        send = new SendApduAction(nfo, call);
+        delete = new DeleteAction(nfo, call);
 
         name.setFont(CustomFont.plain.deriveFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
@@ -66,90 +69,35 @@ public class LocalItemInfo extends HintPanel {
         rawApdu = new JLabel(Sources.language.get("custom_command"), new ImageIcon(
                 Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        rawApdu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!rawApdu.isEnabled())
-                    return;
-                int result = JOptionPane.showConfirmDialog(
-                        Config.getWindow(),
-                        "TODO" /*todo create insert-apdu pane*/,
-                        Sources.language.get("send_APDU_to") + nfo.getName(),
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE,
-                        new ImageIcon(Config.IMAGE_DIR + "info.png"));
-
-                switch (result) {
-                    case JOptionPane.NO_OPTION:
-                    case JOptionPane.CLOSED_OPTION:
-                        return;
-                    case JOptionPane.YES_OPTION: //continue
-                }
-                //CardManager.getInstance().uninstall();
-            }
-        });
+        rawApdu.addMouseListener(send);
         add(rawApdu, "wrap");
 
         uninstall = new JLabel(Sources.language.get("uninstall"), new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        uninstall.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!uninstall.isEnabled()) return;
-
-                DeleteDialogWindow opts = new DeleteDialogWindow(nfo.getAid().toString(), nfo.getKind(), nfo.hasKeys());
-                switch (showDialog(Sources.language.get("CAP_delete_applet"), opts, "delete.png", "delete", "cancel")) {
-                    case JOptionPane.NO_OPTION:
-                    case JOptionPane.CLOSED_OPTION:
-                        return;
-                    case JOptionPane.YES_OPTION: //continue
-                }
-
-                String msg = opts.confirm();
-                if (msg != null) {
-                    switch (showDialog(Sources.language.get("W_"), msg, "error.png", "delete_anyway", "cancel")) {
-                        case JOptionPane.NO_OPTION:
-                        case JOptionPane.CLOSED_OPTION:
-                            return;
-                        case JOptionPane.YES_OPTION: //continue
-                    }
-                }
-                try {
-                    Sources.manager.uninstall(nfo, opts.willForce());
-                    parent.setupWindow();
-                } catch (CardException e1) {
-                    e1.printStackTrace();
-                    //todo log and notify
-                }
-
-            }
-        });
+        uninstall.addMouseListener(delete);
         add(uninstall, "wrap");
     }
 
-    private int showDialog(String title, Object msg, String imgname, String confirmBtnKey, String cancelBtnKey) {
-        return JOptionPane.showOptionDialog(Config.getWindow(),
-                msg,
-                title,
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon(Config.IMAGE_DIR + imgname),
-                new String[]{Sources.language.get(confirmBtnKey), Sources.language.get(cancelBtnKey)}, "error");
-    }
-
     public void set(AppletInfo info) {
-        nfo = info;
-        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>", Sources.language.get("H_name"));
-        author.setText("<html><p width=\"280\">" + Sources.language.get("author") + info.getAuthor() + "</p></html>");
+        delete.setInfo(info);
+        send.setInfo(info);
+        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
+                Sources.language.get("H_name"));
+        author.setText("<html><p width=\"280\">" + Sources.language.get("author") +
+                info.getAuthor() + "</p></html>");
         version.setText("<html><p width=\"280\">" + Sources.language.get("version") +
-                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>", Sources.language.get("H_version"));
-        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(), Sources.language.get("H_id"));
+                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
+                Sources.language.get("H_version"));
+        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
+                Sources.language.get("H_id"));
         type.setText("<html><p width=\"280\">" + Sources.language.get("type") +
                 getType(info.getKind()) + "</p></html>", Sources.language.get("H_type"));
         domain.setText("<html><p width=\"280\">" + Sources.language.get("sd_assigned") +
-                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()), Sources.language.get("H_sd_assinged"));
-        uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile || info.getKind() == GPRegistryEntry.Kind.Application);
+                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()),
+                Sources.language.get("H_sd_assinged"));
+        uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
+                || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
     }
 

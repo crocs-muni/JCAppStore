@@ -18,8 +18,6 @@ import java.util.HashMap;
  */
 public class Config {
 
-
-    //public static Translation translation;
     //options map and key values
     public static final String OPT_KEY_LANGUAGE = "lang";
     public static final String OPT_KEY_GITHUB_LATEST_VERSION = "github.latest.version";
@@ -28,8 +26,8 @@ public class Config {
     //system path separator
     public static final String SEP = File.separator;
 
-    //app external data cache folders
-    public static final String APP_ROOT_DIR = getSystemEnvAndSetup();
+    //app external folders
+    public static final String APP_ROOT_DIR = getDefaultAppRootFolder();
     public static final File APP_DATA_DIR = checkFolders(APP_ROOT_DIR + SEP + "data");
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + SEP + "store");
     public static final File APP_STORE_CAPS_DIR = checkFolders(APP_ROOT_DIR + SEP + "store" + SEP + "JCApplets");
@@ -41,7 +39,6 @@ public class Config {
 
     //database related constants
     public static final String JC_DB_FILE = "jcappstore.db";
-    public static final String DATABASE_URL = "jdbc:sqlite:" + APP_DATA_DIR + SEP + JC_DB_FILE;
     public static final String INI_CARD_LIST = Config.APP_DATA_DIR + Config.SEP + "cards.ini";
     public static final String INI_CARD_TYPES = "src"+SEP+"main"+SEP+"resources"+SEP+"data"+SEP+"types.ini";
 
@@ -58,6 +55,7 @@ public class Config {
     public static final String INI_DATA = "card_data";
     public static final String INI_CAPABILITIES = "card_capabilities";
     public static final String INI_KEY_INFO = "key_info";
+    public static final String INI_INSTALLED = "applets";
 
     //store constants
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
@@ -76,41 +74,13 @@ public class Config {
     public static final String JSON_TAG_USAGE = "usage";
     public static final String RESOURCES = Config.APP_STORE_DIR + Config.SEP + "Resources" + Config.SEP;
 
-    //window context to get into component
-    private static Component window;
-    public static Component getWindow() {
-        return window;
-    }
-    public static void setWindow(Component mainWindow) {
-        window = mainWindow;
-    }
-
     /**
      * Gets the default app folder root location
      * @return
      */
-    public static String getSystemEnvAndSetup() {
+    public static String getDefaultAppRootFolder() {
         //from  https://stackoverflow.com/questions/8782797/creating-directory-in-application-support-or-appdata
         String appFolder = FileSystemView.getFileSystemView().getDefaultDirectory() + SEP + "JCAppStore";
-        //todo test various systems
-        //todo solve "run as admin neccessary" .. ? depends on where is our base folder created
-//        System.out.println("Searching for system");
-//
-//        String os = System.getProperty("os.name").toUpperCase();
-//        if (os.contains("WIN")) {
-//            appFolder = System.getenv("CSIDL_PROFILE") + "/" + "JCAppStore";
-//            System.out.println("Found windows");
-//        }
-//        if (os.contains("MAC")) {
-//            appFolder = System.getProperty("user.home") + "/Library/Application " + "Support"
-//                    + "JCAppStore";
-//            System.out.println("Found mac");
-//        }
-//        if (os.contains("NUX")) {
-//            appFolder = System.getProperty("user.dir") + ".JCAppStore";
-//            System.out.println("Found linux");
-//        }
-
         File directory = new File(appFolder);
         if (!directory.exists() && (!directory.mkdirs())) {
             throw new RuntimeException("The Application doesn't have the rights to store data into default folder.");
@@ -128,9 +98,4 @@ public class Config {
         if (!f.isDirectory()) return null;
         return f;
     }
-
-
-
-
-
 }

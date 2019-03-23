@@ -4,10 +4,10 @@ package cz.muni.crocs.appletstore.iface;
  * @author Jiří Horák
  * @version 1.0
  */
-public interface CallBack {
+public interface CallBack<T> {
 
     /**
      * Enables the callback abstract
      */
-    void callBack();
+    T callBack();
 }

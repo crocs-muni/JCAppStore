@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.StoreWindowPane;
+import cz.muni.crocs.appletstore.StoreWindowManager;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,9 +15,9 @@ import javax.swing.*;
 public class DownloaderWorker extends SwingWorker<String, Object> implements ProcessTrackable {
 
     private static final Logger logger = LogManager.getLogger(DownloaderWorker.class);
-    private StoreWindowPane parent;
+    private StoreWindowManager parent;
 
-    public DownloaderWorker(StoreWindowPane parent) {
+    public DownloaderWorker(StoreWindowManager parent) {
         this.parent = parent;
     }
 
@@ -36,18 +36,18 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         if (storeInfo == null) {
             setProgress(100);
             setLoaderMessage(Sources.language.get("E_no_internet"));
-            parent.setStatus(StoreWindowPane.StoreState.NO_CONNECTION);
+            parent.setStatus(StoreWindowManager.StoreState.NO_CONNECTION);
             return "done";
         } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
             setProgress(100);
             setLoaderMessage(Sources.language.get("done"));
-            parent.setStatus(StoreWindowPane.StoreState.REBUILD);
+            parent.setStatus(StoreWindowManager.StoreState.REBUILD);
             return "done";
         }
         System.out.println("downloading");
         AppletDownloader downloader = new AppletDownloader(storeInfo[1], this);
-        if (!downloader.run()) parent.setStatus(StoreWindowPane.StoreState.FAILED);
-        else parent.setStatus(StoreWindowPane.StoreState.REBUILD);
+        if (!downloader.run()) parent.setStatus(StoreWindowManager.StoreState.FAILED);
+        else parent.setStatus(StoreWindowManager.StoreState.REBUILD);
 
         return storeInfo[2];
     }

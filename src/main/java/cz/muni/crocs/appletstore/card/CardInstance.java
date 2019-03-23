@@ -9,7 +9,6 @@ import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro.javacard.gp.GPData;
 import pro.javacard.gp.GPException;
 
 import pro.javacard.gp.GPKey;
@@ -29,8 +28,6 @@ import java.util.ArrayList;
 public class CardInstance {
 
     private static final Logger logger = LoggerFactory.getLogger(CardInstance.class);
-
-    public static final String DEFAULT_TEST_KEY = "404142434445464748494A4B4C4D4E4F";
 
     private String masterKey;
     private String keyType;
@@ -86,7 +83,7 @@ public class CardInstance {
         this.applets = null;
     }
     private void setTestPasword404f() {
-        masterKey = DEFAULT_TEST_KEY;
+        masterKey = "404142434445464748494A4B4C4D4E4F";
         keyType = "DES3";
         divesifier = "";
     }
@@ -120,11 +117,6 @@ public class CardInstance {
 
             String errormsg = e.getMessage().substring(36);
             System.out.println("PODIVEJ SE" + errormsg);
-
-//            System.out.println(e.getCause().getMessage());
-//            System.out.println(e.getCause().toString());
-//            System.out.println(e.getCause().fillInStackTrace().toString());
-//            System.out.println(e.getCause().getLocalizedMessage());
 
             //todo ugly, but no code management
             switch (errormsg) {
@@ -222,6 +214,7 @@ public class CardInstance {
                 .addValue(Config.INI_DATA, details.getCardData())
                 .addValue(Config.INI_CAPABILITIES, details.getCardCapabilities())
                 .addValue(Config.INI_KEY_INFO, details.getKeyInfo())
+                .addValue(Config.INI_INSTALLED, "[]")
                 .store();
         return false;
     }
@@ -248,8 +241,6 @@ public class CardInstance {
             getCardListWithSavedPassword();
 
         } catch (IOException e) {
-
-            //todo handle
             e.printStackTrace();
         }
     }
@@ -322,12 +313,8 @@ public class CardInstance {
      * This method may brick the card if bad masterKey set
      */
     private void secureConnect(GlobalPlatform context) throws CardException, GPException {
-
         PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), getType(keyType)));
-        //todo correct?
         key.setDiversifier(getDivesifier(divesifier));
-
-        //todo !!! ASK mode - now default only
         context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());
     }
 

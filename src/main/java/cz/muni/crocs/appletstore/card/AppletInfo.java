@@ -21,18 +21,18 @@ public class AppletInfo {
     private GPRegistryEntry.Kind kind;
     private AID domain;
 
-    private String name; //todo set values to be right to use for display e g. missing title -> put aid isntead
-    private String image; //todo check image and put default if not found
+    private String name;
+    private String image;
     private String version;
     private String author;
-    private HasKeys hasKeys = HasKeys.UNKNOWN;
+    public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
     private boolean selected = false;
 
     public boolean isSelected() {
         return selected;
     }
-    public HasKeys hasKeys() {
+    public KeysPresence hasKeys() {
         return hasKeys;
     }
 
@@ -44,12 +44,24 @@ public class AppletInfo {
      * Get the info from card registry
      * @param registry GP info from a card
      */
-    public AppletInfo(GPRegistryEntry registry, String cardId) {
-        aid = registry.getAID();
-        lifecycle = registry.getLifeCycle();
-        kind = registry.getType();
-        domain = registry.getDomain();
-        deduceData(registry);
+    public AppletInfo(GPRegistryEntry registry) {
+        if (registry != null) {
+            aid = registry.getAID();
+            lifecycle = registry.getLifeCycle();
+            kind = registry.getType();
+            domain = registry.getDomain();
+            deduceData(registry);
+        }
+    }
+
+    public AppletInfo(GPRegistryEntry registry, String storeName) {
+        if (registry != null) {
+            aid = registry.getAID();
+            lifecycle = registry.getLifeCycle();
+            kind = registry.getType();
+            domain = registry.getDomain();
+            deduceData(registry);
+        }
 
 //        try {
 //            getAdditionalInfo(cardId);
@@ -81,9 +93,8 @@ public class AppletInfo {
 
     private void setDefaultValues(GPRegistryEntry registry) {
         name = getDefaultName(registry);
-        image = "unknown"; //will be replaced based on its type
+        image = "unknown";
         version = "";
-        //todo deduce author
         author = Sources.language.get("unknown");
     }
 
@@ -124,7 +135,4 @@ public class AppletInfo {
         return author;
     }
 
-    public enum HasKeys {
-        PRESENT, NO_KEYS, UNKNOWN
-    }
 }

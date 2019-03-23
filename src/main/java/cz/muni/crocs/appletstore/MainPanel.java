@@ -4,7 +4,6 @@ import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.Informer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +12,7 @@ import java.awt.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class MainPanel extends BackgroundImgPanel implements CallBack {
+public class MainPanel extends BackgroundImgPanel implements CallBack<Void> {
 
     /**
      * Layout hierarchy:
@@ -27,7 +26,7 @@ public class MainPanel extends BackgroundImgPanel implements CallBack {
     private LeftMenu leftMenu;
 
     private LocalWindowPane localPanel;
-    private StoreWindowPane storePanel;
+    private StoreWindowManager storePanel;
     private boolean isLocalPaneDisplayed;
 
     private Warning warning;
@@ -42,7 +41,7 @@ public class MainPanel extends BackgroundImgPanel implements CallBack {
         setLayout(new BorderLayout());
 
         localPanel = new LocalWindowPane(context);
-        storePanel = new StoreWindowPane(context);
+        storePanel = new StoreWindowManager(context);
 
         /*
     Content panel holds both local and store panels as over layout, switches the visibility
@@ -97,6 +96,15 @@ public class MainPanel extends BackgroundImgPanel implements CallBack {
         warning = new Warning(msg, status, icon, callable == null ? this : callable);
         add(warning, BorderLayout.NORTH);
         revalidate();
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            closeWarning();
+        }).start();
     }
 
     public void closeWarning() {
@@ -108,8 +116,13 @@ public class MainPanel extends BackgroundImgPanel implements CallBack {
         repaint();
     }
 
+    public LocalWindowPane getLocalPanel() {
+        return localPanel;
+    }
+
     @Override
-    public void callBack() {
+    public Void callBack() {
         closeWarning();
+        return null;
     }
 }

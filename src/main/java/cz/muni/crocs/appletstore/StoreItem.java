@@ -1,7 +1,10 @@
 package cz.muni.crocs.appletstore;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.ui.CustomFont;
+import org.json.simple.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +19,7 @@ public class StoreItem extends JPanel implements Item {
 
     private String searchQuery;
 
-    public StoreItem(String title, String imgName, String author, String version) throws IOException {
+    public StoreItem(String title, String author, String version, String image) {
         searchQuery = title + author;
         setLayout(new GridBagLayout());
         setOpaque(false);
@@ -28,7 +31,7 @@ public class StoreItem extends JPanel implements Item {
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel icon = new JLabel(
-                "<html><img src=\"file:///" + getImgAddress(imgName) +"\" width=\"130\" height=\"130\"/> </html>");
+                "<html><img src=\"file:///" + getImgAddress(image) + "\" width=\"130\" height=\"130\"/> </html>");
         add(icon, gbc);
 
         JPanel container = new JPanel();
@@ -63,6 +66,15 @@ public class StoreItem extends JPanel implements Item {
         gbc.gridx = 0;
         gbc.gridy = 1;
         add(container, gbc);
+    }
+
+    public StoreItem(JsonObject dataSet) {
+        this(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
+                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
+                dataSet.get(Config.JSON_TAG_LATEST).getAsString(),
+                dataSet.get(Config.JSON_TAG_ICON).getAsString()
+                );
+
     }
 
     //todo decide: html approach new Label("html")

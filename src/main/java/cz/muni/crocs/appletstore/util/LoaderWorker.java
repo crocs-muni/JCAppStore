@@ -24,13 +24,7 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
         info = "Detecting cards...";
         Sources.setupManager();
         info = "Creating window...";
-        //sleep for 1s to be visible if loaded quickly
-        //(the loading may take time, if card is not responding..)
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         setProgress(getMaximum());
         return null;
     }

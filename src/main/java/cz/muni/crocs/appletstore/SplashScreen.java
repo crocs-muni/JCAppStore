@@ -32,7 +32,7 @@ public class SplashScreen extends JWindow {
         setSize(370, 215);
         setLocationRelativeTo(null);
         setVisible(true);
-        new Thread((SwingWorker) loader).start();
+        new Thread(loader).start();
     }
 
     private void loadProgressBar() {

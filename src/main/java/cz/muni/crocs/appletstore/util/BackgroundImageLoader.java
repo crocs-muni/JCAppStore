@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.Informer;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -11,7 +12,6 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 
 /**

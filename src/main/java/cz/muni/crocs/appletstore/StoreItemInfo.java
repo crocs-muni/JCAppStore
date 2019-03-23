@@ -8,7 +8,6 @@ import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.Informer;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.URLAdapter;

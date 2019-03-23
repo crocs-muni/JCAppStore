@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.util.Sources;
@@ -20,11 +21,11 @@ public class DeleteDialogWindow extends JPanel {
     private JCheckBox forceUninstall = new JCheckBox();
     private JCheckBox advanced = new JCheckBox();
 
-    private AppletInfo.HasKeys keys;
+    private KeysPresence keys;
     private GPRegistryEntry.Kind kind;
 
 
-    public DeleteDialogWindow(String aid, GPRegistryEntry.Kind kind, AppletInfo.HasKeys hasKeys) {
+    public DeleteDialogWindow(String aid, GPRegistryEntry.Kind kind, KeysPresence hasKeys) {
 
         this.keys = hasKeys;
         this.kind = kind;
@@ -65,10 +66,10 @@ public class DeleteDialogWindow extends JPanel {
      * @return null if ok, otherwise msg warning
      */
     public String confirm() {
-        if (keys == AppletInfo.HasKeys.PRESENT) {
+        if (keys == KeysPresence.PRESENT) {
             return Sources.language.get("applet") + Sources.language.get("contains") + Sources.language.get("W_personal_data");
         }
-        if (keys == AppletInfo.HasKeys.UNKNOWN) {
+        if (keys == KeysPresence.UNKNOWN) {
             return Sources.language.get("applet") + Sources.language.get("may_contain") + Sources.language.get("W_personal_data");
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {

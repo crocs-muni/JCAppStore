@@ -1,10 +1,9 @@
-package cz.muni.crocs.appletstore.util;
+package cz.muni.crocs.appletstore;
 
 
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.MainPanel;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.Sources;
 
 /**
  * @author Jiří Horák
