@@ -52,7 +52,7 @@ public class BackgroundImgPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //TODO on smaller width/height jsut cut off
+        //TODO maybe remember the last diemnstions and rescale only once
         Image scaledImage = bg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH);
         g.drawImage(scaledImage, 0, 0, this);
     }

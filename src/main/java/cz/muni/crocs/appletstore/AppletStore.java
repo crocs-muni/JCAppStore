@@ -1,15 +1,13 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.Terminals;
+import cz.muni.crocs.appletstore.iface.CardManager;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
-import javax.swing.JFrame;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
@@ -24,17 +22,22 @@ import java.io.IOException;
 
 public class AppletStore extends JFrame {
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
+    public static final int PREFFERED_WIDTH = 1100;
+    public static final int PREFFERED_HEIGHT = 550;
 
     private boolean windowOpened = true;
     private GlassPaneBlocker blocker = new GlassPaneBlocker();
-    public static final int PREFFERED_WIDTH = 1100;
-    public static final int PREFFERED_HEIGHT = 550;
 
     private MainPanel window;
     private Menu menu;
 
+    public MainPanel getWindow() {
+        return window;
+    }
+
     public AppletStore() {
         logger.info("------- App started");
+
         setup();
         initComponents();
 
@@ -49,27 +52,16 @@ public class AppletStore extends JFrame {
 
     @Override
     public void setEnabled(boolean enabled) {
-        if (enabled) {
-            setGlassPane(null);
-        } else {
-            System.out.println("glass");
-            setGlassPane(blocker);
-            blocker.setVisible(true);
-        }
-    }
-
-    public MainPanel getWindow() {
-        return window;
+        getGlassPane().setVisible(!enabled);
+        revalidate();
+//        if (enabled) {
+//        } else {
+//        }
     }
 
     private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(Sources.sheet);
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            //ignore
-        }
         //setDefaultLookAndFeelDecorated(false);
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);
@@ -79,20 +71,19 @@ public class AppletStore extends JFrame {
         UIManager.put("MenuBar.borderColor", Color.BLACK);
     }
 
-
     private void initComponents() {
         try {
             setIconImage(ImageIO.read(new File(Config.IMAGE_DIR + "icon.png")));
         } catch (IOException e) {
             //ignore
         }
-
         setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
         window = new MainPanel(this);
         setContentPane(window);
 
         menu = new Menu(this);
         setJMenuBar(menu);
+        setGlassPane(blocker);
 
         //start routine
         checkTerminalsRoutine();
@@ -108,16 +99,19 @@ public class AppletStore extends JFrame {
         CardManager manager = Sources.manager;
 
         new Thread(() -> {
+            logger.info("------- routine started");
             while (windowOpened) {
                 try {
                     int result = manager.needsCardRefresh();
 
                     if (result > 0) {
                         if (result == 2) {
-                            SwingUtilities.invokeLater(() -> {
-                                window.getLocalPanel().updatePanes(Terminals.TerminalState.LOADING);
-                            });
-                            manager.refreshCard();
+                            try {
+                                SwingUtilities.invokeLater(() -> { setEnabled(false); });
+                                manager.refreshCard();
+                            } finally {
+                                SwingUtilities.invokeLater(() -> { setEnabled(true); });
+                            }
                         }
 
                         SwingUtilities.invokeLater(() -> {

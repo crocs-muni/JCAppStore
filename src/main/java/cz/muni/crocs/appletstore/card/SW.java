@@ -3,12 +3,17 @@ package cz.muni.crocs.appletstore.card;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.Sources;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 /**
  * SW constants from GPPro
  * @author Jiří Horák
  * @version 1.0
  */
 public class SW {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
     public static final short NO_SPECIFIC_DIAGNOSIS = 0x6400;
 
     public static final short INVALID_INS = 0x6D00;
@@ -33,20 +38,20 @@ public class SW {
 
     public static String getErrorCause(int sw, String msg) {
         switch (sw) {
-            case NO_SPECIFIC_DIAGNOSIS: return Sources.language.get("E_generic") + msg + Sources.language.get("search_SW") + sw + "'.";
-            case INVALID_INS: return Sources.language.get("E_invalid_INS");
-            case INVALID_CLA: return Sources.language.get("E_invalid_CLA");
-            case INVALID_P1P2: return Sources.language.get("E_invalid_P1P2");
-            case WRONG_LENGTH_LC: return Sources.language.get("E_invalid_LC");
-            case MEMORY_FAIL: return Sources.language.get("E_invalid_memory");
-            case MEMORY_FULL: return Sources.language.get("E_full_memory");
-            case INCORRECT_DATA: return Sources.language.get("E_invalid_data");
-            case SECURITY_STATUS_NOT_SATIFIED: return Sources.language.get("E_security_failure");
-            case CONDITIONS_OF_USE_NOT_SATISFIED: return Sources.language.get("E_use_failure");
-            case APP_OR_FILE_NOT_FOUND: return Sources.language.get("E_pkg_not_found");
-            case REFERENCED_DATA_NOT_FOUND: return Sources.language.get("E_data_not_found");
-            case CARD_LOCKED: return Sources.language.get("E_action_denied");
-            case FNC_NOT_SUPPORTED: return Sources.language.get("E_action_not_supported");
+            case NO_SPECIFIC_DIAGNOSIS: return textSrc.getString("E_generic") + msg + textSrc.getString("search_SW") + sw + "'.";
+            case INVALID_INS: return textSrc.getString("E_invalid_INS");
+            case INVALID_CLA: return textSrc.getString("E_invalid_CLA");
+            case INVALID_P1P2: return textSrc.getString("E_invalid_P1P2");
+            case WRONG_LENGTH_LC: return textSrc.getString("E_invalid_LC");
+            case MEMORY_FAIL: return textSrc.getString("E_invalid_memory");
+            case MEMORY_FULL: return textSrc.getString("E_full_memory");
+            case INCORRECT_DATA: return textSrc.getString("E_invalid_data");
+            case SECURITY_STATUS_NOT_SATIFIED: return textSrc.getString("E_security_failure");
+            case CONDITIONS_OF_USE_NOT_SATISFIED: return textSrc.getString("E_use_failure");
+            case APP_OR_FILE_NOT_FOUND: return textSrc.getString("E_pkg_not_found");
+            case REFERENCED_DATA_NOT_FOUND: return textSrc.getString("E_data_not_found");
+            case CARD_LOCKED: return textSrc.getString("E_action_denied");
+            case FNC_NOT_SUPPORTED: return textSrc.getString("E_action_not_supported");
             default: return msg;
         }
     }

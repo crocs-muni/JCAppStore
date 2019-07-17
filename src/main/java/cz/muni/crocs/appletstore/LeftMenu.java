@@ -14,12 +14,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class LeftMenu extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     //holds the content
     private JPanel container = new JPanel();
@@ -57,16 +60,14 @@ public class LeftMenu extends JPanel {
     public void buildMenuComponents() {
 
         searchPane = new JPanel();
-        searchPane.setLayout(new FlowLayout());
         searchPane.setOpaque(false);
         //set margin and size
         searchPane.setBorder(new CompoundBorder(
                 new EmptyBorder(5, 15, 15, 15), //outer margin
                 new MatteBorder(0, 0,5 ,0, Color.BLACK))); //inner nice bottom line
         searchPane.setMaximumSize( new Dimension(Integer.MAX_VALUE, 60));
-        searchPane.setOpaque(false); //transparent ?? or color
         //set search intpu text
-        searchInput = new InputHintTextField(Sources.language.get("search"));
+        searchInput = new InputHintTextField(textSrc.getString("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
         searchInput.setFont(CustomFont.plain);
         searchInput.setPreferredSize(new Dimension(160, 30));
@@ -80,12 +81,12 @@ public class LeftMenu extends JPanel {
         container.add(searchPane);
 
         //init button for local storage
-        setButton(local, Sources.language.get("my_card"), true); //TODO more terminals or cards?
+        setButton(local, textSrc.getString("my_card"), true); //TODO more terminals or cards?
         local.setBackground(choosedButtonBG);
         local.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(local);
         //init button for store
-        setButton(remote, Sources.language.get("app_store"), false);
+        setButton(remote, textSrc.getString("app_store"), false);
         remote.setOpaque(false);
         remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(remote);

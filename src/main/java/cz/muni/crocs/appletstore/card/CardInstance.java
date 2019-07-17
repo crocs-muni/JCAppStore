@@ -5,7 +5,7 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.card.command.List;
-import cz.muni.crocs.appletstore.util.IniParser;
+import cz.muni.crocs.appletstore.util.IniParserImpl;
 import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,8 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 public class CardInstance {
 
     private static final Logger logger = LoggerFactory.getLogger(CardInstance.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private String masterKey;
     private String keyType;
@@ -41,6 +44,10 @@ public class CardInstance {
     private CardDetails details;
     private CardTerminal terminal;
     private ArrayList<AppletInfo> applets;
+
+    public String getId() {
+        return id;
+    }
 
     //CARD STATE
     public enum CardState {
@@ -121,13 +128,13 @@ public class CardInstance {
             //todo ugly, but no code management
             switch (errormsg) {
                 case "SCardConnect got response 0x80100066":
-                    setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_no_reponse"), Sources.language.get("E_card_no_response"));
+                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_no_reponse"), textSrc.getString("E_card_no_response"));
                 case "SCardConnect got response 0x80100068":
                     //card ejected ignore this error
                     cleanWith(CardState.OK);
                     setRefresh();
                 default:
-                    setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_unkown"), Sources.language.get("W_no_translation") + e.getMessage());
+                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_unkown"), textSrc.getString("W_no_translation") + e.getMessage());
             }
             e.printStackTrace();
         }
@@ -172,7 +179,7 @@ public class CardInstance {
 
     private void updateCardAuth(boolean authenticated) {
         try {
-            IniParser parser = new IniParser(Config.INI_CARD_LIST, id);
+            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id);
             parser.addValue(Config.INI_KEY, masterKey)
                     .addValue(Config.INI_KEY_TYPE, keyType)
                     .addValue(Config.INI_DIVERSIFIER, divesifier)
@@ -191,7 +198,7 @@ public class CardInstance {
      * @return true if card info present and custom master key is set
      */
     private boolean saveDetailsAndCheckMasterKey() throws IOException {
-        IniParser parser = new IniParser(Config.INI_CARD_LIST, id);
+        IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id);
         if (parser.isHeaderPresent()) {
             masterKey = parser.getValue(Config.INI_KEY);
             keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
@@ -226,7 +233,7 @@ public class CardInstance {
     private void getCardListWithDefaultPassword() throws CardException {
 
         try {
-            IniParser parser = new IniParser(Config.INI_CARD_TYPES,
+            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_TYPES,
                     CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
             if (parser.isHeaderPresent()) {
                 masterKey = parser.getValue(Config.INI_KEY);
@@ -251,7 +258,7 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws CardException {
         if (! auth) {
             cleanWith(CardState.FAILED);
-            setError(CUSTOM_ERROR_BYTE, Sources.language.get("E_communication"), Sources.language.get("H_authentication"));
+            setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_communication"), textSrc.getString("H_authentication"));
             return;
         }
 
@@ -262,7 +269,6 @@ public class CardInstance {
 
     /**
      * Executes any desired command using secure channel
-     * TODO: (CENC+CMAC) security levels check if meets
      *
      * @param command command instance to execute
      * @throws CardException unable to perform command

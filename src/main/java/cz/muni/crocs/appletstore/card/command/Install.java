@@ -11,6 +11,8 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Modified install process from GPPro
@@ -19,6 +21,7 @@ import java.util.Arrays;
  * @version 1.0
  */
 public class Install extends GPCommand<Void> {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final CAPFile file;
     private String[] data;
@@ -26,7 +29,7 @@ public class Install extends GPCommand<Void> {
 
     public Install(CAPFile f, String[] data) {
         if (data != null && data.length != 3)
-            throw new IllegalArgumentException(Sources.language.get("E_install_invalid_data"));
+            throw new IllegalArgumentException(textSrc.getString("E_install_invalid_data"));
         this.file = f;
         this.data = data;
     }
@@ -73,7 +76,7 @@ public class Install extends GPCommand<Void> {
             } catch (GPException e) {
                 if (e.sw == 0x00) {
                     //to translate message
-                    throw new GPException(Sources.language.get("E_pkg_present"));
+                    throw new GPException(textSrc.getString("E_pkg_present"));
                 }
                 throw e;
             }
@@ -99,17 +102,14 @@ public class Install extends GPCommand<Void> {
 //        } else {
 //        }
 
-        //todo what privileges?
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
         privs.add(GPRegistryEntry.Privilege.CardReset);
-//        if (args.has(OPT_TERMINATE)) {
 
         // Remove existing default app
         if (force && (registry.getDefaultSelectedAID() != null && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             context.deleteAID(registry.getDefaultSelectedAID(), false);
         }
 
-        // warn
         if (context.getRegistry().allAppletAIDs().contains(finalAID)) {
             Informer.getInstance().showInfo("WARNING: Applet " + finalAID + " already present on card");
         }

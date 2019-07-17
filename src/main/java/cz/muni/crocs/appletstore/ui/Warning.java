@@ -9,12 +9,15 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class Warning extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     public enum Importance {
         FATAL, SEVERE, INFO
@@ -74,7 +77,7 @@ public class Warning extends JPanel {
                 iconRetry.setBorder(new EmptyBorder(0, 20, 0, 0));
                 add(iconRetry);
 
-                JLabel retry = new JLabel(Sources.language.get("retry"));
+                JLabel retry = new JLabel(textSrc.getString("retry"));
                 retry.setFont(CustomFont.plain.deriveFont(12f));
                 retry.setForeground(Color.BLACK);
                 add(retry);

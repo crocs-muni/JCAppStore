@@ -8,17 +8,16 @@ import javax.activation.FileDataSource;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-
-
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
- * //TODO implement or remove
- * //todo language
  *
  * @author Jiří Horák
  * @version 1.0
  */
 public class FeedbackFatalError {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final String system =
             System.getProperty("os.name") + "_" +
@@ -26,19 +25,22 @@ public class FeedbackFatalError {
                     System.getProperty("os.version");
 
     //TODO send us some info
-    public FeedbackFatalError(String title, String message, String description,
+    public FeedbackFatalError(String title, String description,
                               boolean notifyUs, final int messageType, Component parent) {
 
+        if (description == null)
+            description = textSrc.getString("unknown_error");
+
         if (notifyUs) {
-            FeedbackConfirmPane content = new FeedbackConfirmPane(message + description);
+            FeedbackConfirmPane content = new FeedbackConfirmPane(description);
 
             int result = JOptionPane.showOptionDialog(
                     parent,
                     content,
                     title,
                     JOptionPane.YES_NO_OPTION, messageType,
-                    new ImageIcon("src/main/resources/img/mail.png"),
-                    new String[]{"Send", "Don't send"},
+                    new ImageIcon("src/main/resources/img/bug.png"),
+                    new String[]{textSrc.getString("send"), textSrc.getString("send_not")},
                     "error");
 
             if (result == 0) {
@@ -47,12 +49,13 @@ public class FeedbackFatalError {
                 System.exit(result);
             }
         } else {
-            JOptionPane.showMessageDialog(null, message, title, messageType);
+            JOptionPane.showMessageDialog(null, description, title, messageType);
         }
     }
 
     private void sendMail(String msg, boolean attachLog) {
         //todo security check
+        //todo learn the mail sending now it cannot wotk without pwd which i wont paste
         EmailBuilder builder = new EmailBuilder().from("user", "unknown")
                 .to("J Horák", "horakj7@gmail.com").subject("JCAppStore Failure Report")
                 .text(msg);
@@ -62,24 +65,29 @@ public class FeedbackFatalError {
                     new FileDataSource(new File("log/jcAppStore.log")));
 
         //misuse google
-        new Mailer("smtp.gmail.com", 25, "horakj7@gmail.com", "xfc68c49",
+        new Mailer("smtp.gmail.com", 25, "horakj7@gmail.com", "",
                 TransportStrategy.SMTP_TLS).sendMail(builder.build());
     }
 
     private class FeedbackConfirmPane extends JPanel {
         private JCheckBox attachment = new JCheckBox("<html><div width=\"350px\">" +
-                "attach log info to help us identify the problem" +
-                "</div></html>");
-        private JTextArea area = new JTextArea(5, 30);
+                textSrc.getString("attachment") + "</div></html>");
+        private JTextArea area = new JTextArea(8, 12);
 
         FeedbackConfirmPane(String message) {
-            setLayout(new BorderLayout());
+            super(new BorderLayout());
+            add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "bug.png")));
+            add(new JLabel("<html><div width=400px>" + textSrc.getString("attachment_desc") + "</div>" +
+                    "<div>&emsp;</div></html>"), BorderLayout.NORTH);
+
             area.setText(message);
+            area.setFont(Font.decode(Font.SANS_SERIF).deriveFont(12.f));
             area.setBorder(BorderFactory.createCompoundBorder(
                     area.getBorder(),
                     BorderFactory.createEmptyBorder(5, 5, 5, 5)));
             add(area, BorderLayout.CENTER);
             add(attachment, BorderLayout.SOUTH);
+            attachment.setSelected(true);
         }
 
         boolean hasAttachment() {

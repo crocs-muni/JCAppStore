@@ -11,12 +11,16 @@ import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class DeleteAction extends MouseAdapter {
+
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletInfo info;
     private final OnEventCallBack<Void, Void, Void> call;
@@ -38,7 +42,7 @@ public class DeleteAction extends MouseAdapter {
         }
 
         DeleteDialogWindow opts = new DeleteDialogWindow(info.getAid().toString(), info.getKind(), info.hasKeys());
-        switch (showDialog(Sources.language.get("CAP_delete_applet"), opts, "delete.png", "delete")) {
+        switch (showDialog(textSrc.getString("CAP_delete_applet"), opts, "delete.png", "delete")) {
             case JOptionPane.NO_OPTION:
             case JOptionPane.CLOSED_OPTION:
                 return;
@@ -47,7 +51,7 @@ public class DeleteAction extends MouseAdapter {
 
         String msg = opts.confirm();
         if (msg != null) {
-            switch (showDialog(Sources.language.get("W_"), msg, "error.png", "delete_anyway")) {
+            switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
                 case JOptionPane.NO_OPTION:
                 case JOptionPane.CLOSED_OPTION:
                     return;
@@ -62,8 +66,8 @@ public class DeleteAction extends MouseAdapter {
         } catch (CardException ex) {
             ex.printStackTrace();
             //todo log and notify try to get better result
-            showFailed(Sources.language.get("delete_failed"),
-                    Sources.language.get("E_generic") + ex.getMessage());
+            showFailed(textSrc.getString("delete_failed"),
+                    textSrc.getString("E_generic") + ex.getMessage());
 
             SwingUtilities.invokeLater(call::onFail);
         }
@@ -79,7 +83,7 @@ public class DeleteAction extends MouseAdapter {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + imgname),
-                new String[]{Sources.language.get(confirmBtnKey), Sources.language.get("cancel")},
+                new String[]{textSrc.getString(confirmBtnKey), textSrc.getString("cancel")},
                 "error");
     }
 

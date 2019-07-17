@@ -1,12 +1,10 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.FeedbackFatalError;
 import cz.muni.crocs.appletstore.OptionsManager;
-import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.CardManagerImpl;
+import cz.muni.crocs.appletstore.iface.CardManager;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 
-import javax.smartcardio.Card;
-import javax.swing.*;
 import javax.swing.text.html.StyleSheet;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -21,18 +19,16 @@ import java.util.HashMap;
 public class Sources {
 
     public static HashMap<String, String> options;
-    public static Language language;
     public static CardManager manager;
     public final static StyleSheet sheet = new StyleSheet();
 
     public static void generalSetupAndLoadOptions() {
         options = OptionsManager.getFileOptions();
         CustomFont.refresh();
-        language = new Language("en");
     }
 
     public static void setupManager() {
-        manager = new CardManager();
+        manager = new CardManagerImpl();
         manager.needsCardRefresh();
         manager.refreshCard();
     }

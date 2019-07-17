@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.iface.IniParser;
 import org.ini4j.Ini;
 
 import java.io.File;
@@ -11,12 +11,12 @@ import java.util.Arrays;
  * @author Jiří Horák
  * @version 1.0
  */
-public class IniParser {
+public class IniParserImpl implements IniParser {
 
     private Ini ini;
     private String header;
 
-    public IniParser(File file, String header) throws IOException {
+    public IniParserImpl(File file, String header) throws IOException {
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -24,7 +24,7 @@ public class IniParser {
         this.header = header;
     }
 
-    public IniParser(String path,  String header) throws IOException {
+    public IniParserImpl(String path, String header) throws IOException {
         this(new File(path), header);
     }
 
@@ -33,12 +33,12 @@ public class IniParser {
         return (value == null) ? "" : value.trim();
     }
 
-    public IniParser addValue(String key, String value) {
+    public IniParserImpl addValue(String key, String value) {
         ini.put(header, key, value);
         return this;
     }
 
-    public IniParser addValue(String key, byte[] value) {
+    public IniParserImpl addValue(String key, byte[] value) {
         ini.put(header, key, Arrays.toString(value));
         return this;
     }

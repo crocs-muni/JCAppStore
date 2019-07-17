@@ -2,8 +2,9 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.action.InstallAction;
 import cz.muni.crocs.appletstore.card.CardInstance;
-import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.CardManagerImpl;
 import cz.muni.crocs.appletstore.card.Terminals;
+import cz.muni.crocs.appletstore.iface.CardManager;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
@@ -22,10 +23,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
-import java.util.TreeSet;
 
 
 /**
@@ -35,6 +34,7 @@ import java.util.TreeSet;
 public class LocalWindowPane extends DisablePanel implements Searchable, OnEventCallBack<Void, Void, Void> {
 
     private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletStore context;
     private LocalItemInfo infoLayout = new LocalItemInfo(this);
@@ -82,7 +82,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
     }
 
     private void addError(String imageName, String titleKey) {
-        add(new ErrorPane(Sources.language.get(titleKey), imageName));
+        add(new ErrorPane(textSrc.getString(titleKey), imageName));
     }
 
     public void updatePanes(Terminals.TerminalState state) {
@@ -144,7 +144,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
                 return false;
             case FAILED:
                 if (items.isEmpty())
-                    add(new ErrorPane(Sources.language.get("E_communication"),
+                    add(new ErrorPane(textSrc.getString("E_communication"),
                             manager.getErrorCause(), "announcement_white.png"));
                 else
                     Informer.getInstance().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
@@ -156,26 +156,26 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
 
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
-            add(new ErrorPane(Sources.language.get("E_authentication"), Sources.language.get("H_authentication"), "announcement_white.png"));
+            add(new ErrorPane(textSrc.getString("E_authentication"), textSrc.getString("H_authentication"), "announcement_white.png"));
             return false;
         }
         switch (isdLifeState) {
             case 0x1:
                 return true;
             case 0x7:
-                add(new ErrorPane(Sources.language.get("E_initialized"), Sources.language.get("H_initialized"), "announcement_white.png"));
+                add(new ErrorPane(textSrc.getString("E_initialized"), textSrc.getString("H_initialized"), "announcement_white.png"));
                 return false;
             case 0xF:
-                add(new ErrorPane(Sources.language.get("E_secure_state"), Sources.language.get("H_secure_state"), "announcement_white.png"));
+                add(new ErrorPane(textSrc.getString("E_secure_state"), textSrc.getString("H_secure_state"), "announcement_white.png"));
                 return false;
             case 0x7F:
-                add(new ErrorPane(Sources.language.get("E_locked"), Sources.language.get("H_locked"), "announcement_white.png"));
+                add(new ErrorPane(textSrc.getString("E_locked"), textSrc.getString("H_locked"), "announcement_white.png"));
                 return false;
             case 0xFF:
-                add(new ErrorPane(Sources.language.get("E_terminated"), Sources.language.get("H_terminated"), "announcement_white.png"));
+                add(new ErrorPane(textSrc.getString("E_terminated"), textSrc.getString("H_terminated"), "announcement_white.png"));
                 return false;
             default:
-                add(new ErrorPane(Sources.language.get("E_no_life_state"), Sources.language.get("H_no_life_state"), "announcement_white.png"));
+                add(new ErrorPane(textSrc.getString("E_no_life_state"), textSrc.getString("H_no_life_state"), "announcement_white.png"));
                 return false;
         }
     }
@@ -205,7 +205,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
     private void showPanel(Collection<LocalItem> sortedItems) {
         windowLayout.removeAll();
         if (sortedItems.size() == 0) {
-            windowLayout.add(new LocalItem(Sources.language.get("no_results"), "no_results.png", "", "", null));
+            windowLayout.add(new LocalItem(textSrc.getString("no_results"), "no_results.png", "", "", null));
         } else {
             for (LocalItem item : sortedItems) {
                 windowLayout.add(item);

@@ -12,10 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Jiří Horák
@@ -24,6 +21,7 @@ import java.util.List;
 public class JSONStoreParser {
 
     private static File info;
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private static File getFileInfo() {
         if (info == null) {
@@ -36,7 +34,7 @@ public class JSONStoreParser {
 
     private static boolean verifyInfoFile() {
         info = new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                + Sources.options.get(Config.OPT_KEY_LANGUAGE)
+                + textSrc.getString(Config.OPT_KEY_LANGUAGE)
                 + Config.FILE_INFO_SUFFIX);
         if (!info.exists()) {
             info = new File(Config.APP_STORE_DIR,Config.FILE_INFO_PREFIX + "en" + Config.FILE_INFO_SUFFIX);

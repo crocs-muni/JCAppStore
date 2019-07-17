@@ -7,6 +7,8 @@ import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 
 import javax.smartcardio.CardException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Modified install process from GPPro
@@ -16,12 +18,14 @@ import javax.smartcardio.CardException;
  */
 public class Delete extends GPCommand<Void> {
 
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
     private boolean force;
     private AppletInfo toDelete;
 
     public Delete(AppletInfo nfo, boolean force) {
         if (nfo == null)
-            throw new IllegalArgumentException(Sources.language.get("E_delete_invalid_data"));
+            throw new IllegalArgumentException(textSrc.getString("E_delete_invalid_data"));
         this.toDelete = nfo;
         this.force = force;
     }

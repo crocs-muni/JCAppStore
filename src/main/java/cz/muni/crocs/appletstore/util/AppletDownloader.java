@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -23,6 +25,8 @@ import java.util.zip.ZipInputStream;
 public class AppletDownloader {
 
     private static final Logger logger = LogManager.getLogger(AppletDownloader.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
     private File zipFile = new File(Config.APP_STORE_DIR, "JCAppStoreContent.zip");
     private String address;
     private int downloaded = 0;
@@ -40,16 +44,16 @@ public class AppletDownloader {
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
         if (!downloadZip(address)) {
             System.out.println("failed to download");
-            parent.setLoaderMessage(Sources.language.get("failed"));
+            parent.setLoaderMessage(textSrc.getString("failed"));
             return false;
         }
         if (downloaded != size || !unZipIt()) {
             System.out.println("failed to unzip");
 
-            parent.setLoaderMessage(Sources.language.get("failed"));
+            parent.setLoaderMessage(textSrc.getString("failed"));
             return false;
         }
-        parent.setLoaderMessage(Sources.language.get("done"));
+        parent.setLoaderMessage(textSrc.getString("done"));
         zipFile.delete();
         return true;
     }
@@ -98,7 +102,7 @@ public class AppletDownloader {
     Corrected errors, the srouce code on the website is wrong, at least for windows.
      */
     private boolean unZipIt() {
-        parent.setLoaderMessage(Sources.language.get("unzip"));
+        parent.setLoaderMessage(textSrc.getString("unzip"));
         ZipInputStream input;
         ZipEntry entry;
         try {

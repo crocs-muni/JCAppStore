@@ -14,12 +14,15 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class LocalItemInfo extends HintPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletInfo nfo;
     private HintLabel name = new HintLabel();
@@ -62,17 +65,17 @@ public class LocalItemInfo extends HintPanel {
         domain.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(domain, "span 2, wrap");
 
-        JLabel title = new JLabel(Sources.language.get("management"));
+        JLabel title = new JLabel(textSrc.getString("management"));
         title.setFont(CustomFont.plain.deriveFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
-        rawApdu = new JLabel(Sources.language.get("custom_command"), new ImageIcon(
+        rawApdu = new JLabel(textSrc.getString("custom_command"), new ImageIcon(
                 Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         rawApdu.addMouseListener(send);
         add(rawApdu, "wrap");
 
-        uninstall = new JLabel(Sources.language.get("uninstall"), new ImageIcon(
+        uninstall = new JLabel(textSrc.getString("uninstall"), new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(delete);
@@ -83,19 +86,19 @@ public class LocalItemInfo extends HintPanel {
         delete.setInfo(info);
         send.setInfo(info);
         name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
-                Sources.language.get("H_name"));
-        author.setText("<html><p width=\"280\">" + Sources.language.get("author") +
+                textSrc.getString("H_name"));
+        author.setText("<html><p width=\"280\">" + textSrc.getString("author") +
                 info.getAuthor() + "</p></html>");
-        version.setText("<html><p width=\"280\">" + Sources.language.get("version") +
+        version.setText("<html><p width=\"280\">" + textSrc.getString("version") +
                 ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
-                Sources.language.get("H_version"));
+                textSrc.getString("H_version"));
         id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
-                Sources.language.get("H_id"));
-        type.setText("<html><p width=\"280\">" + Sources.language.get("type") +
-                getType(info.getKind()) + "</p></html>", Sources.language.get("H_type"));
-        domain.setText("<html><p width=\"280\">" + Sources.language.get("sd_assigned") +
+                textSrc.getString("H_id"));
+        type.setText("<html><p width=\"280\">" + textSrc.getString("type") +
+                getType(info.getKind()) + "</p></html>", textSrc.getString("H_type"));
+        domain.setText("<html><p width=\"280\">" + textSrc.getString("sd_assigned") +
                 ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()),
-                Sources.language.get("H_sd_assinged"));
+                textSrc.getString("H_sd_assinged"));
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);

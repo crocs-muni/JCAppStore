@@ -2,16 +2,22 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.card.CapFileChooser;
+import cz.muni.crocs.appletstore.iface.IniParser;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.IniParserImpl;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -25,12 +31,17 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class StoreItemInfo extends HintPanel {
+
+    private static final Logger logger = LoggerFactory.getLogger(StoreItemInfo.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
@@ -66,7 +77,7 @@ public class StoreItemInfo extends HintPanel {
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
-        JButton install = new JButton("<html><div style=\"margin: 1px 10px;\">" + Sources.language.get("CAP_install") + "</div></html>");
+        JButton install = new JButton("<html><div style=\"margin: 1px 10px;\">" + textSrc.getString("CAP_install") + "</div></html>");
         install.setUI(new CustomButtonUI());
         install.setFont(CustomFont.plain.deriveFont(Font.BOLD, 20f));
         install.setForeground(Color.WHITE);
@@ -80,18 +91,16 @@ public class StoreItemInfo extends HintPanel {
 
                 File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
                         app_name + Config.SEP + app_name + "_v" + latestV +
-                        "_sdk" + sdks.get(sdks.size() - 1).getAsString() + ".casp");
-                //todo remove casp
-                System.out.println(file.getName());
-                System.out.println(file.getAbsolutePath());
+                        "_sdk" + sdks.get(sdks.size() - 1).getAsString() + ".cap");
                 if (!file.exists()) {
                     Informer.getInstance().showWarningToClose("E_install_not_found", Warning.Importance.INFO);
                 }
+
             }
         });
         add(install, "align right, span 1 2, wrap");
 
-        JLabel author = new JLabel(Sources.language.get("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
+        JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
         author.setFont(CustomFont.plain.deriveFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
 
@@ -102,7 +111,7 @@ public class StoreItemInfo extends HintPanel {
         mainInfo.setOpaque(true);
         mainInfo.setEditable(false);
         mainInfo.setBorder(null);
-        ((DefaultCaret)mainInfo.getCaret()).setUpdatePolicy(0);
+        ((DefaultCaret) mainInfo.getCaret()).setUpdatePolicy(0);
         add(mainInfo, "span 4, gap 20, wrap");
 
         //WEBSITE
@@ -128,7 +137,7 @@ public class StoreItemInfo extends HintPanel {
         installInfo.setOpaque(true);
         installInfo.setEditable(false);
         installInfo.setBorder(null);
-        ((DefaultCaret)installInfo.getCaret()).setUpdatePolicy(0);
+        ((DefaultCaret) installInfo.getCaret()).setUpdatePolicy(0);
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
 
         //VERSION
@@ -156,7 +165,7 @@ public class StoreItemInfo extends HintPanel {
         compilerVersionComboBox.setMaximumRowCount(7);
         add(compilerVersionComboBox, "align right");
 
-        JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + Sources.language.get("CAP_install") + "</div></html>");
+        JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + textSrc.getString("CAP_install") + "</div></html>");
         customInstall.setUI(new CustomButtonUI());
         customInstall.setFont(CustomFont.plain.deriveFont(Font.BOLD, 18f));
         customInstall.setForeground(Color.WHITE);
@@ -166,15 +175,13 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
-        HintLabel title = new HintLabel(Sources.language.get(titleKey), Sources.language.get(hintKey));
+        HintLabel title = new HintLabel(textSrc.getString(titleKey), textSrc.getString(hintKey));
         title.setFont(titleFont);
         title.setFocusable(true);
         title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
         add(title, "span 4, gaptop 20, wrap");
     }
 
-
-    //todo or java resize approach new Label(imageIcon)
     private ImageIcon getIcon(String image) {
         File img = new File(Config.RESOURCES + image);
         img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
@@ -199,4 +206,5 @@ public class StoreItemInfo extends HintPanel {
         graphics2D.dispose();
         return new ImageIcon(newIcon);
     }
+
 }

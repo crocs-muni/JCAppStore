@@ -19,12 +19,16 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class Settings extends JPanel {
+
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private String bgImg = Sources.options.get(Config.OPT_KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
@@ -54,11 +58,11 @@ public class Settings extends JPanel {
     }
 
     private void addBackground() {
-        addTitleLabel(Sources.language.get("background"), "span 3, wrap");
+        addTitleLabel(textSrc.getString("background"), "span 3, wrap");
 
         String path = Sources.options.get(Config.OPT_KEY_BACKGROUND);
         if (path.equals(defaultBgPath)) {
-            path = Sources.language.get("default");
+            path = textSrc.getString("default");
             slider.setEnabled(false);
         }
         cutString(path);
@@ -72,10 +76,10 @@ public class Settings extends JPanel {
 
         add(new JLabel()); //empty space
 
-        JButton defaultBg = new JButton(new AbstractAction(Sources.language.get("reset_default")) {
+        JButton defaultBg = new JButton(new AbstractAction(textSrc.getString("reset_default")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                bgImg = Sources.language.get("default");
+                bgImg = textSrc.getString("default");
                 bgValue.setText(bgImg);
                 slider.setValue(1);
                 slider.setEnabled(false);
@@ -83,7 +87,7 @@ public class Settings extends JPanel {
         });
         add(defaultBg, "align right");
 
-        JButton getNewBg = new JButton(new AbstractAction(Sources.language.get("change")) {
+        JButton getNewBg = new JButton(new AbstractAction(textSrc.getString("change")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
@@ -102,13 +106,13 @@ public class Settings extends JPanel {
         add(getNewBg, "align right, wrap");
 
         //blur option
-        addTitleLabel(Sources.language.get("blur"), "");
+        addTitleLabel(textSrc.getString("blur"), "");
         slider.setEnabled(false);
         add(slider, "w 180, align right, span 2, wrap");
     }
 
     private void addLanguage() {
-        addTitleLabel(Sources.language.get("language"), "");
+        addTitleLabel(textSrc.getString("language"), "");
 
         languageBox = new JComboBox<>(langs);
         CustomComboBoxItem listItems = new CustomComboBoxItem();
@@ -118,7 +122,7 @@ public class Settings extends JPanel {
     }
 
     private void addHint() {
-        addTitleLabel(Sources.language.get("enable_hints"), "");
+        addTitleLabel(textSrc.getString("enable_hints"), "");
         hintEnabled.setSelected(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
         add(hintEnabled, "align left, span 2, w 180, wrap");
     }
@@ -142,7 +146,7 @@ public class Settings extends JPanel {
         if (bgImg.equals(Sources.options.get(Config.OPT_KEY_BACKGROUND))) {
             return;
         }
-        if (bgImg.equals(Sources.language.get("default"))) {
+        if (bgImg.equals(textSrc.getString("default"))) {
             try {
                 Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
                 ((BackgroundImgPanel) context.getContentPane()).setNewBackground(
@@ -180,8 +184,8 @@ public class Settings extends JPanel {
      */
     private void showAlertChange() {
         JOptionPane.showMessageDialog(null,
-                Sources.language.get("reset_to_apply"),
-                Sources.language.get("reset_to_apply_title"),
+                textSrc.getString("reset_to_apply"),
+                textSrc.getString("reset_to_apply_title"),
                 JOptionPane.INFORMATION_MESSAGE);
     }
 }

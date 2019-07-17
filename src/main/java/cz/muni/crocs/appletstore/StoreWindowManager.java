@@ -16,6 +16,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +29,8 @@ import java.util.concurrent.TimeoutException;
 public class StoreWindowManager extends JPanel implements Runnable, CallBack<Void>, Searchable {
 
     private static final Logger logger = LogManager.getLogger(StoreWindowManager.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
     private AppletStore context;
     private Component currentComponent = null;
     private Searchable store;
@@ -94,16 +98,16 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
                 return;
             case TIMEOUT:
                 setStatus(StoreState.UNINITIALIZED);
-                putNewPane(new ErrorPane(Sources.language.get("E_store_timeout"),
+                putNewPane(new ErrorPane(textSrc.getString("E_store_timeout"),
                         "error.png", this), false);
                 return;
             case FAILED:
                 setStatus(StoreState.UNINITIALIZED);
-                putNewPane(new ErrorPane(Sources.language.get("E_store_generic"),
+                putNewPane(new ErrorPane(textSrc.getString("E_store_generic"),
                         "error.png", this), false);
                 return;
             case NO_CONNECTION:
-                context.getWindow().showWarning(Sources.language.get("W_internet"),
+                context.getWindow().showWarning(textSrc.getString("W_internet"),
                         Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
                 setupWindow();
                 return;
@@ -133,7 +137,7 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
      */
     private void addLoading(DownloaderWorker downloader) {
         final LoadingPane loadingPane =
-                new LoadingPane(Sources.language.get("waiting_internet"));
+                new LoadingPane(textSrc.getString("waiting_internet"));
         putNewPane(loadingPane, true);
         new Thread(() -> {
             try {
@@ -189,7 +193,7 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
     }
 
     private void setFailed() {
-        putNewPane(new ErrorPane(Sources.language.get("W_store_loading"),
+        putNewPane(new ErrorPane(textSrc.getString("W_store_loading"),
                 "error.png", this), false);
         setStatus(StoreState.UNINITIALIZED);
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);

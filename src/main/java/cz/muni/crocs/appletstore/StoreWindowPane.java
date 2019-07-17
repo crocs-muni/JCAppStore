@@ -21,8 +21,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +37,7 @@ import static cz.muni.crocs.appletstore.StoreWindowManager.StoreState.*;
 public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private static final Logger logger = LogManager.getLogger(StoreWindowPane.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
@@ -87,7 +87,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private void showPanel(Collection<StoreItem> sortedItems) {
         storeLayout.removeAll();
         if (sortedItems.size() == 0) {
-            storeLayout.add(new StoreItem(Sources.language.get("no_results"),
+            storeLayout.add(new StoreItem(textSrc.getString("no_results"),
                     "no_results.png", "", ""));
         } else {
             for (StoreItem item : sortedItems) {

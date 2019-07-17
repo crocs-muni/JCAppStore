@@ -12,15 +12,18 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class InstallDialogWindow extends JPanel {
+
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JTextField installParams = new JTextField(50);
     private JCheckBox forceInstall = new JCheckBox();
@@ -33,13 +36,14 @@ public class InstallDialogWindow extends JPanel {
     public InstallDialogWindow(CAPFile file) {
 
         setLayout(new MigLayout("width 250px"));
-        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("W_do_not_unplug") + "</p></html>"),
-                "wrap, span 5, gapbottom 10");
+        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("W_do_not_unplug") +
+                        "</p></html>"), "wrap, span 5, gapbottom 10");
 
-        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("pkg_id") + file.getPackageAID().toString() +
-               "</p></html>"), "wrap, span 5, gapbottom 20");
+        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("pkg_id") +
+                file.getPackageAID().toString() + "</p></html>"),
+                "wrap, span 5, gapbottom 20");
 
-        JLabel more = new JLabel(Sources.language.get("advanced_settings"));
+        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
         more.setFont(CustomFont.plain.deriveFont(Font.BOLD, 12f));
         add(more, "span 2");
 
@@ -55,7 +59,7 @@ public class InstallDialogWindow extends JPanel {
 
         add(getHint("H_advanced_syntax", "300"), "wrap");
 
-        add(new JLabel(Sources.language.get("install_params")), "span 2");
+        add(new JLabel(textSrc.getString("install_params")), "span 2");
         installParams.setEnabled(false);
         installParams.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -76,7 +80,7 @@ public class InstallDialogWindow extends JPanel {
         add(installParams, "span 3, wrap");
         add(getHint("H_install_params", "600"), "span 5, wrap");
 
-        add(new JLabel(Sources.language.get("applet_ids")), "span 2");
+        add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
         addAllAppletCustomAIDSFields(file.getAppletAIDs());
 
@@ -84,7 +88,7 @@ public class InstallDialogWindow extends JPanel {
 
         add(forceInstall);
         forceInstall.setEnabled(false);
-        add(new JLabel(Sources.language.get("force_install")), "span 4, wrap");
+        add(new JLabel(textSrc.getString("force_install")), "span 4, wrap");
         add(getHint("H_force_install", "600"), "span 5, wrap");
     }
 
@@ -141,7 +145,7 @@ public class InstallDialogWindow extends JPanel {
 
     private JLabel getHint(String langKey, String width) {
         JLabel hint = new JLabel("<html><p width=\"" +
-                width + "\">" + Sources.language.get(langKey) + "</p></html>");
+                width + "\">" + textSrc.getString(langKey) + "</p></html>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }

@@ -14,6 +14,8 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Notif frames for the left menu
@@ -22,6 +24,7 @@ import java.io.IOException;
  * @version 1.0
  */
 public class NotifLabel extends JLabel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private Shape close = new Rectangle(202, 6, 12, 12);
     private NotifLabel self = this;
@@ -47,7 +50,7 @@ public class NotifLabel extends JLabel {
                 } else {
                     JOptionPane.showMessageDialog(
                             parent.getParent(), new JLabel("<html><p width=\"250\">" + msg + "</p></html>"),
-                            Sources.language.get("event"),
+                            textSrc.getString("event"),
                             JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "label.png"));
                 }
             }

@@ -5,11 +5,16 @@ import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.Sources;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class Informer {
+
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private static Informer informer = null;
     private MainPanel context;
@@ -35,7 +40,7 @@ public class Informer {
     }
 
     public void showWarningToClose(String langKey, Warning.Importance status) {
-        context.showWarning(Sources.language.get(langKey), status, Warning.CallBackIcon.CLOSE, context);
+        context.showWarning(textSrc.getString(langKey), status, Warning.CallBackIcon.CLOSE, context);
     }
 
     public void closeWarning() {

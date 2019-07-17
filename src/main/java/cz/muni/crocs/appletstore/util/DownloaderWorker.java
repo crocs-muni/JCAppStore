@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
@@ -15,6 +17,8 @@ import javax.swing.*;
 public class DownloaderWorker extends SwingWorker<String, Object> implements ProcessTrackable {
 
     private static final Logger logger = LogManager.getLogger(DownloaderWorker.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
     private StoreWindowManager parent;
 
     public DownloaderWorker(StoreWindowManager parent) {
@@ -30,17 +34,17 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         setProgress(0);
 
         String[] storeInfo = InternetConnection.checkAndGetLatestReleaseVersion(
-                Sources.options.get(Config.OPT_KEY_GITHUB_LATEST_VERSION)
+                textSrc.getString(Config.OPT_KEY_GITHUB_LATEST_VERSION)
         );
 
         if (storeInfo == null) {
             setProgress(100);
-            setLoaderMessage(Sources.language.get("E_no_internet"));
+            setLoaderMessage(textSrc.getString("E_no_internet"));
             parent.setStatus(StoreWindowManager.StoreState.NO_CONNECTION);
             return "done";
         } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
             setProgress(100);
-            setLoaderMessage(Sources.language.get("done"));
+            setLoaderMessage(textSrc.getString("done"));
             parent.setStatus(StoreWindowManager.StoreState.REBUILD);
             return "done";
         }

@@ -11,12 +11,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class DeleteDialogWindow extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JCheckBox forceUninstall = new JCheckBox();
     private JCheckBox advanced = new JCheckBox();
@@ -31,13 +34,13 @@ public class DeleteDialogWindow extends JPanel {
         this.kind = kind;
 
         setLayout(new MigLayout("width 250px"));
-        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("advanced_settings") + "</p></html>"),
+        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("advanced_settings") + "</p></html>"),
                 "wrap, span 5, gapbottom 10");
 
-        add(new JLabel("<html><p width=\"600\">" + Sources.language.get("pkg_id") + aid +
+        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("pkg_id") + aid +
                "</p></html>"), "wrap, span 5, gapbottom 20");
 
-        JLabel more = new JLabel(Sources.language.get("advanced_settings"));
+        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
         more.setFont(CustomFont.plain.deriveFont(Font.BOLD, 12f));
         add(more, "span 2");
 
@@ -51,12 +54,12 @@ public class DeleteDialogWindow extends JPanel {
 
         add(forceUninstall);
         forceUninstall.setEnabled(false);
-        add(new JLabel(Sources.language.get("chbox_force_delete")), "span 4, wrap");
+        add(new JLabel(textSrc.getString("chbox_force_delete")), "span 4, wrap");
         add(getHint("chbox_force_delete_expl"), "span 5, wrap");
     }
 
     private JLabel getHint(String key) {
-        JLabel hint = new JLabel("<html><p width=\"600\">" + Sources.language.get(key) + "</p></html>");
+        JLabel hint = new JLabel("<html><p width=\"600\">" + textSrc.getString(key) + "</p></html>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
@@ -67,13 +70,13 @@ public class DeleteDialogWindow extends JPanel {
      */
     public String confirm() {
         if (keys == KeysPresence.PRESENT) {
-            return Sources.language.get("applet") + Sources.language.get("contains") + Sources.language.get("W_personal_data");
+            return textSrc.getString("applet") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
         }
         if (keys == KeysPresence.UNKNOWN) {
-            return Sources.language.get("applet") + Sources.language.get("may_contain") + Sources.language.get("W_personal_data");
+            return textSrc.getString("applet") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {
-            return Sources.language.get("E_delete_sd"); //todo allow deleting SD?
+            return textSrc.getString("E_delete_sd"); //todo allow deleting SD?
         }
         return null;
     }

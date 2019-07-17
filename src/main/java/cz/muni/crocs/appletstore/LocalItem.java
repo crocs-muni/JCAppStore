@@ -13,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
@@ -20,6 +22,7 @@ import java.util.Arrays;
  */
 public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private String searchQuery;
     private BufferedImage issuer;
     private  JPanel container;
@@ -95,7 +98,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         this(
                 (info.getName() == null) ? Arrays.toString(info.getAid().getBytes()) : info.getName(),
                 (info.getImage() == null) ? "wrong-image-name" : info.getImage(),
-                (info.getAuthor() == null) ? Sources.language.get("unknown") : info.getAuthor(),
+                (info.getAuthor() == null) ? textSrc.getString("unknown") : info.getAuthor(),
                 (info.getVersion() == null) ? "" : info.getVersion(),
                 info
         );

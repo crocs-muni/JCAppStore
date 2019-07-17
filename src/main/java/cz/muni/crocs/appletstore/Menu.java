@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.Terminals;
+import cz.muni.crocs.appletstore.iface.CardManager;
 import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 import cz.muni.crocs.appletstore.util.Sources;
@@ -14,12 +14,16 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class Menu extends JMenuBar implements ActionListener, ItemListener {
+
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JMenu submenu;
     private AppletStore context;
@@ -110,15 +114,15 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     //TODO menu into func and return menu
     private void buildMenu() {
 
-        CustomJmenu menu = new CustomJmenu(Sources.language.get("file"), "", KeyEvent.VK_A);
+        CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
         add(menu);
 
-        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(Sources.language.get("settings")) {
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Settings settings = new Settings(context);
-                Object[] options = { Sources.language.get("ok"), Sources.language.get("cancel") };
-                int result = JOptionPane.showOptionDialog(null, settings, Sources.language.get("settings"),
+                Object[] options = { textSrc.getString("ok"), textSrc.getString("cancel") };
+                int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                         null, options, null);
                 if (result == JOptionPane.YES_OPTION){
@@ -127,7 +131,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
-        menu.add(menuItemNoShortcut(new AbstractAction(Sources.language.get("quit")) {
+        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -175,7 +179,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         add(new CustomJmenu("Another Menu", "This menu does nothing", KeyEvent.VK_N));
 
         //BUILD READERS MENU
-        readers = new CustomJmenu(Sources.language.get("readers"), "", KeyEvent.VK_R);
+        readers = new CustomJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
         add(readers);
 
 
@@ -215,7 +219,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
             for (String name : manager.getTerminals()) {
-                JRadioButtonMenuItem item = selectableMenuItem(name, Sources.language.get("reader_avail"));
+                JRadioButtonMenuItem item = selectableMenuItem(name, textSrc.getString("reader_avail"));
                 if (name.equals(manager.getSelectedTerminalName())) {
                     item.setSelected(true);
                 }
@@ -226,7 +230,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             readers.repaint();
 
         } else {
-            JMenuItem item = menuItemDisabled(Sources.language.get("no_reader"), "");
+            JMenuItem item = menuItemDisabled(textSrc.getString("no_reader"), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
             readers.add(item);

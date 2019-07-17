@@ -8,12 +8,15 @@ import cz.muni.crocs.appletstore.util.Sources;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     public LocalInstallItem() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -30,13 +33,13 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
         add(Box.createRigidArea(new Dimension(50, 20)));
 
-        JLabel title = new JLabel(Sources.language.get("CAP_install_applet"));
+        JLabel title = new JLabel(textSrc.getString("CAP_install_applet"));
         title.setFont(CustomFont.plain.deriveFont(16f));
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(title);
 
-        title = new JLabel(Sources.language.get("from_pc"));
+        title = new JLabel(textSrc.getString("from_pc"));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setForeground(Color.WHITE);
         add(title);
@@ -44,7 +47,7 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
     @Override
     public String getSearchQuery() {
-        return Sources.language.get("install_kwords");
+        return textSrc.getString("install_kwords");
     }
 
     @Override

@@ -21,9 +21,6 @@ public class InputHintTextField extends JTextField implements FocusListener {
         setBorder(null);
         setOpaque(false);
         addFocusListener(this);
-        addActionListener(listener -> {
-
-        });
     }
 
     @Override

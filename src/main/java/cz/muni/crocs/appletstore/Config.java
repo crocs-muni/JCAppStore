@@ -1,16 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.Language;
-
 import javax.swing.filechooser.FileSystemView;
-import java.awt.Component;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * @author Jiří Horák

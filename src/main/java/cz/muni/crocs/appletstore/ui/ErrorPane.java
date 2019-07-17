@@ -3,23 +3,22 @@ package cz.muni.crocs.appletstore.ui;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.util.Sources;
-import sun.misc.IOUtils;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class ErrorPane extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     public ErrorPane (String title, String imgName) {
         setOpaque(false);
@@ -45,7 +44,7 @@ public class ErrorPane extends JPanel {
         JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
         panel.add(icon);
 
-        JLabel retry = new JLabel(Sources.language.get("retry"));
+        JLabel retry = new JLabel(textSrc.getString("retry"));
         retry.setFont(CustomFont.plain.deriveFont(16f));
         retry.setForeground(Color.WHITE);
         panel.add(retry);
