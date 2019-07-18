@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.card;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.Informer;
 import cz.muni.crocs.appletstore.ui.CapFileView;
-import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;

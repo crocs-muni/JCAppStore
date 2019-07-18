@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,7 @@ public class SplashScreen extends JWindow {
     private int progress = 0;
     private Random r = new Random();
     private ProcessTrackable loader = new LoaderWorker();
+    private Font font = new Font("Courier", Font.PLAIN, 14);
     private boolean update;
 
     private SplashScreen() {
@@ -72,9 +72,9 @@ public class SplashScreen extends JWindow {
             numbers += String.valueOf(r.nextInt(10));
             if ((i + 1) % 4 == 0) numbers += "  ";
         }
-        g2d.setFont(CustomFont.plain.deriveFont(20f));
+        g2d.setFont(font.deriveFont(20f));
         g2d.drawString(numbers, 30, 120);
-        g2d.setFont(CustomFont.plain.deriveFont(12f));
+        g2d.setFont(font.deriveFont(12f));
         g2d.drawString(loader.getInfo(), 78, 98);
     }
 

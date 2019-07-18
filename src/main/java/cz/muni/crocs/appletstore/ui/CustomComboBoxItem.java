@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
 
 import javax.swing.*;
@@ -20,7 +21,7 @@ public class CustomComboBoxItem extends JLabel implements ListCellRenderer {
         setBackground((isSelected) ? list.getSelectionBackground() : list.getBackground());
         setIcon(new ImageIcon(Config.IMAGE_DIR + val.first + ".jpg"));
         setText(val.second);
-        setFont(CustomFont.plain);
+        setFont(OptionsFactory.getOptions().getDefaultFont());
         return this;
     }
 }

@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.util.Sources;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
@@ -44,7 +43,7 @@ public class InstallDialogWindow extends JPanel {
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(CustomFont.plain.deriveFont(Font.BOLD, 12f));
+        more.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 12f));
         add(more, "span 2");
 
         advanced.addMouseListener(new MouseAdapter() {

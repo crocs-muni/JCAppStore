@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.iface;
+package cz.muni.crocs.appletstore.card;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardInstance;

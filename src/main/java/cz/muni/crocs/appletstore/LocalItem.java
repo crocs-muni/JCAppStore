@@ -1,9 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.iface.Item;
-import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.util.Sources;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
@@ -70,14 +69,14 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         title = adjustLength(title, 25);
         JLabel name = new JLabel("<html>" +
                 "<div style=\"width:100px; height: 60px; margin: 5px\">" + title + "</div><html>");
-        name.setFont(CustomFont.plain.deriveFont(16f));
+        name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         container.add(name, gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_START;
         author = adjustLength(author, 15);
         JLabel infoPanel = new JLabel("<html><div style=\"width:85px; max-lines:1; margin: 5px\">" + author + "</div><html>");
-        infoPanel.setFont(CustomFont.plain.deriveFont(13f));
+        infoPanel.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(13f));
         infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
         container.add(infoPanel, gbc);
 
@@ -85,7 +84,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.anchor = GridBagConstraints.LAST_LINE_END;
         version = adjustLength(version, 5);
         JLabel appVersion = new JLabel("<html><div style=\"width:10px; text-overflow: ellipsis; margin: 5px\">" + version + "</div><html>");
-        appVersion.setFont(CustomFont.plain.deriveFont(15f));
+        appVersion.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
         container.add(appVersion, gbc);
 
         gbc.fill = GridBagConstraints.BOTH;

@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
-import cz.muni.crocs.appletstore.iface.CardManager;
-import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
-import cz.muni.crocs.appletstore.util.Sources;
 
 import javax.swing.*;
 import java.awt.*;
@@ -98,7 +98,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
-        component.setFont(CustomFont.plain.deriveFont(10f));
+        component.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(10f));
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         Dimension preferred = component.getPreferredSize();
@@ -138,7 +138,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             }
         }, Config.IMAGE_DIR + "close_black.png"));
 
-//        settings.setFont(CustomFont.plain);
+//        settings.setFont(OptionsFactory.getOptions().getDefaultFont());
 //        settings.setForeground(Color.WHITE);
 //        settings.setMargin(new Insets(0,0 ,0 ,0 ));
 
@@ -214,7 +214,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     public void resetTerminalButtonGroup() {
-        CardManager manager = Sources.manager;
+        CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             readersPresent = new ButtonGroup();
@@ -238,7 +238,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     private ActionListener selectReaderListener() {
-        return e -> Sources.manager.setSelectedTerminal(e.getActionCommand());
+        return e -> CardManagerFactory.getManager().setSelectedTerminal(e.getActionCommand());
     }
 
     @Override

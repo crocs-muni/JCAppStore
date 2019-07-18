@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import org.json.simple.JSONObject;
 
 import java.io.File;
@@ -34,7 +36,7 @@ public class JSONStoreParser {
 
     private static boolean verifyInfoFile() {
         info = new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                + textSrc.getString(Config.OPT_KEY_LANGUAGE)
+                + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
                 + Config.FILE_INFO_SUFFIX);
         if (!info.exists()) {
             info = new File(Config.APP_STORE_DIR,Config.FILE_INFO_PREFIX + "en" + Config.FILE_INFO_SUFFIX);

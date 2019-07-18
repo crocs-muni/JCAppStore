@@ -2,18 +2,14 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.card.CapFileChooser;
-import cz.muni.crocs.appletstore.iface.IniParser;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
-import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.IniParserImpl;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
-import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -46,12 +42,10 @@ public class StoreItemInfo extends HintPanel {
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
 
-    private final Color bg = new Color(255, 255, 255, 80);
-    private final Font textFont = CustomFont.plain.deriveFont(14f);
-    private final Font titleFont = CustomFont.plain.deriveFont(Font.BOLD, 20f);
+    private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
 
     public StoreItemInfo(JsonObject dataSet, Searchable store) {
-        super(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
+        super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -79,7 +73,7 @@ public class StoreItemInfo extends HintPanel {
 
         JButton install = new JButton("<html><div style=\"margin: 1px 10px;\">" + textSrc.getString("CAP_install") + "</div></html>");
         install.setUI(new CustomButtonUI());
-        install.setFont(CustomFont.plain.deriveFont(Font.BOLD, 20f));
+        install.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f));
         install.setForeground(Color.WHITE);
         install.setCursor(new Cursor(Cursor.HAND_CURSOR));
         install.setBackground(new Color(26, 196, 0));
@@ -101,7 +95,7 @@ public class StoreItemInfo extends HintPanel {
         add(install, "align right, span 1 2, wrap");
 
         JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
-        author.setFont(CustomFont.plain.deriveFont(15f));
+        author.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
 
         JTextPane mainInfo = new JTextPane();
@@ -120,8 +114,10 @@ public class StoreItemInfo extends HintPanel {
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
         JLabel url = new JLabel("<html><div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div></html>");
         url.setOpaque(true);
+        Color bg = new Color(255, 255, 255, 80);
         url.setBackground(bg);
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(14f);
         url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
 
@@ -167,7 +163,7 @@ public class StoreItemInfo extends HintPanel {
 
         JButton customInstall = new JButton("<html><div style=\"margin: 1px 10px;\">" + textSrc.getString("CAP_install") + "</div></html>");
         customInstall.setUI(new CustomButtonUI());
-        customInstall.setFont(CustomFont.plain.deriveFont(Font.BOLD, 18f));
+        customInstall.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 18f));
         customInstall.setForeground(Color.WHITE);
         customInstall.setCursor(new Cursor(Cursor.HAND_CURSOR));
         customInstall.setBackground(new Color(170, 166, 167));

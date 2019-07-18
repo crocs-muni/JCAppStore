@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
@@ -131,7 +133,7 @@ public class CustomJTabbedPaneUi extends BasicTabbedPaneUI {
 
     @Override
     protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {
-        super.paintText(g, tabPlacement, CustomFont.plain, metrics, tabIndex, title, textRect, isSelected);
+        super.paintText(g, tabPlacement, OptionsFactory.getOptions().getDefaultFont(), metrics, tabIndex, title, textRect, isSelected);
     }
 
     @Override

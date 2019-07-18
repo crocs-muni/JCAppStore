@@ -3,11 +3,11 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.action.DeleteAction;
 import cz.muni.crocs.appletstore.action.SendApduAction;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.ui.CustomFont;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.util.Sources;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
 
@@ -38,7 +38,7 @@ public class LocalItemInfo extends HintPanel {
     private DeleteAction delete;
 
     public LocalItemInfo(OnEventCallBack<Void, Void, Void> call) {
-        super(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
+        super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
         setOpaque(false);
         setLayout(new MigLayout());
@@ -46,7 +46,7 @@ public class LocalItemInfo extends HintPanel {
         send = new SendApduAction(nfo, call);
         delete = new DeleteAction(nfo, call);
 
-        name.setFont(CustomFont.plain.deriveFont(16f));
+        name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
         add(name, "span 2, wrap");
 
@@ -66,7 +66,7 @@ public class LocalItemInfo extends HintPanel {
         add(domain, "span 2, wrap");
 
         JLabel title = new JLabel(textSrc.getString("management"));
-        title.setFont(CustomFont.plain.deriveFont(Font.BOLD, 13f));
+        title.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
         rawApdu = new JLabel(textSrc.getString("custom_command"), new ImageIcon(

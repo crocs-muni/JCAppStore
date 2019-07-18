@@ -23,9 +23,8 @@ public class MainPanel extends BackgroundImgPanel implements CallBack<Void> {
      *            localPanel
      */
     private AppletStore context;
+
     private LeftMenu leftMenu;
-
-
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
     private boolean isLocalPaneDisplayed;

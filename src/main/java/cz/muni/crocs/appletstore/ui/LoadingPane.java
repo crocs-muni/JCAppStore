@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +40,7 @@ public class LoadingPane extends JPanel {
         Rectangle inline = new Rectangle(-(width/2), -(height/2), width * progress / 100, height);
         graphics2D.draw(inline);
         graphics2D.fill(inline);
-        graphics2D.setFont(CustomFont.plain.deriveFont(Font.BOLD, 15f));
+        graphics2D.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 15f));
         if (0 < progress && progress < 100) {
             graphics2D.drawString(message + progress + "%", -(width/2), -(height/2) - 20);
         } else {

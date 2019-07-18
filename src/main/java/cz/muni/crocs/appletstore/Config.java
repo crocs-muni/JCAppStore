@@ -9,11 +9,6 @@ import java.io.File;
  */
 public class Config {
 
-    //options map and key values
-    public static final String OPT_KEY_LANGUAGE = "lang";
-    public static final String OPT_KEY_GITHUB_LATEST_VERSION = "github.latest.version";
-    public static final String OPT_KEY_BACKGROUND = "background";
-    public static final String OPT_KEY_HINT = "hint";
     //system path separator
     public static final String SEP = File.separator;
 

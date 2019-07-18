@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -22,7 +24,7 @@ public class CustomJmenu extends JMenu {
     private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
-        setFont(CustomFont.plain.deriveFont(12f));
+        setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         setForeground(Color.WHITE);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }

@@ -3,8 +3,8 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.DeleteDialogWindow;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
@@ -61,7 +61,7 @@ public class DeleteAction extends MouseAdapter {
         SwingUtilities.invokeLater(call::onStart);
 
         try {
-            Sources.manager.uninstall(info, opts.willForce());
+            CardManagerFactory.getManager().uninstall(info, opts.willForce());
 
         } catch (CardException ex) {
             ex.printStackTrace();

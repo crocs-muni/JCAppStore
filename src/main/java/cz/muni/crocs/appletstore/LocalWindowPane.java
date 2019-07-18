@@ -1,10 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.action.InstallAction;
-import cz.muni.crocs.appletstore.card.CardInstance;
-import cz.muni.crocs.appletstore.card.CardManagerImpl;
-import cz.muni.crocs.appletstore.card.Terminals;
-import cz.muni.crocs.appletstore.iface.CardManager;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
@@ -13,9 +10,7 @@ import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.card.AppletInfo;
 
-import cz.muni.crocs.appletstore.util.Sources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
@@ -78,7 +73,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
 
         installCmd.addMouseListener(new InstallAction(this));
 
-        updatePanes(Sources.manager.getTerminalState());
+        updatePanes(CardManagerFactory.getManager().getTerminalState());
     }
 
     private void addError(String imageName, String titleKey) {
@@ -90,7 +85,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
         revalidate();
         System.out.println("updated:" + state);
 
-        CardManager manager = Sources.manager;
+        CardManager manager = CardManagerFactory.getManager();
         if (verifyTerminalState(state)
                 && verifyCardState(manager)
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
@@ -232,7 +227,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
 
     @Override
     protected void paintComponent(Graphics g) {
-        infoLayout.setVisible(Sources.manager.isSelected());
+        infoLayout.setVisible(CardManagerFactory.getManager().isSelected());
         super.paintComponent(g);
     }
 

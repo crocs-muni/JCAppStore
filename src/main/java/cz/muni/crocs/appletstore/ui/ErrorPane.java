@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
-import cz.muni.crocs.appletstore.util.Sources;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,7 +28,7 @@ public class ErrorPane extends JPanel {
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
         JLabel errorMsg = new JLabel(title);
-        errorMsg.setFont(CustomFont.plain.deriveFont(20f));
+        errorMsg.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(20f));
         errorMsg.setForeground(Color.WHITE);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(errorMsg);
@@ -45,7 +45,7 @@ public class ErrorPane extends JPanel {
         panel.add(icon);
 
         JLabel retry = new JLabel(textSrc.getString("retry"));
-        retry.setFont(CustomFont.plain.deriveFont(16f));
+        retry.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         retry.setForeground(Color.WHITE);
         panel.add(retry);
 
@@ -64,7 +64,7 @@ public class ErrorPane extends JPanel {
 
         JLabel hint = new JLabel("<html><p width=\"400\" align=\"center\">" + message + "</p></html>");
         hint.setBorder(new EmptyBorder(20, 20, 20, 20));
-        hint.setFont(CustomFont.plain.deriveFont(16f));
+        hint.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);
         hint.setForeground(Color.WHITE);
         add(hint);

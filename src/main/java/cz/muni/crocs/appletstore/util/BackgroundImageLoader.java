@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.Informer;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -51,14 +53,14 @@ public class BackgroundImageLoader {
             //TODO ask how works the system dirs
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
-            Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
+            OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
         } catch (IOException e) {
             defaultBg();
         }
     }
 
     private void defaultBg() {
-        Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
+        OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
         try {
             background = ImageIO.read(new File(Config.IMAGE_DIR + imgName));
         } catch (IOException e) {

@@ -1,15 +1,12 @@
 package cz.muni.crocs.appletstore;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Item;
-import cz.muni.crocs.appletstore.ui.CustomFont;
-import org.json.simple.JSONObject;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * @author Jiří Horák
@@ -44,14 +41,14 @@ public class StoreItem extends JPanel implements Item {
         title = adjustLength(title, 25);
         JLabel name = new JLabel("<html>" +
                 "<div style=\"width:100px; height: 60px; margin: 5px\">" + title + "</div><html>");
-        name.setFont(CustomFont.plain.deriveFont(16f));
+        name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         container.add(name, gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_START;
         author = adjustLength(author, 15);
         JLabel info = new JLabel("<html><div style=\"width:85px; max-lines:1; margin: 5px\">" + author + "</div><html>");
-        info.setFont(CustomFont.plain.deriveFont(13f));
+        info.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(13f));
         info.setHorizontalAlignment(SwingConstants.RIGHT);
         container.add(info, gbc);
 
@@ -59,7 +56,7 @@ public class StoreItem extends JPanel implements Item {
         gbc.anchor = GridBagConstraints.LAST_LINE_END;
         version = adjustLength(version, 5);
         JLabel appVersion = new JLabel("<html><div style=\"width:10px; text-overflow: ellipsis; margin: 5px\">" + version + "</div><html>");
-        appVersion.setFont(CustomFont.plain.deriveFont(15f));
+        appVersion.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
         container.add(appVersion, gbc);
 
         gbc.fill = GridBagConstraints.BOTH;

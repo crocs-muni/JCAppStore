@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -24,7 +25,7 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
         setLayout(new MigLayout("align center center, gapy 15"));
         add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "load.gif")), "wrap");
         JLabel working = new JLabel(textSrc.getString("working"));
-        working.setFont(CustomFont.plain.deriveFont(20f));
+        working.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(20f));
         add(working, "align center");
 
         setOpaque(false);

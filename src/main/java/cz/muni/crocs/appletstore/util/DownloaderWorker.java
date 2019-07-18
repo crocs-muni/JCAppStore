@@ -3,6 +3,8 @@ package cz.muni.crocs.appletstore.util;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.StoreWindowManager;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +36,7 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         setProgress(0);
 
         String[] storeInfo = InternetConnection.checkAndGetLatestReleaseVersion(
-                textSrc.getString(Config.OPT_KEY_GITHUB_LATEST_VERSION)
+                OptionsFactory.getOptions().getOption(Options.KEY_GITHUB_LATEST_VERSION)
         );
 
         if (storeInfo == null) {

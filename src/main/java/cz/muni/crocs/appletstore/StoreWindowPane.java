@@ -1,17 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
-import cz.muni.crocs.appletstore.ui.ErrorPane;
-import cz.muni.crocs.appletstore.ui.LoadingPane;
-import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.DownloaderWorker;
-import cz.muni.crocs.appletstore.util.FileCleaner;
-import cz.muni.crocs.appletstore.util.JSONStoreParser;
-import cz.muni.crocs.appletstore.util.Sources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,14 +12,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static cz.muni.crocs.appletstore.StoreWindowManager.StoreState.*;
 
 /**
  * Scroll pane with items from store

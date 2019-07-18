@@ -2,8 +2,6 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
-import cz.muni.crocs.appletstore.util.Sources;
-import org.bouncycastle.util.encoders.BufferedEncoder;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

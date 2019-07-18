@@ -6,7 +6,6 @@ import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDetails;
 import cz.muni.crocs.appletstore.card.command.List;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
-import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPException;

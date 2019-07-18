@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.card;
 import cz.muni.crocs.appletstore.card.command.Delete;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.Install;
-import cz.muni.crocs.appletstore.iface.CardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;

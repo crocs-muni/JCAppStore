@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.Sources;
 
 import java.util.Locale;
 import java.util.ResourceBundle;

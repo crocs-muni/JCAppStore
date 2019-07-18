@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Searchable;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
@@ -9,7 +11,6 @@ import cz.muni.crocs.appletstore.util.FileCleaner;
 import cz.muni.crocs.appletstore.util.DownloaderWorker;
 import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
-import cz.muni.crocs.appletstore.util.Sources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
@@ -164,7 +165,7 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
             try {
                 String result = workerThread.get(200, TimeUnit.SECONDS);
                 if (!result.equals("done")) {
-                    Sources.options.put(Config.OPT_KEY_GITHUB_LATEST_VERSION, result);
+                    OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 setStatus(StoreState.TIMEOUT);

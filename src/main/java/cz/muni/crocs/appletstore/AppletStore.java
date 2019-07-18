@@ -1,9 +1,9 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.Terminals;
-import cz.muni.crocs.appletstore.iface.CardManager;
+import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
-import cz.muni.crocs.appletstore.util.Sources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
@@ -44,7 +44,7 @@ public class AppletStore extends JFrame {
         //save options on close & kill routine
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                new OptionsManager(Sources.options).save();
+                OptionsFactory.getOptions().save();
                 windowOpened = false;
             }
         });
@@ -54,14 +54,11 @@ public class AppletStore extends JFrame {
     public void setEnabled(boolean enabled) {
         getGlassPane().setVisible(!enabled);
         revalidate();
-//        if (enabled) {
-//        } else {
-//        }
     }
 
     private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
-        kit.setStyleSheet(Sources.sheet);
+        kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         //setDefaultLookAndFeelDecorated(false);
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);
@@ -96,7 +93,7 @@ public class AppletStore extends JFrame {
      * Looking for terminals present once a 2 sec
      */
     private void checkTerminalsRoutine() {
-        CardManager manager = Sources.manager;
+        CardManager manager = CardManagerFactory.getManager();
 
         new Thread(() -> {
             logger.info("------- routine started");

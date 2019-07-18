@@ -1,6 +1,10 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,13 +22,15 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
     @Override
     public Void doInBackground() {
         setProgress(0);
+        //first get options will force to initialize
+        OptionsFactory.getOptions();
 
-        Sources.generalSetupAndLoadOptions();
-        Sources.setStyles();
         info = "Detecting cards...";
-        Sources.setupManager();
-        info = "Creating window...";
+        CardManager manager = CardManagerFactory.getManager();
+        manager.needsCardRefresh();
+        manager.refreshCard();
 
+        info = "Creating window...";
         setProgress(getMaximum());
         return null;
     }

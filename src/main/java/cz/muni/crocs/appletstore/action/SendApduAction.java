@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;

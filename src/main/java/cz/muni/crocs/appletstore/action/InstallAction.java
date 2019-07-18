@@ -4,10 +4,10 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.Informer;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.CapFileChooser;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.iface.IniParser;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
-import cz.muni.crocs.appletstore.util.Sources;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardException;
@@ -80,7 +80,7 @@ public class InstallAction extends MouseAdapter {
         new Thread(() -> {
             try {
                 String[] additionalInfo = opts.getAdditionalInfo();
-                Sources.manager.install(file, additionalInfo);
+                CardManagerFactory.getManager().install(file, additionalInfo);
 
                 if (appletName != null)
                     storeAppletData(additionalInfo);
@@ -104,7 +104,7 @@ public class InstallAction extends MouseAdapter {
 
     private void storeAppletData(String[] additionalInfo) {
         try {
-            IniParser parser = new IniParserImpl(Config.INI_CARD_LIST, Sources.manager.getCard().getId());
+            IniParser parser = new IniParserImpl(Config.INI_CARD_LIST, CardManagerFactory.getManager().getCard().getId());
             String cards = parser.getValue(Config.INI_INSTALLED);
 
             String[] aids = Arrays.copyOfRange(additionalInfo, 2, additionalInfo.length);

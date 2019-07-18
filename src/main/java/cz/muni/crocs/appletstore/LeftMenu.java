@@ -1,10 +1,9 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomButton;
-import cz.muni.crocs.appletstore.ui.CustomFont;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
 import cz.muni.crocs.appletstore.ui.NotifLabel;
-import cz.muni.crocs.appletstore.util.Sources;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -69,7 +68,7 @@ public class LeftMenu extends JPanel {
         //set search intpu text
         searchInput = new InputHintTextField(textSrc.getString("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
-        searchInput.setFont(CustomFont.plain);
+        searchInput.setFont(OptionsFactory.getOptions().getDefaultFont());
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
         //create search icon

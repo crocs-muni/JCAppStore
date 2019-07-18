@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.iface.CallBack;
-import cz.muni.crocs.appletstore.util.Sources;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -61,7 +61,7 @@ public class Warning extends JPanel {
         add(error);
 
         JLabel errorMsg = new JLabel("<html><div style=\"max-width:90%;\">" + msg + "</div></html>");
-        errorMsg.setFont(CustomFont.plain.deriveFont(12f));
+        errorMsg.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         errorMsg.setForeground(Color.BLACK);
         add(errorMsg);
 
@@ -78,7 +78,7 @@ public class Warning extends JPanel {
                 add(iconRetry);
 
                 JLabel retry = new JLabel(textSrc.getString("retry"));
-                retry.setFont(CustomFont.plain.deriveFont(12f));
+                retry.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
                 retry.setForeground(Color.BLACK);
                 add(retry);
                 retry.addMouseListener(call);

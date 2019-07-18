@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -18,7 +20,7 @@ import java.awt.geom.Rectangle2D;
 public class HintPanel extends JPanel {
 
     protected String hint;
-    protected Font hintFont = CustomFont.plain.deriveFont(12f);
+    protected Font hintFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(12f);
     private Point p = null;
     private Dimension hintDimen;
     private boolean enabled;

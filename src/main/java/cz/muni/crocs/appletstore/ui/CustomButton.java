@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -24,7 +26,7 @@ public class CustomButton extends JButton {
     public CustomButton(String imgName) {
         super();
         setUI(new CustomButtonUI());
-        setFont(CustomFont.plain);
+        setFont(OptionsFactory.getOptions().getDefaultFont());
         setHorizontalAlignment(SwingConstants.LEFT);
         setMinimumSize(new Dimension(Integer.MAX_VALUE, 35));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));

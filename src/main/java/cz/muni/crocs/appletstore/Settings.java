@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.sources.Options;
+import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import cz.muni.crocs.appletstore.util.BackgroundImageLoader;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
-import cz.muni.crocs.appletstore.ui.CustomFont;
-import cz.muni.crocs.appletstore.util.Sources;
 import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 
@@ -30,7 +30,7 @@ public class Settings extends JPanel {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private String bgImg = Sources.options.get(Config.OPT_KEY_BACKGROUND);
+    private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
 
@@ -60,7 +60,7 @@ public class Settings extends JPanel {
     private void addBackground() {
         addTitleLabel(textSrc.getString("background"), "span 3, wrap");
 
-        String path = Sources.options.get(Config.OPT_KEY_BACKGROUND);
+        String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
         if (path.equals(defaultBgPath)) {
             path = textSrc.getString("default");
             slider.setEnabled(false);
@@ -68,7 +68,7 @@ public class Settings extends JPanel {
         cutString(path);
 
         JLabel bgValue = new JLabel("<html>" + path + "</html>");
-        bgValue.setFont(CustomFont.plain.deriveFont(12f));
+        bgValue.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         bgValue.setBorder(frame);
         bgValue.setBackground(Color.WHITE);
         bgValue.setOpaque(true);
@@ -123,13 +123,13 @@ public class Settings extends JPanel {
 
     private void addHint() {
         addTitleLabel(textSrc.getString("enable_hints"), "");
-        hintEnabled.setSelected(Sources.options.get(Config.OPT_KEY_HINT).equals("true"));
+        hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         add(hintEnabled, "align left, span 2, w 180, wrap");
     }
 
     private void addTitleLabel(String titleText, String constraints) {
         JLabel title = new JLabel(titleText);
-        title.setFont(CustomFont.plain);
+        title.setFont(OptionsFactory.getOptions().getDefaultFont());
         add(title, constraints);
     }
 
@@ -143,12 +143,12 @@ public class Settings extends JPanel {
 
 
     private void saveBackgroundImage() {
-        if (bgImg.equals(Sources.options.get(Config.OPT_KEY_BACKGROUND))) {
+        if (bgImg.equals(OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND))) {
             return;
         }
         if (bgImg.equals(textSrc.getString("default"))) {
             try {
-                Sources.options.put(Config.OPT_KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
+                OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
                 ((BackgroundImgPanel) context.getContentPane()).setNewBackground(
                         ImageIO.read(new File(defaultBgPath)));
             } catch (IOException e) {
@@ -162,14 +162,14 @@ public class Settings extends JPanel {
     }
 
     private void saveLanguage() {
-        if (langs[languageBox.getSelectedIndex()].first.equals(Sources.options.get(Config.OPT_KEY_LANGUAGE))) return;
-        Sources.options.put(Config.OPT_KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
+        if (langs[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
+        OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
         showAlertChange();
-        //Config.translation = new Translation(Config.options.get(Config.OPT_KEY_LANGUAGE));
+        //Config.translation = new Translation(Config.options.get(Options.KEY_LANGUAGE));
     }
 
     private void saveHint() {
-        Sources.options.put(Config.OPT_KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
+        OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
     }
 
     public void apply() {
