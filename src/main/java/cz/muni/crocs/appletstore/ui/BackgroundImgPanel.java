@@ -1,8 +1,8 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -21,11 +21,13 @@ public class BackgroundImgPanel extends JPanel {
 
     public BackgroundImgPanel() {
         String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-        if (bgImagname == null) {
+        File f = new File(Config.APP_DATA_DIR + Config.SEP + bgImagname);
+
+        if (bgImagname == null || bgImagname.isEmpty() || !f.exists()) {
             loadDefault();
         } else {
             try {
-                bg = ImageIO.read(new File(Config.APP_DATA_DIR + Config.SEP + bgImagname));
+                bg = ImageIO.read(f);
             } catch (IOException e) {
                 e.printStackTrace();
                 loadDefault();

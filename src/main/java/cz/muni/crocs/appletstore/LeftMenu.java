@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
 import cz.muni.crocs.appletstore.ui.NotifLabel;

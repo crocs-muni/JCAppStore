@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore.card.command;
 
 import apdu4j.HexUtils;
-import cz.muni.crocs.appletstore.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.InformerImpl;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
@@ -86,7 +87,7 @@ public class Install extends GPCommand<Void> {
             return false;
         } else if (file.getAppletAIDs().size() > 1) {
             if (customId == null) {
-                Informer.getInstance().showInfo("CAP contains more than one applet, before install, choose different applet ID");
+                InformerFactory.getInformer().showInfo("CAP contains more than one applet, before install, choose different applet ID");
                 return false;
             } else {
                 appaid = AID.fromString(customId);
@@ -110,7 +111,7 @@ public class Install extends GPCommand<Void> {
         }
 
         if (context.getRegistry().allAppletAIDs().contains(finalAID)) {
-            Informer.getInstance().showInfo("WARNING: Applet " + finalAID + " already present on card");
+            InformerFactory.getInformer().showInfo("WARNING: Applet " + finalAID + " already present on card");
         }
 
         context.installAndMakeSelectable(file.getPackageAID(), appaid, finalAID, privs, installParams, null);

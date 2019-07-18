@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;

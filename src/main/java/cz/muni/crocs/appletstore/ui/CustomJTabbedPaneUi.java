@@ -1,13 +1,10 @@
 package cz.muni.crocs.appletstore.ui;
 
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
-import javax.swing.text.View;
 import java.awt.*;
 import java.util.Arrays;
 

@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.iface.IniParser;
 import org.ini4j.Ini;
 
 import java.io.File;

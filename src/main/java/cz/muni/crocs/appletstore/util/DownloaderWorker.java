@@ -3,8 +3,6 @@ package cz.muni.crocs.appletstore.util;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.StoreWindowManager;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

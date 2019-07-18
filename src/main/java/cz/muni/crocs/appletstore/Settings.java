@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.BackgroundImageLoader;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;

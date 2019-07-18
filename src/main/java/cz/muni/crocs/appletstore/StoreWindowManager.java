@@ -2,14 +2,10 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Searchable;
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.FileCleaner;
-import cz.muni.crocs.appletstore.util.DownloaderWorker;
-import cz.muni.crocs.appletstore.util.JSONStoreParser;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,7 +104,7 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
                         "error.png", this), false);
                 return;
             case NO_CONNECTION:
-                context.getWindow().showWarning(textSrc.getString("W_internet"),
+                InformerFactory.getInformer().showWarning(textSrc.getString("W_internet"),
                         Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
                 setupWindow();
                 return;

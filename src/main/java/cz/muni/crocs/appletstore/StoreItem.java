@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Item;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;

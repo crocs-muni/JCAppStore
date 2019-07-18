@@ -1,9 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.Informer;
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -42,7 +39,7 @@ public class BackgroundImageLoader {
             save();
         } catch (InterruptedException e) {
             //todo error log
-            Informer.getInstance().showInfo("E_image");
+            InformerFactory.getInformer().showInfo("E_image");
             e.printStackTrace();
             defaultBg();
         }

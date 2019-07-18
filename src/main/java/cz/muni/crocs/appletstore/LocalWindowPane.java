@@ -11,6 +11,9 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 import cz.muni.crocs.appletstore.ui.Warning;
 
+import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.InformerImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
@@ -142,7 +145,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
                     add(new ErrorPane(textSrc.getString("E_communication"),
                             manager.getErrorCause(), "announcement_white.png"));
                 else
-                    Informer.getInstance().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
+                    InformerFactory.getInformer().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
                 return false;
             default: //continue, probably card locked
         }

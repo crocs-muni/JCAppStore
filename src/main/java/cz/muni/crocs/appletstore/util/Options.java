@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.sources;
+package cz.muni.crocs.appletstore.util;
 
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;

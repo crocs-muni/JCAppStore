@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.sources;
+package cz.muni.crocs.appletstore.util;
 
 public class OptionsFactory {
 
@@ -6,7 +6,7 @@ public class OptionsFactory {
 
     public static Options<String> getOptions() {
         if (opts == null)
-            opts = new OptionImpl();
+            opts = new OptionsImpl();
         return opts;
     }
 

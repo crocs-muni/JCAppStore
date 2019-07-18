@@ -1,11 +1,12 @@
 package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.InformerImpl;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.CapFileChooser;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.iface.IniParser;
+import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import pro.javacard.CAPFile;
@@ -66,7 +67,7 @@ public class InstallAction extends MouseAdapter {
         switch (result) {
             case JOptionPane.YES_OPTION:
                 if (!opts.validAID() || !opts.validInstallParams()) {
-                    Informer.getInstance().showInfo("E_install_invalid_data");
+                    InformerFactory.getInformer().showInfo("E_install_invalid_data");
                     return;
                 }
                 break;
@@ -117,7 +118,7 @@ public class InstallAction extends MouseAdapter {
             parser.addValue(Config.INI_INSTALLED, builder.append("|").toString());
             parser.store();
         } catch (IOException e) {
-            Informer.getInstance().showInfo(textSrc.getString("install_info_failed"));
+            InformerFactory.getInformer().showInfo(textSrc.getString("install_info_failed"));
         }
     }
 }

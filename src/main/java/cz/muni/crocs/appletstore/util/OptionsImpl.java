@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.sources;
+package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
 import org.slf4j.Logger;
@@ -9,14 +9,14 @@ import java.awt.*;
 import java.io.*;
 import java.util.HashMap;
 
-public class OptionImpl implements Options<String> {
-    private static final Logger logger = LoggerFactory.getLogger(OptionImpl.class);
+public class OptionsImpl implements Options<String> {
+    private static final Logger logger = LoggerFactory.getLogger(OptionsImpl.class);
 
     private HashMap<String, String> options;
     private StyleSheet sheet;
     private Font font;
 
-    public OptionImpl() {
+    public OptionsImpl() {
         getFileOptions();
         if (options.isEmpty())
             setDefaults();
@@ -25,7 +25,7 @@ public class OptionImpl implements Options<String> {
         loadFont();
     }
 
-    public OptionImpl(HashMap<String, String> options) {
+    public OptionsImpl(HashMap<String, String> options) {
         this.options = options;
         if (options.isEmpty())
             setDefaults();

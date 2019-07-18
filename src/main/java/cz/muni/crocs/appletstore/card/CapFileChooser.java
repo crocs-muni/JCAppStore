@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.InformerImpl;
 import cz.muni.crocs.appletstore.ui.CapFileView;
 import pro.javacard.CAPFile;
 
@@ -26,7 +27,7 @@ public class CapFileChooser {
         try (FileInputStream fin = new FileInputStream(from)) {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {
-            Informer.getInstance().showInfo(textSrc.getString("E_install_no_file_1") +
+            InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") +
                     from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
         }
         return instcap;
@@ -43,7 +44,7 @@ public class CapFileChooser {
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File cap = fileChooser.getSelectedFile();
             if (!cap.exists()) {
-                Informer.getInstance().showInfo(textSrc.getString("E_install_no_file_1") + cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+                InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") + cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
                 return null;
             }
             return getCapFile(cap);

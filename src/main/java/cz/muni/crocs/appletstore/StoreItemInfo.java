@@ -3,14 +3,11 @@ package cz.muni.crocs.appletstore;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.iface.Searchable;
-import cz.muni.crocs.appletstore.sources.Options;
-import cz.muni.crocs.appletstore.sources.OptionsFactory;
+import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.JSONStoreParser;
-import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +84,7 @@ public class StoreItemInfo extends HintPanel {
                         app_name + Config.SEP + app_name + "_v" + latestV +
                         "_sdk" + sdks.get(sdks.size() - 1).getAsString() + ".cap");
                 if (!file.exists()) {
-                    Informer.getInstance().showWarningToClose("E_install_not_found", Warning.Importance.INFO);
+                    InformerFactory.getInformer().showWarningToClose("E_install_not_found", Warning.Importance.INFO);
                 }
 
             }
