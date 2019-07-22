@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.iface.Informable;
+import cz.muni.crocs.appletstore.Informable;
 
 import java.security.InvalidParameterException;
 

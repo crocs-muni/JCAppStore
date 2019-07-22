@@ -1,8 +1,6 @@
-package cz.muni.crocs.appletstore.card;
+package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.InformerImpl;
 import cz.muni.crocs.appletstore.ui.CapFileView;
 import pro.javacard.CAPFile;
 
@@ -33,8 +31,8 @@ public class CapFileChooser {
         return instcap;
     }
 
-    public static CAPFile chooseCapFile() {
-        JFileChooser fileChooser = new JFileChooser(Config.APP_LOCAL_DIR);
+    public static CAPFile chooseCapFile(File dir) {
+        JFileChooser fileChooser = new JFileChooser(dir);
         fileChooser.setFileView(new CapFileView());
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(false);

@@ -1,8 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.action.DeleteAction;
-import cz.muni.crocs.appletstore.action.SendApduAction;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.HintLabel;
@@ -18,13 +16,15 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Panel that shows applet info on click
+ * allows deletion & communication with chosen applet
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class LocalItemInfo extends HintPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private AppletInfo nfo;
     private HintLabel name = new HintLabel();
     private JLabel author = new JLabel();
     private HintLabel version = new HintLabel();
@@ -43,8 +43,8 @@ public class LocalItemInfo extends HintPanel {
         setOpaque(false);
         setLayout(new MigLayout());
 
-        send = new SendApduAction(nfo, call);
-        delete = new DeleteAction(nfo, call);
+        send = new SendApduAction(null, call);
+        delete = new DeleteAction(null, call);
 
         name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
@@ -82,6 +82,10 @@ public class LocalItemInfo extends HintPanel {
         add(uninstall, "wrap");
     }
 
+    /**
+     * Display info panel - show certain applet
+     * @param info applet info to show
+     */
     public void set(AppletInfo info) {
         delete.setInfo(info);
         send.setInfo(info);
@@ -104,6 +108,9 @@ public class LocalItemInfo extends HintPanel {
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
     }
 
+    /**
+     * Hide the info panel
+     */
     public void unset() {
         name.setText("", "");
         version.setText("", "");
@@ -117,7 +124,7 @@ public class LocalItemInfo extends HintPanel {
         return new Dimension(300, Integer.MAX_VALUE);
     }
 
-    public String getType(GPRegistryEntry.Kind kind) {
+    private String getType(GPRegistryEntry.Kind kind) {
         switch (kind) {
             case ExecutableLoadFile:
                 return "package";

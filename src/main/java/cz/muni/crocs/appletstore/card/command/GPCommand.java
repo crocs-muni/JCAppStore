@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import cz.muni.crocs.appletstore.iface.CardCommand;
 import pro.javacard.gp.GlobalPlatform;
 
 /**

@@ -2,7 +2,6 @@ package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.StoreWindowManager;
-import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +10,11 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Store downloader which checks internet connection,
+ *   and launches AppletDownloader if not up to date
+ *   returns "done" when up to date or no connection
+ *   returns "&lt;version&gt;" version of the newest obtained store
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -21,6 +25,7 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
 
     private StoreWindowManager parent;
 
+    //todo ugly dependency
     public DownloaderWorker(StoreWindowManager parent) {
         this.parent = parent;
     }

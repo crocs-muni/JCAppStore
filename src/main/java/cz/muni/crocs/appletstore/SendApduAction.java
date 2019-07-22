@@ -1,8 +1,7 @@
-package cz.muni.crocs.appletstore.action;
+package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
@@ -32,6 +31,8 @@ public class SendApduAction extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+
+        //TODO:: implement / delete
         if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile)
             return;
         int result = JOptionPane.showConfirmDialog(

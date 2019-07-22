@@ -1,14 +1,13 @@
-package cz.muni.crocs.appletstore.action;
+package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.InformerImpl;
-import cz.muni.crocs.appletstore.InstallDialogWindow;
-import cz.muni.crocs.appletstore.card.CapFileChooser;
+import cz.muni.crocs.appletstore.util.CapFileChooser;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.IniParser;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardException;
@@ -22,10 +21,13 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Class to add to button as listener target to perform applet installation
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class InstallAction extends MouseAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private File capfile = null;
@@ -45,13 +47,9 @@ public class InstallAction extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
         CAPFile file;
-        if (capfile == null) {
-            file = CapFileChooser.chooseCapFile();
-        } else {
-            file = CapFileChooser.getCapFile(capfile);
-        }
+        if (capfile == null) file = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
+        else file = CapFileChooser.getCapFile(capfile);
 
-        //if the user did not selected any file
         if (file == null)
             return;
 
@@ -76,8 +74,7 @@ public class InstallAction extends MouseAdapter {
                 return;
         }
 
-        SwingUtilities.invokeLater(call::onStart);
-
+        call.onStart();
         new Thread(() -> {
             try {
                 String[] additionalInfo = opts.getAdditionalInfo();
@@ -88,12 +85,12 @@ public class InstallAction extends MouseAdapter {
 
             } catch (CardException ex) {
                 ex.printStackTrace();
-                //todo setup (on failed maybe) or get better detailed info...
-                showFailed(textSrc.getString("install_failed"),
-                        textSrc.getString("E_generic") + ex.getMessage());
+                logger.warn("Failed to install applet: " + ex.getMessage());
+                SwingUtilities.invokeLater(() -> {
+                    showFailed(textSrc.getString("install_failed"), ex.getMessage());
+                });
                 SwingUtilities.invokeLater(call::onFail);
             }
-
             SwingUtilities.invokeLater(call::onFinish);
         }).start();
     }

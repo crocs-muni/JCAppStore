@@ -17,6 +17,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Dialog window for applet installation to show install options
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -33,7 +35,6 @@ public class InstallDialogWindow extends JPanel {
     private Color wrong = new Color(0xC01628);
 
     public InstallDialogWindow(CAPFile file) {
-
         setLayout(new MigLayout("width 250px"));
         add(new JLabel("<html><p width=\"600\">" + textSrc.getString("W_do_not_unplug") +
                         "</p></html>"), "wrap, span 5, gapbottom 10");
@@ -91,6 +92,10 @@ public class InstallDialogWindow extends JPanel {
         add(getHint("H_force_install", "600"), "span 5, wrap");
     }
 
+    /**
+     * List all applets to possibly install
+     * @param applets list to install
+     */
     private void addAllAppletCustomAIDSFields(List<AID> applets) {
         customAIDs = new JTextField[applets.size()];
         int i = 0;
@@ -149,6 +154,11 @@ public class InstallDialogWindow extends JPanel {
         return hint;
     }
 
+    /**
+     * Get applet install information
+     * @return null if basic installation,
+     * array with [installation arguments, force install, selected applet to install] values
+     */
     public String[] getAdditionalInfo() {
         if (advanced.isSelected())
             return new String[]{installParams.getText(),

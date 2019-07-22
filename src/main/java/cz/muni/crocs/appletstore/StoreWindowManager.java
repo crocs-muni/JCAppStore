@@ -1,10 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
-import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
 import org.apache.logging.log4j.LogManager;
@@ -20,21 +19,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
+ * Applet store logic implementation
+ *
+ * CallBack >> allows the store to be reloaded in call() method
+ * Searchable >> allows the store to act like searchable object
+ *
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreWindowManager extends JPanel implements Runnable, CallBack<Void>, Searchable {
+public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable {
 
     private static final Logger logger = LogManager.getLogger(StoreWindowManager.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private AppletStore context;
+    private BackgroundChangeable context;
     private Component currentComponent = null;
     private Searchable store;
     private volatile StoreState state = StoreState.UNINITIALIZED;
     private GridBagConstraints constraints;
 
-    public StoreWindowManager(AppletStore context) {
+    public StoreWindowManager(BackgroundChangeable context) {
         this.context = context;
         setOpaque(false);
         setLayout(new GridBagLayout());
@@ -75,19 +79,22 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
         }
     }
 
+    /**
+     * Force the store to update
+     */
     public void updateGUI() {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(this);
+            SwingUtilities.invokeLater(this::update);
         } else {
-            run();
+            update();
         }
     }
 
-    @Override
-    public void run() {
+    private void update() {
         switch (state) {
             case OK:
-            case WORKING: //if OK or WORKING, do nothing
+            case WORKING:
+            case INSTALLING: //if OK or WORKING, do nothing
                 return;
             case REBUILD:
                 setStatus(StoreState.OK);
@@ -112,6 +119,30 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
                 setStatus(StoreState.WORKING);
                 init();
         }
+    }
+
+    /**
+     * Checks the internet connection and the last version downloaded from github
+     * if needed, updates the data
+     * runs the window setup
+     */
+    private void init() {
+        DownloaderWorker workerThread = new DownloaderWorker(this);
+        addLoading(workerThread);
+        workerThread.execute();
+
+        new Thread(() -> {
+            try {
+                String result = workerThread.get(200, TimeUnit.SECONDS);
+                if (!result.equals("done")) {
+                    OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
+                }
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                setStatus(StoreState.TIMEOUT);
+            } finally {
+                updateGUI();
+            }
+        }).start();
     }
 
     /**
@@ -148,33 +179,14 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
     }
 
     /**
-     * Checks the internet connection and the last version downloaded from github
-     * if needed, updates the data
-     * runs the window setup
+     * Builds the store panel with items from GitHub.
+     * If store file missing, displays error
      */
-    private void init() {
-        DownloaderWorker workerThread = new DownloaderWorker(this);
-        addLoading(workerThread);
-        workerThread.execute();
-
-        new Thread(() -> {
-            try {
-                String result = workerThread.get(200, TimeUnit.SECONDS);
-                if (!result.equals("done")) {
-                    OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
-                }
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                setStatus(StoreState.TIMEOUT);
-            } finally {
-                updateGUI();
-            }
-        }).start();
-    }
-
     private void setupWindow() {
+        JsonParser parser = new JsonStoreParser();
         List<JsonObject> data;
         try {
-            data = JSONStoreParser.getValues();
+            data = parser.getValues();
         } catch (FileNotFoundException e) {
             setFailed();
             return;
@@ -184,11 +196,14 @@ public class StoreWindowManager extends JPanel implements Runnable, CallBack<Voi
             setFailed();
             return;
         }
-        StoreWindowPane store = new StoreWindowPane(data);
+        StoreWindowPane store = new StoreWindowPane(data, context);
         this.store = store;
         putNewPane(store, true);
     }
 
+    /**
+     * Display store load failed
+     */
     private void setFailed() {
         putNewPane(new ErrorPane(textSrc.getString("W_store_loading"),
                 "error.png", this), false);

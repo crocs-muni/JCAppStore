@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.CardDetails;
-import cz.muni.crocs.appletstore.iface.CardCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

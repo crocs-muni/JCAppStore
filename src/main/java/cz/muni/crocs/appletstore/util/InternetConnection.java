@@ -1,14 +1,9 @@
 package cz.muni.crocs.appletstore.util;
 
-
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cz.muni.crocs.appletstore.Config;
-import netscape.javascript.JSObject;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,13 +33,14 @@ public class InternetConnection {
             JsonObject latest = root.getAsJsonObject();
 
             String latestVersion = latest.get("name").getAsString();
-            //TODO check the folder emptiness before returning OK
-            if (currentVersion.equals(latestVersion)) {
-                return new String[] {"ok", latest.get("zipball_url").getAsString(), latestVersion};
-            }
-            return new String[] {"nok", latest.get("zipball_url").getAsString(), latestVersion};
+
+            return new String[] {
+                    currentVersion.equals(latestVersion) ? "ok" : "nok",
+                    latest.get("zipball_url").getAsString(),
+                    latestVersion
+            };
         } catch (IOException | NullPointerException e) {
-            return null; //todo add some prevence
+            return null;
         }
     }
 }

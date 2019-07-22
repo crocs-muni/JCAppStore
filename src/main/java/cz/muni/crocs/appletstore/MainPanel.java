@@ -1,7 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.iface.Informable;
-import cz.muni.crocs.appletstore.iface.Searchable;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 
@@ -9,29 +7,32 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
+ * Main panel of the application, holds the left menu and working panes
+ * takes care of displaying the information boxes
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class MainPanel extends BackgroundImgPanel implements Informable {
-    private AppletStore context;
 
     private LeftMenu leftMenu;
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
 
-    public MainPanel(AppletStore context) {
-        this.context = context;
+    public MainPanel(BackgroundChangeable context) {
+        localPanel = new LocalWindowPane(context);
+        storePanel = new StoreWindowManager(context);
+
         createHierarchy();
         InformerFactory.setInformer(this);
     }
 
+    /**
+     * Build Swing components
+     */
     private void createHierarchy() {
         setLayout(new BorderLayout());
 
-        localPanel = new LocalWindowPane(context);
-        storePanel = new StoreWindowManager(context);
-
-        //Content panel holds both local and store panels as over layout, switches the visibility
         JPanel content = new JPanel();
         content.setLayout(new OverlayLayout(content));
         content.setOpaque(false);
@@ -43,21 +44,31 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         add(leftMenu, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
 
-        //by default store hidden
         setLocalPanelVisible();
     }
 
+    /**
+     * Switch to local panel
+     */
     public void setLocalPanelVisible() {
         localPanel.setVisible(true);
         storePanel.setVisible(false);
     }
 
-    public void setUpdateStorePaneVisible() {
+    /**
+     * Switch to store panel and call store update
+     */
+    public void setStorePaneVisible() {
         localPanel.setVisible(false);
         storePanel.setVisible(true);
-        storePanel.run(); //always
+        storePanel.updateGUI(); //always
     }
 
+    /**
+     * Get searchable panel: wither store or local panel - depends
+     * on where to perform the searching
+     * @return currently visible panel
+     */
     public Searchable getSearchablePane() {
         return (storePanel.isVisible()) ? storePanel : localPanel;
     }

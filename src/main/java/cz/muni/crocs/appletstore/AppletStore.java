@@ -1,7 +1,9 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -12,28 +14,26 @@ import javax.swing.text.html.HTMLEditorKit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 /**
+ * App main window
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 
-public class AppletStore extends JFrame {
+public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
     public static final int PREFFERED_WIDTH = 1100;
     public static final int PREFFERED_HEIGHT = 550;
 
     private boolean windowOpened = true;
-    private GlassPaneBlocker blocker = new GlassPaneBlocker();
-
     private MainPanel window;
     private Menu menu;
-
-    public MainPanel getWindow() {
-        return window;
-    }
+    private GlassPaneBlocker blocker = new GlassPaneBlocker();
 
     public AppletStore() {
         logger.info("------- App started");
@@ -50,12 +50,9 @@ public class AppletStore extends JFrame {
         });
     }
 
-    @Override
-    public void setEnabled(boolean enabled) {
-        getGlassPane().setVisible(!enabled);
-        revalidate();
-    }
-
+    /**
+     * Environment and style settings
+     */
     private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
@@ -68,6 +65,9 @@ public class AppletStore extends JFrame {
         UIManager.put("MenuBar.borderColor", Color.BLACK);
     }
 
+    /**
+     * Build Swing components and start routine
+     */
     private void initComponents() {
         try {
             setIconImage(ImageIO.read(new File(Config.IMAGE_DIR + "icon.png")));
@@ -79,6 +79,8 @@ public class AppletStore extends JFrame {
         setContentPane(window);
 
         menu = new Menu(this);
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        menu.setCard(card == null ? null : card.getId());
         setJMenuBar(menu);
         setGlassPane(blocker);
 
@@ -104,18 +106,25 @@ public class AppletStore extends JFrame {
                     if (result > 0) {
                         if (result == 2) {
                             try {
-                                SwingUtilities.invokeLater(() -> { setEnabled(false); });
+                                SwingUtilities.invokeLater(() -> { switchEnabled(false); });
                                 manager.refreshCard();
                             } finally {
-                                SwingUtilities.invokeLater(() -> { setEnabled(true); });
+                                SwingUtilities.invokeLater(() -> { switchEnabled(true); });
                             }
                         }
 
                         SwingUtilities.invokeLater(() -> {
-                            if (result == 2)
-                                window.getLocalPanel().updatePanes(manager.getTerminalState());
+                            if (result == 2) {
+                                window.getLocalPanel().updatePanes();
+                                menu.setCard(manager.getCard().getId());
+                            } else {
+                                menu.setCard(null);
+                            }
+
                             menu.resetTerminalButtonGroup();
                         });
+                    } else {
+                        menu.setCard(null);
                     }
 
                     Thread.sleep(2000);
@@ -126,5 +135,19 @@ public class AppletStore extends JFrame {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public void updateBackground(BufferedImage image) {
+        ((BackgroundImgPanel) getContentPane()).setNewBackground(image);
+    }
+
+    @Override
+    public void switchEnabled(boolean enabled) {
+        if (enabled == isEnabled())
+            return;
+        setEnabled(enabled);
+        getGlassPane().setVisible(!enabled);
+        revalidate();
     }
 }

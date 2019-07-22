@@ -2,19 +2,17 @@ package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 
 /**
+ * SwingWorker for app setup
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrackable {
 
-    private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
     private String info = "Loading options...";
 
     @Override
@@ -51,6 +49,11 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
     @Override
     public String getInfo() {
         return info;
+    }
+
+    @Override
+    public void setLoaderMessage(String msg) {
+        info = msg;
     }
 }
 

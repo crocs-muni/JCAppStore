@@ -8,6 +8,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
+ * Adapter that allows to load web browser on click
+ *
  * @author Jiří Horák
  * @version 1.0
  */

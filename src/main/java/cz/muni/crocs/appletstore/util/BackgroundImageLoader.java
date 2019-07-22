@@ -12,7 +12,6 @@ import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 
-
 /**
  * @author Jiří Horák
  * @version 1.0
@@ -101,7 +100,6 @@ public class BackgroundImageLoader {
 
     private void applyFilter() {
         BufferedImageOp filter;
-        //darken todo doesnt work?
         background = new RescaleOp(.5f, 0f, null).filter(background, null);
 
         if (radius == 0) {

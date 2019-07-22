@@ -1,9 +1,8 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import pro.javacard.gp.GPRegistryEntry;
+import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,28 +15,29 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Item that is found on card and can be either:
+ *      security domain
+ *      package
+ *      applet instance
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static BufferedImage issuer = getIssuerImg();
+
     private String searchQuery;
-    private BufferedImage issuer;
-    private  JPanel container;
+    private JPanel container;
     private String name; //either name or AID if name missing
     public final AppletInfo info;
-
-    private Color selectedContainer = new Color(207, 244, 210);
+    private Color selected = new Color(207, 244, 210);
 
     public LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
         this.info = info;
         this.name = title;
-        try {
-            this.issuer = ImageIO.read(new File(Config.IMAGE_DIR + "issuer.png"));
-        } catch (IOException e) {
-            this.issuer = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
-        }
+
         searchQuery = title + author + ((info == null) ? "" : Arrays.toString(info.getAid().getBytes()));
         setLayout(new GridBagLayout());
         setOpaque(false);
@@ -48,12 +48,15 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.fill = GridBagConstraints.CENTER;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        JLabel icon =
-                new JLabel("<html><img src=\"file:///" + getImgAddress(imgName) +"\" width=\"130\" height=\"130\"/> </html>") {
+
+        Font basic = OptionsFactory.getOptions().getDefaultFont();
+
+        JLabel icon = new JLabel("<html><img src=\"file:///" + getImgAddress(imgName)
+                +"\" width=\"130\" height=\"130\"/> </html>") {
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
-                        if (info != null && info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain)
+                        if (info != null && info.getKind() == Kind.IssuerSecurityDomain)
                             ((Graphics2D) g).drawImage(issuer, null, 20, 4);
                     }
                 };
@@ -67,25 +70,19 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.gridx = 0;
         gbc.gridy = 0;
         title = adjustLength(title, 25);
-        JLabel name = new JLabel("<html>" +
-                "<div style=\"width:100px; height: 60px; margin: 5px\">" + title + "</div><html>");
-        name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
-        container.add(name, gbc);
+        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", basic.deriveFont(16f)), gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_START;
         author = adjustLength(author, 15);
-        JLabel infoPanel = new JLabel("<html><div style=\"width:85px; max-lines:1; margin: 5px\">" + author + "</div><html>");
-        infoPanel.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(13f));
+        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", basic.deriveFont(13f));
         infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
         container.add(infoPanel, gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_END;
         version = adjustLength(version, 5);
-        JLabel appVersion = new JLabel("<html><div style=\"width:10px; text-overflow: ellipsis; margin: 5px\">" + version + "</div><html>");
-        appVersion.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
-        container.add(appVersion, gbc);
+        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", basic.deriveFont(15f)), gbc);
 
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
@@ -103,7 +100,61 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         );
     }
 
-    //todo decide: html approach new Label("html")
+    @Override
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    @Override
+    public int compareTo(Item o) {
+        if (!(o instanceof LocalItem))
+            return 1;
+
+        LocalItem other = (LocalItem)o;
+        if (info.getKind() == Kind.IssuerSecurityDomain || info.getKind() == Kind.SecurityDomain) {
+            if (other.info.getKind() == Kind.IssuerSecurityDomain || other.info.getKind() == Kind.SecurityDomain) {
+                return name.compareTo(other.name);
+            } else {
+                return -1;
+            }
+        } else if (other.info.getKind() == Kind.IssuerSecurityDomain || other.info.getKind() == Kind.SecurityDomain) {
+            return 1;
+        }
+        return name.compareTo(other.name);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        if (info != null && info.isSelected()) {
+            container.setBackground(selected);
+            Graphics2D g2d = (Graphics2D) g;
+            Composite old = g2d.getComposite();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+            g2d.setComposite(old);
+        } else {
+            container.setBackground(Color.WHITE);
+        }
+        super.paintComponent(g);
+    }
+
+    private JLabel getLabel(String text, String css, Font font) {
+        JLabel label = new JLabel("<html><div style=\"" + css + "\">" + text + "</div><html>");
+        label.setFont(font);
+        return label;
+    }
+
+    private static BufferedImage getIssuerImg() {
+        BufferedImage img;
+        try {
+            img = ImageIO.read(new File(Config.IMAGE_DIR + "issuer.png"));
+        } catch (IOException e) {
+            img = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
+        }
+        return img;
+    }
+
     private String getImgAddress(String imgName) {
         File img = new File(Config.IMAGE_DIR + imgName);
         if (info == null) {
@@ -123,44 +174,5 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
             }
         }
         return img.getAbsolutePath();
-    }
-
-    @Override
-    public String getSearchQuery() {
-        return searchQuery;
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        if (info != null && info.isSelected()) {
-            container.setBackground(selectedContainer);
-            Graphics2D g2d = (Graphics2D) g;
-            Composite old = g2d.getComposite();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(0, 0, getWidth(), getHeight());
-            g2d.setComposite(old);
-        } else {
-            container.setBackground(Color.WHITE);
-        }
-        super.paintComponent(g);
-    }
-
-    @Override
-    public int compareTo(Item o) {
-        if (o instanceof LocalInstallItem || ! (o instanceof LocalItem))
-            return 1;
-
-        LocalItem other = (LocalItem)o;
-        if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain || info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
-            if (other.info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain || other.info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
-                return name.compareTo(other.name);
-            } else {
-                return -1;
-            }
-        } else if (other.info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain || other.info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
-            return 1;
-        }
-        return name.compareTo(other.name);
     }
 }

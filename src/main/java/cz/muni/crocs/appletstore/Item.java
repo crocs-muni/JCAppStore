@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.iface;
+package cz.muni.crocs.appletstore;
 
 /**
  * Interface to mark class as displayable as items to click on in store or on card installed applets

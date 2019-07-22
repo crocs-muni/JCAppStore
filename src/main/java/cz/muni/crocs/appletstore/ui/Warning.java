@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;

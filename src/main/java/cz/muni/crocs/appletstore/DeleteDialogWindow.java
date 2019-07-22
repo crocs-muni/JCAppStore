@@ -13,6 +13,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Dialog window for applet deletion - additional information and confirmation window
+ *
  * @author Jiří Horák
  * @version 1.0
  */

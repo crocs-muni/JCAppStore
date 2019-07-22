@@ -66,11 +66,6 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
-    public void saveOption(String name, String value) {
-        options.put(name, value);
-    }
-
-    @Override
     public void save() {
         File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
         try {
@@ -148,7 +143,7 @@ public class OptionsImpl implements Options<String> {
         }
     }
 
-    public void loadFont() {
+    private void loadFont() {
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, new File(options.get(Options.KEY_FONT)));
         } catch (IOException | FontFormatException e) {

@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.iface;
+package cz.muni.crocs.appletstore;
 
 /**
  * @author Jiří Horák

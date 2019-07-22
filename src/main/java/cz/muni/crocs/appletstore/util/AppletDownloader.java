@@ -17,8 +17,10 @@ import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 /**
+ * Store downloader for the app
+ * downloads the github repo & unzips into folder
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -32,9 +34,9 @@ public class AppletDownloader {
     private int downloaded = 0;
     private int size;
 
-    private DownloaderWorker parent;
+    private ProcessTrackable parent;
 
-    public AppletDownloader(String address, DownloaderWorker parentThread) {
+    public AppletDownloader(String address, ProcessTrackable parentThread) {
         parent = parentThread;
         this.address = address;
     }
@@ -43,13 +45,12 @@ public class AppletDownloader {
         parent.setLoaderMessage("downloading");
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
         if (!downloadZip(address)) {
-            System.out.println("failed to download");
+            logger.warn("failed to download store");
             parent.setLoaderMessage(textSrc.getString("failed"));
             return false;
         }
         if (downloaded != size || !unZipIt()) {
-            System.out.println("failed to unzip");
-
+            logger.warn("failed to unzip store");
             parent.setLoaderMessage(textSrc.getString("failed"));
             return false;
         }
@@ -59,6 +60,7 @@ public class AppletDownloader {
     }
 
     private boolean downloadZip(String address) {
+        logger.info("Downloading the store...");
         try {
             URLConnection connection;
             BufferedInputStream in;
@@ -71,7 +73,7 @@ public class AppletDownloader {
 
             in = new BufferedInputStream(connection.getInputStream());
             fileOutputStream = new FileOutputStream(zipFile);
-            byte dataBuffer[] = new byte[1024];
+            byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
@@ -80,11 +82,13 @@ public class AppletDownloader {
             }
             in.close();
             fileOutputStream.close();
+            return true;
+
         } catch (IOException ex) {
-            logger.error("Could not download release from Github.");
+            ex.printStackTrace();
+            logger.error("Could not download release: " + ex.getMessage());
             return false;
         }
-        return true;
     }
 
     private static void saveFile(File newFile, InputStream input) throws IOException {
@@ -99,9 +103,10 @@ public class AppletDownloader {
 
     /*
     From https://www.mkyong.com/java/how-to-decompress-files-from-a-zip-file/
-    Corrected errors, the srouce code on the website is wrong, at least for windows.
+    Corrected errors, the source code on the website is not fully functional, at least for windows.
      */
     private boolean unZipIt() {
+        logger.info("Unzipping the store...");
         parent.setLoaderMessage(textSrc.getString("unzip"));
         ZipInputStream input;
         ZipEntry entry;
@@ -115,9 +120,7 @@ public class AppletDownloader {
                 System.out.println(fileName);
 
                 File newFile = new File(Config.APP_STORE_DIR, fileName);
-
-                System.out.println("file unzip : " + newFile.getAbsoluteFile());
-
+                logger.info("file unzip : " + newFile.getAbsoluteFile());
                 File par = new File(newFile.getParent());
                 par.mkdirs();
 

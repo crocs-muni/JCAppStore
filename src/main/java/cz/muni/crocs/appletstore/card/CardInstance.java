@@ -307,6 +307,7 @@ public class CardInstance {
 
             cleanWith(CardState.FAILED);
             updateCardAuth(false);
+            throw new CardException("Card command failed: " + e.getMessage(), e);
         } finally {
             card.disconnect(true);
         }

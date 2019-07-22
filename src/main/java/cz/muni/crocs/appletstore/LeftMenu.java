@@ -17,34 +17,32 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Menu for switching between store & local panel
+ * and to display info in left pane
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class LeftMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    //holds the content
-    private JPanel container = new JPanel();
-
-    //to perform searching
-    private JPanel searchPane;
+    private JPanel container;
     private InputHintTextField searchInput;
     private JLabel searchIcon;
-    //button for switching
+
     private CustomButton local = new CustomButton("creditcard.png");
     private CustomButton remote = new CustomButton("shop.png");
 
-    private Color choosedButtonBG = new Color(255, 255, 255, 60);
-
     private boolean isLocal = true;
     private MainPanel parent;
+    private Color choosedButtonBG = new Color(255, 255, 255, 60);
 
     public LeftMenu(MainPanel parent) {
         this.parent = parent;
         setBackground(new Color(255, 255, 255, 65));
 
+        container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-
         container.setOpaque(false);
 
         setMaximumSize(new Dimension(240, Integer.MAX_VALUE));
@@ -56,35 +54,33 @@ public class LeftMenu extends JPanel {
         setListeners();
     }
 
-    public void buildMenuComponents() {
-
-        searchPane = new JPanel();
+    /**
+     * Build Swing components
+     */
+    private void buildMenuComponents() {
+        JPanel searchPane = new JPanel();
         searchPane.setOpaque(false);
-        //set margin and size
         searchPane.setBorder(new CompoundBorder(
-                new EmptyBorder(5, 15, 15, 15), //outer margin
-                new MatteBorder(0, 0,5 ,0, Color.BLACK))); //inner nice bottom line
+                new EmptyBorder(5, 15, 15, 15),
+                new MatteBorder(0, 0,5 ,0, Color.BLACK)));
         searchPane.setMaximumSize( new Dimension(Integer.MAX_VALUE, 60));
-        //set search intpu text
         searchInput = new InputHintTextField(textSrc.getString("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
         searchInput.setFont(OptionsFactory.getOptions().getDefaultFont());
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
-        //create search icon
+
         searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR +  "search.png"));
         searchIcon.setBorder(new EmptyBorder(5, 5, 5,5 ));
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
-        //add search to left menu container
         container.add(searchPane);
 
-        //init button for local storage
-        setButton(local, textSrc.getString("my_card"), true); //TODO more terminals or cards?
+        setButton(local, textSrc.getString("my_card"), true);
         local.setBackground(choosedButtonBG);
         local.setCursor(new Cursor(Cursor.HAND_CURSOR));
         container.add(local);
-        //init button for store
+
         setButton(remote, textSrc.getString("app_store"), false);
         remote.setOpaque(false);
         remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -95,9 +91,12 @@ public class LeftMenu extends JPanel {
         add(Box.createRigidArea(new Dimension(200, 20)));
     }
 
+    /**
+     * Display notification to the user below the buttons
+     * @param msg msg to display
+     */
     public void addNotification(String msg) {
         NotifLabel label = new NotifLabel(msg, this);
-        //label.setAlignmentY(Component.TOP_ALIGNMENT);
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(label, 2);
 
@@ -114,10 +113,6 @@ public class LeftMenu extends JPanel {
         remote.setBorder(!isLocal);
     }
 
-    public boolean isLocal() {
-        return isLocal;
-    }
-
     /**
      * Set button properties
      * @param button CustomButton instance
@@ -129,8 +124,10 @@ public class LeftMenu extends JPanel {
         button.setBorder(defaultChoosed);
     }
 
+    /**
+     * Setup actions for the buttons
+     */
     private void setListeners() {
-        //TODO possible call from oher buttons - refreshing appstore window - make it an action
         local.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -142,7 +139,6 @@ public class LeftMenu extends JPanel {
                     local.setOpaque(true);
                     local.setBackground(choosedButtonBG);
                     remote.setOpaque(false);
-                     //init only if no readers
                 }
             }
         });
@@ -152,7 +148,7 @@ public class LeftMenu extends JPanel {
                 if (isLocal) {
                     isLocal = false;
                     setChoosed();
-                    parent.setUpdateStorePaneVisible();
+                    parent.setStorePaneVisible();
 
                     remote.setOpaque(true);
                     remote.setBackground(choosedButtonBG);
@@ -160,6 +156,7 @@ public class LeftMenu extends JPanel {
                 }
             }
         });
+
         //searching icon on click search
         searchIcon.addMouseListener(new MouseAdapter() {
             @Override

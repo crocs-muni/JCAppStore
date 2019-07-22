@@ -1,11 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.util.BackgroundImageLoader;
-import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
-import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -23,6 +19,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Application settings
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -30,25 +28,22 @@ public class Settings extends JPanel {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-    private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
-    private final String defaultBgPath = Config.IMAGE_DIR + "bg.jpg";
-
-    private final Tuple[] langs = new Tuple[]{
+    private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
+    private static final Tuple[] LANGUAGES = new Tuple[]{
             new Tuple<>("en", "English"),
             new Tuple<>("cz", "Česky")
     };
+
+    private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
+    private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
-
     private JCheckBox hintEnabled = new JCheckBox();
-
-    private AppletStore context;
-
+    private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
             new EmptyBorder(new Insets(4, 4, 4, 4)));
 
-    public Settings(AppletStore context) {
+    public Settings(BackgroundChangeable context) {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
@@ -61,7 +56,7 @@ public class Settings extends JPanel {
         addTitleLabel(textSrc.getString("background"), "span 3, wrap");
 
         String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-        if (path.equals(defaultBgPath)) {
+        if (path.equals(DEFAULT_BG_PATH)) {
             path = textSrc.getString("default");
             slider.setEnabled(false);
         }
@@ -111,10 +106,16 @@ public class Settings extends JPanel {
         add(slider, "w 180, align right, span 2, wrap");
     }
 
+    public void apply() {
+        saveBackgroundImage();
+        saveLanguage();
+        saveHint();
+    }
+
     private void addLanguage() {
         addTitleLabel(textSrc.getString("language"), "");
 
-        languageBox = new JComboBox<>(langs);
+        languageBox = new JComboBox<>(LANGUAGES);
         CustomComboBoxItem listItems = new CustomComboBoxItem();
         languageBox.setMaximumRowCount(4);
         languageBox.setRenderer(listItems);
@@ -141,7 +142,6 @@ public class Settings extends JPanel {
         return value;
     }
 
-
     private void saveBackgroundImage() {
         if (bgImg.equals(OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND))) {
             return;
@@ -149,33 +149,26 @@ public class Settings extends JPanel {
         if (bgImg.equals(textSrc.getString("default"))) {
             try {
                 OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
-                ((BackgroundImgPanel) context.getContentPane()).setNewBackground(
-                        ImageIO.read(new File(defaultBgPath)));
+                context.updateBackground(ImageIO.read(new File(DEFAULT_BG_PATH)));
             } catch (IOException e) {
-                //todo show error
+                InformerFactory.getInformer().showInfo(textSrc.getString("E_background"));
                 e.printStackTrace();
             }
         } else {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());
-            ((BackgroundImgPanel) context.getContentPane()).setNewBackground(loader.get());
+            context.updateBackground(loader.get());
         }
     }
 
     private void saveLanguage() {
-        if (langs[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
-        OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)langs[languageBox.getSelectedIndex()].first);
+        if (LANGUAGES[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
+        OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)LANGUAGES[languageBox.getSelectedIndex()].first);
         showAlertChange();
         //Config.translation = new Translation(Config.options.get(Options.KEY_LANGUAGE));
     }
 
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
-    }
-
-    public void apply() {
-        saveBackgroundImage();
-        saveLanguage();
-        saveHint();
     }
 
     /**

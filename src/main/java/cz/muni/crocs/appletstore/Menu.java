@@ -25,16 +25,12 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private JMenu submenu;
     private AppletStore context;
-
     private JMenu readers;
-    private ButtonGroup readersPresent = new ButtonGroup();
+    private JLabel currentCard;
 
     public Menu(AppletStore parent) {
         context = parent;
-
-        //black background with margin and no border bar
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
         setBorder(null);
@@ -54,66 +50,8 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
 //        cbMenuItem.addItemListener(this);
     }
 
-
-    /**
-     * @param action         action to perform
-     * @param keyEvent       KeyEvent key constant
-     * @param inputEventMask InputEvent constant - mask for accelerated access
-     * @return
-     */
-    private JMenuItem menuItemWithKeyShortcutAndIcon(AbstractAction action, String imagePath,
-                                                     String descripton, int keyEvent, int inputEventMask) {
-        JMenuItem menuItem = menuItemWithKeyShortcut(action, descripton, keyEvent,inputEventMask);
-        menuItem.setIcon(new ImageIcon(imagePath));
-
-        return menuItem;
-    }
-
-    /**
-     * @param action         action to perform
-     * @param keyEvent       KeyEvent key constant
-     * @param inputEventMask InputEvent constant - mask for accelerated access
-     * @return
-     */
-    private JMenuItem menuItemWithKeyShortcut(AbstractAction action, String descripton,
-                                               int keyEvent, int inputEventMask) {
-        JMenuItem menuItem = menuItemNoShortcut(action, descripton);
-
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
-        return menuItem;
-    }
-
-    private JMenuItem menuItemDisabled(String title, String descripton) {
-        JMenuItem menuItem = menuItemNoShortcut(null, descripton);
-        menuItem.setText(title);
-        return menuItem;
-    }
-
-    private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
-        JMenuItem menuItem = new JMenuItem(action);
-        setItemLook(menuItem, descripton);
-        return menuItem;
-    }
-
-    private void setItemLook(AbstractButton component, String descripton) {
-        component.setForeground(new Color(0x000000));
-        component.setBackground(new Color(0xffffff));
-        component.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(10f));
-        component.getAccessibleContext().setAccessibleDescription(descripton);
-        component.setMargin(new Insets(4, 4, 4, 16));
-        Dimension preferred = component.getPreferredSize();
-        component.setPreferredSize(new Dimension(200, (int)preferred.getHeight()));
-    }
-
-    private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
-        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
-        setItemLook(rbMenuItem, descripton);
-        return rbMenuItem;
-    }
-
     //TODO menu into func and return menu
     private void buildMenu() {
-
         CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
         add(menu);
 
@@ -138,86 +76,30 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
             }
         }, Config.IMAGE_DIR + "close_black.png"));
 
-//        settings.setFont(OptionsFactory.getOptions().getDefaultFont());
-//        settings.setForeground(Color.WHITE);
-//        settings.setMargin(new Insets(0,0 ,0 ,0 ));
-
-
-        //a group of JMenuItems
-//        menu.add(menuItemWithKeyShortcut("First", "Description", KeyEvent.VK_1, InputEvent.ALT_MASK));
-//        menu.add(menuItemNoShortcut("Second", "Description"));
-//        menu.add(menuItemNoShortcut("Third", "Description"));
-        //a group of radio button menu items
-       // menu.addSeparator();
-
-//
-//
-//        rbMenuItem = new JRadioButtonMenuItem("Another one");
-//        rbMenuItem.setMnemonic(KeyEvent.VK_O);
-//        group.add(rbMenuItem);
-//        menu.add(rbMenuItem);
-//
-////a group of check box menu items
-//        menu.addSeparator();
-//        cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
-//        cbMenuItem.setMnemonic(KeyEvent.VK_C);
-//        menu.add(cbMenuItem);
-//
-//        cbMenuItem = new JCheckBoxMenuItem("Another one");
-//        cbMenuItem.setMnemonic(KeyEvent.VK_H);
-//        menu.add(cbMenuItem);
-
-//a submenu
-
-        submenu = new JMenu("A submenu");
-        submenu.setMnemonic(KeyEvent.VK_S);
-
-//        submenu.add(menuItemWithKeyShortcut("Item submenu", "Description",
-//                KeyEvent.VK_2, InputEvent.ALT_MASK));
-
-
-        add(new CustomJmenu("Another Menu", "This menu does nothing", KeyEvent.VK_N));
-
-        //BUILD READERS MENU
         readers = new CustomJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
         add(readers);
 
+        JPanel midContainer = new JPanel();
+        midContainer.setBackground(Color.black);
+        midContainer.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
+        currentCard = new JLabel();
+        currentCard.setForeground(Color.white);
+        midContainer.add(currentCard);
+        add(midContainer);
+    }
 
-//        add(Box.createGlue());
-//
-//        menu = new CustomJmenu("", "Minimize", KeyEvent.VK_UNDEFINED);
-//        menu.setIcon(new ImageIcon("src/main/resources/img/minimize.png"));
-//        menu.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                if (e.getClickCount() >= 1) {
-//                    context.setState(JFrame.ICONIFIED);
-//                }
-//            }
-//        });
-//        menu.setHorizontalAlignment(SwingConstants.RIGHT);
-//        add(menu);
-//
-//        menu = new CustomJmenu("", "Exit", KeyEvent.VK_UNDEFINED);
-//        menu.setIcon(new ImageIcon("src/main/resources/img/close_white.png"));
-//
-//        menu.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                if (e.getClickCount() >= 1) {
-//                    System.exit(0);
-//                }
-//            }
-//        });
-//        menu.setHorizontalAlignment(SwingConstants.RIGHT);
-//        add(menu);
+    public void setCard(String card) {
+        if (card == null || card.isEmpty())
+            card = textSrc.getString("no_card");
+        currentCard.setText(card);
+        revalidate();
     }
 
     public void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
-            readersPresent = new ButtonGroup();
+            ButtonGroup readersPresent = new ButtonGroup();
             for (String name : manager.getTerminals()) {
                 JRadioButtonMenuItem item = selectableMenuItem(name, textSrc.getString("reader_avail"));
                 if (name.equals(manager.getSelectedTerminalName())) {
@@ -262,4 +144,62 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     public boolean isBorderPainted() {
         return false;
     }
+
+
+    /**
+     * @param action         action to perform
+     * @param keyEvent       KeyEvent key constant
+     * @param inputEventMask InputEvent constant - mask for accelerated access
+     * @return
+     */
+    private JMenuItem menuItemWithKeyShortcutAndIcon(AbstractAction action, String imagePath,
+                                                     String descripton, int keyEvent, int inputEventMask) {
+        JMenuItem menuItem = menuItemWithKeyShortcut(action, descripton, keyEvent,inputEventMask);
+        menuItem.setIcon(new ImageIcon(imagePath));
+
+        return menuItem;
+    }
+
+    /**
+     * @param action         action to perform
+     * @param keyEvent       KeyEvent key constant
+     * @param inputEventMask InputEvent constant - mask for accelerated access
+     * @return
+     */
+    private JMenuItem menuItemWithKeyShortcut(AbstractAction action, String descripton,
+                                              int keyEvent, int inputEventMask) {
+        JMenuItem menuItem = menuItemNoShortcut(action, descripton);
+
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
+        return menuItem;
+    }
+
+    private JMenuItem menuItemDisabled(String title, String descripton) {
+        JMenuItem menuItem = menuItemNoShortcut(null, descripton);
+        menuItem.setText(title);
+        return menuItem;
+    }
+
+    private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
+        JMenuItem menuItem = new JMenuItem(action);
+        setItemLook(menuItem, descripton);
+        return menuItem;
+    }
+
+    private void setItemLook(AbstractButton component, String descripton) {
+        component.setForeground(new Color(0x000000));
+        component.setBackground(new Color(0xffffff));
+        component.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(10f));
+        component.getAccessibleContext().setAccessibleDescription(descripton);
+        component.setMargin(new Insets(4, 4, 4, 16));
+        Dimension preferred = component.getPreferredSize();
+        component.setPreferredSize(new Dimension(200, (int)preferred.getHeight()));
+    }
+
+    private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
+        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
+        setItemLook(rbMenuItem, descripton);
+        return rbMenuItem;
+    }
+
 }

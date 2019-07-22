@@ -1,16 +1,9 @@
 package cz.muni.crocs.appletstore.util;
 
-
-import cz.muni.crocs.appletstore.MainPanel;
-import cz.muni.crocs.appletstore.iface.CallBack;
-import cz.muni.crocs.appletstore.iface.Informable;
+import cz.muni.crocs.appletstore.Informable;
 import cz.muni.crocs.appletstore.ui.Warning;
 
 import javax.swing.*;
-import java.util.Locale;
-import java.util.Queue;
-import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author Jiří Horák
@@ -18,7 +11,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class InformerImpl implements Informer, CallBack<Void> {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     //todo fronta hlášení, pokud null -> zobrazit jiný
     private Warning warning;
     private Informable context;
@@ -39,8 +31,8 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     @Override
-    public void showWarningToClose(String langKey, Warning.Importance status) {
-        warning = new Warning(textSrc.getString(langKey), status, Warning.CallBackIcon.CLOSE, this);
+    public void showWarningToClose(String msg, Warning.Importance status) {
+        warning = new Warning(msg, status, Warning.CallBackIcon.CLOSE, this);
         fireWarning(8000);
     }
 

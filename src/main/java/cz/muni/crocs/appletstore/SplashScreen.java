@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.iface.ProcessTrackable;
+import cz.muni.crocs.appletstore.util.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +12,16 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import javax.swing.*;
 
+/**
+ * App loading - checks for card readers, initializes basic things
+ * needed for app to start & loads settings
+ */
 
 public class SplashScreen extends JWindow {
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private Timer timer1;
+    private Timer timer;
     private int progress = 0;
     private Random r = new Random();
     private ProcessTrackable loader = new LoaderWorker();
@@ -38,6 +42,9 @@ public class SplashScreen extends JWindow {
         new Thread(loader).start();
     }
 
+    /**
+     * Progress bar in form of card numbers
+     */
     private void loadProgressBar() {
         ActionListener al = evt -> {
             if (update && progress < 16) {
@@ -49,15 +56,15 @@ public class SplashScreen extends JWindow {
 
             repaint();
             if (loader.getProgress() > 15) {
-                timer1.stop();
+                timer.stop();
                 runMainApp();
 
                 progress = 16;
                 repaint();
             }
         };
-        timer1 = new Timer(120, al);
-        timer1.start();
+        timer = new Timer(120, al);
+        timer.start();
     }
 
     @Override

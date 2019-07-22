@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.iface;
+package cz.muni.crocs.appletstore.util;
 
 /**
  * @author Jiří Horák
@@ -24,6 +24,18 @@ public interface ProcessTrackable extends Runnable {
     int getMaximum();
 
     /**
+     * Get info about progress
+     * @return
+     */
+    String getInfo();
+
+    /**
+     * Set message for the tracking interface
+     * @param msg message to display
+     */
+    void setLoaderMessage(String msg);
+
+    /**
      * Set progress safely - won't overcome 100
      * @param amount
      */
@@ -41,10 +53,4 @@ public interface ProcessTrackable extends Runnable {
         if (getProgress() < 100)
             updateProgress(getProgress() + 1);
     }
-
-    /**
-     * Get info about progress
-     * @return
-     */
-    String getInfo();
 }

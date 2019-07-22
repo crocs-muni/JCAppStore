@@ -8,12 +8,12 @@ public interface Options<ValueType> {
     /**
      * Key names for options
      */
-    static final String KEY_LANGUAGE = "lang";
-    static final String KEY_GITHUB_LATEST_VERSION = "github.latest.version";
-    static final String KEY_BACKGROUND = "background";
-    static final String KEY_HINT = "hint";
-    static final String KEY_FONT = "font";
-    static final String KEY_STYLESHEET = "stylesheet";
+    String KEY_LANGUAGE = "lang";
+    String KEY_GITHUB_LATEST_VERSION = "github.latest.version";
+    String KEY_BACKGROUND = "background";
+    String KEY_HINT = "hint";
+    String KEY_FONT = "font";
+    String KEY_STYLESHEET = "stylesheet";
 
     /**
      * Get option for app
@@ -28,13 +28,6 @@ public interface Options<ValueType> {
      * @param value value to add/update
      */
     void addOption(String name, ValueType value);
-
-    /**
-     * Add or update value at name
-     * @param name name of the option
-     * @param value value of the option
-     */
-    void saveOption(String name, ValueType value);
 
     /**
      * Save the opts into file

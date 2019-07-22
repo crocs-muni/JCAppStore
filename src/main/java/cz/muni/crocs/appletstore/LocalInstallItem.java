@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.iface.Item;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -10,6 +9,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Specific Item that is not installed on card but offers applet installation on click
+ * always as the last item
+ *
  * @author Jiří Horák
  * @version 1.0
  */
