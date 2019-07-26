@@ -57,5 +57,5 @@ public interface CardManager {
 
     void uninstall(AppletInfo nfo, boolean force) throws CardException;
 
-    void sendApdu(String AID);
+    void sendApdu(String AID) throws CardException;
 }

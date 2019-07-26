@@ -89,12 +89,14 @@ public class LocalItemInfo extends HintPanel {
     public void set(AppletInfo info) {
         delete.setInfo(info);
         send.setInfo(info);
+        String ver = info.getVersion();
+
         name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
                 textSrc.getString("H_name"));
         author.setText("<html><p width=\"280\">" + textSrc.getString("author") +
                 info.getAuthor() + "</p></html>");
         version.setText("<html><p width=\"280\">" + textSrc.getString("version") +
-                ((info.getVersion().isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
+                ((ver == null || ver.isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
                 textSrc.getString("H_version"));
         id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
                 textSrc.getString("H_id"));

@@ -31,16 +31,18 @@ public class InstallAction extends MouseAdapter {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private File capfile = null;
-    private String appletName = null;
+    private String appletName;
+    private String titleBar = "";
     private final OnEventCallBack<Void, Void, Void> call;
 
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
         this.call = call;
     }
 
-    public InstallAction(String appletName, File capfile, OnEventCallBack<Void, Void, Void> call) {
+    public InstallAction(String titleBar, String appletName, File capfile, OnEventCallBack<Void, Void, Void> call) {
         this(call);
         this.capfile = capfile;
+        this.titleBar = titleBar;
         this.appletName = appletName;
     }
 
@@ -56,7 +58,7 @@ public class InstallAction extends MouseAdapter {
         InstallDialogWindow opts = new InstallDialogWindow(file);
 
         int result = JOptionPane.showOptionDialog(null, opts,
-                textSrc.getString("CAP_install_applet"),
+                textSrc.getString("CAP_install_applet") + titleBar,
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + "error.png"),

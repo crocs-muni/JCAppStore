@@ -17,7 +17,10 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+
 /**
+ * Manager providing all functionality over card
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -28,7 +31,7 @@ public class CardManagerImpl implements CardManager {
 
     private Terminals terminals = new Terminals();
     //our card representation
-    private /*volatile*/ CardInstance card = new CardInstance();
+    private CardInstance card = new CardInstance();
     private AID selectedAID = null;
     private boolean busy = false;
 
@@ -43,6 +46,10 @@ public class CardManagerImpl implements CardManager {
             selectedAID = null;
             aid = null;
         }
+
+        if (card.getApplets() == null)
+            return;
+
         for (AppletInfo info : card.getApplets()) {
             info.setSelected(info.getAid() == aid);
         }
@@ -177,6 +184,10 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public synchronized void install(final CAPFile file, String[] data) throws CardException {
+        if (card.getId().equals(CardInstance.NO_CARD)) {
+            throw new CardException("Prdel");
+        }
+
         while (busy || card.getState() == CardInstance.CardState.WORKING) {
             try {
                 wait();
@@ -198,7 +209,7 @@ public class CardManagerImpl implements CardManager {
 
             card.setRefresh();
             if (card.getState() == CardInstance.CardState.OK)
-                terminals.setState(Terminals.TerminalState.NO_CARD);
+                terminals.refresh();
 
             //todo save applet data into ini
 
@@ -221,6 +232,10 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public synchronized void uninstall(AppletInfo nfo, boolean force) throws CardException {
+        if (card.getId().equals(CardInstance.NO_CARD)) {
+            throw new CardException("Prdel");
+        }
+
         while (busy || card.getState() == CardInstance.CardState.WORKING) {
             try {
                 wait();
@@ -238,7 +253,7 @@ public class CardManagerImpl implements CardManager {
             // todo search for failures during install and notify user
             card.setRefresh();
             if (card.getState() == CardInstance.CardState.OK)
-                terminals.setState(Terminals.TerminalState.NO_CARD);
+                terminals.refresh();
         } finally {
             busy = false;
             notifyAll();
@@ -246,7 +261,9 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void sendApdu(String AID) {
-
+    public synchronized void sendApdu(String AID) throws CardException {
+        if (card.getId().equals(CardInstance.NO_CARD)) {
+            throw new CardException("Prdel");
+        }
     }
 }

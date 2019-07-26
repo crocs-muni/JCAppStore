@@ -9,6 +9,8 @@ import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
 import net.miginfocom.swing.MigLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -33,12 +35,12 @@ import java.util.ResourceBundle;
  */
 public class StoreItemInfo extends HintPanel {
 
+    private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
 
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
-
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
@@ -79,9 +81,10 @@ public class StoreItemInfo extends HintPanel {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
-                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject().
-                                get(latestV).getAsJsonArray();
-                        fireInstall(latestV, appName, sdks, sdks.size() - 1, callback, e);
+                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
+                                .get(latestV).getAsJsonArray();
+                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
+                                appName, latestV, sdks, sdks.size() - 1, callback, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
@@ -161,16 +164,19 @@ public class StoreItemInfo extends HintPanel {
                 new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-
                         int versionIdx = getComboBoxSelected(versionComboBox, "E_invalid_version");
                         int compilerIdx = getComboBoxSelected(compilerVersionComboBox, "E_invalid_compiler");
-                        if (versionIdx == 0 || compilerIdx == 0)
+                        if (versionIdx < 0 || compilerIdx < 0) {
+                            InformerFactory.getInformer().showInfo(textSrc.getString("E_invalid_custom_install"));
                             return;
+                        }
 
                         String version = versions[versionIdx];
                         JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
-                        fireInstall(version, dataSet.get(Config.JSON_TAG_TITLE).getAsString(), sdks, compilerIdx, call, e);
+                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
+                                dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
+                                version, sdks, compilerIdx, call, e);
                     }
                 });
         add(customInst, "span 2, align right, wrap");
@@ -228,18 +234,21 @@ public class StoreItemInfo extends HintPanel {
         return selected;
     }
 
-    private static void fireInstall(String which, String appName, JsonArray sdks, int sdkIdx,
+    private static void fireInstall(String appName, String appTitle, String which, JsonArray sdks, int sdkIdx,
                                        OnEventCallBack<Void, Void, Void> call, MouseEvent e) {
 
+        String sdk = sdks.get(sdkIdx).getAsString();
         File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
-                appName + Config.SEP + appName + "_v" + which +
-                "_sdk" + sdks.get(sdkIdx).getAsString() + ".cap");
+                appName + Config.SEP + appName + "_v" + which + "_sdk" + sdk + ".cap");
+
+        logger.info("Install applet " + file.getAbsolutePath());
 
         if (!file.exists()) {
+            logger.warn("Applet file not found.");
             InformerFactory.getInformer().showWarningToClose(textSrc.getString("E_install_not_found"),
                     Warning.Importance.INFO);
             return;
         }
-        new InstallAction(appName, file, call).mouseClicked(e);
+        new InstallAction( ", version " + which + ", sdk " + sdk, appName, file, call).mouseClicked(e);
     }
 }

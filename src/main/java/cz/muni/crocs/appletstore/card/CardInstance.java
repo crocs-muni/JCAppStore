@@ -23,6 +23,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Card instance of card inserted in selected terminal
+ * provides all functionality over card communication
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -61,7 +64,7 @@ public class CardInstance {
     private int errorByte;
     private String errorTitle;
     private String error;
-    public void setError(int errorByte, String errorTitle, String errorBody) {
+    private void setError(int errorByte, String errorTitle, String errorBody) {
         this.errorByte = errorByte;
         this.errorTitle = errorTitle;
         this.error = errorBody;
@@ -79,7 +82,7 @@ public class CardInstance {
     /**
      * Force to reload card by deleting card id
      */
-    public void setRefresh() {
+    void setRefresh() {
         this.id = NO_CARD;
     }
     private void cleanWith(CardState state) {
@@ -102,7 +105,7 @@ public class CardInstance {
      * Performs the only insecure channel use
      * to get data from inserted card
      */
-    public CardDetails getCardInfo(CardTerminal terminal) {
+    CardDetails getCardInfo(CardTerminal terminal) {
         try {
             //todo use logging card terminal?
             Card card = terminal.connect("*");
@@ -146,7 +149,7 @@ public class CardInstance {
      *
      * @param newDetails of the card: ATR is a must, other optional
      */
-    public void update(CardDetails newDetails, CardTerminal terminal, boolean force) {
+    void update(CardDetails newDetails, CardTerminal terminal, boolean force) {
         this.terminal = terminal;
 
         if (newDetails == null || terminal == null) {
@@ -272,7 +275,7 @@ public class CardInstance {
      * @param command command instance to execute
      * @throws CardException unable to perform command
      */
-    public void executeCommand(GPCommand command) throws CardException {
+    void executeCommand(GPCommand command) throws CardException {
         state = CardState.WORKING;
 
         Card card = null;
@@ -365,8 +368,6 @@ public class CardInstance {
                 return GPKey.Type.RAW;
         }
     }
-
-
 
     @Override
     public int hashCode() {
