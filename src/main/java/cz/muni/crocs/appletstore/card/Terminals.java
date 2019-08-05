@@ -115,10 +115,11 @@ public class Terminals {
             if (!checkCardPresence(selectedReader)) {
                 selectedReader = checkAnyCardPresence();
             }
-        } catch (CardException | NoSuchAlgorithmException ex) {
+        } catch (CardException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
-                    null, ex.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE));
-            logger.warn("Failed to check terminal.", ex);
+                    null, e.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE));
+            logger.warn("Failed to check terminal.", e);
             state = TerminalState.NO_READER;
             return (old != state) ? 2 : 0;
         }
@@ -158,6 +159,7 @@ public class Terminals {
         try {
             state = (checkCardInTerminal(terminal)) ? TerminalState.OK : TerminalState.NO_CARD;
         } catch (CardException e) {
+            e.printStackTrace();
             logger.warn("Failed to check card presence in terminal " + terminal.getName(), e);
             state = TerminalState.NO_CARD;
         }
@@ -176,6 +178,7 @@ public class Terminals {
                 }
             }
         } catch (CardException e) {
+            e.printStackTrace();
             logger.warn("Failed to check card presence in terminals.", e);
             return selectedReader;
         }

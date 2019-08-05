@@ -138,6 +138,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                     OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
                 setStatus(StoreState.TIMEOUT);
             } finally {
                 updateGUI();
@@ -188,6 +189,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         try {
             data = parser.getValues();
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
             setFailed();
             return;
         }

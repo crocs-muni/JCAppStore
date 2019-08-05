@@ -55,6 +55,7 @@ public class CardDetails {
         try {
             this.cplc = GPData.CPLC.fromBytes(cplc);
         } catch (GPDataException e) {
+            e.printStackTrace();
             this.cplc = null;
         }
     }

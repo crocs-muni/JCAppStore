@@ -34,6 +34,7 @@ public class NotifLabel extends JLabel {
         try {
             this.closeIcon = ImageIO.read(new File(Config.IMAGE_DIR + "close_small.png"));
         } catch (IOException e) {
+            e.printStackTrace();
             this.closeIcon = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
         }
 

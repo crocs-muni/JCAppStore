@@ -41,7 +41,6 @@ public class Config {
     public static final String INI_DATA = "card_data";
     public static final String INI_CAPABILITIES = "card_capabilities";
     public static final String INI_KEY_INFO = "key_info";
-    public static final String INI_INSTALLED = "applets";
 
     //store constants
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
@@ -58,6 +57,7 @@ public class Config {
     public static final String JSON_TAG_DESC = "description";
     public static final String JSON_TAG_URL = "url";
     public static final String JSON_TAG_USAGE = "usage";
+    public static final String JSON_TAG_KEYS = "keys";
     public static final String RESOURCES = Config.APP_STORE_DIR + Config.SEP + "Resources" + Config.SEP;
 
     /**

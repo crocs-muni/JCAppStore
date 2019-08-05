@@ -46,8 +46,8 @@ public class BackgroundImgPanel extends JPanel {
         try {
             bg = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
         } catch (IOException e) {
-            //build white background
             //TODO show user unable to load default background
+            e.printStackTrace();
             bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
         }
     }

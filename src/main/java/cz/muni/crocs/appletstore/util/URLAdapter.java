@@ -26,8 +26,8 @@ public class URLAdapter extends MouseAdapter {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
                 Desktop.getDesktop().browse(new URI(urlAddress));
-            } catch (IOException | URISyntaxException e1) {
-                e1.printStackTrace();
+            } catch (IOException | URISyntaxException ex) {
+                ex.printStackTrace();
             }
         }
     }

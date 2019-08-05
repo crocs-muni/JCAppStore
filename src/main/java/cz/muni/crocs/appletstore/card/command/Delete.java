@@ -37,6 +37,8 @@ public class Delete extends GPCommand<Void> {
         try {
             context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
         } catch (GPException e) {
+            e.printStackTrace();
+
             if (!context.getRegistry().allAIDs().contains(aid)) {
                 System.err.println("Could not delete AID (not present on card): " + aid);
             } else {

@@ -15,8 +15,6 @@ import static pro.javacard.gp.GPData.getData;
  * @author Jiří Horák
  */
 public class GetDetails implements CardCommand {
-    private static final Logger logger = LogManager.getLogger(GetDetails.class);
-
     private CardChannel channel;
     private CardDetails details;
 

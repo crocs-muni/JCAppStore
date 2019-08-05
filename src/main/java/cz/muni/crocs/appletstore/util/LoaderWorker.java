@@ -2,8 +2,14 @@ package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
 
 import javax.swing.*;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static java.lang.Thread.sleep;
 
 /**
  * SwingWorker for app setup
@@ -12,8 +18,9 @@ import javax.swing.*;
  * @version 1.0
  */
 public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrackable {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private String info = "Loading options...";
+    private String info = textSrc.getString("loading_opts");
 
     @Override
     public Void doInBackground() {
@@ -21,12 +28,18 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
         //first get options will force to initialize
         OptionsFactory.getOptions();
 
-        info = "Detecting cards...";
+        info = textSrc.getString("detect_cards");
         CardManager manager = CardManagerFactory.getManager();
         manager.needsCardRefresh();
-        manager.refreshCard();
+        try {
+            manager.refreshCard();
+        } catch (LocalizedCardException e) {
+            info = textSrc.getString("failed_detect");
+            waitWhile(500);
+        }
 
-        info = "Creating window...";
+        info = textSrc.getString("lanuch");
+        waitWhile(500);
         setProgress(getMaximum());
         return null;
     }
@@ -54,6 +67,15 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
     @Override
     public void setLoaderMessage(String msg) {
         info = msg;
+    }
+
+    private void waitWhile(long ms) {
+        try {
+            //wait for user to be able to read the msg
+            sleep(ms);
+        } catch (InterruptedException ex) {
+            //do nothing
+        }
     }
 }
 

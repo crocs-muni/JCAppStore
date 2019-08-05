@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.card.command;
 import pro.javacard.gp.GlobalPlatform;
 
 /**
+ * GlobalPlatform-like command
  * @author Jiří Horák
  * @version 1.0
  */

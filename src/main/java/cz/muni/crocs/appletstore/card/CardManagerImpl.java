@@ -1,22 +1,24 @@
 package cz.muni.crocs.appletstore.card;
 
-import cz.muni.crocs.appletstore.card.command.Delete;
-import cz.muni.crocs.appletstore.card.command.GPCommand;
-import cz.muni.crocs.appletstore.card.command.Install;
+import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.card.command.*;
+import cz.muni.crocs.appletstore.util.LogOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
+import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.io.PrintStream;
+import java.util.*;
+import java.util.List;
 
 /**
  * Manager providing all functionality over card
@@ -27,18 +29,14 @@ import java.util.Set;
 public class CardManagerImpl implements CardManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardManagerImpl.class);
+    private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private Terminals terminals = new Terminals();
-    //our card representation
-    private CardInstance card = new CardInstance();
-    private AID selectedAID = null;
-    private boolean busy = false;
 
-    @Override
-    public CardInstance.CardState getCardState() {
-        return card.getState();
-    }
+    private CardInstance card;
+    private AID selectedAID = null;
+    private volatile boolean busy = false;
 
     @Override
     public void select(AID aid) {
@@ -61,26 +59,21 @@ public class CardManagerImpl implements CardManager {
         return selectedAID != null;
     }
 
-    /**
-     * Get state of the terminal instance
-     * @return Terminals.TerminalState value (NO_CARD / NO_READER / OK)
-     */
     @Override
     public Terminals.TerminalState getTerminalState() {
         return terminals.getState();
     }
-    /**
-     * Return set of connected terminal names
-     * @return
-     */
+
     @Override
     public Set<String> getTerminals() {
         return terminals.getTerminals().keySet();
     }
+
     @Override
     public CardTerminal getSelectedTerminal() {
         return terminals.getTerminal();
     }
+
     @Override
     public String getSelectedTerminalName() {
         return terminals.getSelectedReaderName();
@@ -92,27 +85,26 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public CardInstance getCard() {
-        return card;
+    public List<AppletInfo> getInstalledApplets() {
+        return card == null ? null : Collections.unmodifiableList(card.getApplets());
     }
 
     @Override
-    public String getErrorCauseTitle() {
-        return card.getErrorTitle();
+    public String getCardId() {
+        return card == null ? "" : card.getId();
     }
 
     @Override
-    public String getErrorCause() {
-        return SW.getErrorCause(card.getErrorByte(),
-                card.getErrorBody() == null ? textSrc.getString("E_communication") : card.getErrorBody());
+    public String getCardDescriptor() {
+        return card == null ? "" : card.getName() + "  " + card.getId();
     }
 
     @Override
     public synchronized int needsCardRefresh() {
-        while (busy || card.getState() == CardInstance.CardState.WORKING) {
+        while (busy) {
             try {
                 wait();
-            } catch (InterruptedException e)  {
+            } catch (InterruptedException e) {
                 logger.info("The card was busy when needsCardRefresh() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
@@ -126,17 +118,13 @@ public class CardManagerImpl implements CardManager {
             notifyAll();
         }
     }
-    /**
-     * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
-     * makes necessarry steps to be ready to work with
-     * @return @link Terminals::checkTerminals()
-     */
+
     @Override
-    public synchronized void refreshCard() {
-        while (busy || card.getState() == CardInstance.CardState.WORKING) {
+    public synchronized void refreshCard() throws LocalizedCardException {
+        while (busy) {
             try {
                 wait();
-            } catch (InterruptedException e)  {
+            } catch (InterruptedException e) {
                 logger.info("The card was busy when refreshCard() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
@@ -145,11 +133,17 @@ public class CardManagerImpl implements CardManager {
 
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
-                card.update(card.getCardInfo(terminals.getTerminal()), terminals.getTerminal(), false);
+                CardDetails details = getCardDetails(terminals.getTerminal());
+                card = new CardInstance(details, terminals.getTerminal());
             } else {
-                card.update(null, null, false);
+                card = null;
             }
-            //todo update
+        } catch (LocalizedCardException ex) {
+            card = null;
+            throw ex;
+        } catch (Exception e) {
+            card = null;
+            throw new LocalizedCardException(e, "E_unkown");
         } finally {
             busy = false;
             notifyAll();
@@ -158,8 +152,10 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public Integer getCardLifeCycle() {
+        if (card == null)
+            return 0;
         java.util.List<AppletInfo> infoList = card.getApplets();
-        if (infoList == null || card.getState() == CardInstance.CardState.WORKING)
+        if (infoList == null)
             return 0;
 
         for (AppletInfo info : infoList) {
@@ -167,79 +163,70 @@ public class CardManagerImpl implements CardManager {
                 return info.getLifecycle();
             }
         }
-        return null;
+        throw new Error("Should not end here.");
     }
 
     @Override
-    public void install(File file, String[] data) throws CardException, IOException {
-        if (!file.exists()) throw new CardException(textSrc.getString("E_install_no_file_1") +
+    public void install(File file, String[] data) throws LocalizedCardException, IOException {
+        if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
                 file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
 
         CAPFile capFile;
         try (FileInputStream fin = new FileInputStream(file)) {
             capFile = CAPFile.fromStream(fin);
         }
-        install(capFile, data);
-    }
-
-    @Override
-    public synchronized void install(final CAPFile file, String[] data) throws CardException {
-        if (card.getId().equals(CardInstance.NO_CARD)) {
-            throw new CardException("Prdel");
-        }
-
-        while (busy || card.getState() == CardInstance.CardState.WORKING) {
-            try {
-                wait();
-            } catch (InterruptedException e)  {
-                logger.info("The card was busy when install() called, waiting interrupted.");
-                Thread.currentThread().interrupt();
-            }
-        }
-        busy = true;
 
         try {
-            if (card.getState() == CardInstance.CardState.WORKING) return;
-            file.dump(System.out);
-            //todo dump into log:   instcap.dump( ... logger or other stream ... )
+            installImpl(capFile, data);
+        } catch (CardException e) {
+            e.printStackTrace();
+        }
+        refreshCard();
+    }
 
-            //new Thread(() -> {
-            GPCommand<Void> install = new Install(file, data);
-            card.executeCommand(install);
-
-            card.setRefresh();
-            if (card.getState() == CardInstance.CardState.OK)
-                terminals.refresh();
-
-            //todo save applet data into ini
-
-            // todo search for failures during install and notify user
-
-            // todo IMPORTANT note whether applet stores keys - uninstalling will destroy them
-
-
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-            //}).start();
+    @Override
+    public synchronized void install(final CAPFile file, String[] data) throws LocalizedCardException {
+        try {
+            installImpl(file, data);
+        } catch (CardException e) {
+            //todo throw
+            e.printStackTrace();
         } finally {
-            busy = false;
-            notifyAll();
+            refreshCard();
         }
     }
 
     @Override
-    public synchronized void uninstall(AppletInfo nfo, boolean force) throws CardException {
-        if (card.getId().equals(CardInstance.NO_CARD)) {
-            throw new CardException("Prdel");
+    public synchronized void install(final CAPFile file, String[] data, AppletInfo info) throws LocalizedCardException {
+        try {
+            String aid = installImpl(file, data);
+            info.setAID(aid);
+        } catch (CardException e) {
+            //todo throw
+            e.printStackTrace();
         }
 
-        while (busy || card.getState() == CardInstance.CardState.WORKING) {
+        java.util.List<AppletInfo> appletInfoList = card.getApplets();
+        appletInfoList.add(info);
+        AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
+        try {
+            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
+        } finally {
+            refreshCard();
+        }
+    }
+
+    @Override
+    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
+        }
+
+        while (busy) {
             try {
                 wait();
-            } catch (InterruptedException e)  {
+            } catch (InterruptedException e) {
+                e.printStackTrace();
                 logger.info("The card was busy when uninstall() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
@@ -249,21 +236,85 @@ public class CardManagerImpl implements CardManager {
         try {
             GPCommand<Void> delete = new Delete(nfo, force);
             card.executeCommand(delete);
-            //todo remove applet data from ini
-            // todo search for failures during install and notify user
-            card.setRefresh();
-            if (card.getState() == CardInstance.CardState.OK)
-                terminals.refresh();
+            card.removeAppletInfo(nfo);
+
+        } catch (CardException e) {
+            //todo translate
+            throw new LocalizedCardException(e);
         } finally {
             busy = false;
             notifyAll();
+            refreshCard();
         }
     }
 
     @Override
-    public synchronized void sendApdu(String AID) throws CardException {
-        if (card.getId().equals(CardInstance.NO_CARD)) {
-            throw new CardException("Prdel");
+    public synchronized void sendApdu(String AID) throws LocalizedCardException {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    /**
+     * Performs the only card insecure-channel use (e.g. GET)
+     * to get data from inserted card
+     */
+    private CardDetails getCardDetails(CardTerminal terminal) throws CardException {
+
+        //todo use logging card terminal?
+        Card card = terminal.connect("*");
+
+        card.beginExclusive();
+        GetDetails command = new GetDetails(card.getBasicChannel());
+        command.execute();
+        card.endExclusive();
+
+        CardDetails details = command.getOuput();
+        details.setAtr(card.getATR());
+
+        card.disconnect(false);
+        return details;
+
+        //TODO find out how to translate this
+//          } catch (CardException e) {
+//            state = CardInstance.CardState.FAILED;
+//            String errormsg = e.getMessage().substring(36);
+//
+//            //todo ugly, but no code management
+//            switch (errormsg) {
+//                case "SCardConnect got response 0x80100066":
+//                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_no_reponse"), textSrc.getString("E_card_no_response"));
+//                case "SCardConnect got response 0x80100068":
+//                    //card ejected ignore this error
+//                    cleanWith(CardState.OK);
+//                    setRefresh();
+//                default:
+//                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_unkown"), textSrc.getString("W_no_translation") + e.getMessage());
+//            }
+    }
+
+    private synchronized String installImpl(final CAPFile file, String[] data) throws CardException, LocalizedCardException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
+        }
+
+        while (busy) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                logger.info("The card was busy when install() called, waiting interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        }
+        busy = true;
+
+        try (PrintStream print = new PrintStream(loggerStream)) {
+            file.dump(print);
+            Install install = new Install(file, data);
+            card.executeCommand(install);
+            return install.getAppletAID().toString();
+        } finally {
+            busy = false;
+            notifyAll();
         }
     }
 }

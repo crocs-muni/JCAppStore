@@ -37,9 +37,9 @@ public class BackgroundImageLoader {
             if (blurAmount > 0) applyFilter();
             save();
         } catch (InterruptedException e) {
+            e.printStackTrace();
             //todo error log
             InformerFactory.getInformer().showInfo("E_image");
-            e.printStackTrace();
             defaultBg();
         }
     }
@@ -51,6 +51,7 @@ public class BackgroundImageLoader {
             ImageIO.write(background, "jpg", outputfile);
             OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
         } catch (IOException e) {
+            e.printStackTrace();
             defaultBg();
         }
     }
@@ -61,6 +62,7 @@ public class BackgroundImageLoader {
             background = ImageIO.read(new File(Config.IMAGE_DIR + imgName));
         } catch (IOException e) {
             e.printStackTrace();
+            //todo logger
         }
     }
 

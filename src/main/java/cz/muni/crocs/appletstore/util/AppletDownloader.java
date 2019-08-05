@@ -132,8 +132,9 @@ public class AppletDownloader {
             }
             input.closeEntry();
             input.close();
-        } catch (IOException ex) {
-            logger.error("Could not unzip store contents: " + ex.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Could not unzip store contents: " + e.getMessage());
             return false;
         }
         return true;

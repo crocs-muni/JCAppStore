@@ -40,6 +40,7 @@ public class InternetConnection {
                     latestVersion
             };
         } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
             return null;
         }
     }

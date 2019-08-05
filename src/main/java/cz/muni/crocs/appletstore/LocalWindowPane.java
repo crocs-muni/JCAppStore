@@ -110,14 +110,13 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
                 && verifyCardState(manager)
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
 
-            CardInstance card = manager.getCard();
-            List<AppletInfo> cardApplets = card.getApplets();
+            List<AppletInfo> cardApplets = manager.getInstalledApplets();
             if (cardApplets == null) {
                 showError("no-card.png", "failed_to_list_aps");
                 logger.warn("Applet list failed, null returned.");
                 return;
             } else {
-                loadApplets(card.getApplets(), manager);
+                loadApplets(manager.getInstalledApplets(), manager);
             }
 
             constraints.fill = GridBagConstraints.BOTH;
@@ -182,25 +181,26 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
 
     /**
      * Verify whether the card is busy,
-     * @param manager
+     * @param manager card manager
      * @return
      */
     private boolean verifyCardState(CardManager manager) {
-        switch (manager.getCard().getState()) {
-            case OK:
-                break;
-            case WORKING:
-                showError("card_busy", "card_busy_desc", "busy.png");
-                return false;
-            case FAILED:
-                if (items.isEmpty())
-                    add(new ErrorPane(textSrc.getString("E_communication"),
-                            manager.getErrorCause(), "announcement_white.png"));
-                else
-                    InformerFactory.getInformer().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
-                return false;
-            default: //continue, probably card locked
-        }
+//        switch (manager.getCard) {
+            //todo update
+//            case OK:
+//                break;
+//            case WORKING:
+//                showError("card_busy", "card_busy_desc", "busy.png");
+//                return false;
+//            case FAILED:
+//                if (items.isEmpty())
+//                    add(new ErrorPane(textSrc.getString("E_communication"),
+//                            manager.getErrorCause(), "announcement_white.png"));
+//                else
+//                    InformerFactory.getInformer().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
+//                return false;
+//            default: //continue, probably card locked
+//        }
         return true;
     }
 
@@ -238,7 +238,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
         add(new ErrorPane(textSrc.getString(titleKey), imageName));
     }
 
-    private void loadApplets(ArrayList<AppletInfo> applets, CardManager manager) {
+    private void loadApplets(List<AppletInfo> applets, CardManager manager) {
         items.clear();
         for (AppletInfo appletInfo : applets) {
             LocalItem item = new LocalItem(appletInfo);

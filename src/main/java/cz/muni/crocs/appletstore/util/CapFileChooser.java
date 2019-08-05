@@ -25,6 +25,7 @@ public class CapFileChooser {
         try (FileInputStream fin = new FileInputStream(from)) {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {
+            e.printStackTrace();
             InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") +
                     from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
         }

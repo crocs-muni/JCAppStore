@@ -86,14 +86,16 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
 
     @Override
     public void showWarning(JComponent component) {
-        add(component, BorderLayout.NORTH);
-        revalidate();
+//        add(component, BorderLayout.NORTH);
+//        revalidate();
+        JOptionPane.showConfirmDialog(this, component);
     }
 
     @Override
     public void hideWarning(JComponent component) {
-        remove(component);
-        revalidate();
-        repaint();
+//        remove(component);
+//        revalidate();
+//        repaint();
+        //do nothing
     }
 }

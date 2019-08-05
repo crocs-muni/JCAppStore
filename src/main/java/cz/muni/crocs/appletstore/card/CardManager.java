@@ -10,14 +10,17 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 public interface CardManager {
 
-    CardInstance.CardState getCardState();
-
     void select(AID aid);
 
+    /**
+     * Check if any applet selected
+     * @return true if any card applet selected
+     */
     boolean isSelected();
 
     /**
@@ -25,6 +28,7 @@ public interface CardManager {
      * @return Terminals.TerminalState value (NO_CARD / NO_READER / OK)
      */
     Terminals.TerminalState getTerminalState();
+
     /**
      * Return set of connected terminal names
      * @return
@@ -35,27 +39,77 @@ public interface CardManager {
 
     void setSelectedTerminal(String name);
 
-    CardInstance getCard();
+    /**
+     * Get applets on card
+     * @return applets info list
+     */
+    List<AppletInfo> getInstalledApplets();
 
-    String getErrorCauseTitle();
+    /**
+     * Get card identifier
+     * @return card id
+     */
+    String getCardId();
 
-    String getErrorCause();
+    /**
+     * Get card name and id
+     * @return
+     */
+    String getCardDescriptor();
 
+    /**
+     * Evaluates the necessity of card refreshing
+     * @return
+     */
     int needsCardRefresh();
+
     /**
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
-     * makes necessarry steps to be ready to work with
+     * makes necessary steps to be ready to work with
+     *
      * @return @link Terminals::checkTerminals()
      */
-    void refreshCard();
+    void refreshCard() throws LocalizedCardException;
 
     Integer getCardLifeCycle();
 
-    void install(File file, String[] data) throws CardException, IOException;
+    /**
+     * Install new applet onto current card
+     * @param file file with the applet
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @throws LocalizedCardException exception with localized text on failure
+     * @throws IOException when the file is incorrect or missing
+     */
+    void install(File file, String[] data) throws LocalizedCardException, IOException;
 
-    void install(final CAPFile file, String[] data) throws CardException;
+    /**
+     * Install new applet onto current card
+     * @param file file with the applet (already parsed)
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void install(final CAPFile file, String[] data) throws LocalizedCardException;
 
-    void uninstall(AppletInfo nfo, boolean force) throws CardException;
+    /**
+     * Install new applet onto current card
+     * @param file file with the applet (already parsed)
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @param info additional applet data from store
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void install(final CAPFile file, String[] data, AppletInfo info) throws LocalizedCardException;
 
-    void sendApdu(String AID) throws CardException;
+    /**
+     * Uninstall applet from the card
+     * @param nfo which applet to uninstall (only the AID is used though)
+     * @param force whether the uninstall is forced
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException;
+
+    /**
+     * Unsupported yet.
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void sendApdu(String AID) throws LocalizedCardException;
 }

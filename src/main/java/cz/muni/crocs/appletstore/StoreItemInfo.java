@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
@@ -22,6 +24,7 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.security.Key;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -84,7 +87,7 @@ public class StoreItemInfo extends HintPanel {
                         JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                                 .get(latestV).getAsJsonArray();
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                appName, latestV, sdks, sdks.size() - 1, callback, e);
+                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
@@ -174,9 +177,9 @@ public class StoreItemInfo extends HintPanel {
                         String version = versions[versionIdx];
                         JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
+
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
-                                version, sdks, compilerIdx, call, e);
+                                getInfoPack(dataSet, version, sdks, compilerIdx), call, e);
                     }
                 });
         add(customInst, "span 2, align right, wrap");
@@ -234,13 +237,30 @@ public class StoreItemInfo extends HintPanel {
         return selected;
     }
 
-    private static void fireInstall(String appName, String appTitle, String which, JsonArray sdks, int sdkIdx,
-                                       OnEventCallBack<Void, Void, Void> call, MouseEvent e) {
+    private KeysPresence hasKey(String data) {
+        switch (data.trim().toLowerCase()) {
+            case "true":
+                return KeysPresence.PRESENT;
+            case "false":
+                return KeysPresence.NO_KEYS;
+            default:
+                return KeysPresence.UNKNOWN;
+        }
+    }
 
-        String sdk = sdks.get(sdkIdx).getAsString();
+    private AppletInfo getInfoPack(JsonObject dataSet, String version, JsonArray sdks, int sdkIdx) {
+        return new AppletInfo(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
+                dataSet.get(Config.JSON_TAG_ICON).getAsString(),
+                version,
+                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
+                sdks.get(sdkIdx).getAsString(),
+                hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
+    }
+
+    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, MouseEvent e) {
+
         File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
-                appName + Config.SEP + appName + "_v" + which + "_sdk" + sdk + ".cap");
-
+                name + Config.SEP + name + "_v" + info.getVersion() + "_sdk" + info.getSdk() + ".cap");
         logger.info("Install applet " + file.getAbsolutePath());
 
         if (!file.exists()) {
@@ -249,6 +269,7 @@ public class StoreItemInfo extends HintPanel {
                     Warning.Importance.INFO);
             return;
         }
-        new InstallAction( ", version " + which + ", sdk " + sdk, appName, file, call).mouseClicked(e);
+
+        new InstallAction( info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, call).mouseClicked(e);
     }
 }

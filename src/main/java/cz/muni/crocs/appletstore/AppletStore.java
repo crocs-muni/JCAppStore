@@ -3,7 +3,10 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -79,8 +82,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         setContentPane(window);
 
         menu = new Menu(this);
-        CardInstance card = CardManagerFactory.getManager().getCard();
-        menu.setCard(card == null ? null : card.getId());
+        menu.setCard(CardManagerFactory.getManager().getCardDescriptor());
         setJMenuBar(menu);
         setGlassPane(blocker);
 
@@ -106,30 +108,38 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                     if (result > 0) {
                         if (result == 2) {
                             try {
-                                SwingUtilities.invokeLater(() -> { switchEnabled(false); });
+                                SwingUtilities.invokeLater(() -> {
+                                    switchEnabled(false);
+                                });
                                 manager.refreshCard();
                             } finally {
-                                SwingUtilities.invokeLater(() -> { switchEnabled(true); });
+                                SwingUtilities.invokeLater(() -> {
+                                    switchEnabled(true);
+                                });
                             }
                         }
 
                         SwingUtilities.invokeLater(() -> {
                             if (result == 2) {
                                 window.getLocalPanel().updatePanes();
-                                menu.setCard(manager.getCard().getId());
-                            } else {
-                                menu.setCard(null);
+                                menu.setCard(manager.getCardDescriptor());
                             }
 
                             menu.resetTerminalButtonGroup();
                         });
-                    } else {
-                        menu.setCard(null);
                     }
-
                     Thread.sleep(2000);
+                } catch (LocalizedCardException ex) {
+                    ex.printStackTrace();
+                    SwingUtilities.invokeLater(() -> {
+                        InformerFactory.getInformer().showWarningToClose(ex.getLocalizedMessage(), Warning.Importance.SEVERE);
+                    });
+                    checkTerminalsRoutine();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> {
+                        InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE);
+                    });
                     logger.info("Terminal routine interrupted, should not happened.", e);
                     checkTerminalsRoutine();
                 }

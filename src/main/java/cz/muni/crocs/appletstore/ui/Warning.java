@@ -60,6 +60,7 @@ public class Warning extends JPanel {
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
 
+        //todo too long msg does not displays
         JLabel errorMsg = new JLabel("<html><div style=\"max-width:90%;\">" + msg + "</div></html>");
         errorMsg.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         errorMsg.setForeground(Color.BLACK);

@@ -1,85 +1,90 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
-import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
  * Simplified GPRegistryEntry version with additional information obtained from our database (about specific applet)
+ *
  * @author Jiří Horák
  * @version 1.0
  */
-public class AppletInfo {
+public class AppletInfo implements Serializable {
+    private static final long serialVersionUID = 458932548615025100L;
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private AID aid;
-    private int lifecycle;
-    private GPRegistryEntry.Kind kind;
-    private AID domain;
+    private transient AID aid;
+    private transient int lifecycle;
+    private transient GPRegistryEntry.Kind kind;
+    private transient AID domain;
 
+    private String strAid;
     private String name;
     private String image;
     private String version;
     private String author;
+    private String sdk;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
-    private boolean selected = false;
+    private transient boolean selected = false;
+
+    public AppletInfo(String name, String image, String version, String author, String sdk, KeysPresence hasKeys) {
+        this.name = name;
+        this.image = image;
+        this.version = version;
+        this.author = author;
+        this.sdk = sdk;
+        this.hasKeys = hasKeys;
+    }
+
+    /**
+     * Get the info from card registry
+     *
+     * @param registry GP info from a card
+     */
+    public AppletInfo(GPRegistryEntry registry) {
+        if (registry != null) {
+            aid = registry.getAID();
+            strAid = aid.toString();
+            lifecycle = registry.getLifeCycle();
+            kind = registry.getType();
+            domain = registry.getDomain();
+            deduceData(registry);
+        }
+    }
+
+    public AppletInfo(GPRegistryEntry registry, List<AppletInfo> savedApplets) {
+        if (registry != null) {
+            aid = registry.getAID();
+            strAid = aid.toString();
+            lifecycle = registry.getLifeCycle();
+            kind = registry.getType();
+            domain = registry.getDomain();
+            deduceData(registry);
+        }
+        if (savedApplets != null) {
+            getAdditionalInfo(savedApplets);
+        }
+    }
 
     public boolean isSelected() {
         return selected;
     }
+
     public KeysPresence hasKeys() {
         return hasKeys;
     }
 
     public void setSelected(boolean selected) {
         this.selected = selected;
-    }
-
-    /**
-     * Get the info from card registry
-     * @param registry GP info from a card
-     */
-    public AppletInfo(GPRegistryEntry registry) {
-        if (registry != null) {
-            aid = registry.getAID();
-            lifecycle = registry.getLifeCycle();
-            kind = registry.getType();
-            domain = registry.getDomain();
-            deduceData(registry);
-        }
-    }
-
-    public AppletInfo(GPRegistryEntry registry, IniParser parser) {
-        if (registry != null) {
-            aid = registry.getAID();
-            lifecycle = registry.getLifeCycle();
-            kind = registry.getType();
-            domain = registry.getDomain();
-            deduceData(registry);
-        }
-    }
-
-    public AppletInfo(GPRegistryEntry registry, String storeName) {
-        if (registry != null) {
-            aid = registry.getAID();
-            lifecycle = registry.getLifeCycle();
-            kind = registry.getType();
-            domain = registry.getDomain();
-            deduceData(registry);
-        }
-
-//        try {
-//            getAdditionalInfo(cardId);
-//        } catch (IOException e) {
-//            deduceData(registry);
-//        }
     }
 
     private void deduceData(GPRegistryEntry registry) {
@@ -95,6 +100,7 @@ public class AppletInfo {
                 setDefaultValues(registry);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             setDefaultValues(registry);
         }
     }
@@ -111,8 +117,17 @@ public class AppletInfo {
         author = textSrc.getString("unknown");
     }
 
-    private void getAdditionalInfo(IniParser parser) throws IOException {
-
+    private void getAdditionalInfo(List<AppletInfo> savedApplets) {
+        for (AppletInfo saved : savedApplets) {
+            if (saved.strAid.equals(strAid)) {
+                this.name = saved.name;
+                this.image = saved.image;
+                this.version = saved.version;
+                this.author = saved.author;
+                this.hasKeys = saved.hasKeys;
+                break;
+            }
+        }
     }
 
     public AID getAid() {
@@ -143,8 +158,20 @@ public class AppletInfo {
         return version;
     }
 
+    public String getSdk() {
+        return sdk;
+    }
+
     public String getAuthor() {
         return author;
+    }
+
+    /**
+     * For newly installed to be recognized
+     * @param aid str representation of AID, should equal to AID.toString() result
+     */
+    public void setAID (String aid) {
+        this.strAid = aid;
     }
 
 }

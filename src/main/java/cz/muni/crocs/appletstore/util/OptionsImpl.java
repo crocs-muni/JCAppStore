@@ -99,8 +99,8 @@ public class OptionsImpl implements Options<String> {
                 setDefaults();
             }
         } catch (IOException e) {
-            setDefaults();
             e.printStackTrace();
+            setDefaults();
             logger.warn("Failed to read app options.");
         }
     }
@@ -121,6 +121,7 @@ public class OptionsImpl implements Options<String> {
             sheet.loadRules(br, null);
 
         } catch (IOException e) {
+            e.printStackTrace();
             sheet.addRule("body {\n" +
                     "    font-size: 11px;\n" +
                     "}\n" +
@@ -145,8 +146,10 @@ public class OptionsImpl implements Options<String> {
 
     private void loadFont() {
         try {
+            //TODO doesnt exist?
             font = Font.createFont(Font.TRUETYPE_FONT, new File(options.get(Options.KEY_FONT)));
         } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
             font = new Font("Courier", Font.PLAIN, 14);
         }
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

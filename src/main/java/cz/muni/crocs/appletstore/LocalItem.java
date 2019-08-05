@@ -150,13 +150,14 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         try {
             img = ImageIO.read(new File(Config.IMAGE_DIR + "issuer.png"));
         } catch (IOException e) {
+            e.printStackTrace();
             img = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
         }
         return img;
     }
 
     private String getImgAddress(String imgName) {
-        File img = new File(Config.IMAGE_DIR + imgName);
+        File img = new File(Config.RESOURCES + imgName);
         if (info == null) {
             img = new File(Config.IMAGE_DIR + "applet_plain.png");
         } else if (! img.exists()) {

@@ -151,8 +151,8 @@ public class Settings extends JPanel {
                 OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
                 context.updateBackground(ImageIO.read(new File(DEFAULT_BG_PATH)));
             } catch (IOException e) {
-                InformerFactory.getInformer().showInfo(textSrc.getString("E_background"));
                 e.printStackTrace();
+                InformerFactory.getInformer().showInfo(textSrc.getString("E_background"));
             }
         } else {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());
