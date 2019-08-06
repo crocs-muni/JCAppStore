@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
 import org.simplejavamail.mailer.config.TransportStrategy;
@@ -77,8 +78,8 @@ public class FeedbackFatalError {
         FeedbackConfirmPane(String message) {
             super(new BorderLayout());
             add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "bug.png")));
-            add(new JLabel("<html><div width=400px>" + textSrc.getString("attachment_desc") + "</div>" +
-                    "<div>&emsp;</div></html>"), BorderLayout.NORTH);
+            add(new HtmlLabel("<div width=400px>" + textSrc.getString("attachment_desc") + "</div>" +
+                    "<div>&emsp;</div>"), BorderLayout.NORTH);
 
             area.setText(message);
             area.setFont(Font.decode(Font.SANS_SERIF).deriveFont(12.f));

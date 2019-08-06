@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -48,7 +49,7 @@ public class NotifLabel extends JLabel {
                     parent.revalidate();
                 } else {
                     JOptionPane.showMessageDialog(
-                            parent.getParent(), new JLabel("<html><p width=\"250\">" + msg + "</p></html>"),
+                            parent.getParent(), new HtmlLabel("<p width=\"250\">" + msg + "</p>"),
                             textSrc.getString("event"),
                             JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "label.png"));
                 }

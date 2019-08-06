@@ -102,7 +102,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
      */
     public void updatePanes() {
         removeAll();
-        revalidate();
 
         CardManager manager = CardManagerFactory.getManager();
         logger.info("Local pane updated: " + manager.getTerminalState().toString());
@@ -130,6 +129,13 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
 
             infoLayout.setBackground(Color.WHITE);
         }
+        revalidate();
+    }
+
+    public void updatePanes(String errorTitleKey, String errorText) {
+        removeAll();
+        add(new ErrorPane(textSrc.getString(errorTitleKey), errorText, "announcement_white.png"));
+        revalidate();
     }
 
     /**

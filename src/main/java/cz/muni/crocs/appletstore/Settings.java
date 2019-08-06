@@ -62,7 +62,7 @@ public class Settings extends JPanel {
         }
         cutString(path);
 
-        JLabel bgValue = new JLabel("<html>" + path + "</html>");
+        JLabel bgValue = new HtmlLabel(path);
         bgValue.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         bgValue.setBorder(frame);
         bgValue.setBackground(Color.WHITE);

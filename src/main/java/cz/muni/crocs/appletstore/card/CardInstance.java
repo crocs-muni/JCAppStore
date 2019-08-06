@@ -4,21 +4,24 @@ import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.List;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro.javacard.gp.GPException;
-
-import pro.javacard.gp.GPKey;
-import pro.javacard.gp.GlobalPlatform;
-import pro.javacard.gp.PlaintextKeys;
+import pro.javacard.gp.*;
 
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
 /**
  * Card instance of card inserted in selected terminal
@@ -28,13 +31,13 @@ import java.util.ArrayList;
  * @version 1.0
  */
 public class CardInstance {
-
     private static final Logger logger = LoggerFactory.getLogger(CardInstance.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private String masterKey;
     private String keyType;
     private String diversifier;
-    private boolean auth = true;
+    private boolean doAuth = true;
 
     public static final int CUSTOM_ERROR_BYTE = 0;
 
@@ -55,22 +58,18 @@ public class CardInstance {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
             throw new LocalizedCardException("Invalid arguments.", "E_load_card");
         }
+
         this.terminal = terminal;
         this.details = newDetails;
         id = CardDetails.getId(newDetails);
+        logger.info("Card plugged in:" + id);
 
-        try {
-            if (saveDetailsAndCheckMasterKey())
-                getCardListWithSavedPassword();
-            else
-                getCardListWithDefaultPassword();
+        if (saveDetailsAndCheckMasterKey())
+            getCardListWithSavedPassword();
+        else
+            getCardListWithDefaultPassword();
 
-            updateCardAuth(true);
-        } catch (LocalizedCardException | CardException e) {
-            updateCardAuth(false);
-            logger.warn("Secure channel failed: ", e);
-            throw e;
-        }
+        updateCardAuth(true);
     }
 
     public String getId() {
@@ -85,6 +84,7 @@ public class CardInstance {
 
     /**
      * Modifiable access for local classes
+     *
      * @return modifiable applet list
      */
     java.util.List<AppletInfo> getApplets() {
@@ -133,7 +133,7 @@ public class CardInstance {
                 masterKey = parser.getValue(Config.INI_KEY);
                 keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
                 diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
-                auth = parser.getValue(Config.INI_AUTHENTICATED).toLowerCase().equals("true");
+                doAuth = parser.getValue(Config.INI_AUTHENTICATED).toLowerCase().equals("true");
                 return !(masterKey == null || masterKey.isEmpty());
             }
 
@@ -164,7 +164,7 @@ public class CardInstance {
      * extract functionality into one connection process
      */
     private void getCardListWithDefaultPassword() throws LocalizedCardException, CardException {
-        if (! (new File(Config.INI_CARD_TYPES).exists())) {
+        if (!(new File(Config.INI_CARD_TYPES).exists())) {
             throw new LocalizedCardException("No types present.", "E_missing_types");
         }
 
@@ -177,8 +177,11 @@ public class CardInstance {
                 keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
                 diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
             } else {
-                logger.warn("Card type not found: " + CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
-                throw new LocalizedCardException("Could not auto-detect the card master key.", "E_master_key_not_found");
+                if (!askDefault()) {
+                    logger.warn("Card type not found: " + CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
+                    throw new LocalizedCardException("Could not auto-detect the card master key.", "E_master_key_not_found");
+                }
+                setTestPassword404f();
             }
             if (masterKey == null || masterKey.isEmpty()) {
                 setTestPassword404f();
@@ -194,7 +197,7 @@ public class CardInstance {
      * Open card types INI and searches by ATR for default password
      */
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
-        if (!auth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
+        if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
         List list = new List();
         executeCommand(list);
@@ -208,27 +211,38 @@ public class CardInstance {
      * @throws CardException unable to perform command
      */
     void executeCommand(GPCommand command) throws LocalizedCardException, CardException {
-
         Card card = null;
         GlobalPlatform context = null;
 
         try {
             card = terminal.connect("*");
             context = GlobalPlatform.discover(card.getBasicChannel());
-
+        } catch (IllegalArgumentException il) {
+            throw new LocalizedCardException(il.getMessage(), "no_channel", il);
+        } catch (GPDataException ex) {
+            throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_unknown_error"), ex);
         } catch (GPException e) {
             card.disconnect(true);
-            //todo look into the discover() method for possibility of translation
-            throw new LocalizedCardException("Failed to indetify card.", e);
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
         }
 
         try {
             secureConnect(context);
+        } catch (GPException e) {
+            //ugly, but the GP is designed in a way it does not allow me to do otherwise
+            if (e.getMessage().startsWith("STRICT WARNING: ")) {
+                updateCardAuth(false);
+                throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_secure_channel_error"), e);
+            }
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
+        }
+
+        try {
             command.setCardId(id);
             command.setGP(context);
             command.execute();
         } catch (GPException e) {
-            throw new LocalizedCardException("Card command failed: " + e.getMessage(), e);
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
         } finally {
             card.disconnect(true);
         }
@@ -241,7 +255,7 @@ public class CardInstance {
      */
     private void secureConnect(GlobalPlatform context) throws CardException, GPException {
         PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), getType(keyType)));
-        key.setDiversifier(getDivesifier(diversifier));
+        key.setDiversifier(getDiversifier(diversifier));
         context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());
     }
 
@@ -251,7 +265,7 @@ public class CardInstance {
      * @param diversifier diversification name
      * @return PlaintextKeys.Diversification diversification object
      */
-    private static PlaintextKeys.Diversification getDivesifier(String diversifier) {
+    private static PlaintextKeys.Diversification getDiversifier(String diversifier) {
         switch (diversifier) {
             case "EMV":
                 return PlaintextKeys.Diversification.EMV;
@@ -286,6 +300,26 @@ public class CardInstance {
                 return GPKey.Type.PSK;
             default:
                 return GPKey.Type.RAW;
+        }
+    }
+
+    private boolean askDefault() {
+        RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
+                null,
+                new HtmlLabel(textSrc.getString("I_use_default_keys_1") +
+                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
+                        "<br>" + textSrc.getString("key_type") + ": <b>DES3</b>" +
+                        textSrc.getString("I_use_default_keys_2")),
+                textSrc.getString("key_not_found"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + "")) == JOptionPane.YES_OPTION);
+        SwingUtilities.invokeLater(task);
+        try {
+            return task.get();
+        } catch (InterruptedException| ExecutionException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 

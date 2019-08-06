@@ -35,6 +35,7 @@ public class CardManagerImpl implements CardManager {
     private Terminals terminals = new Terminals();
 
     private CardInstance card;
+    private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
     private volatile boolean busy = false;
 
@@ -100,6 +101,11 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
+    public String getLastCardDescriptor() {
+        return lastCardId;
+    }
+
+    @Override
     public synchronized int needsCardRefresh() {
         while (busy) {
             try {
@@ -134,6 +140,7 @@ public class CardManagerImpl implements CardManager {
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
+                lastCardId = CardDetails.getId(details);
                 card = new CardInstance(details, terminals.getTerminal());
             } else {
                 card = null;
@@ -143,7 +150,7 @@ public class CardManagerImpl implements CardManager {
             throw ex;
         } catch (Exception e) {
             card = null;
-            throw new LocalizedCardException(e, "E_unkown");
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
             notifyAll();
@@ -180,6 +187,7 @@ public class CardManagerImpl implements CardManager {
             installImpl(capFile, data);
         } catch (CardException e) {
             e.printStackTrace();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         }
         refreshCard();
     }
@@ -189,8 +197,8 @@ public class CardManagerImpl implements CardManager {
         try {
             installImpl(file, data);
         } catch (CardException e) {
-            //todo throw
             e.printStackTrace();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             refreshCard();
         }
@@ -202,8 +210,8 @@ public class CardManagerImpl implements CardManager {
             String aid = installImpl(file, data);
             info.setAID(aid);
         } catch (CardException e) {
-            //todo throw
             e.printStackTrace();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         }
 
         java.util.List<AppletInfo> appletInfoList = card.getApplets();
@@ -239,8 +247,7 @@ public class CardManagerImpl implements CardManager {
             card.removeAppletInfo(nfo);
 
         } catch (CardException e) {
-            //todo translate
-            throw new LocalizedCardException(e);
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
             notifyAll();
@@ -258,8 +265,6 @@ public class CardManagerImpl implements CardManager {
      * to get data from inserted card
      */
     private CardDetails getCardDetails(CardTerminal terminal) throws CardException {
-
-        //todo use logging card terminal?
         Card card = terminal.connect("*");
 
         card.beginExclusive();
@@ -272,23 +277,6 @@ public class CardManagerImpl implements CardManager {
 
         card.disconnect(false);
         return details;
-
-        //TODO find out how to translate this
-//          } catch (CardException e) {
-//            state = CardInstance.CardState.FAILED;
-//            String errormsg = e.getMessage().substring(36);
-//
-//            //todo ugly, but no code management
-//            switch (errormsg) {
-//                case "SCardConnect got response 0x80100066":
-//                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_no_reponse"), textSrc.getString("E_card_no_response"));
-//                case "SCardConnect got response 0x80100068":
-//                    //card ejected ignore this error
-//                    cleanWith(CardState.OK);
-//                    setRefresh();
-//                default:
-//                    setError(CUSTOM_ERROR_BYTE, textSrc.getString("E_unkown"), textSrc.getString("W_no_translation") + e.getMessage());
-//            }
     }
 
     private synchronized String installImpl(final CAPFile file, String[] data) throws CardException, LocalizedCardException {

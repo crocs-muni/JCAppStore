@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
@@ -36,11 +37,9 @@ public class InstallDialogWindow extends JPanel {
 
     public InstallDialogWindow(CAPFile file) {
         setLayout(new MigLayout("width 250px"));
-        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("W_do_not_unplug") +
-                        "</p></html>"), "wrap, span 5, gapbottom 10");
-
-        add(new JLabel("<html><p width=\"600\">" + textSrc.getString("pkg_id") +
-                file.getPackageAID().toString() + "</p></html>"),
+        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
+                "wrap, span 5, gapbottom 10");
+        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("pkg_id") + file.getPackageAID().toString() + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
@@ -148,8 +147,8 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String langKey, String width) {
-        JLabel hint = new JLabel("<html><p width=\"" +
-                width + "\">" + textSrc.getString(langKey) + "</p></html>");
+        JLabel hint = new HtmlLabel("<p width=\"" +
+                width + "\">" + textSrc.getString(langKey) + "</p>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }

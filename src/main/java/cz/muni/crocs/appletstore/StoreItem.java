@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -68,7 +69,7 @@ public class StoreItem extends JPanel implements Item {
     }
 
     private JLabel getLabel(String text, String css, Float fontSize) {
-        JLabel label = new JLabel("<html>" + "<div style=\"" + css + "\">" + text + "</div><html>");
+        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
         label.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(fontSize));
         return label;
     }

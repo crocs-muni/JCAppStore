@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -24,9 +25,9 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
         add(Box.createRigidArea(new Dimension(50, 30)));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        JLabel icon = new JLabel("<html><img src=\"file:///" +
+        JLabel icon = new HtmlLabel("<img src=\"file:///" +
                 new File(Config.IMAGE_DIR + "install_icon.png").getAbsolutePath() +
-                "\" width=\"83\" height=\"56\" /> </html>");
+                "\" width=\"83\" height=\"56\" />");
         icon.setMaximumSize(new Dimension(83, 56));
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(icon);

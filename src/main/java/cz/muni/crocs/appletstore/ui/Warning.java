@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.CallBack;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -61,7 +62,7 @@ public class Warning extends JPanel {
         add(error);
 
         //todo too long msg does not displays
-        JLabel errorMsg = new JLabel("<html><div style=\"max-width:90%;\">" + msg + "</div></html>");
+        JLabel errorMsg = new HtmlLabel("<div style=\"max-width:90%;\">" + msg + "</div>");
         errorMsg.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
         errorMsg.setForeground(Color.BLACK);
         add(errorMsg);

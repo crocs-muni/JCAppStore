@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.CallBack;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -62,7 +63,7 @@ public class ErrorPane extends JPanel {
     public ErrorPane (String title, String message, String imgName) {
         this(title, imgName);
 
-        JLabel hint = new JLabel("<html><p width=\"400\" align=\"center\">" + message + "</p></html>");
+        JLabel hint = new HtmlLabel("<p width=\"400\" align=\"center\">" + message + "</p>");
         hint.setBorder(new EmptyBorder(20, 20, 20, 20));
         hint.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);

@@ -37,7 +37,12 @@ public class LocalizedCardException extends Exception {
     @Override
     public String getLocalizedMessage() {
         if (translated != null)
-            return textSrc.getString(translated);
+            return textSrc.getString(translated) + "<br>" + getMessage();
         return getMessage();
+    }
+
+    @Override
+    public String getMessage() {
+        return textSrc.getString("W_no_translation") + super.getMessage();
     }
 }

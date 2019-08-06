@@ -112,7 +112,7 @@ public class StoreItemInfo extends HintPanel {
         addSubTitle("website", "H_website");
 
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
-        JLabel url = new JLabel("<html><div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div></html>");
+        JLabel url = new HtmlLabel("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>");
         url.setOpaque(true);
         Color bg = new Color(255, 255, 255, 80);
         url.setBackground(bg);

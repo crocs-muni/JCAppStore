@@ -112,6 +112,11 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                                     switchEnabled(false);
                                 });
                                 manager.refreshCard();
+                            } catch (LocalizedCardException e) {
+                                e.printStackTrace();
+                                window.getLocalPanel().updatePanes("E_loading_failed",
+                                        e.getLocalizedMessage() + "<br> CARD: " + manager.getLastCardDescriptor());
+                                continue;
                             } finally {
                                 SwingUtilities.invokeLater(() -> {
                                     switchEnabled(true);
@@ -129,18 +134,13 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                         });
                     }
                     Thread.sleep(2000);
-                } catch (LocalizedCardException ex) {
-                    ex.printStackTrace();
-                    SwingUtilities.invokeLater(() -> {
-                        InformerFactory.getInformer().showWarningToClose(ex.getLocalizedMessage(), Warning.Importance.SEVERE);
-                    });
-                    checkTerminalsRoutine();
                 } catch (Exception e) {
                     e.printStackTrace();
                     SwingUtilities.invokeLater(() -> {
                         InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE);
                     });
                     logger.info("Terminal routine interrupted, should not happened.", e);
+                    window.getLocalPanel().updatePanes();
                     checkTerminalsRoutine();
                 }
             }

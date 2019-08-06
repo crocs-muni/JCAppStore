@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
@@ -51,8 +52,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
         Font basic = OptionsFactory.getOptions().getDefaultFont();
 
-        JLabel icon = new JLabel("<html><img src=\"file:///" + getImgAddress(imgName)
-                +"\" width=\"130\" height=\"130\"/> </html>") {
+        JLabel icon = new HtmlLabel("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
@@ -140,7 +140,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     }
 
     private JLabel getLabel(String text, String css, Font font) {
-        JLabel label = new JLabel("<html><div style=\"" + css + "\">" + text + "</div><html>");
+        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
         label.setFont(font);
         return label;
     }

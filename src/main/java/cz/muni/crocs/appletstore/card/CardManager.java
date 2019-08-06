@@ -53,13 +53,19 @@ public interface CardManager {
 
     /**
      * Get card name and id
-     * @return
+     * @return card descriptor
      */
     String getCardDescriptor();
 
     /**
+     * Get last inserted card descriptor
+     * @return card descriptor
+     */
+    String getLastCardDescriptor();
+
+    /**
      * Evaluates the necessity of card refreshing
-     * @return
+     * @return 0 no refresh /1 needs refresh no new card /2 needs refresh new card
      */
     int needsCardRefresh();
 
