@@ -31,7 +31,7 @@ public class Config {
     //ini database constants
     public static final String INI_NAME = "name";
     public static final String INI_KEY = "key";
-    public static final String INI_KEY_TYPE = "type";
+    public static final String INI_KEY_CHECK_VALUE = "kcv";
     public static final String INI_DIVERSIFIER = "diversifier";
     public static final String INI_AUTHENTICATED = "auth";
     public static final String INI_ATR = "atr";

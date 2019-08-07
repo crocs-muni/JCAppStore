@@ -1,11 +1,15 @@
 package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 
 import javax.smartcardio.CardException;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -16,7 +20,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Delete extends GPCommand<Void> {
-
+    private static final Logger logger = LoggerFactory.getLogger(Install.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private boolean force;
@@ -30,7 +34,7 @@ public class Delete extends GPCommand<Void> {
     }
 
     @Override
-    public boolean execute() throws CardException, GPException {
+    public boolean execute() throws CardException, GPException, LocalizedCardException, IOException {
         AID aid = toDelete.getAid();
         GPRegistry reg = context.getRegistry();
 
@@ -40,10 +44,10 @@ public class Delete extends GPCommand<Void> {
             e.printStackTrace();
 
             if (!context.getRegistry().allAIDs().contains(aid)) {
-                System.err.println("Could not delete AID (not present on card): " + aid);
+                throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
             } else {
                 if (e.sw == 0x6985) {
-                    System.err.println("Deletion not allowed. Some app still active?");
+                    throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed");
                 } else {
                     throw e;
                 }

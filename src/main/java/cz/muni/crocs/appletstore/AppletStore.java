@@ -111,7 +111,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                                 SwingUtilities.invokeLater(() -> {
                                     switchEnabled(false);
                                 });
-                                manager.refreshCard();
+                                manager.loadCard();
                             } catch (LocalizedCardException e) {
                                 e.printStackTrace();
                                 window.getLocalPanel().updatePanes("E_loading_failed",

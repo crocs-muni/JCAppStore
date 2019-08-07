@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
+import apdu4j.APDUBIBO;
+import apdu4j.CardChannelBIBO;
+import apdu4j.TerminalManager;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
@@ -126,7 +129,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void refreshCard() throws LocalizedCardException {
+    public synchronized void loadCard() throws LocalizedCardException {
         while (busy) {
             try {
                 wait();
@@ -136,7 +139,6 @@ public class CardManagerImpl implements CardManager {
             }
         }
         busy = true;
-
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
@@ -174,7 +176,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void install(File file, String[] data) throws LocalizedCardException, IOException {
+    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
         if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
                 file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
 
@@ -188,12 +190,14 @@ public class CardManagerImpl implements CardManager {
         } catch (CardException e) {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } finally {
+            terminals.refresh();
+            refreshCard();
         }
-        refreshCard();
     }
 
     @Override
-    public synchronized void install(final CAPFile file, String[] data) throws LocalizedCardException {
+    public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
         try {
             installImpl(file, data);
         } catch (CardException e) {
@@ -205,7 +209,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void install(final CAPFile file, String[] data, AppletInfo info) throws LocalizedCardException {
+    public synchronized void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException {
         try {
             String aid = installImpl(file, data);
             info.setAID(aid);
@@ -264,22 +268,31 @@ public class CardManagerImpl implements CardManager {
      * Performs the only card insecure-channel use (e.g. GET)
      * to get data from inserted card
      */
-    private CardDetails getCardDetails(CardTerminal terminal) throws CardException {
-        Card card = terminal.connect("*");
+    private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
+        Card card = null;
+        APDUBIBO channel = null;
 
-        card.beginExclusive();
-        GetDetails command = new GetDetails(card.getBasicChannel());
+        try {
+            card = terminal.connect("*");
+            card.beginExclusive();
+            channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
+        } catch (CardException e) {
+            if (card != null) card.endExclusive();
+            throw new LocalizedCardException("Could not connect to selected reader: " +
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+        }
+
+        GetDetails command = new GetDetails(channel);
         command.execute();
         card.endExclusive();
+        card.disconnect(false);
 
         CardDetails details = command.getOuput();
         details.setAtr(card.getATR());
-
-        card.disconnect(false);
         return details;
     }
 
-    private synchronized String installImpl(final CAPFile file, String[] data) throws CardException, LocalizedCardException {
+    private synchronized String installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -304,5 +317,10 @@ public class CardManagerImpl implements CardManager {
             busy = false;
             notifyAll();
         }
+    }
+
+    private void refreshCard() throws LocalizedCardException {
+        terminals.refresh();
+        loadCard();
     }
 }

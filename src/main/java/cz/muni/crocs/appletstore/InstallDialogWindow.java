@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
@@ -136,8 +137,21 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private String getSelectedAID() {
-        if (selectedAID.getSelection() == null) return null;
+        if (selectedAID.getSelection() == null) return "";
         return selectedAID.getSelection().getActionCommand();
+    }
+
+    private int getSelectedIdx() {
+        int result = 0;
+        Enumeration elements = selectedAID.getElements();
+        while (elements.hasMoreElements()) {
+            AbstractButton button = (AbstractButton)elements.nextElement();
+            if (button.isSelected()) {
+                return result;
+            }
+            ++result;
+        }
+        return 0;
     }
 
     private void enableAll(boolean enable) {
@@ -158,10 +172,9 @@ public class InstallDialogWindow extends JPanel {
      * @return null if basic installation,
      * array with [installation arguments, force install, selected applet to install] values
      */
-    public String[] getAdditionalInfo() {
+    public InstallOpts getInstallOpts() {
         if (advanced.isSelected())
-            return new String[]{installParams.getText(),
-                    forceInstall.isSelected() ? "yes" : "no", getSelectedAID()};
+            return new InstallOpts(getSelectedAID(), getSelectedIdx(), forceInstall.isSelected(), installParams.getText());
         return null;
     }
 

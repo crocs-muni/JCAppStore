@@ -1,11 +1,11 @@
 package cz.muni.crocs.appletstore.card.command;
 
+import apdu4j.APDUBIBO;
 import cz.muni.crocs.appletstore.card.CardDetails;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
+
+import java.io.IOException;
 
 import static pro.javacard.gp.GPData.fetchCPLC;
 import static pro.javacard.gp.GPData.fetchKeyInfoTemplate;
@@ -15,10 +15,10 @@ import static pro.javacard.gp.GPData.getData;
  * @author Jiří Horák
  */
 public class GetDetails implements CardCommand {
-    private CardChannel channel;
+    private APDUBIBO channel;
     private CardDetails details;
 
-    public GetDetails(CardChannel channel) {
+    public GetDetails(APDUBIBO channel) {
         this.channel = channel;
     }
 
@@ -27,7 +27,7 @@ public class GetDetails implements CardCommand {
     }
 
     @Override
-    public boolean execute() throws CardException {
+    public boolean execute() throws CardException, IOException {
         details = new CardDetails();
         details.setCplc(fetchCPLC(channel));
         details.setIin(getData(channel, 0x00, 0x42, "IIN", false));

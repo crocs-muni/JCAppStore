@@ -11,6 +11,7 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -23,7 +24,7 @@ import java.util.Collections;
 public class List extends GPCommand<ArrayList<AppletInfo>> {
 
     @Override
-    public boolean execute() throws CardException, GPException {
+    public boolean execute() throws CardException, GPException, IOException {
         result = new ArrayList<>();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;

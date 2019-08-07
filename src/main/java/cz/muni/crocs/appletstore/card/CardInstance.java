@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
+import apdu4j.APDUBIBO;
 import apdu4j.HexUtils;
+import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.List;
@@ -9,6 +11,8 @@ import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.gp.*;
+import pro.javacard.gp.PlaintextKeys.Diversification;
+
 
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
@@ -35,11 +39,9 @@ public class CardInstance {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private String masterKey;
-    private String keyType;
+    private String kcv;
     private String diversifier;
     private boolean doAuth = true;
-
-    public static final int CUSTOM_ERROR_BYTE = 0;
 
     private final String id;
     private String name = "";
@@ -78,7 +80,7 @@ public class CardInstance {
 
     private void setTestPassword404f() {
         masterKey = "404142434445464748494A4B4C4D4E4F";
-        keyType = "DES3";
+        kcv = "";
         diversifier = "";
     }
 
@@ -109,7 +111,7 @@ public class CardInstance {
             IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id);
             parser.addValue(Config.INI_NAME, name)
                     .addValue(Config.INI_KEY, masterKey)
-                    .addValue(Config.INI_KEY_TYPE, keyType)
+                    .addValue(Config.INI_KEY_CHECK_VALUE, kcv)
                     .addValue(Config.INI_DIVERSIFIER, diversifier)
                     .addValue(Config.INI_AUTHENTICATED, authenticated ? "true" : "false")
                     .store();
@@ -131,7 +133,7 @@ public class CardInstance {
             if (parser.isHeaderPresent()) {
                 name = parser.getValue(Config.INI_NAME);
                 masterKey = parser.getValue(Config.INI_KEY);
-                keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
+                kcv = parser.getValue(Config.INI_KEY_CHECK_VALUE).toUpperCase();
                 diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
                 doAuth = parser.getValue(Config.INI_AUTHENTICATED).toLowerCase().equals("true");
                 return !(masterKey == null || masterKey.isEmpty());
@@ -140,8 +142,8 @@ public class CardInstance {
             logger.info("Card " + id + " saved into card list database.");
             parser.addValue(Config.INI_NAME, name)
                     .addValue(Config.INI_KEY, "")
-                    //one of: RAW, DES, DES3, AES, RSAPUB, PSK
-                    .addValue(Config.INI_KEY_TYPE, "")
+                    //key check value from provider, default none
+                    .addValue(Config.INI_KEY_CHECK_VALUE, "")
                     //one of: <no_value>, EMV, KDF3, VISA2
                     .addValue(Config.INI_DIVERSIFIER, "")
                     .addValue(Config.INI_AUTHENTICATED, "true")
@@ -174,7 +176,7 @@ public class CardInstance {
             if (parser.isHeaderPresent()) {
                 name = parser.getValue(Config.INI_NAME);
                 masterKey = parser.getValue(Config.INI_KEY);
-                keyType = parser.getValue(Config.INI_KEY_TYPE).toUpperCase();
+                kcv = parser.getValue(Config.INI_KEY_CHECK_VALUE).toUpperCase();
                 diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
             } else {
                 if (!askDefault()) {
@@ -212,29 +214,60 @@ public class CardInstance {
      */
     void executeCommand(GPCommand command) throws LocalizedCardException, CardException {
         Card card = null;
-        GlobalPlatform context = null;
+        GPSession context = null;
+        APDUBIBO channel = null;
 
         try {
             card = terminal.connect("*");
-            context = GlobalPlatform.discover(card.getBasicChannel());
+            card.beginExclusive();
+            channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
+        } catch (CardException e) {
+            if (card != null) card.endExclusive();
+            throw new LocalizedCardException("Could not connect to selected reader: " +
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+        }
+
+        //todo should consider this if implementing send-raw-apdu approach, now assummes default selected
+//        // Send all raw APDU-s to the default-selected application of the card
+//        if (args.has(OPT_APDU)) {
+//            // Select the application, if present
+//            AID target = null;
+//            if (args.has(OPT_APPLET)) {
+//                target = AID.fromString(args.valueOf(OPT_APPLET));
+//            } else if (cap != null) {
+//                target = cap.getAppletAIDs().get(0);
+//            }
+//            if (target != null) {
+//                verbose("Selecting " + target);
+//                channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, target.getBytes()));
+//            }
+//            for (Object s : args.valuesOf(OPT_APDU)) {
+//                CommandAPDU c = new CommandAPDU(HexUtils.stringToBin((String) s));
+//                channel.transmit(c);
+//            }
+//        }
+
+        try {
+            //always find out the SD, does not support custom SD
+            context = GPSession.discover(channel);
         } catch (IllegalArgumentException il) {
-            throw new LocalizedCardException(il.getMessage(), "no_channel", il);
-        } catch (GPDataException ex) {
-            throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_unknown_error"), ex);
-        } catch (GPException e) {
-            card.disconnect(true);
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
+            fail(card, il, "no_channel");
+        } catch (GPException ex) {
+            fail(card, ex, "E_fail_to_detect_sd");
+        } catch (IOException e) {
+            fail(card, e, "E_fail_to_detect_sd");
         }
 
         try {
             secureConnect(context);
         } catch (GPException e) {
+            card.endExclusive();
             //ugly, but the GP is designed in a way it does not allow me to do otherwise
             if (e.getMessage().startsWith("STRICT WARNING: ")) {
                 updateCardAuth(false);
-                throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_secure_channel_error"), e);
+                fail(card, e, "E_secure_channel_error");
             }
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
+            fail(card, e, "E_unknown_error");
         }
 
         try {
@@ -242,10 +275,25 @@ public class CardInstance {
             command.setGP(context);
             command.execute();
         } catch (GPException e) {
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"),e);
+            fail(card, e, "E_unknown_error");
+        } catch (IOException e) {
+            fail(card, e, "E_unknown_error");
         } finally {
+            card.endExclusive();
             card.disconnect(true);
         }
+    }
+
+    private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
+        card.endExclusive();
+        card.disconnect(true);
+        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, translationKey), e);
+    }
+
+    private void fail(Card card, Exception e, String translationKey) throws LocalizedCardException, CardException {
+        card.endExclusive();
+        card.disconnect(true);
+        throw new LocalizedCardException(e.getMessage(), translationKey, e);
     }
 
     /**
@@ -253,10 +301,13 @@ public class CardInstance {
      * If successful, loads the card contents
      * This method may brick the card if bad masterKey set
      */
-    private void secureConnect(GlobalPlatform context) throws CardException, GPException {
-        PlaintextKeys key = PlaintextKeys.fromMasterKey(new GPKey(HexUtils.hex2bin(masterKey), getType(keyType)));
-        key.setDiversifier(getDiversifier(diversifier));
-        context.openSecureChannel(key, null, 0, GlobalPlatform.defaultMode.clone());
+    private void secureConnect(GPSession context) throws CardException, GPException {
+        GPCardKeys key = PlaintextKeys.derivedFromMasterKey(HexUtils.hex2bin(masterKey), HexUtils.hex2bin(kcv), getDiversifier(diversifier));
+        try {
+            context.openSecureChannel(key, null, null, GPSession.defaultMode.clone());
+        } catch (IOException e) {
+            throw new CardException(e);
+        }
     }
 
     /**
@@ -265,43 +316,43 @@ public class CardInstance {
      * @param diversifier diversification name
      * @return PlaintextKeys.Diversification diversification object
      */
-    private static PlaintextKeys.Diversification getDiversifier(String diversifier) {
+    private static Diversification getDiversifier(String diversifier) {
         switch (diversifier) {
             case "EMV":
-                return PlaintextKeys.Diversification.EMV;
+                return Diversification.EMV;
             case "KDF3":
-                return PlaintextKeys.Diversification.KDF3;
+                return Diversification.KDF3;
             case "VISA2":
-                return PlaintextKeys.Diversification.VISA2;
+                return Diversification.VISA2;
             default:
-                return null;
+                return Diversification.NONE;
         }
     }
 
-    /**
-     * Convert string type to actual object
-     *
-     * @param type type of key
-     * @return GPKey.Type key type
-     */
-    private static GPKey.Type getType(String type) {
-        switch (type) {
-            case "RAW":
-                return GPKey.Type.RAW;
-            case "DES":
-                return GPKey.Type.DES;
-            case "DES3":
-                return GPKey.Type.DES3;
-            case "AES":
-                return GPKey.Type.AES;
-            case "RSAPUB":
-                return GPKey.Type.RSAPUB;
-            case "PSK":
-                return GPKey.Type.PSK;
-            default:
-                return GPKey.Type.RAW;
-        }
-    }
+//    /**
+//     * Convert string type to actual object
+//     *
+//     * @param type type of key
+//     * @return GPKey.Type key type
+//     */
+//    private static GPKey.Type getType(String type) {
+//        switch (type) {
+//            case "RAW":
+//                return GPKey.Type.RAW;
+//            case "DES":
+//                return GPKey.Type.DES;
+//            case "DES3":
+//                return GPKey.Type.DES3;
+//            case "AES":
+//                return GPKey.Type.AES;
+//            case "RSAPUB":
+//                return GPKey.Type.RSAPUB;
+//            case "PSK":
+//                return GPKey.Type.PSK;
+//            default:
+//                return GPKey.Type.RAW;
+//        }
+//    }
 
     private boolean askDefault() {
         RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(

@@ -1,12 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.CardInstance;
-import cz.muni.crocs.appletstore.card.Terminals;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
-import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +71,7 @@ public interface CardManager {
      *
      * @return @link Terminals::checkTerminals()
      */
-    void refreshCard() throws LocalizedCardException;
+    void loadCard() throws LocalizedCardException;
 
     Integer getCardLifeCycle();
 
@@ -86,7 +82,7 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      * @throws IOException when the file is incorrect or missing
      */
-    void install(File file, String[] data) throws LocalizedCardException, IOException;
+    void install(File file, InstallOpts data) throws LocalizedCardException, IOException;
 
     /**
      * Install new applet onto current card
@@ -94,7 +90,7 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, String[] data) throws LocalizedCardException;
+    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
 
     /**
      * Install new applet onto current card
@@ -103,7 +99,7 @@ public interface CardManager {
      * @param info additional applet data from store
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, String[] data, AppletInfo info) throws LocalizedCardException;
+    void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException;
 
     /**
      * Uninstall applet from the card

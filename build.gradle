@@ -17,7 +17,10 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.1'
     compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
-    compile group: 'com.github.martinpaljak', name: 'globalplatformpro', version: '18.09.14'
+    compile group: 'com.github.martinpaljak', name: 'globalplatformpro', version: '19.06.16'
+    compile group: 'com.github.martinpaljak', name: 'apdu4j-core', version: '19.05.08'
+    compile group: 'com.github.martinpaljak', name: 'apdu4j-pcsc', version: '19.05.08'
+
     compile group: 'com.miglayout', name: 'miglayout', version: '3.7.4'
     compile group: 'org.ini4j', name: 'ini4j', version: '0.5.4'
     compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '4.1.2'

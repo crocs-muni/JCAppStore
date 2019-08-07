@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.CapFileChooser;
@@ -77,11 +78,11 @@ public class InstallAction extends MouseAdapter {
         call.onStart();
         new Thread(() -> {
             try {
-                String[] additionalInfo = opts.getAdditionalInfo();
+                InstallOpts intallOpts = opts.getInstallOpts();
                 if (info == null)
-                    CardManagerFactory.getManager().install(file, additionalInfo);
+                    CardManagerFactory.getManager().install(file, intallOpts);
                 else
-                    CardManagerFactory.getManager().install(file, additionalInfo, info);
+                    CardManagerFactory.getManager().install(file, intallOpts, info);
 
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();

@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import pro.javacard.gp.GlobalPlatform;
+import pro.javacard.gp.GPSession;
 
 /**
  * GlobalPlatform-like command
@@ -9,7 +9,7 @@ import pro.javacard.gp.GlobalPlatform;
  */
 public abstract class GPCommand<T> implements CardCommand<T> {
 
-    protected GlobalPlatform context;
+    protected GPSession context;
     protected String cardId;
 
     protected T result;
@@ -17,8 +17,8 @@ public abstract class GPCommand<T> implements CardCommand<T> {
         return result;
     }
 
-    public void setGP(GlobalPlatform platform) {
-        context = platform;
+    public void setGP(GPSession session) {
+        context = session;
     }
     public void setCardId(String cardId) {
         this.cardId = cardId;

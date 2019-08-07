@@ -32,7 +32,7 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
         CardManager manager = CardManagerFactory.getManager();
         manager.needsCardRefresh();
         try {
-            manager.refreshCard();
+            manager.loadCard();
         } catch (LocalizedCardException e) {
             info = textSrc.getString("failed_detect");
             waitWhile(500);

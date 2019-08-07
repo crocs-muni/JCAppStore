@@ -1,8 +1,9 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import apdu4j.HexUtils;
+import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.InformerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
@@ -10,7 +11,7 @@ import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.CardException;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -21,100 +22,131 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Install extends GPCommand<Void> {
+    private static final Logger logger = LoggerFactory.getLogger(Install.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final CAPFile file;
-    private String[] data;
-    private AID finalAID;
+    private InstallOpts data;
+    private AID instanceAID;
 
-    public Install(CAPFile f, String[] data) {
-        if (data != null && data.length != 3)
-            throw new IllegalArgumentException(textSrc.getString("E_install_invalid_data"));
+    public Install(CAPFile f, InstallOpts data) {
         this.file = f;
         this.data = data;
     }
 
     public AID getAppletAID() {
-        return finalAID;
+        return instanceAID;
     }
 
     @Override
     public boolean execute() throws CardException, GPException {
-        //todo possibly third param in data null
-        GPRegistry registry = context.getRegistry();
+        logger.info("Installing params: " + (data == null ? "no advanced settings." : data.toString()));
+        GPRegistry registry = null;
+        try {
+            registry = context.getRegistry();
+        } catch (IOException e) {
+            //todo
+            e.printStackTrace();
+            throw new CardException("");
+        }
 
-        byte[] installParams;
-        boolean force;
-        String[] aids;
         if (data == null) {
-            installParams = new byte[0];
-            force = false;
-        } else {
-            installParams = HexUtils.stringToBin(data[0]);
-            force = data[1].equals("yes");
-            //todo only one?
-            aids = Arrays.copyOfRange(data, 2, data.length);
+            data = new InstallOpts(null, 0, false, new byte[0]);
         }
 
-        if (force && registry.allPackageAIDs().contains(file.getPackageAID())) {
-            context.deleteAID(file.getPackageAID(), true);
+        if (data.getAppletIdx() >= file.getAppletAIDs().size())
+            //todo
+            throw new CardException("");
+
+        // Remove existing default app
+        if (data.isForce() && registry.allPackageAIDs().contains(file.getPackageAID())) {
+            try {
+                context.deleteAID(file.getPackageAID(), true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        //todo delete
-        String customId = (data == null) ? null : data[1];
-        //load onto card
-
-        //todo ??? why not load when more applets available??
+        // Load
+//        if (file.getAppletAIDs().size() <= 1) {
+//            calculateDapPropertiesAndLoadCap(args, gp, instcap);
+//        }
+        //todo mail from martin
         if (file.getAppletAIDs().size() <= 1) {
             try {
-                AID target = null;
-//                if (args.has(OPT_TO)) todo install to specified security domain, not supported i think
-//                    target = AID.fromString(args.valueOf(OPT_TO));
-                context.loadCapFile(file, target);
-
-                System.out.println("CAP loaded");
+                //we do not support installing under custom SD
+                context.loadCapFile(file, null);
+                logger.info("CAP file loaded.");
             } catch (GPException e) {
                 if (e.sw == 0x00) {
-                    //to translate message
                     throw new GPException(textSrc.getString("E_pkg_present"));
                 }
                 throw e;
+            } catch (IOException e) {
+                //todo
+                e.printStackTrace();
             }
         }
 
-        final AID appaid;
-        if (file.getAppletAIDs().size() == 0) {
-            return false;
-        } else if (file.getAppletAIDs().size() > 1) {
-            if (customId == null) {
-                InformerFactory.getInformer().showInfo("CAP contains more than one applet, before install, choose different applet ID");
-                return false;
-            } else {
-                appaid = AID.fromString(customId);
-            }
-        } else {
-            appaid = file.getAppletAIDs().get(0);
-        }
-        finalAID = appaid;
-        // override todo create? what does it do
-//        if (args.has(OPT_CREATE)) {
-//            instanceaid = AID.fromString(args.valueOf(OPT_CREATE));
-//        } else {
-//        }
+        final AID appletAID = file.getAppletAIDs().get(data.getAppletIdx());
+        instanceAID = data.getAID() == null || data.getAID().isEmpty() ? appletAID : AID.fromString(data.getAID());
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
-        privs.add(GPRegistryEntry.Privilege.CardReset);
+        //todo ask petr which privileges should be provided
+        //privs.add(GPRegistryEntry.Privilege.CardReset);
 
-        // Remove existing default app
-        if (force && (registry.getDefaultSelectedAID() != null && privs.has(GPRegistryEntry.Privilege.CardReset))) {
-            context.deleteAID(registry.getDefaultSelectedAID(), false);
+        if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
+            try {
+                context.deleteAID(registry.getDefaultSelectedAID().get(), false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        if (context.getRegistry().allAppletAIDs().contains(finalAID)) {
-            InformerFactory.getInformer().showInfo("WARNING: Applet " + finalAID + " already present on card");
+        if (registry.allAppletAIDs().contains(instanceAID)) {
+            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
         }
 
-        context.installAndMakeSelectable(file.getPackageAID(), appaid, finalAID, privs, installParams, null);
+        try {
+            context.installAndMakeSelectable(
+                    file.getPackageAID(),
+                    appletAID,
+                    instanceAID,
+                    privs,
+                    data.getInstallParams());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return true;
     }
+
+//    private static void calculateDapPropertiesAndLoadCap(OptionSet args, GPSession gp, CAPFile capFile) throws GPException, IOException {
+//        try {
+//            DAPProperties dap = new DAPProperties(args, gp);
+//            loadCapAccordingToDapRequirement(args, gp, dap.getTargetDomain(), dap.getDapDomain(), dap.isRequired(), capFile);
+//            System.out.println("CAP loaded");
+//        } catch (GPException e) {
+//            switch (e.sw) {
+//                case 0x6A80:
+//                    System.err.println("Applet loading failed. Are you sure the card can handle it?");
+//                    break;
+//                case 0x6985:
+//                    System.err.println("Applet loading not allowed. Are you sure the domain can accept it?");
+//                    break;
+//                default:
+//                    // Do nothing. Here for findbugs
+//            }
+//            throw e;
+//        }
+//    }
+//
+//    private static void loadCapAccordingToDapRequirement(OptionSet args, GPSession gp, AID targetDomain, AID dapDomain, boolean dapRequired, CAPFile cap) throws IOException, GPException {
+//        // XXX: figure out right signature type in a better way
+//        if (dapRequired) {
+//            byte[] dap = args.has(OPT_SHA256) ? cap.getMetaInfEntry(CAPFile.DAP_RSA_V1_SHA256_FILE) : cap.getMetaInfEntry(CAPFile.DAP_RSA_V1_SHA1_FILE);
+//            gp.loadCapFile(cap, targetDomain, dapDomain == null ? targetDomain : dapDomain, dap, args.has(OPT_SHA256) ? "SHA-256" : "SHA-1");
+//        } else {
+//            gp.loadCapFile(cap, targetDomain, args.has(OPT_SHA256) ? "SHA-256" : "SHA-1");
+//        }
+//    }
 }

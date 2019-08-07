@@ -32,6 +32,7 @@ public class Terminals {
     private String selectedReader = null;
     private String toSelectReader = null;
     private volatile TerminalState state = TerminalState.LOADING;
+    private volatile Boolean needsRefresh = false;
 
     /**
      * Get state of the current selected terminal
@@ -71,7 +72,7 @@ public class Terminals {
      * package-private: can be used through manager only
      */
     void refresh() {
-        this.state = TerminalState.NO_CARD;
+        this.needsRefresh = true;
     }
 
     /**
@@ -90,6 +91,7 @@ public class Terminals {
 
         try {
             final TerminalFactory tf;
+            //todo find out which SPEC
             tf = TerminalManager.getTerminalFactory(null);
             CardTerminals terminals = tf.terminals();
 
@@ -104,12 +106,14 @@ public class Terminals {
                 return (old != state) ? 2 : 0;
             }
 
-            needToRefresh = toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
+            needToRefresh = needsRefresh || toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
                     !cardReaderMap.containsKey(selectedReader);
             if (needToRefresh) {
                 selectedReader = (toSelectReader != null && cardReaderMap.containsKey(toSelectReader))
                         ? toSelectReader : cardReaderMap.firstKey();
+                logger.info("Selected reader: " + selectedReader);
                 toSelectReader = null;
+                needsRefresh = false;
             }
 
             if (!checkCardPresence(selectedReader)) {
