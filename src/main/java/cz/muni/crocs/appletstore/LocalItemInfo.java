@@ -87,6 +87,10 @@ public class LocalItemInfo extends HintPanel {
      * @param info applet info to show
      */
     public void set(AppletInfo info) {
+        if (info == null) {
+            unset();
+            return;
+        }
         delete.setInfo(info);
         send.setInfo(info);
         String ver = info.getVersion();

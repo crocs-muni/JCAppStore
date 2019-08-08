@@ -108,7 +108,7 @@ public class CardInstance {
 
     private void updateCardAuth(boolean authenticated) throws LocalizedCardException {
         try {
-            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id);
+            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id, textSrc.getString("ini_commentary"));
             parser.addValue(Config.INI_NAME, name)
                     .addValue(Config.INI_KEY, masterKey)
                     .addValue(Config.INI_KEY_CHECK_VALUE, kcv)
@@ -129,7 +129,7 @@ public class CardInstance {
     private boolean saveDetailsAndCheckMasterKey() throws LocalizedCardException {
         IniParserImpl parser;
         try {
-            parser = new IniParserImpl(Config.INI_CARD_LIST, id);
+            parser = new IniParserImpl(Config.INI_CARD_LIST, id, textSrc.getString("ini_commentary"));
             if (parser.isHeaderPresent()) {
                 name = parser.getValue(Config.INI_NAME);
                 masterKey = parser.getValue(Config.INI_KEY);
@@ -359,7 +359,6 @@ public class CardInstance {
                 null,
                 new HtmlLabel(textSrc.getString("I_use_default_keys_1") +
                         "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
-                        "<br>" + textSrc.getString("key_type") + ": <b>DES3</b>" +
                         textSrc.getString("I_use_default_keys_2")),
                 textSrc.getString("key_not_found"),
                 JOptionPane.OK_CANCEL_OPTION,

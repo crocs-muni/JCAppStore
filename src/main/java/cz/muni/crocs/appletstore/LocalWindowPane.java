@@ -102,6 +102,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
      */
     public void updatePanes() {
         removeAll();
+        infoLayout.set(null);
 
         CardManager manager = CardManagerFactory.getManager();
         logger.info("Local pane updated: " + manager.getTerminalState().toString());

@@ -38,19 +38,18 @@ public class Delete extends GPCommand<Void> {
         AID aid = toDelete.getAid();
         GPRegistry reg = context.getRegistry();
 
-        try {
-            context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
-        } catch (GPException e) {
-            e.printStackTrace();
+        if (!context.getRegistry().allAIDs().contains(aid)) {
+            throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
+        }
 
-            if (!context.getRegistry().allAIDs().contains(aid)) {
-                throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
+        try {
+            context.deleteAID(aid, true);
+//            context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
+        } catch (GPException e) {
+            if (e.sw == 0x6985) {
+                throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed", e);
             } else {
-                if (e.sw == 0x6985) {
-                    throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed");
-                } else {
-                    throw e;
-                }
+                throw e;
             }
         }
         return true;

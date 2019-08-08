@@ -15,14 +15,50 @@ public class IniParserImpl implements IniParser {
     private Ini ini;
     private String header;
 
-    public IniParserImpl(File file, String header) throws IOException {
+    /**
+     * @param file file to open
+     * @param header header to read from
+     * @param comment comment to add at the beggining of the file if not exists
+     * @throws IOException cannot modify or read file
+     */
+    public IniParserImpl(File file, String header, String comment) throws IOException {
         if (!file.exists()) {
             file.createNewFile();
         }
         this.ini = new Ini(file);
         this.header = header;
+        if (comment != null && !comment.isEmpty()) {
+            ini.setComment(comment);
+//            ini.putComment("JCAppStore guide", comment);
+            ini.store();
+        }
     }
 
+    /**
+     *
+     * @param path path to the file
+     * @param header header to read from
+     * @param comment comment to add at the beggining of the file if not exists
+     * @throws IOException cannot modify or read file
+     */
+    public IniParserImpl(String path, String header, String comment) throws IOException {
+        this(new File(path), header, comment);
+    }
+
+    /**
+     * @param file file to open
+     * @param header header to read from
+     * @throws IOException cannot modify or read file
+     */
+    public IniParserImpl(File file, String header) throws IOException {
+        this(file, header, "");
+    }
+
+    /**
+     * @param path path to the file
+     * @param header header to read from
+     * @throws IOException cannot modify or read file
+     */
     public IniParserImpl(String path, String header) throws IOException {
         this(new File(path), header);
     }
