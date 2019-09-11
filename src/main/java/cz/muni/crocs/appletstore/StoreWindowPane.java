@@ -18,18 +18,18 @@ import java.util.List;
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreWindowPane extends JScrollPane implements Searchable, OnEventCallBack<Void, Void, Void> {
+public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private BackgroundChangeable context;
+    private OnEventCallBack<Void, Void, Void> callback;
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
 
     public StoreWindowPane(List<JsonObject> data, BackgroundChangeable context) {
         this.data = data;
-        this.context = context;
+        this.callback = new WorkCallback(context);
 
         setOpaque(false);
         getViewport().setOpaque(false);
@@ -65,7 +65,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable, OnEventC
     }
 
     private void showInfo(JsonObject dataSet) {
-        StoreItemInfo info = new StoreItemInfo(dataSet, this, this);
+        StoreItemInfo info = new StoreItemInfo(dataSet, this, callback);
         setViewportView(info);
     }
 
@@ -96,23 +96,5 @@ public class StoreWindowPane extends JScrollPane implements Searchable, OnEventC
             }
             showPanel(sortedIems);
         }
-    }
-
-    @Override
-    public Void onStart() {
-        context.switchEnabled(false);
-        return null;
-    }
-
-    @Override
-    public Void onFail() {
-        context.switchEnabled(true);
-        return null;
-    }
-
-    @Override
-    public Void onFinish() {
-        context.switchEnabled(true);
-        return null;
     }
 }

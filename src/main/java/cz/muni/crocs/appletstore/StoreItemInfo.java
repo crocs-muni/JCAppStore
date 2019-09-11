@@ -99,13 +99,14 @@ public class StoreItemInfo extends HintPanel {
 
     private void buildDescription(JsonObject dataSet) {
         JTextPane mainInfo = new JTextPane();
+        DefaultCaret caret = (DefaultCaret) mainInfo.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         mainInfo.setContentType("text/html");
         mainInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_DESC).getAsString() + "</div></html>");
         mainInfo.setBackground(new Color(255, 255, 255, 80));
         mainInfo.setOpaque(true);
         mainInfo.setEditable(false);
         mainInfo.setBorder(null);
-        ((DefaultCaret) mainInfo.getCaret()).setUpdatePolicy(0);
         add(mainInfo, "span 4, gap 20, wrap");
 
         //WEBSITE
@@ -128,13 +129,14 @@ public class StoreItemInfo extends HintPanel {
         addSubTitle("use", "H_use");
 
         JTextPane installInfo = new JTextPane();
+        DefaultCaret caret = (DefaultCaret) installInfo.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         installInfo.setContentType("text/html");
         installInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_USAGE).getAsString() + "</div></html>");
         installInfo.setBackground(new Color(255, 255, 255, 80));
         installInfo.setOpaque(true);
         installInfo.setEditable(false);
         installInfo.setBorder(null);
-        ((DefaultCaret) installInfo.getCaret()).setUpdatePolicy(0);
         add(installInfo, "span 4, gap 20, gaptop 20, wrap");
 
         //VERSION

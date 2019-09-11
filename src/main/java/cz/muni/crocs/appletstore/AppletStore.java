@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;

@@ -71,8 +71,7 @@ public class HintPanel extends JPanel {
         graphics.setFont(hintFont);
         int width = 0;
         int height = 0;
-        //todo doesnt work
-        for (String line : str.split("\\\\n")) {
+        for (String line : str.split("\\n")) {
             if (hintDimen != null)
                 graphics.drawString(line, x, y + height);
             Rectangle2D bnds = hintFont.getStringBounds(line, fontRender);

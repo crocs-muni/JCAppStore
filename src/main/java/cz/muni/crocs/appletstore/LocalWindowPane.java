@@ -1,15 +1,13 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
-import cz.muni.crocs.appletstore.ui.Warning;
 
-import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
@@ -28,12 +26,12 @@ import java.util.List;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LocalWindowPane extends DisablePanel implements Searchable, OnEventCallBack<Void, Void, Void> {
+public class LocalWindowPane extends DisablePanel implements Searchable {
 
     private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private BackgroundChangeable context;
+    private OnEventCallBack<Void, Void, Void> callback;
     private LocalItemInfo infoLayout;
     private JPanel windowLayout;
     private JScrollPane windowScroll;
@@ -44,7 +42,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
     private GridBagConstraints constraints;
 
     public LocalWindowPane(BackgroundChangeable context) {
-        this.context = context;
+        callback = new WorkCallback(context);
         setOpaque(false);
 
         GridBagLayout gb = new GridBagLayout();
@@ -79,23 +77,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
         super.paintComponent(g);
     }
 
-    @Override
-    public Void onStart() {
-        context.switchEnabled(false);
-        return null;
-    }
 
-    @Override
-    public Void onFail() {
-        context.switchEnabled(true);
-        return null;
-    }
-
-    @Override
-    public Void onFinish() {
-        context.switchEnabled(true);
-        return null;
-    }
 
     /**
      * Update the local pane according to the info obtained from the Card Manager
@@ -125,7 +107,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
             add(windowScroll, constraints);
             constraints.gridx = 1;
 
-            infoLayout.setVisible(false);
             add(infoLayout, constraints);
 
             infoLayout.setBackground(Color.WHITE);
@@ -143,7 +124,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
      * Setup Swing components
      */
     private void setupComponents() {
-        infoLayout = new LocalItemInfo(this);
+        infoLayout = new LocalItemInfo(callback);
         windowLayout = new JPanel();
         windowScroll = new JScrollPane();
 
@@ -160,7 +141,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, OnEvent
         windowLayout.setBorder(new EmptyBorder(50, 50, 50, 50));
         windowLayout.setOpaque(false);
 
-        installCmd.addMouseListener(new InstallAction(this));
+        installCmd.addMouseListener(new InstallAction(callback));
     }
 
     /**

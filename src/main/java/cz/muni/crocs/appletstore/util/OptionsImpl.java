@@ -25,7 +25,7 @@ public class OptionsImpl implements Options<String> {
         loadFont();
     }
 
-    public OptionsImpl(HashMap<String, String> options) {
+    OptionsImpl(HashMap<String, String> options) {
         this.options = options;
         if (options.isEmpty())
             setDefaults();

@@ -123,6 +123,8 @@ public class LocalItemInfo extends HintPanel {
         id.setText("", "");
         type.setText("", "");
         domain.setText("", "");
+        setVisible(false);
+        revalidate();
     }
 
     @Override
