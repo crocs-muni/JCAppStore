@@ -153,6 +153,8 @@ public class LeftMenu extends JPanel {
                     remote.setOpaque(true);
                     remote.setBackground(choosedButtonBG);
                     local.setOpaque(false);
+                } else {
+                    parent.getSearchablePane().showItems(null);
                 }
             }
         });

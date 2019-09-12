@@ -58,7 +58,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
     @Override
     public void showItems(String query) {
-        if (query.isEmpty()) {
+        if (query == null || query.isEmpty()) {
             showPanel(items);
         } else {
             TreeSet<LocalItem> sortedIems = new TreeSet<>();

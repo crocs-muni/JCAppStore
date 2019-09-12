@@ -85,7 +85,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     @Override
     public void showItems(String query) {
-        if (query.isEmpty()) {
+        if (query == null || query.isEmpty()) {
             showPanel(items);
         } else {
             ArrayList<StoreItem> sortedIems = new ArrayList<>();

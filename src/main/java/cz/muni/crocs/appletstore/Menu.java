@@ -3,6 +3,9 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.help.AppletUsage;
+import cz.muni.crocs.appletstore.help.Cmd;
+import cz.muni.crocs.appletstore.help.HelpWrapper;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -21,7 +24,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Menu extends JMenuBar implements ActionListener, ItemListener {
+public class Menu extends JMenuBar {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
@@ -36,56 +39,6 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         setBorder(null);
 
         buildMenu();
-
-        //set action events
-//TODO: for each menu
-//        for (int pos = 0; pos < menu.getItemCount(); ++pos) {
-//            menu.getItem(pos).addActionListener(this);
-//        }
-
-//        //for each JRadioButtonMenuItem:
-//        rbMenuItem.addActionListener(this);
-//        ...
-//        //for each JCheckBoxMenuItem:
-//        cbMenuItem.addItemListener(this);
-    }
-
-    //TODO menu into func and return menu
-    private void buildMenu() {
-        CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
-        add(menu);
-
-        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Settings settings = new Settings(context);
-                Object[] options = { textSrc.getString("ok"), textSrc.getString("cancel") };
-                int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-                        null, options, null);
-                if (result == JOptionPane.YES_OPTION){
-                    settings.apply();
-                }
-            }
-        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
-
-        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        }, Config.IMAGE_DIR + "close_black.png"));
-
-        readers = new CustomJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
-        add(readers);
-
-        JPanel midContainer = new JPanel();
-        midContainer.setBackground(Color.black);
-        midContainer.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
-        currentCard = new JLabel();
-        currentCard.setForeground(Color.white);
-        midContainer.add(currentCard);
-        add(midContainer);
     }
 
     public void setCard(String card) {
@@ -124,16 +77,6 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        //TODO
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        //TODO
-    }
-
-    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK);
@@ -145,12 +88,75 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
         return false;
     }
 
+    private void buildMenu() {
+        buildFileItem();
+        buildReadersItem();
+        buildHelpItem();
+    }
+    private void buildFileItem() {
+        CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
+        add(menu);
+
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Settings settings = new Settings(context);
+                Object[] options = { textSrc.getString("ok"), textSrc.getString("cancel") };
+                int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                        null, options, null);
+                if (result == JOptionPane.YES_OPTION){
+                    settings.apply();
+                }
+            }
+        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+
+        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_small.png"));
+    }
+
+    private void buildReadersItem() {
+        readers = new CustomJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
+        add(readers);
+        resetTerminalButtonGroup();
+
+        JPanel midContainer = new JPanel();
+        midContainer.setBackground(Color.black);
+        midContainer.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
+        currentCard = new JLabel();
+        currentCard.setForeground(Color.white);
+        midContainer.add(currentCard);
+        add(midContainer);
+    }
+
+    private void buildHelpItem() {
+        CustomJmenu help = new CustomJmenu(textSrc.getString("help"), "", KeyEvent.VK_H);
+        add(help);
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("applet_usage")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWrapper(textSrc.getString("applet_usage"), new AppletUsage()).showIt();
+            }
+        }, textSrc.getString("H_applet_usage")));
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("cmd")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWrapper(textSrc.getString("cmd"), new Cmd()).showIt();
+            }
+        }, textSrc.getString("H_cmd")));
+    }
 
     /**
      * @param action         action to perform
      * @param keyEvent       KeyEvent key constant
      * @param inputEventMask InputEvent constant - mask for accelerated access
-     * @return
+     * @return constructed item
      */
     private JMenuItem menuItemWithKeyShortcutAndIcon(AbstractAction action, String imagePath,
                                                      String descripton, int keyEvent, int inputEventMask) {
@@ -164,7 +170,7 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
      * @param action         action to perform
      * @param keyEvent       KeyEvent key constant
      * @param inputEventMask InputEvent constant - mask for accelerated access
-     * @return
+     * @return constructed item
      */
     private JMenuItem menuItemWithKeyShortcut(AbstractAction action, String descripton,
                                               int keyEvent, int inputEventMask) {
@@ -183,6 +189,13 @@ public class Menu extends JMenuBar implements ActionListener, ItemListener {
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
+        return menuItem;
+    }
+
+    private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
+        JMenuItem menuItem = new JMenuItem(action);
+        setItemLook(menuItem, descripton);
+        menuItem.setIcon(new ImageIcon(image));
         return menuItem;
     }
 

@@ -4,12 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
-import cz.muni.crocs.appletstore.ui.CustomButtonUI;
-import cz.muni.crocs.appletstore.ui.HintLabel;
-import cz.muni.crocs.appletstore.ui.HintPanel;
-import cz.muni.crocs.appletstore.ui.Warning;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,9 +38,12 @@ public class StoreItemInfo extends HintPanel {
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
+    private final Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.PLAIN, 16f);
+
 
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
+
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
@@ -77,7 +77,7 @@ public class StoreItemInfo extends HintPanel {
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
-        JButton install = getButton("CAP_install", "margin: 1px 10px;",
+        JButton install = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;",
                 20f, Color.WHITE, new Color(26, 196, 0));
         install.addMouseListener(
                 new MouseAdapter() {
@@ -98,20 +98,9 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildDescription(JsonObject dataSet) {
-        JTextPane mainInfo = new JTextPane();
-        DefaultCaret caret = (DefaultCaret) mainInfo.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        mainInfo.setContentType("text/html");
-        mainInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_DESC).getAsString() + "</div></html>");
-        mainInfo.setBackground(new Color(255, 255, 255, 80));
-        mainInfo.setOpaque(true);
-        mainInfo.setEditable(false);
-        mainInfo.setBorder(null);
-        add(mainInfo, "span 4, gap 20, wrap");
+        add(Components.getTextField(dataSet.get(Config.JSON_TAG_DESC).getAsString(), OptionsFactory.getOptions().getDefaultFont()), "span 4, gap 20, wrap");
 
-        //WEBSITE
         addSubTitle("website", "H_website");
-
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
         JLabel url = new HtmlLabel("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>");
         url.setOpaque(true);
@@ -122,29 +111,19 @@ public class StoreItemInfo extends HintPanel {
         url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
+
+        addSubTitle("use", "H_use");
+        add(Components.getTextField(dataSet.get(Config.JSON_TAG_USAGE).getAsString(), OptionsFactory.getOptions().getDefaultFont()), "span 4, gap 20, gaptop 20, wrap");
     }
 
     private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void, Void> call) {
-        //INSTALL
-        addSubTitle("use", "H_use");
-
-        JTextPane installInfo = new JTextPane();
-        DefaultCaret caret = (DefaultCaret) installInfo.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        installInfo.setContentType("text/html");
-        installInfo.setText("<html><div style=\"margin: 10px; width:600px\">" + dataSet.get(Config.JSON_TAG_USAGE).getAsString() + "</div></html>");
-        installInfo.setBackground(new Color(255, 255, 255, 80));
-        installInfo.setOpaque(true);
-        installInfo.setEditable(false);
-        installInfo.setBorder(null);
-        add(installInfo, "span 4, gap 20, gaptop 20, wrap");
-
-        //VERSION
         addSubTitle("custom_install", "H_custom_install");
 
+        addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
+        addText("custom_sdk", "H_custom_sdk", "gapleft 20, gaptop 20, wrap");
+
         String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
-        versionComboBox = new JComboBox<>(versions);
-        versionComboBox.setMaximumRowCount(7);
+        versionComboBox = getBoxSelection(versions);
         //todo disables the build combobox exchange...?
         //versionComboBox.setSelectedItem(dataSet.get(Config.JSON_TAG_LATEST).getAsString());
         versionComboBox.addActionListener(e -> {
@@ -155,16 +134,14 @@ public class StoreItemInfo extends HintPanel {
             );
             compilerVersionComboBox.setModel(new JComboBox<>(compilerVersions).getModel());
         });
-        add(versionComboBox, "align right");
+        add(versionComboBox, "gapleft 50, gapleft 20");
 
         JsonObject builds = dataSet.getAsJsonObject(Config.JSON_TAG_BUILD);
-
         String[] compilerVersions = parser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
-        compilerVersionComboBox = new JComboBox<>(compilerVersions);
-        compilerVersionComboBox.setMaximumRowCount(7);
-        add(compilerVersionComboBox, "align right");
+        compilerVersionComboBox = getBoxSelection(compilerVersions);
+        add(compilerVersionComboBox, "gapleft 20");
 
-        JButton customInst = getButton("CAP_install", "margin: 1px 10px;", 18f, Color.WHITE, new Color(170, 166, 167));
+        JButton customInst = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;", 18f, Color.WHITE, new Color(170, 166, 167));
         customInst.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -184,26 +161,32 @@ public class StoreItemInfo extends HintPanel {
                                 getInfoPack(dataSet, version, sdks, compilerIdx), call, e);
                     }
                 });
-        add(customInst, "span 2, align right, wrap");
-    }
-
-    private JButton getButton(String textKey, String css, Float fontSize, Color foreground, Color background) {
-        JButton button = new JButton("<html><div style=\"" + css + "\">"
-                + textSrc.getString(textKey) + "</div></html>");
-        button.setUI(new CustomButtonUI());
-        button.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, fontSize));
-        button.setForeground(foreground);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBackground(background);
-        return button;
+        add(customInst, "wrap");
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
-        HintLabel title = new HintLabel(textSrc.getString(titleKey), textSrc.getString(hintKey));
-        title.setFont(titleFont);
-        title.setFocusable(true);
-        title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
+        HintLabel title = Components.getHintLabel(
+                textSrc.getString(titleKey),
+                textSrc.getString(hintKey),
+                titleFont,
+                BorderFactory.createEmptyBorder(20, 20, 0, 20)
+        );
         add(title, "span 4, gaptop 20, wrap");
+    }
+
+    private void addText(String titleKey, String hintKey, String constraints) {
+        add(Components.getHintLabel(
+                textSrc.getString(titleKey),
+                textSrc.getString(hintKey),
+                textFont,
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ), constraints);
+    }
+
+    private JComboBox<String> getBoxSelection(String[] values) {
+        JComboBox<String> box = new StyledComboBox<>(values);
+        box.setMaximumRowCount(5);
+        return box;
     }
 
     private ImageIcon getIcon(String image) {
@@ -272,6 +255,6 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction( info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, call).mouseClicked(e);
+        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, call).mouseClicked(e);
     }
 }
