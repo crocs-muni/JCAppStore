@@ -19,15 +19,15 @@ import java.awt.geom.Rectangle2D;
  */
 public class HintPanel extends JPanel {
 
+    private static boolean enabled = true;
     protected String hint;
     protected Font hintFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(12f);
 
     private Point p = null;
     private Dimension hintDimen;
-    private boolean enabled;
 
-    public HintPanel(boolean enabled) {
-        this.enabled = enabled;
+    public HintPanel(boolean enable) {
+        enabled = enable;
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
@@ -46,8 +46,8 @@ public class HintPanel extends JPanel {
 
     }
 
-    public void enableHint(boolean enabled) {
-        this.enabled = enabled;
+    public static void enableHint(boolean enable) {
+        enabled = enable;
     }
 
     @Override

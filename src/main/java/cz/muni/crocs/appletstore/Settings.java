@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import net.miginfocom.swing.MigLayout;
@@ -125,7 +126,7 @@ public class Settings extends JPanel {
     private void addHint() {
         addTitleLabel(textSrc.getString("enable_hints"), "");
         hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
-        add(hintEnabled, "align left, span 2, w 180, wrap");
+        add(hintEnabled, "align right, span 2, w 180, wrap");
     }
 
     private void addTitleLabel(String titleText, String constraints) {
@@ -169,6 +170,7 @@ public class Settings extends JPanel {
 
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
+        HintPanel.enableHint(hintEnabled.isSelected());
     }
 
     /**
