@@ -1,0 +1,21 @@
+/*https://stackoverflow.com/questions/4000792/how-can-i-style-code-listings-using-css*/
+body {
+    font-size: 11px;
+}
+
+.code {
+    background: #F4F4F4;
+    border-radius: 5px;
+    border-left: 3px solid #f36d33;
+    color: #676767;
+    page-break-inside: avoid;
+    font-family: monospace;
+    font-size: 10px;
+    line-height: 1.6;
+    margin: 15px 5px;
+    max-width: 550px;
+    overflow: auto;
+    padding: 4px;
+    display: block;
+    word-wrap: break-word;
+}
