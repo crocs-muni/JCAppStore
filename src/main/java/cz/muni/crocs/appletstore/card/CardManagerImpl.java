@@ -43,8 +43,13 @@ public class CardManagerImpl implements CardManager {
     private volatile boolean busy = false;
 
     @Override
-    public void select(AID aid) {
-        if (aid == selectedAID) {
+    public void switchApplet(AID aid) {
+        if (card == null) {
+            selectedAID = null;
+            return;
+        }
+
+        if (card.getApplets() == null || aid == selectedAID) {
             selectedAID = null;
             aid = null;
         }
@@ -59,7 +64,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public boolean isSelected() {
+    public boolean isAppletSelected() {
         return selectedAID != null;
     }
 
@@ -176,7 +181,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
+    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
         if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
                 file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
 
@@ -191,7 +196,6 @@ public class CardManagerImpl implements CardManager {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
-            terminals.refresh();
             refreshCard();
         }
     }
@@ -213,16 +217,14 @@ public class CardManagerImpl implements CardManager {
         try {
             String aid = installImpl(file, data);
             info.setAID(aid);
+
+            java.util.List<AppletInfo> appletInfoList = card.getApplets();
+            appletInfoList.add(info);
+            AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
+            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
         } catch (CardException e) {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        }
-
-        java.util.List<AppletInfo> appletInfoList = card.getApplets();
-        appletInfoList.add(info);
-        AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
-        try {
-            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
         } finally {
             refreshCard();
         }
@@ -320,7 +322,11 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void refreshCard() throws LocalizedCardException {
+        logger.info("Card to refrresh");
+        card = null;
+        selectedAID = null;
         terminals.refresh();
         loadCard();
+        logger.info("Card refreshed");
     }
 }

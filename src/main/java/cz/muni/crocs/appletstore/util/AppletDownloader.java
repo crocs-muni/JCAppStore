@@ -62,17 +62,13 @@ public class AppletDownloader {
     private boolean downloadZip(String address) {
         logger.info("Downloading the store...");
         try {
-            URLConnection connection;
-            BufferedInputStream in;
-            FileOutputStream fileOutputStream;
-            connection = new URL(address).openConnection();
-
+            URLConnection connection = new URL(address).openConnection();
             connection.connect();
             size = connection.getContentLength();
             if (size == -1) return false;
 
-            in = new BufferedInputStream(connection.getInputStream());
-            fileOutputStream = new FileOutputStream(zipFile);
+            BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+            FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {

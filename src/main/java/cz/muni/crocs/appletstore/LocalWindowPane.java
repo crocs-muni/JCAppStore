@@ -71,13 +71,17 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         }
     }
 
+//    @Override
+//    protected void paintComponent(Graphics g) {
+//        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
+//        super.paintComponent(g);
+//    }
+
     @Override
-    protected void paintComponent(Graphics g) {
-        infoLayout.setVisible(CardManagerFactory.getManager().isSelected());
-        super.paintComponent(g);
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
     }
-
-
 
     /**
      * Update the local pane according to the info obtained from the Card Manager
@@ -89,7 +93,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         CardManager manager = CardManagerFactory.getManager();
         logger.info("Local pane updated: " + manager.getTerminalState().toString());
         if (verifyTerminalState(manager.getTerminalState())
-                && verifyCardState(manager)
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
 
             List<AppletInfo> cardApplets = manager.getInstalledApplets();
@@ -167,31 +170,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         return true;
     }
 
-    /**
-     * Verify whether the card is busy,
-     * @param manager card manager
-     * @return
-     */
-    private boolean verifyCardState(CardManager manager) {
-//        switch (manager.getCard) {
-            //todo update
-//            case OK:
-//                break;
-//            case WORKING:
-//                showError("card_busy", "card_busy_desc", "busy.png");
-//                return false;
-//            case FAILED:
-//                if (items.isEmpty())
-//                    add(new ErrorPane(textSrc.getString("E_communication"),
-//                            manager.getErrorCause(), "announcement_white.png"));
-//                else
-//                    InformerFactory.getInformer().showWarningToClose(manager.getErrorCause(), Warning.Importance.SEVERE);
-//                return false;
-//            default: //continue, probably card locked
-//        }
-        return true;
-    }
-
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
             showError("E_authentication", "H_authentication", "announcement_white.png");
@@ -234,8 +212,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
             item.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    manager.select(item.info.getAid());
-                    if (manager.isSelected())
+                    manager.switchApplet(item.info.getAid());
+                    if (manager.isAppletSelected())
                         infoLayout.set(item.info);
                     else
                         infoLayout.unset();

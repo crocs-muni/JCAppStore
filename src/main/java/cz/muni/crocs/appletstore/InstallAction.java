@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardException;
@@ -16,6 +17,7 @@ import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -29,21 +31,33 @@ public class InstallAction extends MouseAdapter {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
+    private boolean checked = false;
+    private boolean installed = false;
     private File capfile = null;
     private AppletInfo info;
     private String titleBar = "";
     private final OnEventCallBack<Void, Void, Void> call;
 
-    public InstallAction(OnEventCallBack<Void, Void, Void> call) {
+    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed,
+                         OnEventCallBack<Void, Void, Void> call) {
+        this.installed = installed;
         this.call = call;
-    }
-
-    public InstallAction(String titleBar, AppletInfo info, File capfile, OnEventCallBack<Void, Void, Void> call) {
-        this(call);
         this.capfile = capfile;
         this.titleBar = titleBar;
         this.info = info;
+        this.checked = true;
     }
+
+    public InstallAction(OnEventCallBack<Void, Void, Void> call) {
+        this("", null, null, false, call);
+        this.checked = false;
+    }
+
+    public InstallAction(String titleBar, AppletInfo info, File capfile, OnEventCallBack<Void, Void, Void> call) {
+        this(titleBar, info, capfile, false, call);
+        this.checked = false;
+    }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -54,27 +68,12 @@ public class InstallAction extends MouseAdapter {
         if (file == null)
             return;
 
-        InstallDialogWindow opts = new InstallDialogWindow(file);
+        installed = checkIfCountains(file);
+        InstallDialogWindow opts = new InstallDialogWindow(file, installed);
+        if (!showInstallDialog(opts))
+            return;
 
-        int result = JOptionPane.showOptionDialog(null, opts,
-                textSrc.getString("CAP_install_applet") + titleBar,
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon(Config.IMAGE_DIR + "error.png"),
-                new String[]{textSrc.getString("install"), textSrc.getString("cancel")}, "error");
-
-        switch (result) {
-            case JOptionPane.YES_OPTION:
-                if (!opts.validAID() || !opts.validInstallParams()) {
-                    InformerFactory.getInformer().showInfo("E_install_invalid_data");
-                    return;
-                }
-                break;
-            case JOptionPane.NO_OPTION:
-            case JOptionPane.CLOSED_OPTION:
-                return;
-        }
-
+        logger.info("Install fired.");
         call.onStart();
         new Thread(() -> {
             try {
@@ -96,8 +95,42 @@ public class InstallAction extends MouseAdapter {
         }).start();
     }
 
+    private boolean showInstallDialog(InstallDialogWindow opts) {
+        int result = JOptionPane.showOptionDialog(null, opts,
+                textSrc.getString("CAP_install_applet") + titleBar,
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + "error.png"),
+                new String[]{textSrc.getString("install"), textSrc.getString("cancel")}, "error");
+
+        switch (result) {
+            case JOptionPane.YES_OPTION:
+                if (!opts.validAID() || !opts.validInstallParams()) {
+                    InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
+                    return true;
+                }
+                break;
+            case JOptionPane.NO_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+                return false;
+        }
+        return true;
+    }
+
     private void showFailed(String title, String message) {
         JOptionPane.showMessageDialog(null,
                 message, title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
+    }
+
+    private boolean checkIfCountains(CAPFile file) {
+        if (checked) return installed;
+        List<AppletInfo> infos = CardManagerFactory.getManager().getInstalledApplets();
+        for (AppletInfo nfo : infos) {
+            for (AID aid : file.getAppletAIDs()) {
+                if (nfo.getAid().equals(aid))
+                    return true;
+            }
+        }
+        return false;
     }
 }

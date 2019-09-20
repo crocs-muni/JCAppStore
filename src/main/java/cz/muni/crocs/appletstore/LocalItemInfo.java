@@ -112,6 +112,7 @@ public class LocalItemInfo extends HintPanel {
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
+        setVisible(true);
     }
 
     /**

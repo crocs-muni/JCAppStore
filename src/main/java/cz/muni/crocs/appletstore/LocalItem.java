@@ -55,9 +55,12 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         JLabel icon = new HtmlLabel("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
                     @Override
                     protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D)g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                         super.paintComponent(g);
                         if (info != null && info.getKind() == Kind.IssuerSecurityDomain)
-                            ((Graphics2D) g).drawImage(issuer, null, 20, 4);
+                            g2d.drawImage(issuer, null, 20, 4);
                     }
                 };
         add(icon, gbc);

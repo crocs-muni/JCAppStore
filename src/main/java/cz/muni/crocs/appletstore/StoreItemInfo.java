@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -22,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.security.Key;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -40,13 +42,23 @@ public class StoreItemInfo extends HintPanel {
     private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
     private final Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.PLAIN, 16f);
 
-
+    private boolean installed = false;
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
+        List<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
+        if (appletInfos != null) {
+            for (AppletInfo applet : appletInfos) {
+                String name = applet.getName();
+                if (name != null && name.equals(dataSet.get(Config.JSON_TAG_TITLE).getAsString())) {
+                    installed = true;
+                    break;
+                }
+            }
+        }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
@@ -78,7 +90,7 @@ public class StoreItemInfo extends HintPanel {
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
-        JButton install = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;",
+        JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;",
                 20f, Color.WHITE, new Color(140, 196, 128));
         install.addMouseListener(
                 new MouseAdapter() {
@@ -88,7 +100,7 @@ public class StoreItemInfo extends HintPanel {
                         JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                                 .get(latestV).getAsJsonArray();
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, e);
+                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, installed, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
@@ -164,7 +176,7 @@ public class StoreItemInfo extends HintPanel {
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
 
-        JButton customInst = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;", 18f, Color.WHITE, new Color(155, 151, 152));
+        JButton customInst = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;", 18f, Color.WHITE, new Color(155, 151, 152));
         customInst.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -181,7 +193,7 @@ public class StoreItemInfo extends HintPanel {
                                 .get(version).getAsJsonArray();
 
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, version, sdks, compilerIdx), call, e);
+                                getInfoPack(dataSet, version, sdks, compilerIdx), call, installed, e);
                     }
                 });
         add(customInst, "gapleft 10, wrap");
@@ -265,11 +277,11 @@ public class StoreItemInfo extends HintPanel {
                 hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
     }
 
-    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, MouseEvent e) {
+    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
 
         File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
                 name + Config.SEP + name + "_v" + info.getVersion() + "_sdk" + info.getSdk() + ".cap");
-        logger.info("Install applet " + file.getAbsolutePath());
+        logger.info("Prepare to install " + file.getAbsolutePath());
 
         if (!file.exists()) {
             logger.warn("Applet file not found.");
@@ -278,6 +290,6 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, call).mouseClicked(e);
+        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
     }
 }
