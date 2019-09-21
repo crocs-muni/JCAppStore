@@ -5,6 +5,8 @@ import cz.muni.crocs.appletstore.util.InformerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Main panel of the application, holds the left menu and working panes
@@ -15,9 +17,10 @@ import java.awt.*;
  */
 public class MainPanel extends BackgroundImgPanel implements Informable {
 
-    private LeftMenu leftMenu;
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
+
 
     public MainPanel(BackgroundChangeable context) {
         localPanel = new LocalWindowPane(context);
@@ -38,7 +41,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         content.setOpaque(false);
         content.add(localPanel);
         content.add(storePanel);
-        leftMenu = new LeftMenu(this);
+        LeftMenu leftMenu = new LeftMenu(this);
 
         setOpaque(false);
         add(leftMenu, BorderLayout.WEST);
@@ -81,7 +84,11 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     public void showInfo(String info) {
         if (info == null || info.isEmpty())
             return;
-        leftMenu.addNotification(info);
+        JOptionPane.showMessageDialog(this,
+                info,
+                textSrc.getString("info"),
+                JOptionPane.QUESTION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + "info.png"));
     }
 
     @Override

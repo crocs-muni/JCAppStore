@@ -29,83 +29,73 @@ import java.util.ResourceBundle;
 public class LeftMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private JPanel container;
+    private JPanel container = new JPanel(new GridBagLayout());;
     private InputHintTextField searchInput;
     private JLabel searchIcon;
 
     private CustomButton local = new CustomButton("creditcard.png");
     private CustomButton remote = new CustomButton("shop.png");
-
     private boolean isLocal = true;
-    private MainPanel parent;
+
     private Color choosedButtonBG = new Color(255, 255, 255, 60);
+    private MainPanel parent;
 
     public LeftMenu(MainPanel parent) {
         this.parent = parent;
-        setBackground(new Color(255, 255, 255, 65));
 
-        container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        setBackground(new Color(255, 255, 255, 65));
         container.setOpaque(false);
 
-        setMaximumSize(new Dimension(240, Integer.MAX_VALUE));
-        setMinimumSize(new Dimension(240, 0));
-        setPreferredSize(new Dimension(240, parent.getHeight()));
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
+        setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
+        setLayout(new BorderLayout());
         buildMenuComponents();
         setListeners();
     }
 
-    /**
-     * Build Swing components
-     */
-    private void buildMenuComponents() {
+    public void buildMenuComponents() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.PAGE_START;
+
+        container.add(buildSearchPane(), gbc);
+
+        //init button for local storage
+        setButton(local, textSrc.getString("my_card"), true);
+        local.setBackground(choosedButtonBG);
+        local.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        container.add(local, gbc);
+
+        setButton(remote, textSrc.getString("app_store"), false);
+        remote.setOpaque(false);
+        remote.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        container.add(remote, gbc);
+
+        add(container, BorderLayout.NORTH);
+    }
+
+    private JPanel buildSearchPane() {
         JPanel searchPane = new JPanel();
+        searchPane.setLayout(new FlowLayout());
         searchPane.setOpaque(false);
         searchPane.setBorder(new CompoundBorder(
-                new EmptyBorder(5, 15, 15, 15),
-                new MatteBorder(0, 0,5 ,0, Color.BLACK)));
+                new EmptyBorder(5, 15, 15, 15), //outer margin
+                new MatteBorder(0, 0,5 ,0, Color.BLACK))); //inner nice bottom line
         searchPane.setMaximumSize( new Dimension(Integer.MAX_VALUE, 60));
+        searchPane.setOpaque(false); //transparent ?? or color
+
         searchInput = new InputHintTextField(textSrc.getString("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
         searchInput.setFont(OptionsFactory.getOptions().getDefaultFont());
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
 
-        searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR +  "search.png"));
+        searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
         searchIcon.setBorder(new EmptyBorder(5, 5, 5,5 ));
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
-        container.add(searchPane);
-
-        setButton(local, textSrc.getString("my_card"), true);
-        local.setBackground(choosedButtonBG);
-        local.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        container.add(local);
-
-        setButton(remote, textSrc.getString("app_store"), false);
-        remote.setOpaque(false);
-        remote.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        container.add(remote);
-
-        container.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(container);
-        add(Box.createRigidArea(new Dimension(200, 20)));
-    }
-
-    /**
-     * Display notification to the user below the buttons
-     * @param msg msg to display
-     */
-    public void addNotification(String msg) {
-        NotifLabel label = new NotifLabel(msg, this);
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(label, 2);
-
-        if (getComponentCount() > 25)
-            remove(getComponent(getComponentCount() - 1));
-        revalidate();
+        return searchPane;
     }
 
     /**
@@ -178,3 +168,4 @@ public class LeftMenu extends JPanel {
         });
     }
 }
+

@@ -31,9 +31,9 @@ public class InstallAction extends MouseAdapter {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private boolean checked = false;
-    private boolean installed = false;
-    private File capfile = null;
+    private boolean checked;
+    private boolean installed;
+    private File capfile;
     private AppletInfo info;
     private String titleBar = "";
     private final OnEventCallBack<Void, Void, Void> call;
@@ -107,7 +107,7 @@ public class InstallAction extends MouseAdapter {
             case JOptionPane.YES_OPTION:
                 if (!opts.validAID() || !opts.validInstallParams()) {
                     InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
-                    return true;
+                    return false;
                 }
                 break;
             case JOptionPane.NO_OPTION:
