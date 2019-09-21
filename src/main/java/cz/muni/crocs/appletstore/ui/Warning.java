@@ -28,12 +28,12 @@ public class Warning extends JPanel {
         RETRY, CLOSE, NO_ICON
     }
 
-    public Warning(String msg, Importance status, CallBackIcon type, CallBack callable) {
+    public Warning(String msg, Importance status, CallBackIcon type, CallBack iconOnClick) {
 
         MouseAdapter call = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                callable.callBack();
+                iconOnClick.callBack();
             }
         };
 

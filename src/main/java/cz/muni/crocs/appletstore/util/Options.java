@@ -3,6 +3,10 @@ package cz.muni.crocs.appletstore.util;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 
+/**
+ * Options of the application
+ * @param <ValueType> type of the option values stored inside.
+ */
 public interface Options<ValueType> {
 
     /**

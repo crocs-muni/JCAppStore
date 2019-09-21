@@ -2,6 +2,9 @@ package cz.muni.crocs.appletstore;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Class enables to update background with image
+ */
 public interface BackgroundChangeable {
 
     /**

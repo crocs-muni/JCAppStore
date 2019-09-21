@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
