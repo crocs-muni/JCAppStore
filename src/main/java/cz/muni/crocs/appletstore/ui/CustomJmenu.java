@@ -24,7 +24,7 @@ public class CustomJmenu extends JMenu {
     private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
-        setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
+        setFont(OptionsFactory.getOptions().getFont(12f));
         setForeground(Color.WHITE);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }

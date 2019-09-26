@@ -6,6 +6,9 @@ import com.google.gson.JsonObject;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+/**
+ * Parse JSON file
+ */
 public interface JsonParser {
 
     /**

@@ -14,20 +14,21 @@ public class Cmd extends JPanel {
 
     public Cmd() {
         setLayout(new MigLayout());
-        Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
+        Font titleFont = OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f);
+        Font textFont = OptionsFactory.getOptions().getFont();
         add(Components.getLabel(textSrc.getString("cmd_title"), titleFont.deriveFont(35f)), "wrap");
-        add(Components.getTextField(textSrc.getString("cmd_introduction"), OptionsFactory.getOptions().getDefaultFont()), "wrap");
+        add(Components.getTextField(textSrc.getString("cmd_introduction"), textFont, "width: 600px", null), "gapleft 10, wrap");
 
         add(Components.getLabel(textSrc.getString("cmd_browse_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("cmd_browse"), OptionsFactory.getOptions().getDefaultFont()), "wrap");
+        add(Components.getTextField(textSrc.getString("cmd_browse"), textFont, "width: 600px", null), "gapleft 10, wrap");
 
         add(Components.getLabel(textSrc.getString("cmd_launch_linux_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("cmd_launch_linux"), OptionsFactory.getOptions().getDefaultFont()), "wrap");
+        add(Components.getTextField(textSrc.getString("cmd_launch_linux"), textFont, "width: 600px", null), "gapleft 10, wrap");
 
         add(Components.getLabel(textSrc.getString("cmd_launch_win_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("cmd_launch_win"), OptionsFactory.getOptions().getDefaultFont()), "wrap");
+        add(Components.getTextField(textSrc.getString("cmd_launch_win"), textFont, "width: 600px", null), "gapleft 10, wrap");
 
         add(Components.getLabel(textSrc.getString("cmd_lanuch_Java_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("cmd_lanuch_Java"), OptionsFactory.getOptions().getDefaultFont()), "wrap");
+        add(Components.getTextField(textSrc.getString("cmd_lanuch_Java"), textFont, "width: 600px", null), "gapleft 10, wrap");
     }
 }

@@ -46,7 +46,7 @@ public class LocalItemInfo extends HintPanel {
         send = new SendApduAction(null, call);
         delete = new DeleteAction(null, call);
 
-        name.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
+        name.setFont(OptionsFactory.getOptions().getTitleFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
         add(name, "span 2, wrap");
 
@@ -66,7 +66,7 @@ public class LocalItemInfo extends HintPanel {
         add(domain, "span 2, wrap");
 
         JLabel title = new JLabel(textSrc.getString("management"));
-        title.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 13f));
+        title.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
         rawApdu = new JLabel(textSrc.getString("custom_command"), new ImageIcon(
@@ -112,6 +112,7 @@ public class LocalItemInfo extends HintPanel {
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
+        setVisible(true);
     }
 
     /**

@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,6 +19,7 @@ import java.io.IOException;
  * @version 1.0
  */
 public class BackgroundImageLoader {
+    private static final Logger logger = LogManager.getLogger(BackgroundImageLoader.class);
 
     private BufferedImage background = null;
     private String imgName = "bg.jpg";
@@ -38,7 +41,7 @@ public class BackgroundImageLoader {
             save();
         } catch (InterruptedException e) {
             e.printStackTrace();
-            //todo error log
+            logger.warn("Image loading interrupted. " + Config.IMAGE_DIR + imgName, e);
             InformerFactory.getInformer().showInfo("E_image");
             defaultBg();
         }
@@ -46,7 +49,6 @@ public class BackgroundImageLoader {
 
     private void save() {
         try {
-            //TODO ask how works the system dirs
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
             OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
@@ -61,8 +63,8 @@ public class BackgroundImageLoader {
         try {
             background = ImageIO.read(new File(Config.IMAGE_DIR + imgName));
         } catch (IOException e) {
+            logger.warn("Failed to read image: " + Config.IMAGE_DIR + imgName, e);
             e.printStackTrace();
-            //todo logger
         }
     }
 
@@ -70,7 +72,7 @@ public class BackgroundImageLoader {
         try {
             background = ImageIO.read(new File(name));
         } catch (IOException e) {
-            //TODO possible error handling? show user message?
+            InformerFactory.getInformer().showInfo("E_image");
             defaultBg();
         }
     }
@@ -93,9 +95,9 @@ public class BackgroundImageLoader {
         for (int i = 0; i < size; ++i){
             for (int j = 0; j < size; ++j) {
                 data[i * size + j] = (float)(data[i * size + j] / sum);
-                System.out.print(data[i * size + j] + ", ");
+                //System.out.print(data[i * size + j] + ", ");
             }
-            System.out.println();
+            //System.out.println();
         }
         return data;
     }

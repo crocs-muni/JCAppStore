@@ -42,7 +42,7 @@ public class DeleteDialogWindow extends JPanel {
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 12f));
+        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         add(more, "span 2");
 
         advanced.addMouseListener(new MouseAdapter() {

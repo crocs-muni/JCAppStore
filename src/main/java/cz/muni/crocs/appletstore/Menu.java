@@ -202,7 +202,7 @@ public class Menu extends JMenuBar {
     private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
-        component.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(10f));
+        component.setFont(OptionsFactory.getOptions().getFont(10f));
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         Dimension preferred = component.getPreferredSize();

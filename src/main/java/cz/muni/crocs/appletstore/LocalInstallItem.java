@@ -35,7 +35,7 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
         add(Box.createRigidArea(new Dimension(50, 20)));
 
         JLabel title = new JLabel(textSrc.getString("CAP_install_applet"));
-        title.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(16f));
+        title.setFont(OptionsFactory.getOptions().getTitleFont(16f));
         title.setForeground(Color.WHITE);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(title);

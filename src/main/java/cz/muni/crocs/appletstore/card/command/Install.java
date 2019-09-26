@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.InstallOpts;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class Install extends GPCommand<Void> {
     }
 
     @Override
-    public boolean execute() throws CardException, GPException {
+    public boolean execute() throws LocalizedCardException, GPException {
         logger.info("Installing params: " + (data == null ? "no advanced settings." : data.toString()));
         GPRegistry registry = null;
         try {
@@ -47,7 +48,7 @@ public class Install extends GPCommand<Void> {
         } catch (IOException e) {
             //todo
             e.printStackTrace();
-            throw new CardException("");
+            throw new LocalizedCardException("");
         }
 
         if (data == null) {
@@ -56,7 +57,7 @@ public class Install extends GPCommand<Void> {
 
         if (data.getAppletIdx() >= file.getAppletAIDs().size())
             //todo
-            throw new CardException("");
+            throw new LocalizedCardException("");
 
         // Remove existing default app
         if (data.isForce() && registry.allPackageAIDs().contains(file.getPackageAID())) {
@@ -75,6 +76,7 @@ public class Install extends GPCommand<Void> {
         if (file.getAppletAIDs().size() <= 1) {
             try {
                 //we do not support installing under custom SD
+                //todo ask about third arg
                 context.loadCapFile(file, null);
                 logger.info("CAP file loaded.");
             } catch (GPException e) {
@@ -93,7 +95,7 @@ public class Install extends GPCommand<Void> {
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
         //todo ask petr which privileges should be provided
-        //privs.add(GPRegistryEntry.Privilege.CardReset);
+        //privs.add(GPRegistryEntry.Privilege.CardReset)
 
         if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             try {
@@ -103,9 +105,9 @@ public class Install extends GPCommand<Void> {
             }
         }
 
-        if (registry.allAppletAIDs().contains(instanceAID)) {
-            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
-        }
+//        if (registry.allAppletAIDs().contains(instanceAID)) {
+//            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
+//        }
 
         try {
             context.installAndMakeSelectable(

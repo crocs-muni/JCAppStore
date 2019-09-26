@@ -28,12 +28,12 @@ public class Warning extends JPanel {
         RETRY, CLOSE, NO_ICON
     }
 
-    public Warning(String msg, Importance status, CallBackIcon type, CallBack callable) {
+    public Warning(String msg, Importance status, CallBackIcon type, CallBack iconOnClick) {
 
         MouseAdapter call = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                callable.callBack();
+                iconOnClick.callBack();
             }
         };
 
@@ -63,7 +63,7 @@ public class Warning extends JPanel {
 
         //todo too long msg does not displays
         JLabel errorMsg = new HtmlLabel("<div style=\"max-width:90%;\">" + msg + "</div>");
-        errorMsg.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
+        errorMsg.setFont(OptionsFactory.getOptions().getTitleFont(12f));
         errorMsg.setForeground(Color.BLACK);
         add(errorMsg);
 
@@ -80,7 +80,7 @@ public class Warning extends JPanel {
                 add(iconRetry);
 
                 JLabel retry = new JLabel(textSrc.getString("retry"));
-                retry.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
+                retry.setFont(OptionsFactory.getOptions().getTitleFont(12f));
                 retry.setForeground(Color.BLACK);
                 add(retry);
                 retry.addMouseListener(call);

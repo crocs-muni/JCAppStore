@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 /**
+ * On various events, perform various callbacks depending on the action state.
  * @author Jiří Horák
  * @version 1.0
  */

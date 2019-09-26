@@ -3,6 +3,10 @@ package cz.muni.crocs.appletstore.util;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 
+/**
+ * Options of the application
+ * @param <ValueType> type of the option values stored inside.
+ */
 public interface Options<ValueType> {
 
     /**
@@ -12,8 +16,9 @@ public interface Options<ValueType> {
     String KEY_GITHUB_LATEST_VERSION = "github.latest.version";
     String KEY_BACKGROUND = "background";
     String KEY_HINT = "hint";
-    String KEY_FONT = "font";
     String KEY_STYLESHEET = "stylesheet";
+    String KEY_FONT = "text";
+    String KEY_TITLE_FONT = "title";
 
     /**
      * Get option for app
@@ -40,10 +45,46 @@ public interface Options<ValueType> {
     void setDefaults();
 
     /**
-     * Returns default font as specified in opts
-     * @return default font for app
+     * Returns font as specified in opts
+     * @return font for app
      */
-    Font getDefaultFont();
+    Font getFont();
+
+    /**
+     * Returns font as specified in opts
+     * @return font title for app
+     */
+    Font getTitleFont();
+
+    /**
+     * Returns font as specified in opts
+     * @param size font size
+     * @return font for app
+     */
+    Font getFont(float size);
+
+    /**
+     * Returns font as specified in opts
+     * @param size font size
+     * @return font title for app
+     */
+    Font getTitleFont(float size);
+
+    /**
+     * Returns font as specified in opts
+     * @param size font size
+     * @param style font style, one of Font.BOLD, Font.ITALIC...
+     * @return font for app
+     */
+    Font getFont(int style, float size);
+
+    /**
+     * Returns font as specified in opts
+     * @param size font size
+     * @param style font style, one of Font.BOLD, Font.ITALIC...
+     * @return font title for app
+     */
+    Font getTitleFont(int style, float size);
 
     /**
      * Returns default styleSheet as specified in opts

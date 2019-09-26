@@ -34,11 +34,11 @@ public class Delete extends GPCommand<Void> {
     }
 
     @Override
-    public boolean execute() throws CardException, GPException, LocalizedCardException, IOException {
+    public boolean execute() throws GPException, LocalizedCardException, IOException {
         AID aid = toDelete.getAid();
         GPRegistry reg = context.getRegistry();
 
-        if (!context.getRegistry().allAIDs().contains(aid)) {
+        if (!reg.allAIDs().contains(aid)) {
             throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
         }
 

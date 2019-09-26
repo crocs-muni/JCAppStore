@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -22,6 +23,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.security.Key;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -37,21 +39,32 @@ public class StoreItemInfo extends HintPanel {
 
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-    private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
-    private final Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.PLAIN, 16f);
+    private final Font titleFont = OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f);
+    private final Font textFont = OptionsFactory.getOptions().getFont(Font.PLAIN, 16f);
 
-
+    private boolean installed = false;
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
+        List<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
+        if (appletInfos != null) {
+            for (AppletInfo applet : appletInfos) {
+                String name = applet.getName();
+                if (name != null && name.equals(dataSet.get(Config.JSON_TAG_TITLE).getAsString())) {
+                    installed = true;
+                    break;
+                }
+            }
+        }
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
         buildHeader(dataSet, store, callBack);
+        checkHostApp(dataSet);
         buildDescription(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
@@ -66,19 +79,19 @@ public class StoreItemInfo extends HintPanel {
                 store.showItems("");
             }
         });
-        add(back, "span 1 2");
+        add(back, "pos 0 0");
 
         JLabel icon = new JLabel(getIcon(dataSet.get(Config.JSON_TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        add(icon, "span 1 2");
+        add(icon, "span 2 2, gapleft 50");
 
         String appName = dataSet.get(Config.JSON_TAG_TITLE).getAsString();
         JLabel name = new JLabel(appName);
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350");
 
-        JButton install = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;",
-                20f, Color.WHITE, new Color(26, 196, 0));
+        JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;",
+                20f, Color.WHITE, new Color(140, 196, 128), true);
         install.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -87,18 +100,35 @@ public class StoreItemInfo extends HintPanel {
                         JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                                 .get(latestV).getAsJsonArray();
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, e);
+                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, installed, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
 
         JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
-        author.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
+        author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
+    private void checkHostApp(JsonObject dataSet) {
+        if (!dataSet.get(Config.JSON_TAG_HOST).getAsString().trim().toLowerCase().equals("true")) {
+            add(Components.getNotice(
+                    textSrc.getString("W_no_host_app"),
+                    OptionsFactory.getOptions().getFont(),
+                    new Color(255, 219, 148),
+                    new ImageIcon(Config.IMAGE_DIR + "info.png"),
+                    "margin: 10px; width:500px")
+            , "gap 20, span 4, gaptop 40, growx, wrap");
+        }
+    }
+
     private void buildDescription(JsonObject dataSet) {
-        add(Components.getTextField(dataSet.get(Config.JSON_TAG_DESC).getAsString(), OptionsFactory.getOptions().getDefaultFont()), "span 4, gap 20, wrap");
+        add(Components.getTextField(
+                dataSet.get(Config.JSON_TAG_DESC).getAsString(),
+                OptionsFactory.getOptions().getFont(),
+                "margin: 10px; width:600px",
+                new Color(255, 255, 255, 80)
+        ), "span 4, gap 20, gaptop 40, wrap");
 
         addSubTitle("website", "H_website");
         final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
@@ -107,13 +137,18 @@ public class StoreItemInfo extends HintPanel {
         Color bg = new Color(255, 255, 255, 80);
         url.setBackground(bg);
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(14f);
+        Font textFont = OptionsFactory.getOptions().getFont(14f);
         url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
 
         addSubTitle("use", "H_use");
-        add(Components.getTextField(dataSet.get(Config.JSON_TAG_USAGE).getAsString(), OptionsFactory.getOptions().getDefaultFont()), "span 4, gap 20, gaptop 20, wrap");
+        add(Components.getTextField(
+                dataSet.get(Config.JSON_TAG_USAGE).getAsString(),
+                OptionsFactory.getOptions().getFont(),
+                "margin: 10px; width:600px",
+                new Color(255, 255, 255, 80)
+        ), "span 4, gap 20, gaptop 20, wrap");
     }
 
     private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void, Void> call) {
@@ -141,7 +176,13 @@ public class StoreItemInfo extends HintPanel {
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
 
-        JButton customInst = Components.getButton(textSrc.getString("CAP_install"), "margin: 1px 10px;", 18f, Color.WHITE, new Color(170, 166, 167));
+        JButton customInst = Components.getButton(
+                textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"),
+                "margin: 1px 10px;",
+                18f,
+                Color.WHITE,
+                new Color(155, 151, 152),
+                true);
         customInst.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -158,10 +199,10 @@ public class StoreItemInfo extends HintPanel {
                                 .get(version).getAsJsonArray();
 
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, version, sdks, compilerIdx), call, e);
+                                getInfoPack(dataSet, version, sdks, compilerIdx), call, installed, e);
                     }
                 });
-        add(customInst, "wrap");
+        add(customInst, "gapleft 10, wrap");
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
@@ -242,11 +283,11 @@ public class StoreItemInfo extends HintPanel {
                 hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
     }
 
-    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, MouseEvent e) {
+    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
 
         File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
                 name + Config.SEP + name + "_v" + info.getVersion() + "_sdk" + info.getSdk() + ".cap");
-        logger.info("Install applet " + file.getAbsolutePath());
+        logger.info("Prepare to install " + file.getAbsolutePath());
 
         if (!file.exists()) {
             logger.warn("Applet file not found.");
@@ -255,6 +296,6 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, call).mouseClicked(e);
+        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
     }
 }

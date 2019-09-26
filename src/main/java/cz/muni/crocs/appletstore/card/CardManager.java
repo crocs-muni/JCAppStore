@@ -11,13 +11,18 @@ import java.util.Set;
 
 public interface CardManager {
 
-    void select(AID aid);
+    /**
+     * Switches to the new aid as selected applet
+     * should not select if card not plugged
+     * @param aid AID to select
+     */
+    void switchApplet(AID aid);
 
     /**
      * Check if any applet selected
      * @return true if any card applet selected
      */
-    boolean isSelected();
+    boolean isAppletSelected();
 
     /**
      * Get state of the terminal instance
@@ -73,7 +78,24 @@ public interface CardManager {
      */
     void loadCard() throws LocalizedCardException;
 
+    /**
+     * Get life cycle of the card
+     * @return int, where value determines card state - OP_READY, LOCKED...
+     * as designed by GlobalPlatform specification
+     */
     Integer getCardLifeCycle();
+
+    /**
+     * Set the last applet AID installed
+     * @param aid that was installed, null to delete
+     */
+    void setLastAppletInstalled(AID aid);
+
+    /**
+     * Get the last installed applet aid
+     * @return AID of the last installed applet
+     */
+    AID getLastAppletInstalledAid();
 
     /**
      * Install new applet onto current card

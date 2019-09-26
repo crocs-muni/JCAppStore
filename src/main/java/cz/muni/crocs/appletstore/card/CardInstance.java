@@ -213,16 +213,16 @@ public class CardInstance {
      * @throws CardException unable to perform command
      */
     void executeCommand(GPCommand command) throws LocalizedCardException, CardException {
-        Card card = null;
+        Card card;
         GPSession context = null;
-        APDUBIBO channel = null;
+        APDUBIBO channel;
 
         try {
             card = terminal.connect("*");
-            card.beginExclusive();
+            //card.beginExclusive();
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
         } catch (CardException e) {
-            if (card != null) card.endExclusive();
+//            if (card != null) card.endExclusive();
             throw new LocalizedCardException("Could not connect to selected reader: " +
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
@@ -279,13 +279,13 @@ public class CardInstance {
         } catch (IOException e) {
             fail(card, e, "E_unknown_error");
         } finally {
-            card.endExclusive();
+            //card.endExclusive();
             card.disconnect(true);
         }
     }
 
     private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
-        card.endExclusive();
+        //card.endExclusive();
         card.disconnect(true);
         throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, translationKey), e);
     }
@@ -328,31 +328,6 @@ public class CardInstance {
                 return Diversification.NONE;
         }
     }
-
-//    /**
-//     * Convert string type to actual object
-//     *
-//     * @param type type of key
-//     * @return GPKey.Type key type
-//     */
-//    private static GPKey.Type getType(String type) {
-//        switch (type) {
-//            case "RAW":
-//                return GPKey.Type.RAW;
-//            case "DES":
-//                return GPKey.Type.DES;
-//            case "DES3":
-//                return GPKey.Type.DES3;
-//            case "AES":
-//                return GPKey.Type.AES;
-//            case "RSAPUB":
-//                return GPKey.Type.RSAPUB;
-//            case "PSK":
-//                return GPKey.Type.PSK;
-//            default:
-//                return GPKey.Type.RAW;
-//        }
-//    }
 
     private boolean askDefault() {
         RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(

@@ -25,7 +25,7 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
         setLayout(new MigLayout("align center center, gapy 15"));
         add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "load.gif")), "wrap");
         JLabel working = new JLabel(textSrc.getString("working"));
-        working.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(20f));
+        working.setFont(OptionsFactory.getOptions().getTitleFont(20f));
         add(working, "align center");
 
         setOpaque(false);

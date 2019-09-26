@@ -2,6 +2,11 @@ package cz.muni.crocs.appletstore;
 
 import javax.swing.*;
 
+/**
+ * Interface for informer.
+ * Class that implements should be able to display to the user
+ * GUI swing messages using following methods.
+ */
 public interface Informable {
 
     /**

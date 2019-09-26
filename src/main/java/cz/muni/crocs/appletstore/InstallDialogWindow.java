@@ -17,6 +17,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Dialog window for applet installation to show install options
@@ -28,6 +30,7 @@ public class InstallDialogWindow extends JPanel {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
+    private boolean installed = false;
     private JTextField installParams = new JTextField(50);
     private JCheckBox forceInstall = new JCheckBox();
     private JTextField[] customAIDs;
@@ -36,15 +39,26 @@ public class InstallDialogWindow extends JPanel {
 
     private Color wrong = new Color(0xC01628);
 
-    public InstallDialogWindow(CAPFile file) {
+    private static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
+
+    public InstallDialogWindow(CAPFile file, boolean isInstalled) {
+        this.installed = isInstalled;
+        build(file);
+    }
+
+    private void build(CAPFile file) {
         setLayout(new MigLayout("width 250px"));
         add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
                 "wrap, span 5, gapbottom 10");
+        if (installed) {
+            add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
+                    "wrap, span 5, gapbottom 10");
+        }
         add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("pkg_id") + file.getPackageAID().toString() + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 12f));
+        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         add(more, "span 2");
 
         advanced.addMouseListener(new MouseAdapter() {
@@ -86,8 +100,10 @@ public class InstallDialogWindow extends JPanel {
 
         add(getHint("H_default_aid", "600"), "span 5, wrap");
 
-        add(forceInstall);
         forceInstall.setEnabled(false);
+        forceInstall.setSelected(installed);
+        add(forceInstall);
+
         add(new JLabel(textSrc.getString("force_install")), "span 4, wrap");
         add(getHint("H_force_install", "600"), "span 5, wrap");
     }
@@ -175,11 +191,12 @@ public class InstallDialogWindow extends JPanel {
     public InstallOpts getInstallOpts() {
         if (advanced.isSelected())
             return new InstallOpts(getSelectedAID(), getSelectedIdx(), forceInstall.isSelected(), installParams.getText());
-        return null;
+        else return new InstallOpts(getSelectedAID(), getSelectedIdx(), forceInstall.isSelected(), new byte[0]);
     }
 
     public boolean validInstallParams() {
-        return installParams.getText().length() % 2 == 0;
+        String text = installParams.getText();
+        return text == null || validHex(text);
     }
 
     public boolean validAID() {
@@ -194,13 +211,10 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private static boolean validAID(String aid) {
-        int length = aid.length();
-        for (int i = 0; i < length; i++){
-            char c = aid.charAt(i);
-            if ("0123456789ABCDEFabcdef".indexOf(c) < 0) {
-                return false;
-            }
-        }
-        return length % 2 == 0 && length < 32;
+        return validHex(aid) && aid.length() <= 32;
+    }
+
+    private static boolean validHex(String hex) {
+        return hex.isEmpty() || (HEXA_PATTERN.matcher(hex.toLowerCase()).matches() && hex.length() % 2 == 0);
     }
 }

@@ -40,11 +40,18 @@ public class CardManagerImpl implements CardManager {
     private CardInstance card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
+    private AID lastInstalled = null;
     private volatile boolean busy = false;
 
     @Override
-    public void select(AID aid) {
-        if (aid == selectedAID) {
+    public void switchApplet(AID aid) {
+        if (card == null) {
+            selectedAID = null;
+            lastInstalled = null;
+            return;
+        }
+
+        if (card.getApplets() == null || aid == selectedAID) {
             selectedAID = null;
             aid = null;
         }
@@ -59,7 +66,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public boolean isSelected() {
+    public boolean isAppletSelected() {
         return selectedAID != null;
     }
 
@@ -156,6 +163,8 @@ public class CardManagerImpl implements CardManager {
         } finally {
             busy = false;
             notifyAll();
+            //todo delete next line
+            lastInstalled = AID.fromString("4a43416C675465737431");
         }
     }
 
@@ -176,7 +185,17 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
+    public void setLastAppletInstalled(AID aid) {
+        lastInstalled = aid;
+    }
+
+    @Override
+    public AID getLastAppletInstalledAid() {
+        return lastInstalled;
+    }
+
+    @Override
+    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
         if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
                 file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
 
@@ -191,7 +210,6 @@ public class CardManagerImpl implements CardManager {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
-            terminals.refresh();
             refreshCard();
         }
     }
@@ -213,16 +231,14 @@ public class CardManagerImpl implements CardManager {
         try {
             String aid = installImpl(file, data);
             info.setAID(aid);
+
+            java.util.List<AppletInfo> appletInfoList = card.getApplets();
+            appletInfoList.add(info);
+            AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
+            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
         } catch (CardException e) {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        }
-
-        java.util.List<AppletInfo> appletInfoList = card.getApplets();
-        appletInfoList.add(info);
-        AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
-        try {
-            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
         } finally {
             refreshCard();
         }
@@ -320,7 +336,13 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void refreshCard() throws LocalizedCardException {
+        logger.info("Card was about to refresh.");
+        card = null;
+        selectedAID = null;
+        lastInstalled = null;
         terminals.refresh();
         loadCard();
+        System.out.println(lastInstalled == null? "" : lastInstalled.toString());
+        logger.info("Card successfully refreshed.");
     }
 }

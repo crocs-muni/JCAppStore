@@ -58,6 +58,7 @@ public class Config {
     public static final String JSON_TAG_URL = "url";
     public static final String JSON_TAG_USAGE = "usage";
     public static final String JSON_TAG_KEYS = "keys";
+    public static final String JSON_TAG_HOST = "host_app";
     public static final String RESOURCES = Config.APP_STORE_DIR + Config.SEP + "Resources" + Config.SEP;
 
     /**

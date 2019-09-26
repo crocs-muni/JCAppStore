@@ -2,6 +2,10 @@ package cz.muni.crocs.appletstore;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Class enables to update background with image
+ * enables to disable and again enable whole GUI area
+ */
 public interface BackgroundChangeable {
 
     /**
