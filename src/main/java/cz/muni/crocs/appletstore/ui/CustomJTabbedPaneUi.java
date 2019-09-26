@@ -130,7 +130,7 @@ public class CustomJTabbedPaneUi extends BasicTabbedPaneUI {
 
     @Override
     protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {
-        super.paintText(g, tabPlacement, OptionsFactory.getOptions().getDefaultFont(), metrics, tabIndex, title, textRect, isSelected);
+        super.paintText(g, tabPlacement, OptionsFactory.getOptions().getFont(), metrics, tabIndex, title, textRect, isSelected);
     }
 
     @Override

@@ -38,10 +38,8 @@ public class JsonStoreParser implements JsonParser {
     public String[] jsonArrayToDataArray(JsonArray array) {
         if (array == null) return null;
         int len = array.size();
-
         String[] result = new String[len];
         for (int i = 0; i < len; i++) {
-            //todo try simpler
             result[i] = array.get(i).getAsString();
         }
         return result;

@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.util.Informer;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
@@ -18,6 +20,7 @@ import java.io.IOException;
 public class BackgroundImgPanel extends JPanel {
 
     private BufferedImage bg;
+    private int width = -1, height = -1;
 
     public BackgroundImgPanel() {
         String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
@@ -40,13 +43,9 @@ public class BackgroundImgPanel extends JPanel {
     }
 
     private void loadDefault() {
-//        //first run to blur the default image, otherwise just load
-//        BackgroundImageLoader imgBuilder = new BackgroundImageLoader("bg.jpg", this);
-//        bg = imgBuilder.get();
         try {
             bg = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
         } catch (IOException e) {
-            //TODO show user unable to load default background
             e.printStackTrace();
             bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
         }
@@ -55,8 +54,10 @@ public class BackgroundImgPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //TODO maybe remember the last diemnstions and rescale only once
-        Image scaledImage = bg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH);
-        g.drawImage(scaledImage, 0, 0, this);
+        if (width == getWidth() && height == getHeight()) {
+            g.drawImage(bg, 0, 0, this);
+        } else {
+            g.drawImage(bg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH), 0, 0, this);
+        }
     }
 }

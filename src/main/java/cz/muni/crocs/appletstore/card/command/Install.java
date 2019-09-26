@@ -105,9 +105,9 @@ public class Install extends GPCommand<Void> {
             }
         }
 
-        if (registry.allAppletAIDs().contains(instanceAID)) {
-            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
-        }
+//        if (registry.allAppletAIDs().contains(instanceAID)) {
+//            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
+//        }
 
         try {
             context.installAndMakeSelectable(

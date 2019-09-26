@@ -14,7 +14,8 @@ public class OptionsImpl implements Options<String> {
 
     private HashMap<String, String> options;
     private StyleSheet sheet;
-    private Font font;
+    private Font text;
+    private Font title;
 
     public OptionsImpl() {
         getFileOptions();
@@ -22,7 +23,7 @@ public class OptionsImpl implements Options<String> {
             setDefaults();
 
         setStyles();
-        loadFont();
+        loadFonts();
     }
 
     OptionsImpl(HashMap<String, String> options) {
@@ -31,7 +32,7 @@ public class OptionsImpl implements Options<String> {
             setDefaults();
 
         setStyles();
-        loadFont();
+        loadFonts();
     }
 
     @Override
@@ -42,12 +43,38 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");
         options.put(Options.KEY_STYLESHEET, "src/main/resources/css/default.css");
-        options.put(Options.KEY_FONT, "src/main/resources/fonts/x.ttf");
+        options.put(Options.KEY_FONT, null);
+        options.put(Options.KEY_TITLE_FONT, "src/main/resources/fonts/title.ttf");
     }
 
     @Override
-    public Font getDefaultFont() {
-        return font;
+    public Font getFont() {
+        return text;
+    }
+
+    @Override
+    public Font getTitleFont() {
+        return title;
+    }
+
+    @Override
+    public Font getFont(float size) {
+        return getFont().deriveFont(size);
+    }
+
+    @Override
+    public Font getTitleFont(float size) {
+        return getTitleFont().deriveFont(size);
+    }
+
+    @Override
+    public Font getFont(int style, float size) {
+        return getFont().deriveFont(style, size);
+    }
+
+    @Override
+    public Font getTitleFont(int style, float size) {
+        return  getTitleFont().deriveFont(style, size);
     }
 
     @Override
@@ -144,16 +171,33 @@ public class OptionsImpl implements Options<String> {
         }
     }
 
-    private void loadFont() {
+    private void loadFonts() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+        text = getCustomFont(options.get(Options.KEY_FONT));
+        ge.registerFont(text);
+        title = getCustomFont(options.get(Options.KEY_TITLE_FONT));
+        ge.registerFont(title);
+    }
+
+    private Font getCustomFont(String path) {
+        if (path == null || path.isEmpty()) {
+            return getDefaultFont();
+        }
+        return getCustomFont(new File(path));
+    }
+
+    private Font getCustomFont(File fontFile) {
         try {
-            //TODO doesnt exist?
-            font = Font.createFont(Font.TRUETYPE_FONT, new File(options.get(Options.KEY_FONT)));
+            return Font.createFont(Font.TRUETYPE_FONT, fontFile);
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
-            font = new Font("Courier", Font.PLAIN, 14);
+            return getDefaultFont();
         }
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(font);
+    }
+
+    private Font getDefaultFont() {
+        return new Font("Courier", Font.PLAIN, 14);
     }
 
 

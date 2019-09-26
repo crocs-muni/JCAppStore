@@ -329,31 +329,6 @@ public class CardInstance {
         }
     }
 
-//    /**
-//     * Convert string type to actual object
-//     *
-//     * @param type type of key
-//     * @return GPKey.Type key type
-//     */
-//    private static GPKey.Type getType(String type) {
-//        switch (type) {
-//            case "RAW":
-//                return GPKey.Type.RAW;
-//            case "DES":
-//                return GPKey.Type.DES;
-//            case "DES3":
-//                return GPKey.Type.DES3;
-//            case "AES":
-//                return GPKey.Type.AES;
-//            case "RSAPUB":
-//                return GPKey.Type.RSAPUB;
-//            case "PSK":
-//                return GPKey.Type.PSK;
-//            default:
-//                return GPKey.Type.RAW;
-//        }
-//    }
-
     private boolean askDefault() {
         RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
                 null,

@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.ProcessModifiable;
 import cz.muni.crocs.appletstore.StoreWindowManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,15 +24,14 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
     private static final Logger logger = LogManager.getLogger(DownloaderWorker.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private StoreWindowManager parent;
+    private ProcessModifiable<StoreWindowManager.StoreState> parent;
 
-    //todo ugly dependency
-    public DownloaderWorker(StoreWindowManager parent) {
+    public DownloaderWorker(ProcessModifiable<StoreWindowManager.StoreState> parent) {
         this.parent = parent;
     }
 
     public void setLoaderMessage(String message) {
-        parent.setLoadingPaneMessage(message);
+        parent.setProcessMessage(message);
     }
 
     @Override
@@ -45,18 +45,18 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
         if (storeInfo == null) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("E_no_internet"));
-            parent.setStatus(StoreWindowManager.StoreState.NO_CONNECTION);
+            parent.setState(StoreWindowManager.StoreState.NO_CONNECTION);
             return "done";
         } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("done"));
-            parent.setStatus(StoreWindowManager.StoreState.REBUILD);
+            parent.setState(StoreWindowManager.StoreState.REBUILD);
             return "done";
         }
         System.out.println("downloading");
         AppletDownloader downloader = new AppletDownloader(storeInfo[1], this);
-        if (!downloader.run()) parent.setStatus(StoreWindowManager.StoreState.FAILED);
-        else parent.setStatus(StoreWindowManager.StoreState.REBUILD);
+        if (!downloader.run()) parent.setState(StoreWindowManager.StoreState.FAILED);
+        else parent.setState(StoreWindowManager.StoreState.REBUILD);
 
         return storeInfo[2];
     }

@@ -1,18 +1,14 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.InstallOpts;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.CapFileChooser;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
-import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -58,7 +54,6 @@ public class InstallAction extends MouseAdapter {
         this.checked = false;
     }
 
-
     @Override
     public void mouseClicked(MouseEvent e) {
         CAPFile file;
@@ -73,16 +68,18 @@ public class InstallAction extends MouseAdapter {
         if (!showInstallDialog(opts))
             return;
 
-        logger.info("Install fired.");
+        final InstallOpts intallOpts = opts.getInstallOpts();
+        logger.info("Install fired, list of AIDS: " + file.getApplets().toString());
+        logger.info("Install AID: " + intallOpts.getAID());
         call.onStart();
         new Thread(() -> {
             try {
-                InstallOpts intallOpts = opts.getInstallOpts();
+                CardManager manager = CardManagerFactory.getManager();
                 if (info == null)
-                    CardManagerFactory.getManager().install(file, intallOpts);
+                    manager.install(file, intallOpts);
                 else
-                    CardManagerFactory.getManager().install(file, intallOpts, info);
-
+                    manager.install(file, intallOpts, info);
+                manager.setLastAppletInstalled(AID.fromString(opts.getInstallOpts().getAID()));
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();
                 logger.warn("Failed to install applet: " + ex.getMessage());
@@ -107,7 +104,7 @@ public class InstallAction extends MouseAdapter {
             case JOptionPane.YES_OPTION:
                 if (!opts.validAID() || !opts.validInstallParams()) {
                     InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
-                    return false;
+                    return showInstallDialog(opts);
                 }
                 break;
             case JOptionPane.NO_OPTION:

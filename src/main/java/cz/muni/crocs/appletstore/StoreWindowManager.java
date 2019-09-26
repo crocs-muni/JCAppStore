@@ -23,11 +23,13 @@ import java.util.concurrent.TimeoutException;
  *
  * CallBack >> allows the store to be reloaded in call() method
  * Searchable >> allows the store to act like searchable object
+ * ProcessModifiable >> allows the store loading process to give status & result information
  *
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable {
+public class StoreWindowManager extends JPanel implements
+        CallBack<Void>, Searchable, ProcessModifiable<StoreWindowManager.StoreState> {
 
     private static final Logger logger = LogManager.getLogger(StoreWindowManager.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
@@ -56,18 +58,18 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         UNINITIALIZED, NO_CONNECTION, WORKING, OK, INSTALLING, REBUILD, FAILED, TIMEOUT
     }
 
-    public synchronized void setStatus(StoreState state) {
+    public synchronized void setState(StoreState state) {
         this.state = state;
     }
 
-    public void setLoadingPaneMessage(String msg) {
+    public void setProcessMessage(String msg) {
         if (currentComponent instanceof LoadingPane)
             ((LoadingPane) currentComponent).setMessage(msg);
     }
 
     @Override
     public Void callBack() {
-        setStatus(StoreState.UNINITIALIZED);
+        setState(StoreState.UNINITIALIZED);
         updateGUI();
         return null;
     }
@@ -97,16 +99,16 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             case INSTALLING: //if OK or WORKING, do nothing
                 return;
             case REBUILD:
-                setStatus(StoreState.OK);
+                setState(StoreState.OK);
                 setupWindow();
                 return;
             case TIMEOUT:
-                setStatus(StoreState.UNINITIALIZED);
+                setState(StoreState.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_timeout"),
                         "error.png", this), false);
                 return;
             case FAILED:
-                setStatus(StoreState.UNINITIALIZED);
+                setState(StoreState.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_generic"),
                         "error.png", this), false);
                 return;
@@ -116,7 +118,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 setupWindow();
                 return;
             default:
-                setStatus(StoreState.WORKING);
+                setState(StoreState.WORKING);
                 init();
         }
     }
@@ -139,7 +141,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 }
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
-                setStatus(StoreState.TIMEOUT);
+                setState(StoreState.TIMEOUT);
             } finally {
                 updateGUI();
             }
@@ -209,7 +211,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private void setFailed() {
         putNewPane(new ErrorPane(textSrc.getString("W_store_loading"),
                 "error.png", this), false);
-        setStatus(StoreState.UNINITIALIZED);
+        setState(StoreState.UNINITIALIZED);
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
     }
 }

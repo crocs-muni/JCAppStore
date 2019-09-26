@@ -25,7 +25,6 @@ import java.util.zip.ZipInputStream;
  * @version 1.0
  */
 public class AppletDownloader {
-
     private static final Logger logger = LogManager.getLogger(AppletDownloader.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 

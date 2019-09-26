@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
@@ -64,7 +65,7 @@ public class Settings extends JPanel {
         cutString(path);
 
         JLabel bgValue = new HtmlLabel(path);
-        bgValue.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(12f));
+        bgValue.setFont(OptionsFactory.getOptions().getFont(12f));
         bgValue.setBorder(frame);
         bgValue.setBackground(Color.WHITE);
         bgValue.setOpaque(true);
@@ -86,11 +87,7 @@ public class Settings extends JPanel {
         JButton getNewBg = new JButton(new AbstractAction(textSrc.getString("change")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                fileChooser.setMultiSelectionEnabled(false);
-                fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Images", ImageIO.getReaderFileSuffixes()));
-                fileChooser.setAcceptAllFileFilterUsed(false);
+                JFileChooser fileChooser = getBGImageFileChooser();
                 int r = fileChooser.showOpenDialog(null);
                 if (r == JFileChooser.APPROVE_OPTION) {
                     bgImg = fileChooser.getSelectedFile().getAbsolutePath();
@@ -113,6 +110,32 @@ public class Settings extends JPanel {
         saveHint();
     }
 
+    private JFileChooser getBGImageFileChooser() {
+        JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.addChoosableFileFilter(new FileFilter() {
+
+            @Override
+            public boolean accept(File f) {
+                String name = f.getName().toLowerCase();
+                return f.length() <= 2 * (512 * 1024) &&
+                        (f.isDirectory() ||
+                                name.endsWith(".png") ||
+                                name.endsWith(".jpg") ||
+                                name.endsWith(".jpeg") ||
+                                name.endsWith(".bmp"));
+            }
+
+            @Override
+            public String getDescription() {
+                return "Images (png, jpeg/jpg, bmp) less than 1.5 MB";
+            }
+        });
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        return fileChooser;
+    }
+
     private void addLanguage() {
         addTitleLabel(textSrc.getString("language"), "");
 
@@ -131,7 +154,7 @@ public class Settings extends JPanel {
 
     private void addTitleLabel(String titleText, String constraints) {
         JLabel title = new JLabel(titleText);
-        title.setFont(OptionsFactory.getOptions().getDefaultFont());
+        title.setFont(OptionsFactory.getOptions().getTitleFont());
         add(title, constraints);
     }
 

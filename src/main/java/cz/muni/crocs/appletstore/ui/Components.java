@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import sun.management.counter.ByteArrayCounter;
 
@@ -72,10 +73,10 @@ public class Components {
         return box;
     }
 
-    public static JButton getButton(String text, String css, Float fontSize, Color foreground, Color background) {
+    public static JButton getButton(String text, String css, Float fontSize, Color foreground, Color background, boolean title) {
         JButton button = new JButton("<html><div style=\"" + css + "\">" + text + "</div></html>");
         button.setUI(new CustomButtonUI());
-        button.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, fontSize));
+        button.setFont(title ? OptionsFactory.getOptions().getTitleFont(Font.BOLD, fontSize) : OptionsFactory.getOptions().getFont(Font.BOLD, fontSize));
         button.setForeground(foreground);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBackground(background);

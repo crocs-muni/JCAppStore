@@ -22,10 +22,10 @@ public class CustomButton extends JButton {
             new EmptyBorder(new Insets(8, 8,8, 8)));
     private EmptyBorder defaultBorder = new EmptyBorder(new Insets(12, 21,12, 12));
 
-    public CustomButton(String imgName) {
+    public CustomButton(String imgName, boolean isTitle) {
         super();
         setUI(new CustomButtonUI());
-        setFont(OptionsFactory.getOptions().getDefaultFont());
+        setFont(isTitle ? OptionsFactory.getOptions().getTitleFont() : OptionsFactory.getOptions().getFont());
         setHorizontalAlignment(SwingConstants.LEFT);
         setMinimumSize(new Dimension(Integer.MAX_VALUE, 35));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));

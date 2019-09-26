@@ -40,12 +40,14 @@ public class CardManagerImpl implements CardManager {
     private CardInstance card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
+    private AID lastInstalled = null;
     private volatile boolean busy = false;
 
     @Override
     public void switchApplet(AID aid) {
         if (card == null) {
             selectedAID = null;
+            lastInstalled = null;
             return;
         }
 
@@ -161,6 +163,8 @@ public class CardManagerImpl implements CardManager {
         } finally {
             busy = false;
             notifyAll();
+            //todo delete next line
+            lastInstalled = AID.fromString("4a43416C675465737431");
         }
     }
 
@@ -178,6 +182,16 @@ public class CardManagerImpl implements CardManager {
             }
         }
         throw new Error("Should not end here.");
+    }
+
+    @Override
+    public void setLastAppletInstalled(AID aid) {
+        lastInstalled = aid;
+    }
+
+    @Override
+    public AID getLastAppletInstalledAid() {
+        return lastInstalled;
     }
 
     @Override
@@ -322,11 +336,13 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void refreshCard() throws LocalizedCardException {
-        logger.info("Card to refrresh");
+        logger.info("Card was about to refresh.");
         card = null;
         selectedAID = null;
+        lastInstalled = null;
         terminals.refresh();
         loadCard();
-        logger.info("Card refreshed");
+        System.out.println(lastInstalled == null? "" : lastInstalled.toString());
+        logger.info("Card successfully refreshed.");
     }
 }

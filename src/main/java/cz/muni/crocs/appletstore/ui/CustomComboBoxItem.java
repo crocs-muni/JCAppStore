@@ -21,7 +21,7 @@ public class CustomComboBoxItem extends JLabel implements ListCellRenderer {
         setBackground((isSelected) ? list.getSelectionBackground() : list.getBackground());
         setIcon(new ImageIcon(Config.IMAGE_DIR + val.first + ".jpg"));
         setText(val.second);
-        setFont(OptionsFactory.getOptions().getDefaultFont());
+        setFont(OptionsFactory.getOptions().getFont());
         return this;
     }
 }

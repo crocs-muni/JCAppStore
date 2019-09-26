@@ -58,7 +58,7 @@ public class InstallDialogWindow extends JPanel {
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 12f));
+        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         add(more, "span 2");
 
         advanced.addMouseListener(new MouseAdapter() {
@@ -191,7 +191,7 @@ public class InstallDialogWindow extends JPanel {
     public InstallOpts getInstallOpts() {
         if (advanced.isSelected())
             return new InstallOpts(getSelectedAID(), getSelectedIdx(), forceInstall.isSelected(), installParams.getText());
-        return null;
+        else return new InstallOpts(getSelectedAID(), getSelectedIdx(), forceInstall.isSelected(), new byte[0]);
     }
 
     public boolean validInstallParams() {
@@ -211,10 +211,10 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private static boolean validAID(String aid) {
-        return validHex(aid) && aid.length() < 32;
+        return validHex(aid) && aid.length() <= 32;
     }
 
     private static boolean validHex(String hex) {
-        return HEXA_PATTERN.matcher(hex.toLowerCase()).matches() && hex.length() % 2 == 0;
+        return hex.isEmpty() || (HEXA_PATTERN.matcher(hex.toLowerCase()).matches() && hex.length() % 2 == 0);
     }
 }

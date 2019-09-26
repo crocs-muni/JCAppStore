@@ -1,12 +1,8 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.Warning;
-import cz.muni.crocs.appletstore.util.Informer;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
-import cz.muni.crocs.appletstore.ui.NotifLabel;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -33,8 +29,8 @@ public class LeftMenu extends JPanel {
     private InputHintTextField searchInput;
     private JLabel searchIcon;
 
-    private CustomButton local = new CustomButton("creditcard.png");
-    private CustomButton remote = new CustomButton("shop.png");
+    private CustomButton local = new CustomButton("creditcard.png", false);
+    private CustomButton remote = new CustomButton("shop.png", false);
     private boolean isLocal = true;
 
     private Color choosedButtonBG = new Color(255, 255, 255, 60);
@@ -87,7 +83,7 @@ public class LeftMenu extends JPanel {
 
         searchInput = new InputHintTextField(textSrc.getString("search"));
         searchInput.setHorizontalAlignment(SwingConstants.LEFT);
-        searchInput.setFont(OptionsFactory.getOptions().getDefaultFont());
+        searchInput.setFont(OptionsFactory.getOptions().getFont());
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
 

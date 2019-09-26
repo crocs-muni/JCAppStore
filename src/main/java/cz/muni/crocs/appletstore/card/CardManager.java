@@ -78,7 +78,24 @@ public interface CardManager {
      */
     void loadCard() throws LocalizedCardException;
 
+    /**
+     * Get life cycle of the card
+     * @return int, where value determines card state - OP_READY, LOCKED...
+     * as designed by GlobalPlatform specification
+     */
     Integer getCardLifeCycle();
+
+    /**
+     * Set the last applet AID installed
+     * @param aid that was installed, null to delete
+     */
+    void setLastAppletInstalled(AID aid);
+
+    /**
+     * Get the last installed applet aid
+     * @return AID of the last installed applet
+     */
+    AID getLastAppletInstalledAid();
 
     /**
      * Install new applet onto current card

@@ -21,7 +21,7 @@ public class HintPanel extends JPanel {
 
     private static boolean enabled = true;
     protected String hint;
-    protected Font hintFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(12f);
+    protected Font hintFont = OptionsFactory.getOptions().getFont(12f);
 
     private Point p = null;
     private Dimension hintDimen;

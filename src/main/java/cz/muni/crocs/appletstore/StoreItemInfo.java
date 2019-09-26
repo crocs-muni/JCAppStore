@@ -39,8 +39,8 @@ public class StoreItemInfo extends HintPanel {
 
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-    private final Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
-    private final Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.PLAIN, 16f);
+    private final Font titleFont = OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f);
+    private final Font textFont = OptionsFactory.getOptions().getFont(Font.PLAIN, 16f);
 
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
@@ -91,7 +91,7 @@ public class StoreItemInfo extends HintPanel {
         add(name, "align left, gaptop 40, width ::350");
 
         JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;",
-                20f, Color.WHITE, new Color(140, 196, 128));
+                20f, Color.WHITE, new Color(140, 196, 128), true);
         install.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -106,7 +106,7 @@ public class StoreItemInfo extends HintPanel {
         add(install, "align right, span 1 2, wrap");
 
         JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
-        author.setFont(OptionsFactory.getOptions().getDefaultFont().deriveFont(15f));
+        author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
@@ -114,7 +114,7 @@ public class StoreItemInfo extends HintPanel {
         if (!dataSet.get(Config.JSON_TAG_HOST).getAsString().trim().toLowerCase().equals("true")) {
             add(Components.getNotice(
                     textSrc.getString("W_no_host_app"),
-                    OptionsFactory.getOptions().getDefaultFont(),
+                    OptionsFactory.getOptions().getFont(),
                     new Color(255, 219, 148),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"),
                     "margin: 10px; width:500px")
@@ -125,7 +125,7 @@ public class StoreItemInfo extends HintPanel {
     private void buildDescription(JsonObject dataSet) {
         add(Components.getTextField(
                 dataSet.get(Config.JSON_TAG_DESC).getAsString(),
-                OptionsFactory.getOptions().getDefaultFont(),
+                OptionsFactory.getOptions().getFont(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 40, wrap");
@@ -137,7 +137,7 @@ public class StoreItemInfo extends HintPanel {
         Color bg = new Color(255, 255, 255, 80);
         url.setBackground(bg);
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        Font textFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(14f);
+        Font textFont = OptionsFactory.getOptions().getFont(14f);
         url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
@@ -145,7 +145,7 @@ public class StoreItemInfo extends HintPanel {
         addSubTitle("use", "H_use");
         add(Components.getTextField(
                 dataSet.get(Config.JSON_TAG_USAGE).getAsString(),
-                OptionsFactory.getOptions().getDefaultFont(),
+                OptionsFactory.getOptions().getFont(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 20, wrap");
@@ -176,7 +176,13 @@ public class StoreItemInfo extends HintPanel {
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
 
-        JButton customInst = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;", 18f, Color.WHITE, new Color(155, 151, 152));
+        JButton customInst = Components.getButton(
+                textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"),
+                "margin: 1px 10px;",
+                18f,
+                Color.WHITE,
+                new Color(155, 151, 152),
+                true);
         customInst.addMouseListener(
                 new MouseAdapter() {
                     @Override

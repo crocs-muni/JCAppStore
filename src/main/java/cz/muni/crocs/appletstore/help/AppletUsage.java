@@ -14,12 +14,13 @@ public class AppletUsage extends JPanel {
 
     public AppletUsage() {
         setLayout(new MigLayout());
-        Font titleFont = OptionsFactory.getOptions().getDefaultFont().deriveFont(Font.BOLD, 20f);
+        Font titleFont = OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f);
+        Font textFont = OptionsFactory.getOptions().getFont();
         add(Components.getLabel(textSrc.getString("au_title"), titleFont.deriveFont(35f)), "wrap");
-        add(Components.getTextField(textSrc.getString("au_introduction"), OptionsFactory.getOptions().getDefaultFont(), "width: 600px", null), "gapleft 10, wrap");
+        add(Components.getTextField(textSrc.getString("au_introduction"), textFont, "width: 600px", null), "gapleft 10, wrap");
         add(Components.getLabel(textSrc.getString("au_host_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("au_host"), OptionsFactory.getOptions().getDefaultFont(), "width: 600px", null), "gapleft 10, wrap");
+        add(Components.getTextField(textSrc.getString("au_host"), textFont, "width: 600px", null), "gapleft 10, wrap");
         add(Components.getLabel(textSrc.getString("au_no_host_title"), titleFont), "wrap");
-        add(Components.getTextField(textSrc.getString("au_no_host"), OptionsFactory.getOptions().getDefaultFont(), "width: 600px", null), "gapleft 10, wrap");
+        add(Components.getTextField(textSrc.getString("au_no_host"), textFont, "width: 600px", null), "gapleft 10, wrap");
     }
 }
