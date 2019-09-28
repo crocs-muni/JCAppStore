@@ -64,22 +64,19 @@ public class InstallAction extends MouseAdapter {
             return;
 
         installed = checkIfCountains(file);
-        InstallDialogWindow opts = new InstallDialogWindow(file, installed);
+        InstallDialogWindow opts = new InstallDialogWindow(file, info, installed);
         if (!showInstallDialog(opts))
             return;
 
-        final InstallOpts intallOpts = opts.getInstallOpts();
+        final InstallOpts installOpts = opts.getInstallOpts();
         logger.info("Install fired, list of AIDS: " + file.getApplets().toString());
-        logger.info("Install AID: " + intallOpts.getAID());
+        logger.info("Install AID: " + installOpts.getAID());
         call.onStart();
         new Thread(() -> {
             try {
                 CardManager manager = CardManagerFactory.getManager();
-                if (info == null)
-                    manager.install(file, intallOpts);
-                else
-                    manager.install(file, intallOpts, info);
-                manager.setLastAppletInstalled(AID.fromString(opts.getInstallOpts().getAID()));
+                manager.install(file, installOpts);
+                manager.setLastAppletInstalled(AID.fromString(installOpts.getAID()));
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();
                 logger.warn("Failed to install applet: " + ex.getMessage());

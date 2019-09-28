@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -32,6 +33,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private OnEventCallBack<Void, Void, Void> callback;
+    private LocalSubMenu submenu;
     private LocalItemInfo infoLayout;
     private JPanel windowLayout;
     private JScrollPane windowScroll;
@@ -45,9 +47,17 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         callback = new WorkCallback(context);
         setOpaque(false);
 
+        submenu = new LocalSubMenu();
+        submenu.setOnSummit(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showItems(null);
+            }
+        });
+
         GridBagLayout gb = new GridBagLayout();
-        gb.columnWeights = new double[]{1, 0.1d};
-        gb.rowWeights = new double[]{1};
+        gb.columnWeights = new double[]{1d, 0.1d};
+        gb.rowWeights = new double[]{0.01d, 1d};
         this.setLayout(gb);
 
         constraints = new GridBagConstraints();
@@ -105,8 +115,14 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
             }
 
             constraints.fill = GridBagConstraints.BOTH;
+
             constraints.gridx = 0;
             constraints.gridy = 0;
+            constraints.gridwidth = 2;
+            add(submenu, constraints);
+
+            constraints.gridy = 1;
+            constraints.gridwidth = 1;
             add(windowScroll, constraints);
             constraints.gridx = 1;
 
@@ -141,7 +157,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         windowScroll.getVerticalScrollBar().setOpaque(false);
 
         windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
-        windowLayout.setBorder(new EmptyBorder(50, 50, 50, 50));
+        windowLayout.setBorder(new EmptyBorder(10, 50, 50, 50));
         windowLayout.setOpaque(false);
 
         installCmd.addMouseListener(new InstallAction(callback));
@@ -232,7 +248,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                     "no_results.png", "", "", null));
         } else {
             for (LocalItem item : sortedItems) {
-                windowLayout.add(item);
+                if (submenu.accept(item.info.getKind()))
+                    windowLayout.add(item);
             }
         }
         windowLayout.add(installCmd);

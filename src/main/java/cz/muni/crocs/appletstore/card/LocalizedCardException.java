@@ -1,11 +1,11 @@
 package cz.muni.crocs.appletstore.card;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
+import cz.muni.crocs.appletstore.LocalizedException;
 
-public class LocalizedCardException extends Exception {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-    private String translated;
+/**
+ * Just to separate different exception source
+ */
+public class LocalizedCardException extends LocalizedException {
 
     public LocalizedCardException(String cause) {
         super(cause);
@@ -20,29 +20,14 @@ public class LocalizedCardException extends Exception {
     }
 
     public LocalizedCardException(String cause, String translated) {
-        super(cause);
-        this.translated = translated;
+        super(cause, translated);
     }
 
     public LocalizedCardException(Throwable cause, String translated) {
-        super(cause);
-        this.translated = translated;
+        super(cause, translated);
     }
 
     public LocalizedCardException(String cause, String translated, Throwable ex) {
-        super(cause, ex);
-        this.translated = translated;
-    }
-
-    @Override
-    public String getLocalizedMessage() {
-        if (translated != null)
-            return textSrc.getString(translated) + "<br>" + getMessage();
-        return getMessage();
-    }
-
-    @Override
-    public String getMessage() {
-        return textSrc.getString("W_no_translation") + super.getMessage();
+        super(cause, translated, ex);
     }
 }

@@ -115,15 +115,6 @@ public interface CardManager {
     void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
 
     /**
-     * Install new applet onto current card
-     * @param file file with the applet (already parsed)
-     * @param data data from install user, namely 3 items: install params, force install and custom AID
-     * @param info additional applet data from store
-     * @throws LocalizedCardException exception with localized text on failure
-     */
-    void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException;
-
-    /**
      * Uninstall applet from the card
      * @param nfo which applet to uninstall (only the AID is used though)
      * @param force whether the uninstall is forced

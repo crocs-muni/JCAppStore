@@ -45,6 +45,7 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_STYLESHEET, "src/main/resources/css/default.css");
         options.put(Options.KEY_FONT, null);
         options.put(Options.KEY_TITLE_FONT, "src/main/resources/fonts/title.ttf");
+        options.put(Options.KEY_KEYBASE_LOCATION, "");
     }
 
     @Override

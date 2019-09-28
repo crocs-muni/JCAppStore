@@ -19,6 +19,7 @@ public interface Options<ValueType> {
     String KEY_STYLESHEET = "stylesheet";
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
+    String KEY_KEYBASE_LOCATION = "";
 
     /**
      * Get option for app

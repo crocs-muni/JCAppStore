@@ -2,7 +2,6 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -11,7 +10,6 @@ import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
 
-import javax.smartcardio.CardException;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -52,12 +50,9 @@ public class Install extends GPCommand<Void> {
         }
 
         if (data == null) {
-            data = new InstallOpts(null, 0, false, new byte[0]);
-        }
-
-        if (data.getAppletIdx() >= file.getAppletAIDs().size())
             //todo
             throw new LocalizedCardException("");
+        }
 
         // Remove existing default app
         if (data.isForce() && registry.allPackageAIDs().contains(file.getPackageAID())) {
@@ -73,7 +68,6 @@ public class Install extends GPCommand<Void> {
 //            calculateDapPropertiesAndLoadCap(args, gp, instcap);
 //        }
         //todo mail from martin
-        if (file.getAppletAIDs().size() <= 1) {
             try {
                 //we do not support installing under custom SD
                 //todo ask about third arg
@@ -88,11 +82,9 @@ public class Install extends GPCommand<Void> {
                 //todo
                 e.printStackTrace();
             }
-        }
 
-        final AID appletAID = file.getAppletAIDs().get(data.getAppletIdx());
-        instanceAID = data.getAID() == null || data.getAID().isEmpty() ? appletAID : AID.fromString(data.getAID());
 
+        final AID appletAID = data.getAID();
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
         //todo ask petr which privileges should be provided
         //privs.add(GPRegistryEntry.Privilege.CardReset)

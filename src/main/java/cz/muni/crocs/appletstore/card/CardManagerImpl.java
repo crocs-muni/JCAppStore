@@ -163,8 +163,6 @@ public class CardManagerImpl implements CardManager {
         } finally {
             busy = false;
             notifyAll();
-            //todo delete next line
-            lastInstalled = AID.fromString("4a43416C675465737431");
         }
     }
 
@@ -206,6 +204,7 @@ public class CardManagerImpl implements CardManager {
 
         try {
             installImpl(capFile, data);
+            saveData(capFile, data.getInfo());
         } catch (CardException e) {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
@@ -218,6 +217,7 @@ public class CardManagerImpl implements CardManager {
     public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
         try {
             installImpl(file, data);
+            saveData(file, data.getInfo());
         } catch (CardException e) {
             e.printStackTrace();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
@@ -226,22 +226,15 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
-    @Override
-    public synchronized void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException {
-        try {
-            String aid = installImpl(file, data);
-            info.setAID(aid);
-
-            java.util.List<AppletInfo> appletInfoList = card.getApplets();
-            appletInfoList.add(info);
-            AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
-            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
-        } catch (CardException e) {
-            e.printStackTrace();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            refreshCard();
-        }
+    private void saveData(final CAPFile file, final AppletInfo info) throws LocalizedCardException {
+        java.util.List<AppletInfo> appletInfoList = card.getApplets();
+        //add applet
+        appletInfoList.add(info);
+        //add package instance
+        appletInfoList.add(new AppletInfo(info.getName(), info.getImage(), info.getVersion(), info.getAuthor(),
+                info.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS));
+        AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
     }
 
     @Override
@@ -308,7 +301,7 @@ public class CardManagerImpl implements CardManager {
         return details;
     }
 
-    private synchronized String installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
+    private synchronized void installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -328,7 +321,6 @@ public class CardManagerImpl implements CardManager {
             file.dump(print);
             Install install = new Install(file, data);
             card.executeCommand(install);
-            return install.getAppletAID().toString();
         } finally {
             busy = false;
             notifyAll();

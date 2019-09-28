@@ -84,7 +84,10 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        title = adjustLength(title, 25);
+        if (info.getName() == null)
+            title = adjustLength(title, 15);
+        else
+            title = adjustLength(title, 25);
         container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", basic.deriveFont(16f)), gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
@@ -107,7 +110,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     public LocalItem(AppletInfo info) {
         this(
-                (info.getName() == null) ? Arrays.toString(info.getAid().getBytes()) : info.getName(),
+                (info.getName() == null) ? info.getAid().toString() : info.getName(),
                 (info.getImage() == null) ? "wrong-image-name" : info.getImage(),
                 (info.getAuthor() == null) ? textSrc.getString("unknown") : info.getAuthor(),
                 (info.getVersion() == null) ? "" : info.getVersion(),
@@ -135,7 +138,8 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         } else if (other.info.getKind() == Kind.IssuerSecurityDomain || other.info.getKind() == Kind.SecurityDomain) {
             return 1;
         }
-        return name.compareTo(other.name);
+
+        return name.compareTo(other.name) + Math.max(info.getKind().hashCode(), other.info.getKind().hashCode());
     }
 
     @Override

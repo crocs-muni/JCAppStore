@@ -28,6 +28,7 @@ public class LocalItemInfo extends HintPanel {
     private HintLabel name = new HintLabel();
     private JLabel author = new JLabel();
     private HintLabel version = new HintLabel();
+    private HintLabel sdk = new HintLabel();
     private HintLabel id = new HintLabel();;
     private HintLabel type = new HintLabel();
     private HintLabel domain = new HintLabel();
@@ -55,6 +56,9 @@ public class LocalItemInfo extends HintPanel {
 
         version.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(version, "span 2, wrap");
+
+        sdk.setBorder(new EmptyBorder(5, 0, 5, 5));
+        add(sdk, "span 2, wrap");
 
         id.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(id, "span 2, wrap");
@@ -93,26 +97,33 @@ public class LocalItemInfo extends HintPanel {
         }
         delete.setInfo(info);
         send.setInfo(info);
-        String ver = info.getVersion();
 
-        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
-                textSrc.getString("H_name"));
-        author.setText("<html><p width=\"280\">" + textSrc.getString("author") +
-                info.getAuthor() + "</p></html>");
-        version.setText("<html><p width=\"280\">" + textSrc.getString("version") +
-                ((ver == null || ver.isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
-                textSrc.getString("H_version"));
-        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
-                textSrc.getString("H_id"));
-        type.setText("<html><p width=\"280\">" + textSrc.getString("type") +
-                getType(info.getKind()) + "</p></html>", textSrc.getString("H_type"));
-        domain.setText("<html><p width=\"280\">" + textSrc.getString("sd_assigned") +
-                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()),
-                textSrc.getString("H_sd_assinged"));
+        setLabel(name, info.getName() == null ? info.getAid().toString() : info.getName(), "H_name");
+        setLabel(author, textSrc.getString("author") + getValue(info.getAuthor()));
+        setLabel(version, textSrc.getString("version") + getValue(info.getVersion()), "H_version");
+        setLabel(sdk, textSrc.getString("sdk_version") + getValue(info.getSdk()), "H_custom_sdk");
+        setLabel(id, textSrc.getString("aid") + info.getAid().toString(), "H_id");
+        setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
+        setLabel(domain, textSrc.getString("sd_assigned") +
+                ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
+    }
+
+    private String getValue(String maybe) {
+        if (maybe == null || maybe.isEmpty())
+            return textSrc.getString("unknown");
+        return maybe;
+    }
+
+    private void setLabel(HintLabel label, String data, String keyHint) {
+        label.setText("<html><p width=\"280\">" + data + "</p></html>", textSrc.getString(keyHint));
+    }
+
+    private void setLabel(JLabel label, String data) {
+        label.setText("<html><p width=\"280\">" + data + "</p></html>");
     }
 
     /**

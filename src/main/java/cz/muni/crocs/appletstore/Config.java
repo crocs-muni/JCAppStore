@@ -18,10 +18,13 @@ public class Config {
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + SEP + "store");
     public static final File APP_STORE_CAPS_DIR = checkFolders(APP_ROOT_DIR + SEP + "store" + SEP + "JCApplets");
     public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + SEP + "my_applets");
+    public static final File APP_KEY_DIR = checkFolders(APP_ROOT_DIR + SEP + "keys");
 
     //app internal dirs
-    public static final String IMAGE_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"img"+SEP;
-    public static final String LANG_DIR = "src"+SEP+"main"+SEP+"resources"+SEP+"lang"+SEP;
+    public static final String RESOURCES_DIR = "src"+SEP+"main"+SEP+"resources"+SEP;
+    public static final String IMAGE_DIR = RESOURCES_DIR +"img"+SEP;
+    public static final String LANG_DIR = RESOURCES_DIR +"lang"+SEP;
+    public static final String DATA_DIR = RESOURCES_DIR +"data"+SEP;
 
     //database related constants
     public static final String JC_DB_FILE = "jcappstore.db";
@@ -79,10 +82,11 @@ public class Config {
         File f = new File(folder);
         if (!f.exists()) {
             if (!f.mkdir()) {
-                return null;
+                throw new RuntimeException("The app cannot create folders in the documents. Allow this operation first.");
             }
         }
-        if (!f.isDirectory()) return null;
+        if (!f.isDirectory())
+            throw new RuntimeException("File 'folder' already exists. Move or delete this file to stat this app.");
         return f;
     }
 }

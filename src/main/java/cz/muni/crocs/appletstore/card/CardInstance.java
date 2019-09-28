@@ -219,10 +219,8 @@ public class CardInstance {
 
         try {
             card = terminal.connect("*");
-            //card.beginExclusive();
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
         } catch (CardException e) {
-//            if (card != null) card.endExclusive();
             throw new LocalizedCardException("Could not connect to selected reader: " +
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
@@ -261,7 +259,6 @@ public class CardInstance {
         try {
             secureConnect(context);
         } catch (GPException e) {
-            card.endExclusive();
             //ugly, but the GP is designed in a way it does not allow me to do otherwise
             if (e.getMessage().startsWith("STRICT WARNING: ")) {
                 updateCardAuth(false);
@@ -279,19 +276,16 @@ public class CardInstance {
         } catch (IOException e) {
             fail(card, e, "E_unknown_error");
         } finally {
-            //card.endExclusive();
             card.disconnect(true);
         }
     }
 
     private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
-        //card.endExclusive();
         card.disconnect(true);
         throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, translationKey), e);
     }
 
     private void fail(Card card, Exception e, String translationKey) throws LocalizedCardException, CardException {
-        card.endExclusive();
         card.disconnect(true);
         throw new LocalizedCardException(e.getMessage(), translationKey, e);
     }

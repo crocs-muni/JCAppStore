@@ -280,6 +280,7 @@ public class StoreItemInfo extends HintPanel {
                 version,
                 dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
                 sdks.get(sdkIdx).getAsString(),
+                null,
                 hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
     }
 

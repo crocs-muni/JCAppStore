@@ -1,10 +1,7 @@
+//import cz.muni.crocs.appletstore.Config;
 //
-//import cz.muni.crocs.appletstore.card.Terminals;
-//import cz.muni.crocs.appletstore.card.command.GetDetails;
-//import pro.javacard.gp.GPException;
-//
-//import javax.smartcardio.Card;
-//import javax.smartcardio.CardException;
+//import java.awt.image.BufferedImage;
+//import java.io.*;
 //
 ///**
 // * @author Jiří Horák
@@ -12,11 +9,19 @@
 // */
 //public class Main {
 //
-//    public static void main(String[] args) throws CardException, GPException {
-//        Terminals terminals = new Terminals();
-//        Card c = terminals.getTerminal().connect("*");
-//
-//        GetDetails details = new GetDetails(c.getBasicChannel());
-//        details.execute();
+//    public static void main(String[] args) throws IOException {
+//        try (BufferedReader reader = new BufferedReader(new FileReader("C:/Users/Jirka/Desktop/well_known_rids.csv"));
+//        BufferedWriter writer = new BufferedWriter(new FileWriter("C:/Users/Jirka/Desktop/a.txt"))) {
+//            String line = reader.readLine();
+//            while (line != null) {
+//                String[] data = line.split(",");
+//                if (!data[1].trim().isEmpty()) {
+//                    writer.write("[" + data[0].trim() + "]\n");
+//                    writer.write("author = " + data[1].trim() + "\n");
+//                    writer.write("\n");
+//                }
+//                line = reader.readLine();
+//            }
+//        }
 //    }
 //}
