@@ -23,6 +23,15 @@ public class InputHintTextField extends JTextField implements FocusListener {
         addFocusListener(this);
     }
 
+    public InputHintTextField(String text, final String hint) {
+        super(text == null || text.isEmpty() ? hint : text);
+        this.hint = hint;
+        isHint = true;
+        setBorder(null);
+        setOpaque(false);
+        addFocusListener(this);
+    }
+
     @Override
     protected void paintBorder(Graphics g) {
         //deleted
@@ -30,7 +39,7 @@ public class InputHintTextField extends JTextField implements FocusListener {
 
     @Override
     public void focusGained(FocusEvent e) {
-        if (getText().isEmpty() || getText().equals(hint)) {
+        if (super.getText().equals(hint)) {
             setText("");
             isHint = false;
         }
@@ -38,10 +47,14 @@ public class InputHintTextField extends JTextField implements FocusListener {
 
     @Override
     public void focusLost(FocusEvent e) {
-        if (this.getText().isEmpty()) {
+        if (super.getText().isEmpty()) {
             setText(hint);
             isHint = true;
         }
+    }
+
+    public void setShowHint(boolean isHint) {
+        this.isHint = isHint;
     }
 
     @Override

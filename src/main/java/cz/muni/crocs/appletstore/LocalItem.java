@@ -33,7 +33,6 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     private static BufferedImage issuer = getIssuerImg();
 
     private static BufferedImage newItem;
-    private static int newItemDimen = 40;
     private String searchQuery;
     private JPanel container;
     private String name; //either name or AID if name missing
@@ -145,9 +144,10 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     @Override
     protected void paintComponent(Graphics g) {
+        boolean isSelected = info != null && manager.isAppletSelected(info.getAid());
         if (info != null) {
             Graphics2D g2d = (Graphics2D) g;
-            if (info.isSelected()) {
+            if (isSelected) {
                 container.setBackground(selected);
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
@@ -157,14 +157,13 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
                 g2d.setComposite(old);
             }
             if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
-//                GraphicsTool.paintFocus(g2d, new Rectangle2D.Float(0f, 0f, getWidth(), getHeight()), 4);
+                int newItemDimen = 40;
                 g2d.drawImage(newItem, getWidth() - newItemDimen, 0, newItemDimen, newItemDimen, null);
             }
         }
-        if (info != null && !info.isSelected()) {
+        if (!isSelected) {
             container.setBackground(Color.WHITE);
         }
-
         super.paintComponent(g);
     }
 

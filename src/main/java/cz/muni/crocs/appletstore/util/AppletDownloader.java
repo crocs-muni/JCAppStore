@@ -112,7 +112,6 @@ public class AppletDownloader {
 
             while (entry != null) {
                 String fileName = entry.getName().substring(32); //TODO: can be invalid if changed the package id length
-                System.out.println(fileName);
 
                 File newFile = new File(Config.APP_STORE_DIR, fileName);
                 logger.info("file unzip : " + newFile.getAbsoluteFile());

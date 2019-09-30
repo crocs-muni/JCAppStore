@@ -1,10 +1,12 @@
 package cz.muni.crocs.appletstore.util;
 
 import org.ini4j.Ini;
+import org.ini4j.Profile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * @author Jiří Horák
@@ -85,5 +87,10 @@ public class IniParserImpl implements IniParser {
     public boolean isHeaderPresent() {
         //calling on the whole file checks headers
         return ini.containsKey(header);
+    }
+
+    public Set<String> keySet() {
+        Profile.Section section = ini.get(header);
+        return ini.get(header).keySet();
     }
 }

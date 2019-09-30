@@ -28,7 +28,6 @@ public class BackgroundImageLoader {
     private int size;
 
     public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
-        System.out.println(blurAmount);
         radius = (blurAmount == 0) ? 0 : 2 + blurAmount * 2;
         size = radius * 2 + 1;
 

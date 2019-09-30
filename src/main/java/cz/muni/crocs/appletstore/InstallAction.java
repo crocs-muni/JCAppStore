@@ -128,7 +128,7 @@ public class InstallAction extends MouseAdapter {
             try {
                 CardManager manager = CardManagerFactory.getManager();
                 manager.install(file, opts);
-                manager.setLastAppletInstalled(AID.fromString(opts.getAID()));
+                manager.setLastAppletInstalled(opts.getAID());
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();
                 logger.warn("Failed to install applet: " + ex.getMessage());

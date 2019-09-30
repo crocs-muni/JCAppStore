@@ -37,6 +37,7 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void setDefaults() {
+        //todo use delimiter of system
         options.clear();
         options.put(Options.KEY_LANGUAGE, "en");
         options.put(Options.KEY_BACKGROUND, "bg.jpg");
@@ -75,7 +76,7 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public Font getTitleFont(int style, float size) {
-        return  getTitleFont().deriveFont(style, size);
+        return getTitleFont().deriveFont(style, size);
     }
 
     @Override
@@ -97,28 +98,24 @@ public class OptionsImpl implements Options<String> {
     public void save() {
         File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
         try {
-            if (!file.createNewFile()) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                    options.forEach((key, value) -> safeWriter(writer, key, value));
-                }
-            }
+            if (!file.exists()) file.createNewFile();
+            IniParser parser = new IniParserImpl(file, "JCAppStore", "");
+            options.forEach(parser::addValue);
+            parser.store();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void getFileOptions(){
+    private void getFileOptions() {
         options = new HashMap<>();
         File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
 
         try {
             if (!file.createNewFile()) {
-                try (BufferedReader r = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        String[] content = line.split("=");
-                        options.put(content[0], content[1]);
-                    }
+                IniParser parser = new IniParserImpl(file, "JCAppStore", "");
+                for (String key : parser.keySet()) {
+                    options.put(key, parser.getValue(key));
                 }
                 if (options.size() == 0) {
                     setDefaults();
@@ -130,15 +127,6 @@ public class OptionsImpl implements Options<String> {
             e.printStackTrace();
             setDefaults();
             logger.warn("Failed to read app options.");
-        }
-    }
-
-    private void safeWriter(BufferedWriter writer, String key, String value) {
-        try {
-            writer.write(key + "=" + value + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.warn("Failed to save options.");
         }
     }
 

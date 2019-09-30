@@ -53,7 +53,6 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
             parent.setState(StoreWindowManager.StoreState.REBUILD);
             return "done";
         }
-        System.out.println("downloading");
         AppletDownloader downloader = new AppletDownloader(storeInfo[1], this);
         if (!downloader.run()) parent.setState(StoreWindowManager.StoreState.FAILED);
         else parent.setState(StoreWindowManager.StoreState.REBUILD);

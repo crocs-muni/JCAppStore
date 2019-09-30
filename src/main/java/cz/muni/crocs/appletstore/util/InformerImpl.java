@@ -72,10 +72,8 @@ public class InformerImpl implements Informer, CallBack<Void> {
             return;
 
         busy = true;
-        System.out.println("Running");
         new Thread(() -> {
             while (true) {
-                System.out.println(queue.toString());
 
                 if (queue.isEmpty()) {
                     busy = false;
@@ -84,7 +82,6 @@ public class InformerImpl implements Informer, CallBack<Void> {
                 final Tuple<Warning, Integer> next = queue.pop();
                 toClose.add(next.first);
 
-                System.out.println(next.first.getBackground());
                 SwingUtilities.invokeLater(() -> {
                     context.showWarning(next.first);
                 });

@@ -25,6 +25,12 @@ public interface CardManager {
     boolean isAppletSelected();
 
     /**
+     * Check if applet selected
+     * @return true if applet with AID provided selected
+     */
+    boolean isAppletSelected(AID applet);
+
+    /**
      * Get state of the terminal instance
      * @return Terminals.TerminalState value (NO_CARD / NO_READER / OK)
      */
@@ -32,7 +38,7 @@ public interface CardManager {
 
     /**
      * Return set of connected terminal names
-     * @return
+     * @return set of all terminals
      */
     Set<String> getTerminals();
     CardTerminal getSelectedTerminal();
@@ -74,7 +80,7 @@ public interface CardManager {
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessary steps to be ready to work with
      *
-     * @return @link Terminals::checkTerminals()
+     * @link Terminals::checkTerminals()
      */
     void loadCard() throws LocalizedCardException;
 

@@ -35,8 +35,6 @@ public class AppletInfo implements Serializable {
     private String sdk;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
-    private transient boolean selected = false;
-
     public AppletInfo(String name, String image, String version, String author, String sdk) {
         this.name = name;
         this.image = image;
@@ -46,6 +44,7 @@ public class AppletInfo implements Serializable {
     }
 
     public AppletInfo(String name, String image, String version, String author, String sdk, String strAid, KeysPresence hasKeys) {
+        this.aid = strAid;
         this.name = name;
         this.image = image;
         this.version = version;
@@ -83,16 +82,8 @@ public class AppletInfo implements Serializable {
         }
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
-
     public KeysPresence hasKeys() {
         return hasKeys;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
     }
 
     private void deduceData(GPRegistryEntry registry) {

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Parser class that focuses only on one header inside INI file:
@@ -43,5 +44,11 @@ public interface IniParser {
      * Check header presence
      * @return true if header, given in constructor, present
      */
-    boolean isHeaderPresent() ;
+    boolean isHeaderPresent();
+
+    /**
+     * Get all keys from header given
+     * @return set of keys
+     */
+    Set<String> keySet();
 }

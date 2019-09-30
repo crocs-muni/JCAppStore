@@ -47,27 +47,27 @@ public class CardManagerImpl implements CardManager {
     public void switchApplet(AID aid) {
         if (card == null) {
             selectedAID = null;
-            lastInstalled = null;
             return;
         }
 
-        if (card.getApplets() == null || aid == selectedAID) {
+        if (aid.equals(selectedAID)) {
             selectedAID = null;
             aid = null;
         }
 
         if (card.getApplets() == null)
             return;
-
-        for (AppletInfo info : card.getApplets()) {
-            info.setSelected(info.getAid() == aid);
-        }
         this.selectedAID = aid;
     }
 
     @Override
     public boolean isAppletSelected() {
         return selectedAID != null;
+    }
+
+    @Override
+    public boolean isAppletSelected(AID applet) {
+        return applet != null && applet.equals(selectedAID);
     }
 
     @Override
@@ -146,6 +146,7 @@ public class CardManagerImpl implements CardManager {
             }
         }
         busy = true;
+        lastInstalled = null;
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
@@ -230,8 +231,8 @@ public class CardManagerImpl implements CardManager {
         java.util.List<AppletInfo> appletInfoList = card.getApplets();
         //add applet
         appletInfoList.add(info);
-        //add package instance
-        appletInfoList.add(new AppletInfo(info.getName(), info.getImage(), info.getVersion(), info.getAuthor(),
+        //add package instance, donst save image as the package wont be distinguishable from applet
+        appletInfoList.add(new AppletInfo(info.getName(), null, info.getVersion(), info.getAuthor(),
                 info.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS));
         AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
@@ -328,13 +329,13 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void refreshCard() throws LocalizedCardException {
-        logger.info("Card was about to refresh.");
+        //todo maybe ugly, instead of calling the refresh card, just refresh terminals and let routine do the job
+        //        loadCard();
+        terminals.refresh();
         card = null;
         selectedAID = null;
         lastInstalled = null;
-        terminals.refresh();
-        loadCard();
-        System.out.println(lastInstalled == null? "" : lastInstalled.toString());
+
         logger.info("Card successfully refreshed.");
     }
 }

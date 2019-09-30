@@ -1,10 +1,7 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.HintPanel;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
-import cz.muni.crocs.appletstore.ui.JtextFieldWithHint;
+import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.*;
-import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -68,6 +65,7 @@ public class Settings extends JPanel {
                 if (r == JFileChooser.APPROVE_OPTION) {
                     keybase.setText(fileChooser.getSelectedFile().getAbsolutePath());
                     keybase.setForeground(Color.BLACK);
+                    ((InputHintTextField)keybase).setShowHint(false);
                 }
             }
         });
@@ -76,10 +74,9 @@ public class Settings extends JPanel {
         String path = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
         if (path == null) path = "";
 
-        keybase = new JtextFieldWithHint(path, textSrc.getString("H_keybase_loc"), 15);
+        keybase = new InputHintTextField(path, textSrc.getString("H_keybase_loc"));
         keybase.setFont(OptionsFactory.getOptions().getFont(12f));
         keybase.setBorder(frame);
-        keybase.setBackground(Color.WHITE);
         add(keybase, "span 3, growx, wrap");
     }
 
@@ -96,8 +93,6 @@ public class Settings extends JPanel {
         JLabel bgValue = new HtmlLabel(path);
         bgValue.setFont(OptionsFactory.getOptions().getFont(12f));
         bgValue.setBorder(frame);
-        bgValue.setBackground(Color.WHITE);
-        bgValue.setOpaque(true);
         add(bgValue, "span 3, growx, wrap");
 
         add(new JLabel()); //empty space
@@ -240,7 +235,6 @@ public class Settings extends JPanel {
     }
 
     private void saveKeyBase() {
-        System.out.println(keybase.getText());
         OptionsFactory.getOptions().addOption(Options.KEY_KEYBASE_LOCATION, keybase.getText());
     }
 
