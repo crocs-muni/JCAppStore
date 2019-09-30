@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
 import org.simplejavamail.mailer.config.TransportStrategy;
@@ -71,16 +71,17 @@ public class FeedbackFatalError {
     }
 
     private class FeedbackConfirmPane extends JPanel {
-        private JCheckBox attachment = new JCheckBox("<html><div width=\"350px\">" +
+        private JCheckBox attachment = new JCheckBox("<html><div width=\"350\">" +
                 textSrc.getString("attachment") + "</div></html>");
         private JTextArea area = new JTextArea(8, 12);
 
         FeedbackConfirmPane(String message) {
             super(new BorderLayout());
             add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "bug.png")));
-            add(new HtmlLabel("<div width=400px>" + textSrc.getString("attachment_desc") + "</div>" +
+            add(new HtmlLabel("<div width=\"400\">" + textSrc.getString("attachment_desc") + "</div>" +
                     "<div>&emsp;</div>"), BorderLayout.NORTH);
-
+            area.setLineWrap(true);
+            area.setWrapStyleWord(true);
             area.setText(message);
             area.setFont(Font.decode(Font.SANS_SERIF).deriveFont(12.f));
             area.setBorder(BorderFactory.createCompoundBorder(

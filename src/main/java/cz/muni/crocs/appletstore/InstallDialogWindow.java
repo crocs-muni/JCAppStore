@@ -3,8 +3,12 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.crypto.KeyBase;
+import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
+import cz.muni.crocs.appletstore.ui.HintLabel;
+import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
@@ -12,7 +16,6 @@ import pro.javacard.CAPFile;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,7 +23,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -49,22 +51,25 @@ public class InstallDialogWindow extends JPanel {
 
     private static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
-    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled) {
+    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
         this.info = info;
-        build(file, isInstalled);
+        build(file, isInstalled, verifyMsg);
     }
 
-    private void build(CAPFile file, boolean installed) {
+    private void build(CAPFile file, boolean installed, String verified) {
         setLayout(new MigLayout("width 250px"));
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
+        add(new HtmlLabel("<p width=\"600\">" + verified + "</p>"),
                 "wrap, span 5, gapbottom 10");
         if (installed) {
             add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
                     "wrap, span 5, gapbottom 10");
         }
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("pkg_id") + file.getPackageAID().toString() + "</p>"),
-                "wrap, span 5, gapbottom 20");
 
+        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
+                "wrap, span 5, gapbottom 10");
+
+        add(new JLabel(textSrc.getString("pkg_id")), "span 2");
+        add(new JLabel(file.getPackageAID().toString()), "span 3, wrap");
         buildMetaDataSection();
         buildAdvanced(file, installed);
     }
@@ -116,6 +121,12 @@ public class InstallDialogWindow extends JPanel {
 
         add(getHint("H_advanced_syntax", "300"), "wrap");
 
+        add(new JLabel(textSrc.getString("applet_ids")), "span 2");
+
+        addAllAppletCustomAIDSFields(file.getAppletAIDs());
+
+        add(getHint("H_default_aid", "600"), "span 5, wrap");
+
         add(new JLabel(textSrc.getString("install_params")), "span 2");
         installParams.setEnabled(false);
         installParams.getDocument().addDocumentListener(new DocumentListener() {
@@ -136,12 +147,6 @@ public class InstallDialogWindow extends JPanel {
         });
         add(installParams, "span 3, wrap");
         add(getHint("H_install_params", "600"), "span 5, wrap");
-
-        add(new JLabel(textSrc.getString("applet_ids")), "span 2");
-
-        addAllAppletCustomAIDSFields(file.getAppletAIDs());
-
-        add(getHint("H_default_aid", "600"), "span 5, wrap");
 
         forceInstall.setEnabled(false);
         forceInstall.setSelected(installed);
@@ -194,6 +199,8 @@ public class InstallDialogWindow extends JPanel {
             button.setSelected(true);
         }
     }
+
+
 
     private int getSelectedIdx() {
         int result = 0;

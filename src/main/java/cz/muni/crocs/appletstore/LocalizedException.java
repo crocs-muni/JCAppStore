@@ -41,6 +41,12 @@ public class LocalizedException extends Exception {
         return getMessage();
     }
 
+    public String getLocalizedMessageWithoutCause() {
+        if (translated != null)
+            return textSrc.getString(translated);
+        return "";
+    }
+
     @Override
     public String getMessage() {
         return textSrc.getString("W_no_translation") + super.getMessage();

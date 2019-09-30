@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import cz.muni.crocs.appletstore.crypto.KeyBase;
+import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
@@ -14,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,7 +23,6 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.security.Key;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -45,6 +45,7 @@ public class StoreItemInfo extends HintPanel {
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
+    private JLabel verifyIcon;
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
@@ -59,7 +60,6 @@ public class StoreItemInfo extends HintPanel {
                 }
             }
         }
-
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
@@ -67,6 +67,31 @@ public class StoreItemInfo extends HintPanel {
         checkHostApp(dataSet);
         buildDescription(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
+    }
+
+     private void setVerifiedFromThread(String imgName, String hint) {
+        SwingUtilities.invokeLater(() -> {
+            verifyIcon.setIcon(new ImageIcon(Config.IMAGE_DIR + imgName));
+            ((HintLabel)verifyIcon).setText("", hint);
+            revalidate();
+        });
+    }
+
+    void checkIntegrity(String filePath) {
+        new Thread(() -> {
+            try {
+                Tuple<String, String> result = new KeyBase().verifySignature(filePath);
+                setVerifiedFromThread(result.first, result.second);
+            } catch (LocalizedSignatureException e) {
+                setVerifiedFromThread("not_verified.png", textSrc.getString("H_verify_failed")
+                        + e.getLocalizedMessageWithoutCause());
+            }
+        }).start();
+    }
+
+    private HintLabel getVerifiedIcon() {
+        return new HintLabel(new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
+                textSrc.getString("H_keybase_loading"));
     }
 
     private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callback) {
@@ -86,28 +111,40 @@ public class StoreItemInfo extends HintPanel {
         add(icon, "span 2 2, gapleft 50");
 
         String appName = dataSet.get(Config.JSON_TAG_TITLE).getAsString();
-        JLabel name = new JLabel(appName);
+        JLabel name = new JLabel(appName + "  ");
         name.setFont(titleFont);
-        add(name, "align left, gaptop 40, width ::350");
+        add(name, "align left, gaptop 40, width ::350, id title");
 
-        JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;",
-                20f, Color.WHITE, new Color(140, 196, 128), true);
-        install.addMouseListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
-                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
-                                .get(latestV).getAsJsonArray();
-                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, installed, e);
-                    }
-                });
-        add(install, "align right, span 1 2, wrap");
+        verifyIcon = getVerifiedIcon();
+        add(verifyIcon, "pos title.x2 title.y");
+
+        buildMainInstallButton(dataSet, callback);
 
         JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
         author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
+    }
+
+    private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void, Void> callback) {
+        JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"),
+                "margin: 1px 10px;", 20f, Color.WHITE, new Color(140, 196, 128), true);
+        final String appletName = dataSet.get(Config.JSON_TAG_NAME).getAsString();
+        final String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
+        final JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
+                .get(latestV).getAsJsonArray();
+        String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
+
+        checkIntegrity(latestFilename);
+
+        install.addMouseListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        fireInstall(appletName, getInfoPack(dataSet, latestV,
+                                sdks, sdks.size() - 1), callback, installed, e);
+                    }
+                });
+        add(install, "align right, span 1 2, wrap");
     }
 
     private void checkHostApp(JsonObject dataSet) {
@@ -159,8 +196,7 @@ public class StoreItemInfo extends HintPanel {
 
         String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
         versionComboBox = getBoxSelection(versions);
-        //todo disables the build combobox exchange...?
-        //versionComboBox.setSelectedItem(dataSet.get(Config.JSON_TAG_LATEST).getAsString());
+
         versionComboBox.addActionListener(e -> {
             String[] compilerVersions = parser.jsonArrayToDataArray(
                     dataSet.getAsJsonObject(
@@ -202,7 +238,7 @@ public class StoreItemInfo extends HintPanel {
                                 getInfoPack(dataSet, version, sdks, compilerIdx), call, installed, e);
                     }
                 });
-        add(customInst, "gapleft 10, wrap");
+        add(customInst, "gapleft 10");
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
@@ -284,10 +320,14 @@ public class StoreItemInfo extends HintPanel {
                 hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
     }
 
-    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
+    private static String getInstallFileName(String appletName, String version, String sdkVersion) {
+        return Config.APP_STORE_CAPS_DIR + Config.SEP +
+                appletName + Config.SEP + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
+    }
 
-        File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
-                name + Config.SEP + name + "_v" + info.getVersion() + "_sdk" + info.getSdk() + ".cap");
+    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call,
+                                    boolean installed, MouseEvent e) {
+        File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
 
         if (!file.exists()) {
@@ -299,4 +339,11 @@ public class StoreItemInfo extends HintPanel {
 
         new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
     }
+
+
+//    @Override
+//    protected void paintChildren(Graphics g) {
+//        super.paintChildren(g);
+////        g.drawImage(not_verified, icon.getX() + icon.getWidth() - 45, icon.getY() + icon.getHeight() - 45, null);
+//    }
 }

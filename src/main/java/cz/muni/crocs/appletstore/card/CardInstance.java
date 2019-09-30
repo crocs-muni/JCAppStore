@@ -6,7 +6,7 @@ import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.List;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

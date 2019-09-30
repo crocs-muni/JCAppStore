@@ -1,11 +1,11 @@
-package cz.muni.crocs.appletstore.util;
+package cz.muni.crocs.appletstore.ui;
 
 import javax.swing.*;
 
 public class HtmlLabel extends JLabel {
 
     public HtmlLabel(String text, Icon icon, int horizontalAlignment) {
-        super("<html>" + text + "<html>", icon, horizontalAlignment);
+        super("<html>" + text + "</html>", icon, horizontalAlignment);
     }
 
     public HtmlLabel(String text, int horizontalAlignment) {

@@ -66,7 +66,7 @@ public class LocalSubMenu extends JPanel {
         }
     }
 
-    void setOnSummit(Action a) {
+    void setOnSubmit(Action a) {
         submit.addActionListener(a);
     }
 }

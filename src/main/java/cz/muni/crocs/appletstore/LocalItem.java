@@ -1,9 +1,10 @@
 package cz.muni.crocs.appletstore;
 
+import com.sun.istack.internal.NotNull;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
@@ -84,7 +85,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        if (info.getName() == null)
+        if (info != null && info.getName() == null)
             title = adjustLength(title, 15);
         else
             title = adjustLength(title, 25);
@@ -124,7 +125,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     }
 
     @Override
-    public int compareTo(Item o) {
+    public int compareTo(@NotNull Item o) {
         if (!(o instanceof LocalItem))
             return 1;
 
@@ -160,7 +161,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
                 g2d.drawImage(newItem, getWidth() - newItemDimen, 0, newItemDimen, newItemDimen, null);
             }
         }
-        if (!info.isSelected()) {
+        if (info != null && !info.isSelected()) {
             container.setBackground(Color.WHITE);
         }
 

@@ -48,7 +48,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         setOpaque(false);
 
         submenu = new LocalSubMenu();
-        submenu.setOnSummit(new AbstractAction() {
+        submenu.setOnSubmit(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showItems(null);

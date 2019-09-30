@@ -37,6 +37,7 @@ public class HintPanel extends JPanel {
                 if (c instanceof HintLabel) {
                     p = e.getPoint();
                     hint = ((HintLabel) c).hint;
+                    if (hint.isEmpty()) hint = null;
                 } else {
                     hint = null;
                     hintDimen = null;
@@ -53,7 +54,7 @@ public class HintPanel extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        if (enabled && hint != null && !hint.isEmpty()) {
+        if (enabled && hint != null) {
             Graphics2D g2d = (Graphics2D) g;
             // first call the dimen is not known, after second the dimen is computed
             if (hintDimen != null) {

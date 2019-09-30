@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.HintPanel;
+import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.JtextFieldWithHint;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import net.miginfocom.swing.MigLayout;
@@ -11,7 +13,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,6 +37,7 @@ public class Settings extends JPanel {
             new Tuple<>("cz", "Česky")
     };
 
+    private JTextField keybase;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
@@ -49,9 +51,36 @@ public class Settings extends JPanel {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        addBackground();
+        addKeyBase();
         addLanguage();
         addHint();
+        addBackground();
+    }
+
+    private void addKeyBase() {
+        addTitleLabel(textSrc.getString("keybase_loc"), "");
+
+        JButton specify = new JButton(new AbstractAction(textSrc.getString("keybase_specify_loc")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = getKeybaseFileChooser();
+                int r = fileChooser.showOpenDialog(null);
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    keybase.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    keybase.setForeground(Color.BLACK);
+                }
+            }
+        });
+        add(specify, "span 2, align right, wrap");
+
+        String path = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
+        if (path == null) path = "";
+
+        keybase = new JtextFieldWithHint(path, textSrc.getString("H_keybase_loc"), 15);
+        keybase.setFont(OptionsFactory.getOptions().getFont(12f));
+        keybase.setBorder(frame);
+        keybase.setBackground(Color.WHITE);
+        add(keybase, "span 3, growx, wrap");
     }
 
     private void addBackground() {
@@ -105,15 +134,22 @@ public class Settings extends JPanel {
     }
 
     public void apply() {
+        saveKeyBase();
         saveBackgroundImage();
         saveLanguage();
         saveHint();
     }
 
-    private JFileChooser getBGImageFileChooser() {
-        JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
+    private JFileChooser getShaderFileChoser(File defaultFolder) {
+        JFileChooser fileChooser = new JFileChooser(defaultFolder);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        return fileChooser;
+    }
+
+    private JFileChooser getBGImageFileChooser() {
+        JFileChooser fileChooser = getShaderFileChoser(FileSystemView.getFileSystemView().getDefaultDirectory());
         fileChooser.addChoosableFileFilter(new FileFilter() {
 
             @Override
@@ -132,8 +168,11 @@ public class Settings extends JPanel {
                 return "Images (png, jpeg/jpg, bmp) less than 1.5 MB";
             }
         });
-        fileChooser.setAcceptAllFileFilterUsed(false);
         return fileChooser;
+    }
+
+    private JFileChooser getKeybaseFileChooser() {
+        return getShaderFileChoser(new File(System.getProperty("user.home")));
     }
 
     private void addLanguage() {
@@ -154,16 +193,20 @@ public class Settings extends JPanel {
 
     private void addTitleLabel(String titleText, String constraints) {
         JLabel title = new JLabel(titleText);
-        title.setFont(OptionsFactory.getOptions().getTitleFont());
+        title.setFont(OptionsFactory.getOptions().getFont());
         add(title, constraints);
     }
 
-    private String cutString(String value) {
-        if (value.length() > 45) {
+    private String cutString(String value, int length) {
+        if (value.length() > length) {
             int len = value.length();
-            value = "..." + value.substring(len - 42, len);
+            value = "..." + value.substring(len - length + 3, len);
         }
         return value;
+    }
+
+    private String cutString(String value) {
+        return cutString(value, 45);
     }
 
     private void saveBackgroundImage() {
@@ -194,6 +237,11 @@ public class Settings extends JPanel {
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
         HintPanel.enableHint(hintEnabled.isSelected());
+    }
+
+    private void saveKeyBase() {
+        System.out.println(keybase.getText());
+        OptionsFactory.getOptions().addOption(Options.KEY_KEYBASE_LOCATION, keybase.getText());
     }
 
     /**

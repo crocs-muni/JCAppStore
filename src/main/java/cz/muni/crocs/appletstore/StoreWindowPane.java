@@ -65,8 +65,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     }
 
     private void showInfo(JsonObject dataSet) {
-        StoreItemInfo info = new StoreItemInfo(dataSet, this, callback);
-        setViewportView(info);
+        setViewportView(new StoreItemInfo(dataSet, this, callback));
     }
 
     private void showPanel(Collection<StoreItem> sortedItems) {

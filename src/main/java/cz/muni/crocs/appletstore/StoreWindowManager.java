@@ -6,8 +6,6 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileNotFoundException;
@@ -31,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 public class StoreWindowManager extends JPanel implements
         CallBack<Void>, Searchable, ProcessModifiable<StoreWindowManager.StoreState> {
 
-    private static final Logger logger = LogManager.getLogger(StoreWindowManager.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private BackgroundChangeable context;
