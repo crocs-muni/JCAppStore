@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Parses all installed applets to display them in app
@@ -29,10 +30,10 @@ public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
-        AppletSerializer<java.util.List<AppletInfo>> savedData = new AppletSerializerImpl();
+        AppletSerializer<List<AppletInfo>> savedData = new AppletSerializerImpl();
         File file = new File(Config.APP_DATA_DIR + Config.SEP + cardId);
 
-        java.util.List<AppletInfo> saved = null;
+        List<AppletInfo> saved = null;
         if (file.exists()) {
             try {
                 saved = savedData.deserialize(file);
@@ -46,7 +47,6 @@ public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
         for (GPRegistryEntry entry : registry) {
             result.add(new AppletInfo(entry, saved));
         }
-
         return true;
     }
 }

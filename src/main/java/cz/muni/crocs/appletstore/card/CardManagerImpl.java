@@ -172,7 +172,7 @@ public class CardManagerImpl implements CardManager {
     public Integer getCardLifeCycle() {
         if (card == null)
             return 0;
-        java.util.List<AppletInfo> infoList = card.getApplets();
+        List<AppletInfo> infoList = card.getApplets();
         if (infoList == null)
             return 0;
 
@@ -234,7 +234,7 @@ public class CardManagerImpl implements CardManager {
         //add package instance, donst save image as the package wont be distinguishable from applet
         appletInfoList.add(new AppletInfo(info.getName(), null, info.getVersion(), info.getAuthor(),
                 info.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS));
-        AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
+        AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
     }
 

@@ -20,6 +20,7 @@ import javax.smartcardio.CardTerminal;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
@@ -46,7 +47,7 @@ public class CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private java.util.List<AppletInfo> applets;
+    private List<AppletInfo> applets;
 
     /**
      * Compares the card id and updates card data if needed
@@ -88,11 +89,11 @@ public class CardInstance {
      *
      * @return modifiable applet list
      */
-    java.util.List<AppletInfo> getApplets() {
+    List<AppletInfo> getApplets() {
         return applets;
     }
 
-    void setApplets(java.util.List<AppletInfo> applets) {
+    void setApplets(List<AppletInfo> applets) {
         this.applets = applets;
     }
 
@@ -277,12 +278,15 @@ public class CardInstance {
                 command.execute();
             }
         } catch (GPException e) {
-            fail(card, e, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
         } catch (IOException e) {
-            fail(card, e, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", e);
         } finally {
             card.disconnect(true);
         }
+    }
+
+    private void failNoDisconnect(Exception e, String translationKey) throws LocalizedCardException {
     }
 
     private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
