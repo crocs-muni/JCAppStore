@@ -32,8 +32,8 @@ public class LocalItemInfo extends HintPanel {
     private HintLabel id = new HintLabel();;
     private HintLabel type = new HintLabel();
     private HintLabel domain = new HintLabel();
-    private JLabel uninstall;
-    private JLabel rawApdu;
+    private HintLabel uninstall;
+    private HintLabel rawApdu;
 
     private SendApduAction send;
     private DeleteAction delete;
@@ -73,14 +73,14 @@ public class LocalItemInfo extends HintPanel {
         title.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 13f));
         add(title, "span 2, gaptop 15, wrap");
 
-        rawApdu = new JLabel(textSrc.getString("custom_command"), new ImageIcon(
-                Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
+        rawApdu = new HintLabel(textSrc.getString("custom_command"),
+                textSrc.getString("no_support_yet"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         rawApdu.addMouseListener(send);
         add(rawApdu, "wrap");
 
-        uninstall = new JLabel(textSrc.getString("uninstall"), new ImageIcon(
-                Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
+        uninstall = new HintLabel(textSrc.getString("uninstall"), "", new ImageIcon(
+                Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(delete);
         add(uninstall, "wrap");
@@ -108,6 +108,8 @@ public class LocalItemInfo extends HintPanel {
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
+        uninstall.setHint(textSrc.getString(info.getKind() == GPRegistryEntry.Kind.Application ?
+                "H_uninstall_apk" : "H_uninstall_pkg"));
         rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }

@@ -43,7 +43,7 @@ public class Delete extends GPCommand<Void> {
         }
 
         try {
-            context.deleteAID(aid, true);
+            context.deleteAID(aid, force);
 //            context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
         } catch (GPException e) {
             if (e.sw == 0x6985) {

@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,10 +22,13 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
 
-
     public MainPanel(BackgroundChangeable context) {
-        localPanel = new LocalWindowPane(context);
-        storePanel = new StoreWindowManager(context);
+        localPanel = new LocalWindowPane();
+        storePanel = new StoreWindowManager();
+        OnEventCallBack<Void, Void, Void> callback = new WorkCallback(context, localPanel);
+
+        localPanel.build(callback);
+        storePanel.setCallbackOnAction(callback);
 
         createHierarchy();
         InformerFactory.setInformer(this);
@@ -76,7 +80,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         return (storePanel.isVisible()) ? storePanel : localPanel;
     }
 
-    public LocalWindowPane getLocalPanel() {
+    public LocalWindowPane getRefreshablePane() {
         return localPanel;
     }
 

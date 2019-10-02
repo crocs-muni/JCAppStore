@@ -22,6 +22,7 @@ public class CapFileChooser {
 
     public static CAPFile getCapFile(File from) {
         CAPFile instcap = null;
+        if (from == null) return null;
         try (FileInputStream fin = new FileInputStream(from)) {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {

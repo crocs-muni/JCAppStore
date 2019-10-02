@@ -58,7 +58,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
-        //setDefaultLookAndFeelDecorated(false);
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);
         UIManager.put("Menu.foreground", Color.WHITE);
@@ -110,12 +109,12 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                                 SwingUtilities.invokeLater(() -> {
                                     switchEnabled(false);
                                 });
-                                System.out.println("Loaded from routine");
                                 manager.loadCard();
                             } catch (LocalizedCardException e) {
                                 e.printStackTrace();
-                                window.getLocalPanel().updatePanes("E_loading_failed",
-                                        e.getLocalizedMessage() + "<br> CARD: " + manager.getLastCardDescriptor());
+                                window.getRefreshablePane().showError("E_loading_failed",
+                                        e.getLocalizedMessage() + "<br> CARD: " + manager.getLastCardDescriptor(),
+                                        "announcement_white.png");
                                 continue;
                             } finally {
                                 SwingUtilities.invokeLater(() -> {
@@ -126,7 +125,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
                         SwingUtilities.invokeLater(() -> {
                             if (result == 2) {
-                                window.getLocalPanel().updatePanes();
+                                window.getRefreshablePane().refresh();
                                 menu.setCard(manager.getCardDescriptor());
                             }
 
@@ -140,7 +139,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                         InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE);
                     });
                     logger.info("Terminal routine interrupted, should not happened.", e);
-                    window.getLocalPanel().updatePanes();
+                    window.getRefreshablePane().refresh();
                     checkTerminalsRoutine();
                 }
             }

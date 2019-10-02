@@ -27,10 +27,9 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
 
-    public StoreWindowPane(List<JsonObject> data, BackgroundChangeable context) {
+    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void, Void> callback) {
         this.data = data;
-        this.callback = new WorkCallback(context);
-
+        this.callback = callback;
         setOpaque(false);
         getViewport().setOpaque(false);
         storeLayout.setOpaque(false);

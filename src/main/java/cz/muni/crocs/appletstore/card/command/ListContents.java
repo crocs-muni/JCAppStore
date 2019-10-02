@@ -21,7 +21,7 @@ import java.util.Collections;
  * @author Jiří Horák
  * @version 1.0
  */
-public class List extends GPCommand<ArrayList<AppletInfo>> {
+public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
 
     @Override
     public boolean execute() throws CardException, GPException, IOException {

@@ -26,8 +26,17 @@ public class HintLabel extends JLabel {
         this.hint = hint;
     }
 
+    public HintLabel(String text, String hint, Icon icon) {
+        super(text, icon, JLabel.LEFT);
+        this.hint = hint;
+    }
+
     public void setText(String text, String hint) {
         super.setText(text);
+        setHint(hint);
+    }
+
+    public void setHint(String hint) {
         this.hint = hint;
     }
 }

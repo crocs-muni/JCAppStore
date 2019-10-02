@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
+import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.Card;
@@ -205,12 +206,10 @@ public class CardManagerImpl implements CardManager {
 
         try {
             installImpl(capFile, data);
-            saveData(capFile, data.getInfo());
         } catch (CardException e) {
             e.printStackTrace();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
             refreshCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         }
     }
 
@@ -218,17 +217,18 @@ public class CardManagerImpl implements CardManager {
     public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
         try {
             installImpl(file, data);
-            saveData(file, data.getInfo());
         } catch (CardException e) {
             e.printStackTrace();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
             refreshCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         }
     }
 
-    private void saveData(final CAPFile file, final AppletInfo info) throws LocalizedCardException {
-        java.util.List<AppletInfo> appletInfoList = card.getApplets();
+    private void saveData(final CAPFile file, final InstallOpts data) throws LocalizedCardException {
+        AppletInfo info = data.getInfo();
+        //now we rewrite the default aid as custom aid that was used
+        info.setAID(data.getCustomAID());
+        List<AppletInfo> appletInfoList = card.getApplets();
         //add applet
         appletInfoList.add(info);
         //add package instance, donst save image as the package wont be distinguishable from applet
@@ -256,16 +256,16 @@ public class CardManagerImpl implements CardManager {
         busy = true;
 
         try {
-            GPCommand<Void> delete = new Delete(nfo, force);
-            card.executeCommand(delete);
-            card.removeAppletInfo(nfo);
-
+            Delete delete = new Delete(nfo, force);
+            ListContents contents = new ListContents();
+            card.executeCommands(delete, contents);
+            card.setApplets(contents.getResult());
         } catch (CardException e) {
+            refreshCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
             notifyAll();
-            refreshCard();
         }
     }
 
@@ -321,7 +321,15 @@ public class CardManagerImpl implements CardManager {
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
             Install install = new Install(file, data);
-            card.executeCommand(install);
+            ListContents contents = new ListContents();
+            card.executeCommands(install, new GPCommand() {
+                @Override
+                public boolean execute() throws LocalizedCardException {
+                    saveData(file, data);
+                    return true;
+                }
+            }, contents);
+            card.setApplets(contents.getResult());
         } finally {
             busy = false;
             notifyAll();

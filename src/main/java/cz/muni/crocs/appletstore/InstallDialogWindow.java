@@ -164,29 +164,32 @@ public class InstallDialogWindow extends JPanel {
         customAIDs = new JTextField[applets.size()];
         int i = 0;
         for (AID applet : applets) {
+            JRadioButton button = new JRadioButton();
+            button.setActionCommand(applet.toString());
+            selectedAID.add(button);
+
             JTextField f = new JTextField(applet.toString(), 50);
             f.setEnabled(false);
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    button.setToolTipText(f.getText());
                 }
             });
             add(f, "span 2");
-
-            JRadioButton button = new JRadioButton();
-            button.setActionCommand(applet.toString());
-            selectedAID.add(button);
             add(button, "wrap");
             add(new JLabel(), "span 2"); //empty label to align
             customAIDs[i++] = f;
@@ -200,19 +203,20 @@ public class InstallDialogWindow extends JPanel {
         }
     }
 
+    private String valueOrDefault(String data, String defaultValue) {
+        if (data == null || data.isEmpty()) return defaultValue;
+        return data;
+    }
 
-
-    private int getSelectedIdx() {
-        int result = 0;
+    private String getCustomAppletName(String defaultOpt) {
         Enumeration elements = selectedAID.getElements();
         while (elements.hasMoreElements()) {
             AbstractButton button = (AbstractButton)elements.nextElement();
             if (button.isSelected()) {
-                return result;
+                return valueOrDefault(button.getToolTipText(), defaultOpt);
             }
-            ++result;
         }
-        return 0;
+        return defaultOpt;
     }
 
     private String getSelectedAID() {
@@ -251,8 +255,8 @@ public class InstallDialogWindow extends JPanel {
         }
 
         if (advanced.isSelected())
-            return new InstallOpts(getSelectedIdx(), details, forceInstall.isSelected(), installParams.getText());
-        else return new InstallOpts(getSelectedIdx(), details, forceInstall.isSelected(), new byte[0]);
+            return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), installParams.getText());
+        else return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), new byte[0]);
     }
 
     public boolean validInstallParams() {

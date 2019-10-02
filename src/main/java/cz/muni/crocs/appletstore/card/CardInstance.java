@@ -5,7 +5,7 @@ import apdu4j.HexUtils;
 import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
-import cz.muni.crocs.appletstore.card.command.List;
+import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
@@ -20,7 +20,6 @@ import javax.smartcardio.CardTerminal;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +46,7 @@ public class CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private ArrayList<AppletInfo> applets;
+    private java.util.List<AppletInfo> applets;
 
     /**
      * Compares the card id and updates card data if needed
@@ -91,6 +90,10 @@ public class CardInstance {
      */
     java.util.List<AppletInfo> getApplets() {
         return applets;
+    }
+
+    void setApplets(java.util.List<AppletInfo> applets) {
+        this.applets = applets;
     }
 
     void removeAppletInfo(AppletInfo info) {
@@ -201,18 +204,18 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        List list = new List();
-        executeCommand(list);
-        applets = list.getResult();
+        ListContents listContents = new ListContents();
+        executeCommands(listContents);
+        applets = listContents.getResult();
     }
 
     /**
      * Executes any desired command using secure channel
      *
-     * @param command command instance to execute
+     * @param commands commands to execute
      * @throws CardException unable to perform command
      */
-    void executeCommand(GPCommand command) throws LocalizedCardException, CardException {
+    void executeCommands(GPCommand ... commands) throws LocalizedCardException, CardException {
         Card card;
         GPSession context = null;
         APDUBIBO channel;
@@ -268,9 +271,11 @@ public class CardInstance {
         }
 
         try {
-            command.setCardId(id);
-            command.setGP(context);
-            command.execute();
+            for (GPCommand command : commands) {
+                command.setCardId(id);
+                command.setGP(context);
+                command.execute();
+            }
         } catch (GPException e) {
             fail(card, e, "E_unknown_error");
         } catch (IOException e) {

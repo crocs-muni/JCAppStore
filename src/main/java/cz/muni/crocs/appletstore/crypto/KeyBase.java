@@ -48,7 +48,7 @@ public class KeyBase extends CmdTask {
             return new CmdTask().add("\"" + keybase + "\"").add("verify")
                     .add("-d").add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("-i").add("\"" + file.getAbsolutePath() + "\"")
-                    .processToString().startsWith("Signed by aiosa");
+                    .processToString().contains("Signed by aiosa");
             //todo now works only for aiosa user
         } else if (SystemUtils.IS_OS_UNIX) {
             //todo run on unix

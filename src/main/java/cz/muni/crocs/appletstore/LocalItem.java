@@ -139,7 +139,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
             return 1;
         }
 
-        return name.compareTo(other.name) + Math.max(info.getKind().hashCode(), other.info.getKind().hashCode());
+        return 13 * name.compareTo(other.name) + info.getKind().compareTo(other.info.getKind());
     }
 
     @Override

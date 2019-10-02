@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
-import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.CapFileChooser;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -37,6 +36,7 @@ public class InstallAction extends MouseAdapter {
     private AppletInfo info;
     private String titleBar;
     private final OnEventCallBack<Void, Void, Void> call;
+    private boolean fromCustomFile = false;
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed,
                          OnEventCallBack<Void, Void, Void> call) {
@@ -51,6 +51,7 @@ public class InstallAction extends MouseAdapter {
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
         this("", null, null, false, call);
         this.checked = false;
+        this.fromCustomFile = true;
     }
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, OnEventCallBack<Void, Void, Void> call) {
@@ -61,6 +62,11 @@ public class InstallAction extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (capfile == null) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
+
+        if (fromCustomFile) {
+            showInstallDialog("custom_file", "verify_no_keybase.png");
+            return;
+        }
 
         JOptionPane pane = new JOptionPane(textSrc.getString("H_keybase_loading"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,

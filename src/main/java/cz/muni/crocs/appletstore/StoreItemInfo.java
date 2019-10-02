@@ -339,11 +339,4 @@ public class StoreItemInfo extends HintPanel {
 
         new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
     }
-
-
-//    @Override
-//    protected void paintChildren(Graphics g) {
-//        super.paintChildren(g);
-////        g.drawImage(not_verified, icon.getX() + icon.getWidth() - 45, icon.getY() + icon.getHeight() - 45, null);
-//    }
 }

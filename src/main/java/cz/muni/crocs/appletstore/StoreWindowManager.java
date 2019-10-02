@@ -31,14 +31,13 @@ public class StoreWindowManager extends JPanel implements
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private BackgroundChangeable context;
+    private OnEventCallBack<Void, Void, Void> callbackOnAction;
     private Component currentComponent = null;
     private Searchable store;
     private volatile StoreState state = StoreState.UNINITIALIZED;
     private GridBagConstraints constraints;
 
-    public StoreWindowManager(BackgroundChangeable context) {
-        this.context = context;
+    public StoreWindowManager() {
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
@@ -49,6 +48,10 @@ public class StoreWindowManager extends JPanel implements
         constraints.gridheight = 1;
         constraints.gridx = 0;
         constraints.gridy = 0;
+    }
+
+    void setCallbackOnAction(OnEventCallBack<Void, Void, Void> callbackOnAction) {
+        this.callbackOnAction = callbackOnAction;
     }
 
     public enum StoreState {
@@ -197,7 +200,7 @@ public class StoreWindowManager extends JPanel implements
             setFailed();
             return;
         }
-        StoreWindowPane store = new StoreWindowPane(data, context);
+        StoreWindowPane store = new StoreWindowPane(data, callbackOnAction);
         this.store = store;
         putNewPane(store, true);
     }

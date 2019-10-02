@@ -26,31 +26,26 @@ public class Install extends GPCommand<Void> {
 
     private final CAPFile file;
     private InstallOpts data;
-    private AID instanceAID;
 
     public Install(CAPFile f, InstallOpts data) {
         this.file = f;
         this.data = data;
     }
 
-    public AID getAppletAID() {
-        return instanceAID;
-    }
-
     @Override
     public boolean execute() throws LocalizedCardException, GPException {
         logger.info("Installing params: " + (data == null ? "no advanced settings." : data.toString()));
-        GPRegistry registry = null;
+        if (data == null) {
+            //todo
+            throw new LocalizedCardException("");
+        }
+
+        GPRegistry registry;
         try {
             registry = context.getRegistry();
         } catch (IOException e) {
             //todo
             e.printStackTrace();
-            throw new LocalizedCardException("");
-        }
-
-        if (data == null) {
-            //todo
             throw new LocalizedCardException("");
         }
 
@@ -74,6 +69,7 @@ public class Install extends GPCommand<Void> {
                 context.loadCapFile(file, null);
                 logger.info("CAP file loaded.");
             } catch (GPException e) {
+                //todo localized
                 if (e.sw == 0x00) {
                     throw new GPException(textSrc.getString("E_pkg_present"));
                 }
@@ -85,9 +81,9 @@ public class Install extends GPCommand<Void> {
 
 
         final AID appletAID = data.getAID();
+        AID customAID = data.getCustomAID() == null ? null : AID.fromString(data.getCustomAID());
+
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
-        //todo ask petr which privileges should be provided
-        //privs.add(GPRegistryEntry.Privilege.CardReset)
 
         if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             try {
@@ -97,15 +93,15 @@ public class Install extends GPCommand<Void> {
             }
         }
 
-//        if (registry.allAppletAIDs().contains(instanceAID)) {
-//            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + instanceAID);
+//        if (registry.allAppletAIDs().contains(customAID)) {
+//            InformerFactory.getInformer().showInfo(textSrc.getString("E_aid_present_on_card") + customAID);
 //        }
 
         try {
             context.installAndMakeSelectable(
                     file.getPackageAID(),
                     appletAID,
-                    instanceAID,
+                    customAID,
                     privs,
                     data.getInstallParams());
         } catch (IOException e) {
@@ -113,34 +109,4 @@ public class Install extends GPCommand<Void> {
         }
         return true;
     }
-
-//    private static void calculateDapPropertiesAndLoadCap(OptionSet args, GPSession gp, CAPFile capFile) throws GPException, IOException {
-//        try {
-//            DAPProperties dap = new DAPProperties(args, gp);
-//            loadCapAccordingToDapRequirement(args, gp, dap.getTargetDomain(), dap.getDapDomain(), dap.isRequired(), capFile);
-//            System.out.println("CAP loaded");
-//        } catch (GPException e) {
-//            switch (e.sw) {
-//                case 0x6A80:
-//                    System.err.println("Applet loading failed. Are you sure the card can handle it?");
-//                    break;
-//                case 0x6985:
-//                    System.err.println("Applet loading not allowed. Are you sure the domain can accept it?");
-//                    break;
-//                default:
-//                    // Do nothing. Here for findbugs
-//            }
-//            throw e;
-//        }
-//    }
-//
-//    private static void loadCapAccordingToDapRequirement(OptionSet args, GPSession gp, AID targetDomain, AID dapDomain, boolean dapRequired, CAPFile cap) throws IOException, GPException {
-//        // XXX: figure out right signature type in a better way
-//        if (dapRequired) {
-//            byte[] dap = args.has(OPT_SHA256) ? cap.getMetaInfEntry(CAPFile.DAP_RSA_V1_SHA256_FILE) : cap.getMetaInfEntry(CAPFile.DAP_RSA_V1_SHA1_FILE);
-//            gp.loadCapFile(cap, targetDomain, dapDomain == null ? targetDomain : dapDomain, dap, args.has(OPT_SHA256) ? "SHA-256" : "SHA-1");
-//        } else {
-//            gp.loadCapFile(cap, targetDomain, args.has(OPT_SHA256) ? "SHA-256" : "SHA-1");
-//        }
-//    }
 }
