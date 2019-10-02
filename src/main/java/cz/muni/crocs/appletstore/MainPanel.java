@@ -89,7 +89,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         if (info == null || info.isEmpty())
             return;
         JOptionPane.showMessageDialog(this,
-                info,
+                "<html><div width=\"450\"" + info + "</div></html>",
                 textSrc.getString("info"),
                 JOptionPane.QUESTION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + "info.png"));

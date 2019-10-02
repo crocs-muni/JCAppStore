@@ -43,8 +43,12 @@ public class InformerImpl implements Informer, CallBack<Void> {
 
     @Override
     public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis) {
-        queue.add(new Tuple<>(new Warning(msg, status, icon, callable == null ? this : callable), milis));
-        fireWarning();
+        if (callable == null) {
+            showWarningToClose(msg, status, milis);
+        } else {
+            queue.add(new Tuple<>(new Warning(msg, status, icon, callable, this), milis));
+            fireWarning();
+        }
     }
 
     @Override

@@ -142,7 +142,7 @@ public class CardManagerImpl implements CardManager {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.info("The card was busy when refreshCard() called, waiting interrupted.");
+                logger.info("The card was busy when loadCard() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -210,6 +210,9 @@ public class CardManagerImpl implements CardManager {
             e.printStackTrace();
             refreshCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } catch (LocalizedCardException e) {
+            refreshCard();
+            throw e;
         }
     }
 
@@ -221,6 +224,9 @@ public class CardManagerImpl implements CardManager {
             e.printStackTrace();
             refreshCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } catch (LocalizedCardException e) {
+            refreshCard();
+            throw e;
         }
     }
 
@@ -260,6 +266,7 @@ public class CardManagerImpl implements CardManager {
             ListContents contents = new ListContents();
             card.executeCommands(delete, contents);
             card.setApplets(contents.getResult());
+            selectedAID = null;
         } catch (CardException e) {
             refreshCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
@@ -329,6 +336,7 @@ public class CardManagerImpl implements CardManager {
                     return true;
                 }
             }, contents);
+            selectedAID = null;
             card.setApplets(contents.getResult());
         } finally {
             busy = false;
@@ -338,8 +346,8 @@ public class CardManagerImpl implements CardManager {
 
     private void refreshCard() throws LocalizedCardException {
         //todo maybe ugly, instead of calling the refresh card, just refresh terminals and let routine do the job
-        //        loadCard();
         terminals.refresh();
+        loadCard();
         card = null;
         selectedAID = null;
         lastInstalled = null;
