@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.card.action.InstallAction;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.DisablePanel;
@@ -8,6 +9,8 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
@@ -49,6 +52,21 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             @Override
             public void actionPerformed(ActionEvent e) {
                 showItems(null);
+            }
+        });
+        submenu.setOnReload(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+
+                    CardManagerFactory.getManager().loadCard();
+                } catch (LocalizedCardException ex) {
+                    showError(textSrc.getString("failed_to_reload"),
+                            OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                            ex.getLocalizedMessage() : ex.getLocalizedMessageWithoutCause(),
+                            "announcement_white.png");
+                    ex.printStackTrace();
+                }
             }
         });
 

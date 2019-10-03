@@ -148,6 +148,7 @@ public class CardManagerImpl implements CardManager {
         }
         busy = true;
         lastInstalled = null;
+        selectedAID = null;
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
@@ -166,6 +167,7 @@ public class CardManagerImpl implements CardManager {
             busy = false;
             notifyAll();
         }
+        logger.info("Card successfully refreshed.");
     }
 
     @Override
@@ -208,10 +210,10 @@ public class CardManagerImpl implements CardManager {
             installImpl(capFile, data);
         } catch (CardException e) {
             e.printStackTrace();
-            refreshCard();
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } catch (LocalizedCardException e) {
-            refreshCard();
+            loadCard();
             throw e;
         }
     }
@@ -222,10 +224,10 @@ public class CardManagerImpl implements CardManager {
             installImpl(file, data);
         } catch (CardException e) {
             e.printStackTrace();
-            refreshCard();
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } catch (LocalizedCardException e) {
-            refreshCard();
+            loadCard();
             throw e;
         }
     }
@@ -268,7 +270,7 @@ public class CardManagerImpl implements CardManager {
             card.setApplets(contents.getResult());
             selectedAID = null;
         } catch (CardException e) {
-            refreshCard();
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
@@ -342,16 +344,5 @@ public class CardManagerImpl implements CardManager {
             busy = false;
             notifyAll();
         }
-    }
-
-    private void refreshCard() throws LocalizedCardException {
-        //todo maybe ugly, instead of calling the refresh card, just refresh terminals and let routine do the job
-        terminals.refresh();
-        loadCard();
-        card = null;
-        selectedAID = null;
-        lastInstalled = null;
-
-        logger.info("Card successfully refreshed.");
     }
 }

@@ -20,6 +20,7 @@ public interface Options<ValueType> {
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
     String KEY_KEYBASE_LOCATION = "keybase";
+    String KEY_ERROR_MODE = "mode";
 
     /**
      * Get option for app

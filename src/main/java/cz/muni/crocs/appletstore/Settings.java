@@ -39,6 +39,7 @@ public class Settings extends JPanel {
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
     private JCheckBox hintEnabled = new JCheckBox();
+    private JCheckBox verboseEnabled = new JCheckBox();
     private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
@@ -48,13 +49,22 @@ public class Settings extends JPanel {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        addKeyBase();
-        addLanguage();
-        addHint();
-        addBackground();
+        buildKeyBase();
+        buildLanguage();
+        buildHint();
+        buildErrorMode();
+        buildBackground();
     }
 
-    private void addKeyBase() {
+    public void apply() {
+        saveKeyBase();
+        saveBackgroundImage();
+        saveLanguage();
+        saveHint();
+        saveErrorMode();
+    }
+
+    private void buildKeyBase() {
         addTitleLabel(textSrc.getString("keybase_loc"), "");
 
         JButton specify = new JButton(new AbstractAction(textSrc.getString("keybase_specify_loc")) {
@@ -80,7 +90,7 @@ public class Settings extends JPanel {
         add(keybase, "span 3, growx, wrap");
     }
 
-    private void addBackground() {
+    private void buildBackground() {
         addTitleLabel(textSrc.getString("background"), "span 3, wrap");
 
         String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
@@ -128,11 +138,26 @@ public class Settings extends JPanel {
         add(slider, "w 180, align right, span 2, wrap");
     }
 
-    public void apply() {
-        saveKeyBase();
-        saveBackgroundImage();
-        saveLanguage();
-        saveHint();
+    private void buildLanguage() {
+        addTitleLabel(textSrc.getString("language"), "");
+
+        languageBox = new JComboBox<>(LANGUAGES);
+        CustomComboBoxItem listItems = new CustomComboBoxItem();
+        languageBox.setMaximumRowCount(4);
+        languageBox.setRenderer(listItems);
+        add(languageBox, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildErrorMode() {
+        addTitleLabel(textSrc.getString("enable_verbose"), "");
+        verboseEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose"));
+        add(verboseEnabled, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildHint() {
+        addTitleLabel(textSrc.getString("enable_hints"), "");
+        hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
+        add(hintEnabled, "align right, span 2, w 180, wrap");
     }
 
     private JFileChooser getShaderFileChoser(File defaultFolder) {
@@ -168,22 +193,6 @@ public class Settings extends JPanel {
 
     private JFileChooser getKeybaseFileChooser() {
         return getShaderFileChoser(new File(System.getProperty("user.home")));
-    }
-
-    private void addLanguage() {
-        addTitleLabel(textSrc.getString("language"), "");
-
-        languageBox = new JComboBox<>(LANGUAGES);
-        CustomComboBoxItem listItems = new CustomComboBoxItem();
-        languageBox.setMaximumRowCount(4);
-        languageBox.setRenderer(listItems);
-        add(languageBox, "align right, span 2, w 180, wrap");
-    }
-
-    private void addHint() {
-        addTitleLabel(textSrc.getString("enable_hints"), "");
-        hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
-        add(hintEnabled, "align right, span 2, w 180, wrap");
     }
 
     private void addTitleLabel(String titleText, String constraints) {
@@ -232,6 +241,10 @@ public class Settings extends JPanel {
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
         HintPanel.enableHint(hintEnabled.isSelected());
+    }
+
+    private void saveErrorMode() {
+        OptionsFactory.getOptions().addOption(Options.KEY_ERROR_MODE, verboseEnabled.isSelected() ? "verbose" : "default");
     }
 
     private void saveKeyBase() {

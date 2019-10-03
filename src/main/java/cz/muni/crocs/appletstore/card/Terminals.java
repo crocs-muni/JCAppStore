@@ -122,7 +122,8 @@ public class Terminals {
         } catch (CardException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
-                    null, e.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE));
+                    null, "<html><div width=\"450\"" + e.getMessage() + "</div></html>",
+                    "Start", JOptionPane.INFORMATION_MESSAGE));
             logger.warn("Failed to check terminal.", e);
             state = TerminalState.NO_READER;
             return (old != state) ? 2 : 0;

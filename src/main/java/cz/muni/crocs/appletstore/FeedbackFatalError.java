@@ -50,7 +50,8 @@ public class FeedbackFatalError {
                 System.exit(result);
             }
         } else {
-            JOptionPane.showMessageDialog(null, description, title, messageType);
+            JOptionPane.showMessageDialog(null, "<html><div width=\"350\"" + description +
+                    "</div></html>", title, messageType);
         }
     }
 

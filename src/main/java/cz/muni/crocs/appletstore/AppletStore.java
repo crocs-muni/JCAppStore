@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -113,7 +114,9 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                             } catch (LocalizedCardException e) {
                                 e.printStackTrace();
                                 window.getRefreshablePane().showError("E_loading_failed",
-                                        e.getLocalizedMessage() + "<br> CARD: " + manager.getLastCardDescriptor(),
+                                        (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                                                e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause())
+                                        + "<br> CARD: " + manager.getLastCardDescriptor(),
                                         "announcement_white.png");
                                 continue;
                             } finally {

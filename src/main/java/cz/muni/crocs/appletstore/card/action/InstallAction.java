@@ -1,22 +1,18 @@
-package cz.muni.crocs.appletstore;
+package cz.muni.crocs.appletstore.card.action;
 
+import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.CapFileChooser;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Tuple;
+import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -26,37 +22,32 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class InstallAction extends MouseAdapter {
+public class InstallAction extends CardAction {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private boolean checked;
     private boolean installed;
     private File capfile;
     private AppletInfo info;
     private String titleBar;
-    private final OnEventCallBack<Void, Void, Void> call;
     private boolean fromCustomFile = false;
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed,
                          OnEventCallBack<Void, Void, Void> call) {
+        super(call);
         this.installed = installed;
-        this.call = call;
         this.capfile = capfile;
         this.titleBar = titleBar;
         this.info = info;
-        this.checked = true;
     }
 
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
         this("", null, null, false, call);
-        this.checked = false;
         this.fromCustomFile = true;
     }
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, OnEventCallBack<Void, Void, Void> call) {
         this(titleBar, info, capfile, false, call);
-        this.checked = false;
     }
 
     @Override
@@ -86,7 +77,8 @@ public class InstallAction extends MouseAdapter {
                     result = new KeyBase().verifySignature(capfile.getAbsolutePath());
                 } catch (LocalizedSignatureException e) {
                     result = new Tuple<>("not_verified.png", textSrc.getString("H_verify_failed")
-                            + e.getLocalizedMessageWithoutCause());
+                            + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                            e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
                 }
                 return null;
             }
@@ -129,37 +121,11 @@ public class InstallAction extends MouseAdapter {
         final InstallOpts opts = dialog.getInstallOpts();
         logger.info("Install fired, list of AIDS: " + file.getApplets().toString());
         logger.info("Install AID: " + opts.getAID());
-        call.onStart();
-        new Thread(() -> {
-            try {
-                CardManager manager = CardManagerFactory.getManager();
-                manager.install(file, opts);
-                manager.setLastAppletInstalled(opts.getAID());
-            } catch (LocalizedCardException ex) {
-                ex.printStackTrace();
-                logger.warn("Failed to install applet: " + ex.getMessage());
-                SwingUtilities.invokeLater(() -> showFailed(
-                        textSrc.getString("install_failed"), ex.getLocalizedMessage()));
-                SwingUtilities.invokeLater(call::onFail);
-            }
-            SwingUtilities.invokeLater(call::onFinish);
-        }).start();
-    }
 
-    private void showFailed(String title, String message) {
-        JOptionPane.showMessageDialog(null,
-                message, title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
-    }
-
-    private boolean checkIfCountains(CAPFile file) {
-        if (checked) return installed;
-        List<AppletInfo> infos = CardManagerFactory.getManager().getInstalledApplets();
-        for (AppletInfo nfo : infos) {
-            for (AID aid : file.getAppletAIDs()) {
-                if (nfo.getAid().equals(aid))
-                    return true;
-            }
-        }
-        return false;
+        execute(() -> {
+            CardManager manager = CardManagerFactory.getManager();
+            manager.install(file, opts);
+            manager.setLastAppletInstalled(opts.getAID());
+        }, "Failed to install applet.", textSrc.getString("install_failed"));
     }
 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import cz.muni.crocs.appletstore.card.action.InstallAction;
 import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.ui.*;
@@ -84,7 +85,8 @@ public class StoreItemInfo extends HintPanel {
                 setVerifiedFromThread(result.first, result.second);
             } catch (LocalizedSignatureException e) {
                 setVerifiedFromThread("not_verified.png", textSrc.getString("H_verify_failed")
-                        + e.getLocalizedMessageWithoutCause());
+                        + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                        e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
             }
         }).start();
     }

@@ -39,14 +39,15 @@ public class OptionsImpl implements Options<String> {
     public void setDefaults() {
         //todo use delimiter of system
         options.clear();
-        options.put(Options.KEY_LANGUAGE, "en");
+        options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
         options.put(Options.KEY_BACKGROUND, "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
-        options.put(Options.KEY_HINT, "true");
+        options.put(Options.KEY_HINT, "true");  //true false
         options.put(Options.KEY_STYLESHEET, "src/main/resources/css/default.css");
         options.put(Options.KEY_FONT, null);
         options.put(Options.KEY_TITLE_FONT, "src/main/resources/fonts/title.ttf");
         options.put(Options.KEY_KEYBASE_LOCATION, "");
+        options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
     }
 
     @Override

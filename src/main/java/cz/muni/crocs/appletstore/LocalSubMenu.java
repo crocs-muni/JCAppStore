@@ -16,12 +16,17 @@ public class LocalSubMenu extends JPanel {
     private JCheckBox pkg = new JCheckBox();
 
     private JButton submit = Components.getButton(textSrc.getString("filter"), "", 12.f, Color.BLACK, Color.WHITE, false);
+    private JButton reload = Components.getButton(textSrc.getString("card_refresh"), "", 12.f, Color.BLACK, Color.WHITE, false);
 
     public LocalSubMenu() {
-        setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
+//        setLayout(new FlowLayout(FlowLayout.LEADING, 8, 2));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         setOpaque(false);
-        add(Box.createHorizontalGlue());
 
+        reload.setOpaque(false);
+        add(reload);
+
+        add(Box.createHorizontalGlue());
 
         add(new JLabel(textSrc.getString("sds")));
         add(sd);
@@ -69,4 +74,5 @@ public class LocalSubMenu extends JPanel {
     void setOnSubmit(Action a) {
         submit.addActionListener(a);
     }
+    void setOnReload(Action a) { reload.addActionListener(a); }
 }
