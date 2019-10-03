@@ -5,6 +5,7 @@ import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.awt.event.MouseEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -24,7 +25,7 @@ public class ReloadAction extends CardAction {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(@Nullable MouseEvent e) {
         execute(() -> {
             CardManager manager = CardManagerFactory.getManager();
             manager.loadCard();

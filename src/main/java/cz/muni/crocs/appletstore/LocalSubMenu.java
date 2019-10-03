@@ -15,29 +15,27 @@ public class LocalSubMenu extends JPanel {
     private JCheckBox app = new JCheckBox();
     private JCheckBox pkg = new JCheckBox();
 
-    private JButton submit = Components.getButton(textSrc.getString("filter"), "", 12.f, Color.BLACK, Color.WHITE, false);
-    private JButton reload = Components.getButton(textSrc.getString("card_refresh"), "", 12.f, Color.BLACK, Color.WHITE, false);
+    private JButton submit;
+    private JButton reload;
 
     public LocalSubMenu() {
-//        setLayout(new FlowLayout(FlowLayout.LEADING, 8, 2));
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
         setOpaque(false);
 
-        reload.setOpaque(false);
-        add(reload);
+        submit = getButton("filter");
+        reload = getButton("card_refresh");
 
-        add(Box.createHorizontalGlue());
-
-        add(new JLabel(textSrc.getString("sds")));
+        add(getLabel("sds"));
         add(sd);
-        add(Box.createRigidArea(new Dimension(10, 0)));
-        add(new JLabel(textSrc.getString("applets")));
+        add(Box.createRigidArea(new Dimension(6, 0)));
+        add(getLabel("applets"));
         add(app);
-        add(Box.createRigidArea(new Dimension(10, 0)));
-        add(new JLabel(textSrc.getString("packages")));
+        add(Box.createRigidArea(new Dimension(6, 0)));
+        add(getLabel("packages"));
         add(pkg);
-        submit.setOpaque(false);
         add(submit);
+        add(Box.createRigidArea(new Dimension(15, 0)));
+        add(reload);
         add(Box.createRigidArea(new Dimension(10, 0)));
         sd.setSelected(false);
         app.setSelected(true);
@@ -75,4 +73,18 @@ public class LocalSubMenu extends JPanel {
         submit.addActionListener(a);
     }
     void setOnReload(Action a) { reload.addActionListener(a); }
+
+    private JLabel getLabel(String translateKey) {
+        JLabel label = new JLabel(textSrc.getString(translateKey));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
+    }
+
+    private JButton getButton(String translationKey) {
+        JButton button = Components.getButton(textSrc.getString(translationKey), "",
+                12.f, Color.BLACK, Color.WHITE, false);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setOpaque(false);
+        return button;
+    }
 }

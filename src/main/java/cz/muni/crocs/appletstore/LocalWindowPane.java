@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.card.action.InstallAction;
+import cz.muni.crocs.appletstore.card.action.ReloadAction;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.DisablePanel;
@@ -48,27 +49,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         setOpaque(false);
 
         submenu = new LocalSubMenu();
-        submenu.setOnSubmit(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showItems(null);
-            }
-        });
-        submenu.setOnReload(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-
-                    CardManagerFactory.getManager().loadCard();
-                } catch (LocalizedCardException ex) {
-                    showError(textSrc.getString("failed_to_reload"),
-                            OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                            ex.getLocalizedMessage() : ex.getLocalizedMessageWithoutCause(),
-                            "announcement_white.png");
-                    ex.printStackTrace();
-                }
-            }
-        });
 
         GridBagLayout gb = new GridBagLayout();
         gb.columnWeights = new double[]{1d, 0.1d};
@@ -85,6 +65,20 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
      */
     public void build(OnEventCallBack<Void, Void, Void> callback) {
         removeAll();
+
+        submenu.setOnSubmit(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showItems(null);
+            }
+        });
+        submenu.setOnReload(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ReloadAction(callback).mouseClicked(null);
+            }
+        });
+
         infoLayout = new LocalItemInfo(callback);
         windowLayout = new JPanel();
         windowScroll = new JScrollPane();
