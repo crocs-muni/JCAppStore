@@ -9,6 +9,7 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -33,6 +34,7 @@ public class AppletInfo implements Serializable {
     private String version;
     private String author;
     private String sdk;
+    private List<AID> modules;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
     public AppletInfo(String name, String image, String version, String author, String sdk) {
@@ -64,6 +66,7 @@ public class AppletInfo implements Serializable {
             lifecycle = registry.getLifeCycle();
             kind = registry.getType();
             domain = registry.getDomain();
+            fillModules(registry);
             deduceData(registry);
         }
     }
@@ -74,6 +77,7 @@ public class AppletInfo implements Serializable {
             lifecycle = registry.getLifeCycle();
             kind = registry.getType();
             domain = registry.getDomain();
+            fillModules(registry);
         }
         if (savedApplets != null) {
             getAdditionalInfo(savedApplets, registry);
@@ -84,6 +88,18 @@ public class AppletInfo implements Serializable {
 
     public KeysPresence hasKeys() {
         return hasKeys;
+    }
+
+    public List<AID> getModules() {
+        return modules;
+    }
+
+    private void fillModules(GPRegistryEntry entry){
+        if (entry.getType() == GPRegistryEntry.Kind.ExecutableLoadFile) {
+            modules = entry.getModules();
+        } else {
+            modules = new ArrayList<>();
+        }
     }
 
     private void deduceData(GPRegistryEntry registry) {

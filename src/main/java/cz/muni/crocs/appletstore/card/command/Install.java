@@ -35,11 +35,11 @@ public class Install extends GPCommand<Void> {
 
     @Override
     public boolean execute() throws LocalizedCardException, GPException {
-        logger.info("Installing params: " + (data == null ? "no advanced settings." : data.toString()));
         if (data == null) {
-            //todo
-            throw new LocalizedCardException("");
+            logger.info("Installing params are missnig");
+            throw new LocalizedCardException("No install data.", textSrc.getString("E_notify_us"));
         }
+        logger.info("Installing params: " + data.toString());
 
         GPRegistry registry;
         try {
@@ -60,15 +60,13 @@ public class Install extends GPCommand<Void> {
 
         if (file.getAppletAIDs().size() <= 1) {
             try {
-                //we do not support installing under custom SD
-                //todo ask about third arg
                 calculateDapPropertiesAndLoadCap(context, file);
                 //context.loadCapFile(file, null);
                 logger.info("CAP file loaded.");
             } catch (GPException e) {
                 //todo localized
                 if (e.sw == 0x00) {
-                    throw new GPException(textSrc.getString("E_pkg_present"));
+                    throw new LocalizedCardException("Package already present", textSrc.getString("E_pkg_present"), e);
                 }
                 throw e;
             } catch (IOException e) {

@@ -9,12 +9,16 @@ import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
+import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
+import static pro.javacard.gp.GPRegistryEntry.Kind;
+
 
 /**
  * Class to add to button as listener target to perform applet installation
@@ -122,8 +126,19 @@ public class InstallAction extends CardAction {
         logger.info("Install fired, list of AIDS: " + file.getApplets().toString());
         logger.info("Install AID: " + opts.getAID());
 
+        final CardManager manager = CardManagerFactory.getManager();
+        //if easy mode && package already present
+        if (!OptionsFactory.getOptions().isVerbose()) {
+            Stream<AppletInfo> applets = manager.getInstalledApplets().stream();
+            //if applet present dont change anything
+            if (applets.noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+                if (applets.anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+                    opts.setForce(true);
+                }
+            }
+        }
+
         execute(() -> {
-            CardManager manager = CardManagerFactory.getManager();
             manager.install(file, opts);
             manager.setLastAppletInstalled(opts.getAID());
         }, "Failed to install applet.", textSrc.getString("install_failed"));

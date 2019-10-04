@@ -3,10 +3,13 @@ package cz.muni.crocs.appletstore.card.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.DeleteDialogWindow;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
@@ -52,7 +55,19 @@ public class DeleteAction extends CardAction {
         }
         logger.info("Delete applet: " + info.toString());
 
-        if (info.getKind() != Kind.ExecutableLoadFile) {
+        final CardManager manager = CardManagerFactory.getManager();
+        boolean willForce = opts.willForce();
+        //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
+        if (!OptionsFactory.getOptions().isVerbose() && info.getKind() == Kind.ExecutableLoadFile) {
+            for (AID mod : info.getModules()) {
+                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+                    willForce = true;
+                    break;
+                }
+            }
+        }
+
+        if (willForce || info.getKind() != Kind.ExecutableLoadFile) {
             String msg = opts.confirm();
             if (msg != null) {
                 switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
@@ -65,8 +80,9 @@ public class DeleteAction extends CardAction {
             }
         }
 
+        final boolean finalWillForce = willForce;
         execute(() -> {
-            CardManagerFactory.getManager().uninstall(info, opts.willForce());
+            manager.uninstall(info, finalWillForce);
         }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
     }
 

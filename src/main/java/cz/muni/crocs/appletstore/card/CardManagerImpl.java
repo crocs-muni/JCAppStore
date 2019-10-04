@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
-import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.Card;

@@ -86,6 +86,11 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
+    public boolean isVerbose() {
+        return getOption(Options.KEY_ERROR_MODE).trim().toLowerCase().equals("verbose");
+    }
+
+    @Override
     public String getOption(String name) {
         return options.get(name);
     }

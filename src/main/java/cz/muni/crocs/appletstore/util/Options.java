@@ -93,4 +93,10 @@ public interface Options<ValueType> {
      * @return default styleSheet for app
      */
     StyleSheet getDefaultStyleSheet();
+
+    /**
+     * Check if system in verbose advanced use
+     * @return true if verbose
+     */
+    boolean isVerbose();
 }

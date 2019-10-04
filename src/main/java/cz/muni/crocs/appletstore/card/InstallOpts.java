@@ -79,6 +79,10 @@ public class InstallOpts {
         return force;
     }
 
+    public void setForce(boolean isForce) {
+        this.force = isForce;
+    }
+
     public byte[] getInstallParams() {
         return installParams;
     }
