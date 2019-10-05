@@ -80,6 +80,7 @@ public class InstallAction extends CardAction {
                 try {
                     result = new KeyBase().verifySignature(capfile.getAbsolutePath());
                 } catch (LocalizedSignatureException e) {
+                    e.printStackTrace();
                     result = new Tuple<>("not_verified.png", textSrc.getString("H_verify_failed")
                             + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
                             e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
@@ -129,10 +130,9 @@ public class InstallAction extends CardAction {
         final CardManager manager = CardManagerFactory.getManager();
         //if easy mode && package already present
         if (!OptionsFactory.getOptions().isVerbose()) {
-            Stream<AppletInfo> applets = manager.getInstalledApplets().stream();
             //if applet present dont change anything
-            if (applets.noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
-                if (applets.anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+            if (manager.getInstalledApplets().stream().noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(file.getPackageAID()))) {
                     opts.setForce(true);
                 }
             }

@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
  */
 public class Install extends GPCommand<Void> {
     private static final Logger logger = LoggerFactory.getLogger(Install.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final CAPFile file;
     private InstallOpts data;
@@ -37,7 +36,7 @@ public class Install extends GPCommand<Void> {
     public boolean execute() throws LocalizedCardException, GPException {
         if (data == null) {
             logger.info("Installing params are missnig");
-            throw new LocalizedCardException("No install data.", textSrc.getString("E_notify_us"));
+            throw new LocalizedCardException("No install data.", "E_notify_us");
         }
         logger.info("Installing params: " + data.toString());
 
@@ -66,7 +65,7 @@ public class Install extends GPCommand<Void> {
             } catch (GPException e) {
                 //todo localized
                 if (e.sw == 0x00) {
-                    throw new LocalizedCardException("Package already present", textSrc.getString("E_pkg_present"), e);
+                    throw new LocalizedCardException("Package already present", "E_pkg_present", e);
                 }
                 throw e;
             } catch (IOException e) {
@@ -82,7 +81,6 @@ public class Install extends GPCommand<Void> {
         AID customAID = data.getCustomAID() == null ? appletAID : AID.fromString(data.getCustomAID());
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
-        privs.add(GPRegistryEntry.Privilege.CardReset);
 
         if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             try {
@@ -92,16 +90,8 @@ public class Install extends GPCommand<Void> {
             }
         }
 
-        if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
-            try {
-                context.deleteAID(registry.getDefaultSelectedAID().get(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-                //todo
-                throw new LocalizedCardException("");
-            }
-        }
 
+        logger.info("Installing applet: pkg " + file.getPackageAID() + ", aid " + appletAID + ", custom aid " + customAID);
         try {
             context.installAndMakeSelectable(
                     file.getPackageAID(),

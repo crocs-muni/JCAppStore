@@ -71,13 +71,13 @@ public class DeleteDialogWindow extends JPanel {
      */
     public String confirm() {
         if (keys == KeysPresence.PRESENT) {
-            return textSrc.getString("applet") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
         }
         if (keys == KeysPresence.UNKNOWN) {
-            return textSrc.getString("applet") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {
-            return textSrc.getString("E_delete_sd"); //todo allow deleting SD?
+            return textSrc.getString("E_delete_sd");
         }
         return null;
     }

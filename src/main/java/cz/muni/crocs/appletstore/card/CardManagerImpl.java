@@ -245,6 +245,29 @@ public class CardManagerImpl implements CardManager {
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
     }
 
+    private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+        List<AppletInfo> appletInfoList = card.getApplets();
+        deleteInfo(appletInfoList, applet.getAid());
+        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
+            for (AID aid : applet.getModules()) {
+                deleteInfo(appletInfoList, aid);
+            }
+        }
+        AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
+    }
+
+    private void deleteInfo(List<AppletInfo> list, AID toDelete) {
+        Iterator<AppletInfo> info = list.iterator();
+        while(info.hasNext()) {
+            AppletInfo nfo = info.next();
+            if (toDelete.equals(nfo.getAid())) {
+                info.remove();
+                return;
+            }
+        }
+    }
+
     @Override
     public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
         if (card == null) {
@@ -265,7 +288,13 @@ public class CardManagerImpl implements CardManager {
         try {
             Delete delete = new Delete(nfo, force);
             ListContents contents = new ListContents();
-            card.executeCommands(delete, contents);
+            card.executeCommands(delete, new GPCommand() {
+                @Override
+                public boolean execute() throws LocalizedCardException {
+                    deleteData(nfo, force);
+                    return true;
+                }
+            }, contents);
             card.setApplets(contents.getResult());
             selectedAID = null;
         } catch (CardException e) {

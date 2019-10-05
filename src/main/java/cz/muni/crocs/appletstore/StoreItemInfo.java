@@ -46,7 +46,6 @@ public class StoreItemInfo extends HintPanel {
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
-    private JLabel verifyIcon;
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
@@ -68,27 +67,6 @@ public class StoreItemInfo extends HintPanel {
         checkHostApp(dataSet);
         buildDescription(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
-    }
-
-     private void setVerifiedFromThread(String imgName, String hint) {
-        SwingUtilities.invokeLater(() -> {
-            verifyIcon.setIcon(new ImageIcon(Config.IMAGE_DIR + imgName));
-            ((HintLabel)verifyIcon).setText("", hint);
-            revalidate();
-        });
-    }
-
-    void checkIntegrity(String filePath) {
-        new Thread(() -> {
-            try {
-                Tuple<String, String> result = new KeyBase().verifySignature(filePath);
-                setVerifiedFromThread(result.first, result.second);
-            } catch (LocalizedSignatureException e) {
-                setVerifiedFromThread("not_verified.png", textSrc.getString("H_verify_failed")
-                        + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                        e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
-            }
-        }).start();
     }
 
     private HintLabel getVerifiedIcon() {
@@ -117,9 +95,6 @@ public class StoreItemInfo extends HintPanel {
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350, id title");
 
-        verifyIcon = getVerifiedIcon();
-        add(verifyIcon, "pos title.x2 title.y");
-
         buildMainInstallButton(dataSet, callback);
 
         JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
@@ -135,8 +110,6 @@ public class StoreItemInfo extends HintPanel {
         final JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
                 .get(latestV).getAsJsonArray();
         String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
-
-        checkIntegrity(latestFilename);
 
         install.addMouseListener(
                 new MouseAdapter() {

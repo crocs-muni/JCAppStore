@@ -13,6 +13,7 @@ import javax.smartcardio.CardException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,18 +34,26 @@ public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
         AppletSerializer<List<AppletInfo>> savedData = new AppletSerializerImpl();
         File file = new File(Config.APP_DATA_DIR + Config.SEP + cardId);
 
-        List<AppletInfo> saved = null;
+        List<AppletInfo> saved;
         if (file.exists()) {
             try {
                 saved = savedData.deserialize(file);
             } catch (LocalizedCardException e) {
                 e.printStackTrace();
+                saved = Collections.emptyList();
             }
         } else {
             saved = Collections.emptyList();
         }
 
+        saved.forEach(item -> {
+            System.out.println(item.getAid().toString() + ", " + item.getKind());
+        });
+
         for (GPRegistryEntry entry : registry) {
+            //global platform lists all packages two times skip the one with no modules in it
+            if (entry.getType().equals(GPRegistryEntry.Kind.ExecutableLoadFile) && entry.getModules().size() == 0)
+                continue;
             result.add(new AppletInfo(entry, saved));
         }
         return true;

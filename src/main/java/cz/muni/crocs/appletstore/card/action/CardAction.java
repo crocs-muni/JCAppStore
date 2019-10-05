@@ -20,6 +20,7 @@ public abstract class CardAction extends MouseAdapter {
     }
 
     protected void execute(CardExecutable r, String loggerMessage, String title) {
+        call.onStart();
         new Thread(() ->  {
             try {
                 r.execute();

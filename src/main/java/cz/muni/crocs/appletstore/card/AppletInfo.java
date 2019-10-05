@@ -26,6 +26,7 @@ public class AppletInfo implements Serializable {
 
     private transient int lifecycle;
     private transient GPRegistryEntry.Kind kind;
+    private transient List<AID> modules;
     private transient AID domain;
 
     private String aid;
@@ -34,7 +35,6 @@ public class AppletInfo implements Serializable {
     private String version;
     private String author;
     private String sdk;
-    private List<AID> modules;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
     public AppletInfo(String name, String image, String version, String author, String sdk) {
