@@ -164,6 +164,18 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     }
 
     @Override
+    public void showError(String keyTitle, String text, String imgName, LocalizedException cause) {
+        removeAll();
+        if (text == null)
+            add(new ErrorPane(textSrc.getString(keyTitle), imgName));
+        else
+            add(new ErrorPane(textSrc.getString(keyTitle), text +
+                    (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                            cause.getLocalizedMessage() : cause.getLocalizedMessageWithoutCause()), imgName));
+        revalidate();
+    }
+
+    @Override
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
         System.out.println("Applet info visible: " + CardManagerFactory.getManager().isAppletSelected());

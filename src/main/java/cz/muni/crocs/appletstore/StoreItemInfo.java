@@ -69,11 +69,6 @@ public class StoreItemInfo extends HintPanel {
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
 
-    private HintLabel getVerifiedIcon() {
-        return new HintLabel(new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
-                textSrc.getString("H_keybase_loading"));
-    }
-
     private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callback) {
         JLabel back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "back.png"));
         back.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

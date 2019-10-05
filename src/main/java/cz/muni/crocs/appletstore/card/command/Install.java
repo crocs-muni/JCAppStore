@@ -59,11 +59,9 @@ public class Install extends GPCommand<Void> {
 
         if (file.getAppletAIDs().size() <= 1) {
             try {
-                calculateDapPropertiesAndLoadCap(context, file);
-                //context.loadCapFile(file, null);
+                context.loadCapFile(file, null);
                 logger.info("CAP file loaded.");
             } catch (GPException e) {
-                //todo localized
                 if (e.sw == 0x00) {
                     throw new LocalizedCardException("Package already present", "E_pkg_present", e);
                 }
@@ -81,7 +79,6 @@ public class Install extends GPCommand<Void> {
         AID customAID = data.getCustomAID() == null ? appletAID : AID.fromString(data.getCustomAID());
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
-
         if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             try {
                 context.deleteAID(registry.getDefaultSelectedAID().get(), false);
@@ -89,7 +86,6 @@ public class Install extends GPCommand<Void> {
                 e.printStackTrace();
             }
         }
-
 
         logger.info("Installing applet: pkg " + file.getPackageAID() + ", aid " + appletAID + ", custom aid " + customAID);
         try {
@@ -105,33 +101,4 @@ public class Install extends GPCommand<Void> {
         return true;
     }
 
-    private static void calculateDapPropertiesAndLoadCap(GPSession gp, CAPFile capFile) throws GPException, IOException {
-        try {
-            DAPProperties dap = new DAPProperties(gp);
-            loadCapAccordingToDapRequirement(gp, dap.getTargetDomain(), dap.getDapDomain(), dap.isRequired(), capFile);
-            System.out.println("CAP loaded");
-        } catch (GPException e) {
-            switch (e.sw) {
-                case 0x6A80:
-                    System.err.println("Applet loading failed. Are you sure the card can handle it?");
-                    break;
-                case 0x6985:
-                    System.err.println("Applet loading not allowed. Are you sure the domain can accept it?");
-                    break;
-                default:
-                    // Do nothing. Here for findbugs
-            }
-            throw e;
-        }
-    }
-
-    private static void loadCapAccordingToDapRequirement(GPSession gp, AID targetDomain, AID dapDomain, boolean dapRequired, CAPFile cap) throws IOException, GPException {
-        // XXX: figure out right signature type in a better way
-        if (dapRequired) {
-            byte[] dap = cap.getMetaInfEntry(CAPFile.DAP_RSA_V1_SHA1_FILE);
-            gp.loadCapFile(cap, targetDomain, dapDomain == null ? targetDomain : dapDomain, dap, "SHA-1");
-        } else {
-            gp.loadCapFile(cap, targetDomain, "SHA-1");
-        }
-    }
 }

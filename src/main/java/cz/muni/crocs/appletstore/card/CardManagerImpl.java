@@ -6,6 +6,7 @@ import apdu4j.TerminalManager;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -161,7 +162,7 @@ public class CardManagerImpl implements CardManager {
             throw ex;
         } catch (Exception e) {
             card = null;
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            throw new LocalizedCardException(e.getMessage(), OptionsFactory.getOptions().isVerbose() ? "unable_to_translate" : "E_default", e);
         } finally {
             busy = false;
             notifyAll();

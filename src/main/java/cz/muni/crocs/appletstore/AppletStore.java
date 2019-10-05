@@ -114,10 +114,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                             } catch (LocalizedCardException e) {
                                 e.printStackTrace();
                                 window.getRefreshablePane().showError("E_loading_failed",
-                                        (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                                                e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause())
-                                        + "<br> CARD: " + manager.getLastCardDescriptor(),
-                                        "announcement_white.png");
+                                        "CARD: " + manager.getLastCardDescriptor() + "<br>",
+                                        "announcement_white.png", e);
                                 continue;
                             } finally {
                                 SwingUtilities.invokeLater(() -> {

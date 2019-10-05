@@ -68,6 +68,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
     @Override
     public Void callBack() {
         closeWarning();
+        notifyAll();
         return null;
     }
 
@@ -89,12 +90,21 @@ public class InformerImpl implements Informer, CallBack<Void> {
                 SwingUtilities.invokeLater(() -> {
                     context.showWarning(next.first);
                 });
-                try {
-                    Thread.sleep(next.second);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+
+                if (next.second != null) {
+                    try {
+                        Thread.sleep(next.second);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    SwingUtilities.invokeLater(this::closeWarning);
+                } else {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
-                SwingUtilities.invokeLater(this::closeWarning);
             }
         }).start();
     }

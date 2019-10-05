@@ -46,11 +46,11 @@ public class Warning extends JPanel {
                 break;
             case SEVERE:
                 image = "announcement.png";
-                setBackground(new Color(193, 95, 42));
+                setBackground(new Color(193, 137, 56));
                 break;
             case INFO:
                 image = "info.png";
-                setBackground(new Color(193, 149, 40));
+                setBackground(new Color(159, 193, 55));
                 break;
             default:
                 image = "info.png";

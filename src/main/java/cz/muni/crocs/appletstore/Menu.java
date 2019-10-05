@@ -3,9 +3,7 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.help.AppletUsage;
-import cz.muni.crocs.appletstore.help.Cmd;
-import cz.muni.crocs.appletstore.help.HelpWrapper;
+import cz.muni.crocs.appletstore.help.*;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -150,6 +148,20 @@ public class Menu extends JMenuBar {
                 new HelpWrapper(textSrc.getString("cmd"), new Cmd()).showIt();
             }
         }, textSrc.getString("H_cmd")));
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("auth")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWrapper(textSrc.getString("auth"), new MasterKey()).showIt();
+            }
+        }, textSrc.getString("H_auth")));
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("keybase")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWrapper(textSrc.getString("keybase"), new Keybase()).showIt();
+            }
+        }, textSrc.getString("H_keybase")));
     }
 
     /**

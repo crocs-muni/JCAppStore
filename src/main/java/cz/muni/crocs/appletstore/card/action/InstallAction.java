@@ -5,6 +5,7 @@ import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
+import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,12 @@ public class InstallAction extends CardAction {
             @Override
             public Void doInBackground() {
                 try {
+                    String keybase = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
+                    if (keybase == null || keybase.isEmpty()) {
+                        result = new Tuple<>("not_verified.png", textSrc.getString("no_keybase_path"));
+                        return null;
+                    }
+
                     result = new KeyBase().verifySignature(capfile.getAbsolutePath());
                 } catch (LocalizedSignatureException e) {
                     e.printStackTrace();
@@ -141,6 +148,9 @@ public class InstallAction extends CardAction {
         execute(() -> {
             manager.install(file, opts);
             manager.setLastAppletInstalled(opts.getAID());
+            SwingUtilities.invokeLater(() -> {
+                InformerFactory.getInformer().showWarning(textSrc.getString("installed"), Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000);
+            });
         }, "Failed to install applet.", textSrc.getString("install_failed"));
     }
 }

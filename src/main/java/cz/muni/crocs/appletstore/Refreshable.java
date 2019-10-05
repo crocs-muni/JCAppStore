@@ -16,5 +16,7 @@ public interface Refreshable {
      * @param keyText key to find in internacionalized bundle
      * @param imgNamec custom image to display
      */
-    void showError(String keyTitle, String keyText, String imgNamec) ;
+    void showError(String keyTitle, String keyText, String imgNamec);
+
+    void showError(String keyTitle, String text, String imgName, LocalizedException cause);
 }
