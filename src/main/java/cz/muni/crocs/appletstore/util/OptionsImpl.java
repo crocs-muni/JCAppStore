@@ -9,6 +9,8 @@ import java.awt.*;
 import java.io.*;
 import java.util.HashMap;
 
+import static cz.muni.crocs.appletstore.Config.S;
+
 public class OptionsImpl implements Options<String> {
     private static final Logger logger = LoggerFactory.getLogger(OptionsImpl.class);
 
@@ -16,6 +18,7 @@ public class OptionsImpl implements Options<String> {
     private StyleSheet sheet;
     private Font text;
     private Font title;
+    private final String HEADER = "JCAppStore";
 
     public OptionsImpl() {
         getFileOptions();
@@ -43,9 +46,9 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_BACKGROUND, "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");  //true false
-        options.put(Options.KEY_STYLESHEET, "src/main/resources/css/default.css");
+        options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
         options.put(Options.KEY_FONT, null);
-        options.put(Options.KEY_TITLE_FONT, "src/main/resources/fonts/title.ttf");
+        options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
         options.put(Options.KEY_KEYBASE_LOCATION, "");
         options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
     }
@@ -102,10 +105,10 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void save() {
-        File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
+        File file = new File(Config.OPTIONS_FILE);
         try {
             if (!file.exists()) file.createNewFile();
-            IniParser parser = new IniParserImpl(file, "JCAppStore", "");
+            IniParser parser = new IniParserImpl(file, HEADER, "");
             options.forEach(parser::addValue);
             parser.store();
         } catch (IOException e) {
@@ -115,11 +118,11 @@ public class OptionsImpl implements Options<String> {
 
     private void getFileOptions() {
         options = new HashMap<>();
-        File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
+        File file = new File(Config.OPTIONS_FILE);
 
         try {
             if (!file.createNewFile()) {
-                IniParser parser = new IniParserImpl(file, "JCAppStore", "");
+                IniParser parser = new IniParserImpl(file, HEADER, "");
                 for (String key : parser.keySet()) {
                     options.put(key, parser.getValue(key));
                 }

@@ -3,21 +3,19 @@ package cz.muni.crocs.appletstore.card.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.crypto.KeyBase;
-import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
+import cz.muni.crocs.appletstore.crypto.SignatureImpl;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
-import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.stream.Stream;
+
 import static pro.javacard.gp.GPRegistryEntry.Kind;
 
 
@@ -35,24 +33,28 @@ public class InstallAction extends CardAction {
     private File capfile;
     private AppletInfo info;
     private String titleBar;
+    private String signer;
+    private String keyUrl;
     private boolean fromCustomFile = false;
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed,
+    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer, String keyUrl,
                          OnEventCallBack<Void, Void, Void> call) {
         super(call);
         this.installed = installed;
         this.capfile = capfile;
         this.titleBar = titleBar;
+        this.signer = signer;
+        this.keyUrl = keyUrl;
         this.info = info;
     }
 
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
-        this("", null, null, false, call);
+        this("", null, null, false, null, null, call);
         this.fromCustomFile = true;
     }
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, OnEventCallBack<Void, Void, Void> call) {
-        this(titleBar, info, capfile, false, call);
+    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer, String keyUrl, OnEventCallBack<Void, Void, Void> call) {
+        this(titleBar, info, capfile, false, signer, keyUrl, call);
     }
 
     @Override
@@ -60,6 +62,7 @@ public class InstallAction extends CardAction {
         if (capfile == null) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
 
         if (fromCustomFile) {
+            //todo install dialog add custom verify option
             showInstallDialog("custom_file", "verify_no_keybase.png");
             return;
         }
@@ -78,19 +81,10 @@ public class InstallAction extends CardAction {
 
             @Override
             public Void doInBackground() {
-                try {
-                    String keybase = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
-                    if (keybase == null || keybase.isEmpty()) {
-                        result = new Tuple<>("not_verified.png", textSrc.getString("no_keybase_path"));
-                        return null;
-                    }
-
-                    result = new KeyBase().verifySignature(capfile.getAbsolutePath());
-                } catch (LocalizedSignatureException e) {
-                    e.printStackTrace();
-                    result = new Tuple<>("not_verified.png", textSrc.getString("H_verify_failed")
-                            + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                            e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
+                if (keyUrl == null || keyUrl.trim().isEmpty()) {
+                    result = new SignatureImpl().verifyAndReturnMessage(signer, capfile);
+                } else {
+                    result = new SignatureImpl().verifyPGPAndReturnMessage(signer, keyUrl, capfile);
                 }
                 return null;
             }

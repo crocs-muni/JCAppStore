@@ -38,7 +38,7 @@ public class DownloaderWorker extends SwingWorker<String, Object> implements Pro
     public String doInBackground() {
         setProgress(0);
 
-        String[] storeInfo = InternetConnection.checkAndGetLatestReleaseVersion(
+        String[] storeInfo = GitHubInternetConnection.checkAndGetLatestReleaseVersion(
                 OptionsFactory.getOptions().getOption(Options.KEY_GITHUB_LATEST_VERSION)
         );
 

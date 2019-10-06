@@ -24,7 +24,7 @@ public class BackgroundImgPanel extends JPanel {
 
     public BackgroundImgPanel() {
         String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-        File f = new File(Config.APP_DATA_DIR + Config.SEP + bgImagname);
+        File f = new File(Config.APP_DATA_DIR + Config.S + bgImagname);
 
         if (bgImagname == null || bgImagname.isEmpty() || !f.exists()) {
             loadDefault();

@@ -243,7 +243,7 @@ public class CardManagerImpl implements CardManager {
         appletInfoList.add(new AppletInfo(info.getName(), null, info.getVersion(), info.getAuthor(),
                 info.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS));
         AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
-        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
     private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
@@ -255,7 +255,7 @@ public class CardManagerImpl implements CardManager {
             }
         }
         AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
-        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
     private void deleteInfo(List<AppletInfo> list, AID toDelete) {

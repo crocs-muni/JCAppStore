@@ -111,7 +111,10 @@ public class StoreItemInfo extends HintPanel {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         fireInstall(appletName, getInfoPack(dataSet, latestV,
-                                sdks, sdks.size() - 1), callback, installed, e);
+                                sdks, sdks.size() - 1),
+                                dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
+                                dataSet.get(Config.JSON_TAG_PGP_KEY).getAsString(),
+                                callback, installed, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
@@ -205,7 +208,10 @@ public class StoreItemInfo extends HintPanel {
                                 .get(version).getAsJsonArray();
 
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, version, sdks, compilerIdx), call, installed, e);
+                                getInfoPack(dataSet, version, sdks, compilerIdx),
+                                dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
+                                dataSet.get(Config.JSON_TAG_PGP_KEY).getAsString(),
+                                call, installed, e);
                     }
                 });
         add(customInst, "gapleft 10");
@@ -291,12 +297,12 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private static String getInstallFileName(String appletName, String version, String sdkVersion) {
-        return Config.APP_STORE_CAPS_DIR + Config.SEP +
-                appletName + Config.SEP + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
+        return Config.APP_STORE_CAPS_DIR + Config.S +
+                appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call,
-                                    boolean installed, MouseEvent e) {
+    private static void fireInstall(String name, AppletInfo info, String signer, String keyUrl,
+                                    OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
 
@@ -307,6 +313,7 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
+        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
+                info, file, installed, signer, keyUrl, call).mouseClicked(e);
     }
 }

@@ -32,7 +32,7 @@ public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
         if (registry == null || cardId == null) return false;
 
         AppletSerializer<List<AppletInfo>> savedData = new AppletSerializerImpl();
-        File file = new File(Config.APP_DATA_DIR + Config.SEP + cardId);
+        File file = new File(Config.APP_DATA_DIR + Config.S + cardId);
 
         List<AppletInfo> saved;
         if (file.exists()) {

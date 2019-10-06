@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.crypto;
 
+import cz.muni.crocs.appletstore.util.Tuple;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -9,26 +11,88 @@ import java.io.IOException;
  */
 public interface Signature {
 
-    String KEYBASE = "keybase";
-
     /**
-     * Verify the file signature
+     * Verify the file signature with auto author deduction
+     * @param author author of the file
      * @param file path to the file to verify
      * @param fileSignature path to the signature file of the file
-     * @param keyFile path to the key to verify with
-     * @param method method to use for signature verification
      * @return true if signature successful
      */
-    boolean verify(String file, String fileSignature, String keyFile, String method) throws LocalizedSignatureException;
+    boolean verify(String author, String file, String fileSignature) throws LocalizedSignatureException;
+
+    /**
+     * Verify the file signature with auto author deduction
+     * @param author author of the file
+     * @param file file to verify
+     * @param fileSignature signature of the file
+     * @return true if signature successful
+     */
+    boolean verify(String author, File file, File fileSignature) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature
+     * @param author author of the file
+     * @param keyURL author's public key (.asc) file url
+     * @param file path to the file to verify
+     * @param fileSignature path to the signature file of the file
+     * @return true if file signature verified
+     * @throws LocalizedSignatureException when signature fails for reasons such as wrong parameters, failed to obrain key...
+     */
+    boolean verifyPGP(String author, String keyURL, String file, String fileSignature) throws LocalizedSignatureException;
+
+    /**
+     * Verify the file signature
+     * @param author author of the file
+     * @param keyURL author's public key (.asc) file url
      * @param file file to verify
-     * @param fileSignature signature of the file
-     * @param keyFile key to verify with
-     * @param method method to use for signature verification
+     * @param fileSignature the signature file of the file
+     * @return true if file signature verified
+     * @throws LocalizedSignatureException when signature fails for reasons such as wrong parameters, failed to obtain key...
+     */
+    boolean verifyPGP(String author, String keyURL, File file, File fileSignature) throws LocalizedSignatureException;
+
+    /**
+     * Verify the file signature with auto author deduction
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the signature, to verify that it was really signed by him, not by someone else
+     * @param file path to the file to verify
      * @return true if signature successful
      */
-    boolean verify(File file, File fileSignature, File keyFile, String method) throws LocalizedSignatureException;
+    Tuple<String, String> verifyAndReturnMessage(String author, String file);
+
+    /**
+     * Verify the file signature with auto author deduction
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the signature, to verify that it was really signed by him, not by someone else
+     * @param file file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyAndReturnMessage(String author, File file);
+
+    /**
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the file
+     * @param keyURL author's public key (.asc) file url
+     * @param file path to the file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String keyURL, String file);
+
+    /**
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the file
+     * @param keyURL author's public key (.asc) file url
+     * @param file file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String keyURL, File file);
 
 }

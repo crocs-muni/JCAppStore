@@ -50,7 +50,7 @@ public class BackgroundImageLoader {
         try {
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
-            OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
+            OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.S + imgName);
         } catch (IOException e) {
             e.printStackTrace();
             defaultBg();

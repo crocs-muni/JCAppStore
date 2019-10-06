@@ -35,12 +35,7 @@ public class KeyBase extends CmdTask {
         }
     }
 
-    public boolean verifySignature(File file, File signatureFile) throws LocalizedSignatureException {
-        if (!(file.exists() && signatureFile.exists())) {
-            //todo consider throw to send cause to user
-            return false;
-        }
-
+    boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (SystemUtils.IS_OS_MAC) {
             //todo run on mac
             return true;
@@ -48,39 +43,26 @@ public class KeyBase extends CmdTask {
             return new CmdTask().add("\"" + keybase + "\"").add("verify")
                     .add("-d").add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("-i").add("\"" + file.getAbsolutePath() + "\"")
-                    .processToString().contains("Signed by aiosa");
-            //todo now works only for aiosa user
+                    .processToString().contains("Signed by " + author);
         } else if (SystemUtils.IS_OS_UNIX) {
             //todo run on unix
             return true;
         } else return false;
     }
 
-    /**
-     * Gui-friendly version of the verify signature implementation, not much portable
-     *
-     * @param filePath path to file to verify the signature from, expects the signature to be in
-     *                 the same folder as filepath and be in form [filepath].sig
-     * @return image name for icon and description - designed for GUI JLabel / HintLabel
-     */
-    public Tuple<String, String> verifySignature(String filePath) throws LocalizedSignatureException {
-        String keybase = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
-        if (keybase == null || keybase.isEmpty())
-            return new Tuple<>("verify_no_keybase.png", "H_no_keybase");
-
-        return verifySignature(new File(filePath));
+    Tuple<String, String> verifySignature(String author, String filePath) throws LocalizedSignatureException {
+        return verifySignature(author, new File(filePath));
     }
 
-    /**
-     * Gui-friendly version of the verify signature implementation, not much portable
-     *
-     * @param file file to verify the signature from, expects the signature to be in
-     *             the same folder as filepath and be in form [filepath].sig
-     * @return image name for icon and description - designed for GUI JLabel / HintLabel
-     */
-    public Tuple<String, String> verifySignature(File file) throws LocalizedSignatureException {
-        if (verifySignature(file, new File(file + ".sig"))) {
-            return new Tuple<>("verify.png", textSrc.getString("H_verified") + "JCAppStore");
+
+    Tuple<String, String> verifySignature(String author, File file) throws LocalizedSignatureException {
+        if (!file.exists())
+            return new Tuple<>("verify_no_keybase.png", "H_no_file_keybase");
+        File sig = new File(file + ".sig");
+        if (!sig.exists())
+            return new Tuple<>("verify_no_keybase.png", "H_no_file_keybase");
+        if (verifySignature(author, file, sig)) {
+            return new Tuple<>("verify.png", textSrc.getString("H_verified") + "JCAppStore"); //todo get author
         } else {
             return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
         }
