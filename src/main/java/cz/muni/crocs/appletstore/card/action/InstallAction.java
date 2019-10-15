@@ -34,27 +34,27 @@ public class InstallAction extends CardAction {
     private AppletInfo info;
     private String titleBar;
     private String signer;
-    private String keyUrl;
+    private boolean pgp;
     private boolean fromCustomFile = false;
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer, String keyUrl,
+    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer, boolean pgp,
                          OnEventCallBack<Void, Void, Void> call) {
         super(call);
         this.installed = installed;
         this.capfile = capfile;
         this.titleBar = titleBar;
         this.signer = signer;
-        this.keyUrl = keyUrl;
+        this.pgp = pgp;
         this.info = info;
     }
 
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
-        this("", null, null, false, null, null, call);
+        this("", null, null, false, null, true, call);
         this.fromCustomFile = true;
     }
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer, String keyUrl, OnEventCallBack<Void, Void, Void> call) {
-        this(titleBar, info, capfile, false, signer, keyUrl, call);
+    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer, boolean pgp, OnEventCallBack<Void, Void, Void> call) {
+        this(titleBar, info, capfile, false, signer, pgp, call);
     }
 
     @Override
@@ -81,10 +81,10 @@ public class InstallAction extends CardAction {
 
             @Override
             public Void doInBackground() {
-                if (keyUrl == null || keyUrl.trim().isEmpty()) {
-                    result = new SignatureImpl().verifyAndReturnMessage(signer, capfile);
+                if (pgp) {
+                    result = new SignatureImpl().verifyPGPAndReturnMessage(signer, capfile);
                 } else {
-                    result = new SignatureImpl().verifyPGPAndReturnMessage(signer, keyUrl, capfile);
+                    result = new SignatureImpl().verifyAndReturnMessage(signer, capfile);
                 }
                 return null;
             }

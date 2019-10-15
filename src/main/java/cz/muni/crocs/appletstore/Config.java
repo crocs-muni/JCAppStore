@@ -18,7 +18,6 @@ public class Config {
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + S + "store");
     public static final File APP_STORE_CAPS_DIR = checkFolders(APP_ROOT_DIR + S + "store" + S + "JCApplets");
     public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + S + "my_applets");
-    public static final File APP_KEY_DIR = checkFolders(APP_ROOT_DIR + S + "keys");
 
     //app internal dirs
     public static final String RESOURCES_DIR = "src"+S+"main"+S+"resources"+S;
@@ -62,7 +61,7 @@ public class Config {
     public static final String JSON_TAG_USAGE = "usage";
     public static final String JSON_TAG_KEYS = "keys";
     public static final String JSON_TAG_HOST = "host_app";
-    public static final String JSON_TAG_PGP_KEY = "pgp_key";
+    public static final String JSON_TAG_PGP_KEY_ID = "pgp";
     public static final String JSON_TAG_SIGNER = "signed_by";
     public static final String RESOURCES = Config.APP_STORE_DIR + Config.S + "Resources" + Config.S;
 

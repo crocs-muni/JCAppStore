@@ -34,7 +34,7 @@ public class Settings extends JPanel {
             new Tuple<>("cz", "Česky")
     };
 
-    private JTextField keybase;
+    private JTextField pgp;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
@@ -49,7 +49,7 @@ public class Settings extends JPanel {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        buildKeyBase();
+        buildPGP();
         buildLanguage();
         buildHint();
         buildErrorMode();
@@ -57,37 +57,37 @@ public class Settings extends JPanel {
     }
 
     public void apply() {
-        saveKeyBase();
+        savePGP();
         saveBackgroundImage();
         saveLanguage();
         saveHint();
         saveErrorMode();
     }
 
-    private void buildKeyBase() {
-        addTitleLabel(textSrc.getString("keybase_loc"), "");
+    private void buildPGP() {
+        addTitleLabel(textSrc.getString("pgp_loc"), "");
 
-        JButton specify = new JButton(new AbstractAction(textSrc.getString("keybase_specify_loc")) {
+        JButton specify = new JButton(new AbstractAction(textSrc.getString("pgp_specify_loc")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = getKeybaseFileChooser();
+                JFileChooser fileChooser = getPGPFileChooser();
                 int r = fileChooser.showOpenDialog(null);
                 if (r == JFileChooser.APPROVE_OPTION) {
-                    keybase.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                    keybase.setForeground(Color.BLACK);
-                    ((InputHintTextField)keybase).setShowHint(false);
+                    pgp.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    pgp.setForeground(Color.BLACK);
+                    ((InputHintTextField)pgp).setShowHint(false);
                 }
             }
         });
         add(specify, "span 2, align right, wrap");
 
-        String path = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
+        String path = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (path == null) path = "";
 
-        keybase = new InputHintTextField(path, textSrc.getString("H_keybase_loc"));
-        keybase.setFont(OptionsFactory.getOptions().getFont(12f));
-        keybase.setBorder(frame);
-        add(keybase, "span 3, growx, wrap");
+        pgp = new InputHintTextField(path, textSrc.getString("H_pgp_loc"));
+        pgp.setFont(OptionsFactory.getOptions().getFont(12f));
+        pgp.setBorder(frame);
+        add(pgp, "span 3, growx, wrap");
     }
 
     private void buildBackground() {
@@ -191,7 +191,7 @@ public class Settings extends JPanel {
         return fileChooser;
     }
 
-    private JFileChooser getKeybaseFileChooser() {
+    private JFileChooser getPGPFileChooser() {
         return getShaderFileChoser(new File(System.getProperty("user.home")));
     }
 
@@ -247,8 +247,8 @@ public class Settings extends JPanel {
         OptionsFactory.getOptions().addOption(Options.KEY_ERROR_MODE, verboseEnabled.isSelected() ? "verbose" : "default");
     }
 
-    private void saveKeyBase() {
-        OptionsFactory.getOptions().addOption(Options.KEY_KEYBASE_LOCATION, keybase.getText());
+    private void savePGP() {
+        OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, pgp.getText());
     }
 
     /**

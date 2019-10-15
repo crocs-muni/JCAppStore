@@ -58,6 +58,17 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      */
     private void setup() {
         HTMLEditorKit kit = new HTMLEditorKit();
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);

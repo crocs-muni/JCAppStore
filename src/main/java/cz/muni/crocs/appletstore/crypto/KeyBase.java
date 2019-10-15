@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * IF IMPLEMENTING DEFINE THE TRANSLATION STRINGS
  * Detect Keybase App if installed on the computer & perform signature verification
  * <p>
  * keybase id aiosa

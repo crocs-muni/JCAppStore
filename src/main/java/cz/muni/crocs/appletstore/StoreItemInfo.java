@@ -113,7 +113,7 @@ public class StoreItemInfo extends HintPanel {
                         fireInstall(appletName, getInfoPack(dataSet, latestV,
                                 sdks, sdks.size() - 1),
                                 dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
-                                dataSet.get(Config.JSON_TAG_PGP_KEY).getAsString(),
+                                dataSet.get(Config.JSON_TAG_PGP_KEY_ID).getAsString(),
                                 callback, installed, e);
                     }
                 });
@@ -121,7 +121,7 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void checkHostApp(JsonObject dataSet) {
-        if (!dataSet.get(Config.JSON_TAG_HOST).getAsString().trim().toLowerCase().equals("true")) {
+        if (!dataSet.get(Config.JSON_TAG_HOST).getAsBoolean()) {
             add(Components.getNotice(
                     textSrc.getString("W_no_host_app"),
                     OptionsFactory.getOptions().getFont(),
@@ -210,7 +210,7 @@ public class StoreItemInfo extends HintPanel {
                         fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
                                 dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
-                                dataSet.get(Config.JSON_TAG_PGP_KEY).getAsString(),
+                                dataSet.get(Config.JSON_TAG_PGP_KEY_ID).getAsString(),
                                 call, installed, e);
                     }
                 });
@@ -301,7 +301,7 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, String signer, String keyUrl,
+    private static void fireInstall(String name, AppletInfo info, String signer, String keyid,
                                     OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
@@ -314,6 +314,6 @@ public class StoreItemInfo extends HintPanel {
         }
 
         new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, installed, signer, keyUrl, call).mouseClicked(e);
+                info, file, installed, signer, pgp, call).mouseClicked(e);
     }
 }
