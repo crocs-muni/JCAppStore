@@ -39,7 +39,7 @@ public interface Signature {
      * @return true if file signature verified
      * @throws LocalizedSignatureException when signature fails for reasons such as wrong parameters, failed to obrain key...
      */
-    boolean verifyPGP(String author, String keyID, String file, String fileSignature) throws LocalizedSignatureException;
+    boolean verifyPGP(String author, String file, String fileSignature) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature
@@ -49,7 +49,7 @@ public interface Signature {
      * @return true if file signature verified
      * @throws LocalizedSignatureException when signature fails for reasons such as wrong parameters, failed to obtain key...
      */
-    boolean verifyPGP(String author, String keyID, File file, File fileSignature) throws LocalizedSignatureException;
+    boolean verifyPGP(String author, File file, File fileSignature) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -81,7 +81,7 @@ public interface Signature {
      * @param file path to the file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String keyID, String file);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file);
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -91,6 +91,6 @@ public interface Signature {
      * @param file file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String keyID, File file);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file);
 
 }

@@ -30,31 +30,43 @@ public class InstallAction extends CardAction {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private boolean installed;
+    private boolean pgp = true; //now only pgp
     private File capfile;
     private AppletInfo info;
     private String titleBar;
     private String signer;
-    private boolean pgp;
+    private String identifier;
     private boolean fromCustomFile = false;
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer, boolean pgp,
-                         OnEventCallBack<Void, Void, Void> call) {
+    /**
+     * Create an install action
+     * @param titleBar title of the dialog
+     * @param info info about the applet to install
+     * @param capfile file with the compiled sourcecode
+     * @param installed whether installed on the card already
+     * @param signer signer's name
+     * @param identifier signer's identifier, can be either his email or key ID
+     * @param call callback that is called before action and after failure or after success
+     */
+    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer,
+                         String identifier, OnEventCallBack<Void, Void, Void> call) {
         super(call);
         this.installed = installed;
         this.capfile = capfile;
         this.titleBar = titleBar;
         this.signer = signer;
-        this.pgp = pgp;
+        this.identifier = identifier;
         this.info = info;
     }
 
     public InstallAction(OnEventCallBack<Void, Void, Void> call) {
-        this("", null, null, false, null, true, call);
+        this("", null, null, false, null, "", call);
         this.fromCustomFile = true;
     }
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer, boolean pgp, OnEventCallBack<Void, Void, Void> call) {
-        this(titleBar, info, capfile, false, signer, pgp, call);
+    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer,
+                         String identifier, OnEventCallBack<Void, Void, Void> call) {
+        this(titleBar, info, capfile, false, signer, identifier, call);
     }
 
     @Override
@@ -92,6 +104,9 @@ public class InstallAction extends CardAction {
             @Override
             protected void done() {
                 dialog.dispose();
+                if (result == null) {
+                    result = new Tuple<>("verify.png", textSrc.getString("H_verified") + signer);
+                }
                 showInstallDialog(result.second, result.first);
             }
         }.execute();
