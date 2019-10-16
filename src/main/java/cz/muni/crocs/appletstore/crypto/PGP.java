@@ -29,8 +29,8 @@ public class PGP extends CmdTask {
         location = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (!verified) {
             if (location == null || location.isEmpty()) {
-                location = getPGPPath();
-                OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, location);
+                location = "gpg";
+                //todo try run gpg --help / about if not working norify no gpg specify path
             }
             if (!new File(location).exists())
                 throw new LocalizedSignatureException("Keybase not present.", "no_pgp");
@@ -81,24 +81,6 @@ public class PGP extends CmdTask {
                 return true;
         }
         return false;
-    }
-
-    private static String getPGPPath() throws LocalizedSignatureException {
-        String res = getPGPPathSafe();
-        if (!res.isEmpty())
-            return res;
-        throw new LocalizedSignatureException("GnuPG no path given.", "no_pgp_path");
-    }
-
-    public static String getPGPPathSafe() {
-        String env = System.getenv("PATH");
-        if (env == null || env.isEmpty()) return "";
-        String[] paths = env.split(System.getProperty("path.separator"));
-        for (String path : paths) {
-            if (path.contains("GnuPG"))
-                return path;
-        }
-        return "";
     }
 
     public String getKeyID(File key) throws LocalizedSignatureException {
