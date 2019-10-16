@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.crypto.PGP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,13 +44,13 @@ public class OptionsImpl implements Options<String> {
         //todo use delimiter of system
         options.clear();
         options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
-        options.put(Options.KEY_BACKGROUND, "bg.jpg");
+        options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");  //true false
         options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
         options.put(Options.KEY_FONT, null);
         options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
-        options.put(Options.KEY_PGP_LOCATION, "");
+        options.put(Options.KEY_PGP_LOCATION, PGP.getPGPPathSafe());
         options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
     }
 

@@ -84,14 +84,21 @@ public class PGP extends CmdTask {
     }
 
     private static String getPGPPath() throws LocalizedSignatureException {
+        String res = getPGPPathSafe();
+        if (!res.isEmpty())
+            return res;
+        throw new LocalizedSignatureException("GnuPG no path given.", "no_pgp_path");
+    }
+
+    public static String getPGPPathSafe() {
         String env = System.getenv("PATH");
-        if (env == null || env.isEmpty()) throw new LocalizedSignatureException("GnuPG no path given.", "no_pgp_path");
+        if (env == null || env.isEmpty()) return "";
         String[] paths = env.split(System.getProperty("path.separator"));
         for (String path : paths) {
             if (path.contains("GnuPG"))
                 return path;
         }
-        throw new LocalizedSignatureException("GnuPG no path given.", "no_pgp_path");
+        return "";
     }
 
     public String getKeyID(File key) throws LocalizedSignatureException {
