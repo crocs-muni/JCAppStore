@@ -96,15 +96,21 @@ public class ImportPGPKey extends JPanel {
         add(pgpkey, "span 2, growx, wrap");
 
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
-        labelTable.put(1, new JLabel(textSrc.getString("trust_1")) );
-        labelTable.put(2, new JLabel(textSrc.getString("trust_2")) );
-        labelTable.put(3, new JLabel(textSrc.getString("trust_3")) );
-        labelTable.put(4, new JLabel(textSrc.getString("trust_4")) );
-        labelTable.put(5, new JLabel(textSrc.getString("trust_5")) );
+        labelTable.put(1, new JLabel("1") );
+        labelTable.put(2, new JLabel("2") );
+        labelTable.put(3, new JLabel("3") );
+        labelTable.put(4, new JLabel("4") );
+        labelTable.put(5, new JLabel("5") );
         slider.setLabelTable(labelTable);
         slider.setPaintLabels(true);
         slider.setPreferredSize(new Dimension(380, slider.getPreferredSize().height));
         add(slider, "span 2, growx, wrap");
+
+        add(new JLabel("1\t" + textSrc.getString("trust_1")), "span 2, wrap");
+        add(new JLabel("2\t" + textSrc.getString("trust_2")), "span 2, wrap");
+        add(new JLabel("3\t" + textSrc.getString("trust_3")), "span 2, wrap");
+        add(new JLabel("4\t" + textSrc.getString("trust_4")), "span 2, wrap");
+        add(new JLabel("5\t" + textSrc.getString("trust_5")), "span 2, wrap");
     }
 
     private JFileChooser getKeyChooser() {
