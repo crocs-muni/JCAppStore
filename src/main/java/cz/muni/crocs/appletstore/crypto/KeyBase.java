@@ -26,7 +26,7 @@ public class KeyBase extends CmdTask {
     private String keybase;
 
     public KeyBase() throws LocalizedSignatureException {
-        keybase = OptionsFactory.getOptions().getOption(Options.KEY_KEYBASE_LOCATION);
+        keybase = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (!verified) {
             if (keybase == null || keybase.isEmpty())
                 throw new LocalizedSignatureException("Keybase no path given.", "no_keybase_path");

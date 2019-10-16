@@ -121,7 +121,7 @@ public class Menu extends JMenuBar {
                     pgpKey.apply();
                 }
             }
-        }, textSrc.getString("H_key_import"),Config.IMAGE_DIR + "key.png"));
+        }, textSrc.getString("H_key_import"),Config.IMAGE_DIR + "key_small.png"));
 
         menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
@@ -170,12 +170,12 @@ public class Menu extends JMenuBar {
             }
         }, textSrc.getString("H_auth")));
 
-        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("keybase")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new HelpWrapper(textSrc.getString("keybase"), new Keybase()).showIt();
-            }
-        }, textSrc.getString("H_keybase")));
+//        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("pgp")) {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                new HelpWrapper(textSrc.getString("pgp"), new Keybase()).showIt();
+//            }
+//        }, textSrc.getString("H_pgp")));
     }
 
     /**

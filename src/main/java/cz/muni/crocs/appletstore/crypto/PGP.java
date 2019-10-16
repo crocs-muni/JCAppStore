@@ -43,7 +43,7 @@ public class PGP extends CmdTask {
             //todo run on mac
             return true;
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            String result = new CmdTask().add("\"" + location + "\"").add("verify")
+            String result = new CmdTask().add(location).add("verify")
                     .add("-d").add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("-i").add("\"" + file.getAbsolutePath() + "\"")
                     .processToString();
@@ -74,7 +74,7 @@ public class PGP extends CmdTask {
 
     //not tested
     private boolean hasKeyInRing(String keyId, String signer) throws LocalizedSignatureException {
-        String[] result = new CmdTask().add("\"" + location + "\"").add("--list-keys")
+        String[] result = new CmdTask().add(location).add("--list-keys")
                 .add("-d").processToString().split("\n");
         for (int i = 0; i < result.length; i += 2) {
             if (result[i].contains(keyId) && result[i + 1].contains(signer))
@@ -96,7 +96,7 @@ public class PGP extends CmdTask {
 
     public String getKeyID(File key) throws LocalizedSignatureException {
         if (!key.exists()) return null;
-        String res = new CmdTask().add("\"" + location + "\"").add("--with-fingerprint")
+        String res = new CmdTask().add(location).add("--with-fingerprint")
                 .add(key.getAbsolutePath()).processToString();
         Matcher m = pattern.matcher(res);
         if (m.find()) {
@@ -107,7 +107,7 @@ public class PGP extends CmdTask {
     }
 
     public boolean importKey(File key) throws LocalizedSignatureException {
-        Process p = new CmdTask().add("\"" + location + "\"").add("--import")
+        Process p = new CmdTask().add(location).add("--import")
                 .add(key.getAbsolutePath()).process();
         int res = p.exitValue();
         p.destroy();
@@ -136,14 +136,14 @@ public class PGP extends CmdTask {
                     .add("&echo").add("y")
                     .add("&echo").add("quit").add(")")
                     .add("|")
-                    .add("\"" + location + "\"")
+                    .add(location)
                     .add("--command-fd")
                     .add("0").add("--edit-key").add(key).process();
 
         } else {
             p = new CmdTask().add("echo").add("-e")
                     .add("\"" + level + "\ny\n\"").add("|")
-                    .add("\"" + location + "\"").add("--homedir")
+                    .add(location).add("--homedir")
                     .add(".").add("--command-fd").add("0")
                     .add("--expert").add("--edit-key").add(key).process();
         }

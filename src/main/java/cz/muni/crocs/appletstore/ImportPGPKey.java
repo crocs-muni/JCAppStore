@@ -74,7 +74,7 @@ public class ImportPGPKey extends JPanel {
     private void buildPGP() {
         JLabel title = new JLabel(textSrc.getString("pgp_key_loc"));
         title.setFont(OptionsFactory.getOptions().getFont());
-        add(title, "wrap");
+        add(title, "");
 
         JButton specify = new JButton(new AbstractAction(textSrc.getString("key_specify_loc")) {
             @Override
@@ -93,7 +93,7 @@ public class ImportPGPKey extends JPanel {
         pgpkey = new InputHintTextField("", textSrc.getString("H_pgp_loc"));
         pgpkey.setFont(OptionsFactory.getOptions().getFont(12f));
         pgpkey.setBorder(frame);
-        add(pgpkey, "growx, wrap");
+        add(pgpkey, "span 2, growx, wrap");
 
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
         labelTable.put(1, new JLabel(textSrc.getString("trust_1")) );
@@ -103,7 +103,8 @@ public class ImportPGPKey extends JPanel {
         labelTable.put(5, new JLabel(textSrc.getString("trust_5")) );
         slider.setLabelTable(labelTable);
         slider.setPaintLabels(true);
-        add(slider);
+        slider.setPreferredSize(new Dimension(380, slider.getPreferredSize().height));
+        add(slider, "span 2, growx, wrap");
     }
 
     private JFileChooser getKeyChooser() {
