@@ -71,7 +71,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         storeLayout.removeAll();
         if (sortedItems.size() == 0) {
             storeLayout.add(new StoreItem(textSrc.getString("no_results"),
-                    "no_results.png", "", ""));
+                    "", "", "no_results.png"));
         } else {
             for (StoreItem item : sortedItems) {
                 storeLayout.add(item);

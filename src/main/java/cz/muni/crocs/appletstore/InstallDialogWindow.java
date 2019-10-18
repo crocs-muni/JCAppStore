@@ -43,9 +43,12 @@ public class InstallDialogWindow extends JPanel {
     private JCheckBox forceInstall = new JCheckBox();
     private JCheckBox hasKeys = new JCheckBox();
     private JTextField[] customAIDs;
-    private JCheckBox advanced = new JCheckBox();
+    private JPanel advanced = new JPanel();
     private ButtonGroup selectedAID = new ButtonGroup();
+
     private AppletInfo info;
+    private CAPFile src;
+    private boolean isInstalled;
 
     private Color wrong = new Color(0xA3383D);
 
@@ -53,25 +56,84 @@ public class InstallDialogWindow extends JPanel {
 
     public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
         this.info = info;
-        build(file, isInstalled, verifyMsg);
+        this.src = file;
+        this.isInstalled = isInstalled;
+        build(verifyMsg);
     }
 
-    private void build(CAPFile file, boolean installed, String verified) {
-        setLayout(new MigLayout("width 250px"));
-        add(new HtmlLabel("<p width=\"600\">" + verified + "</p>"),
-                "wrap, span 5, gapbottom 10");
-        if (installed) {
-            add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
-                    "wrap, span 5, gapbottom 10");
+    /**
+     * Build advanced section of the dialog, if not called only metadata section shown
+     * @param parent parent window to resize on switch
+     */
+    public void buildAdvanced(Window parent) {
+        if (parent == null)
+            return;
+
+        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "arrow_small.png")), "gaptop 11");
+        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
+        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
+        more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        add(more, "gaptop 11, span 4, wrap");
+
+        more.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (advanced.isVisible()) {
+                    advanced.setVisible(false);
+                    remove(advanced);
+                } else {
+                    advanced.setVisible(true);
+                    add(advanced, "span 5, wrap");
+                }
+                parent.pack();
+            }
+        });
+        buildAdvanced();
+    }
+
+    /**
+     * Get applet install information
+     * @return null if basic installation,
+     * array with [installation arguments, force install, selected applet to install] values
+     */
+    public InstallOpts getInstallOpts() {
+        String aid = getSelectedAID();
+        AppletInfo details;
+        if (info == null) {
+            details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
+                    sdk.getText(), aid, KeysPresence.UNKNOWN);
+        } else {
+            details = info;
+            info.setAID(aid);
         }
+
+        if (isAdvanced())
+            return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), installParams.getText());
+        else return new InstallOpts(getCustomAppletName(aid), details, isInstalled, new byte[0]);
+    }
+
+    public boolean validInstallParams() {
+        String text = installParams.getText();
+        return text == null || validHex(text);
+    }
+
+    public boolean validAID() {
+        String aid = getSelectedAID();
+        if (aid == null)
+            return false;
+        return validAID(aid);
+    }
+
+    private void build(String verifiedMsg) {
+        setLayout(new MigLayout("width 250px"));
+        add(new HtmlLabel("<p width=\"600\">" + verifiedMsg + "</p>"), "wrap, span 5, gapbottom 10");
 
         add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
                 "wrap, span 5, gapbottom 10");
 
         add(new JLabel(textSrc.getString("pkg_id")), "span 2");
-        add(new JLabel(file.getPackageAID().toString()), "span 3, wrap");
+        add(new JLabel(src.getPackageAID().toString()), "span 3, wrap");
         buildMetaDataSection();
-        buildAdvanced(file, installed);
     }
 
     private void buildMetaDataSection() {
@@ -104,31 +166,21 @@ public class InstallDialogWindow extends JPanel {
         add(getHint("H_has_keys", "600"), "span 5, wrap");
     }
 
-    private void buildAdvanced(CAPFile file, boolean installed) {
-        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
-        add(more, "span 2");
+    private boolean isAdvanced() {
+        return advanced.isVisible();
+    }
 
-        advanced.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                installParams.setEnabled(advanced.isSelected());
-                forceInstall.setEnabled(advanced.isSelected());
-                enableAll(advanced.isSelected());
-            }
-        });
-        add(advanced);
+    private void buildAdvanced() {
+        advanced.setLayout(new MigLayout());
+        advanced.setVisible(false);
+        advanced.add(getHint("H_advanced_syntax", "300"), "span 5, wrap");
+        advanced.add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
-        add(getHint("H_advanced_syntax", "300"), "wrap");
+        addAllAppletCustomAIDSFields(advanced, src.getAppletAIDs());
 
-        add(new JLabel(textSrc.getString("applet_ids")), "span 2");
+        advanced.add(getHint("H_default_aid", "600"), "span 5, wrap");
 
-        addAllAppletCustomAIDSFields(file.getAppletAIDs());
-
-        add(getHint("H_default_aid", "600"), "span 5, wrap");
-
-        add(new JLabel(textSrc.getString("install_params")), "span 2");
-        installParams.setEnabled(false);
+        advanced.add(new JLabel(textSrc.getString("install_params")), "span 2");
         installParams.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -145,22 +197,26 @@ public class InstallDialogWindow extends JPanel {
                 installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
             }
         });
-        add(installParams, "span 3, wrap");
-        add(getHint("H_install_params", "600"), "span 5, wrap");
+        advanced.add(installParams, "span 3, wrap");
+        advanced.add(getHint("H_install_params", "600"), "span 5, wrap");
 
-        forceInstall.setEnabled(false);
-        forceInstall.setSelected(installed);
-        add(forceInstall);
+        forceInstall.setSelected(isInstalled);
+        advanced.add(forceInstall);
 
-        add(new JLabel(textSrc.getString("force_install")), "span 4, wrap");
-        add(getHint("H_force_install", "600"), "span 5, wrap");
+        advanced.add(new JLabel(textSrc.getString("force_install")), "span 4, wrap");
+        advanced.add(getHint("H_force_install", "600"), "span 5, wrap");
+        if (isInstalled) {
+            advanced.add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
+                    "wrap, span 5, gapbottom 10");
+        }
+        add(advanced, "span 5, wrap");
     }
 
     /**
      * List all applets to possibly install
      * @param applets list to install
      */
-    private void addAllAppletCustomAIDSFields(List<AID> applets) {
+    private void addAllAppletCustomAIDSFields(JPanel to, List<AID> applets) {
         customAIDs = new JTextField[applets.size()];
         int i = 0;
         for (AID applet : applets) {
@@ -189,12 +245,12 @@ public class InstallDialogWindow extends JPanel {
                     button.setToolTipText(f.getText());
                 }
             });
-            add(f, "span 2");
-            add(button, "wrap");
-            add(new JLabel(), "span 2"); //empty label to align
+            to.add(f, "span 2");
+            to.add(button, "wrap");
+            to.add(new JLabel(), "span 2"); //empty label to align
             customAIDs[i++] = f;
         }
-        add(new JLabel(), "wrap"); //cut line
+        to.add(new JLabel(), "wrap"); //cut line
         //set first selected
         Enumeration elements = selectedAID.getElements();
         if (elements.hasMoreElements()) {
@@ -220,8 +276,10 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private String getSelectedAID() {
-        if (selectedAID.getSelection() == null)
-            return null;
+        if (selectedAID.getSelection() == null) {
+            List<AID> aids = src.getAppletAIDs();
+            return (aids.size() > 0) ? src.getAppletAIDs().get(0).toString() : null;
+        }
         return selectedAID.getSelection().getActionCommand();
     }
 
@@ -232,43 +290,9 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String langKey, String width) {
-        JLabel hint = new HtmlLabel("<p width=\"" +
-                width + "\">" + textSrc.getString(langKey) + "</p>");
+        JLabel hint = new HtmlLabel("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
-    }
-
-    /**
-     * Get applet install information
-     * @return null if basic installation,
-     * array with [installation arguments, force install, selected applet to install] values
-     */
-    public InstallOpts getInstallOpts() {
-        String aid = getSelectedAID();
-        AppletInfo details;
-        if (info == null) {
-            details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
-                    sdk.getText(), aid, KeysPresence.UNKNOWN);
-        } else {
-            details = info;
-            info.setAID(aid);
-        }
-
-        if (advanced.isSelected())
-            return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), installParams.getText());
-        else return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), new byte[0]);
-    }
-
-    public boolean validInstallParams() {
-        String text = installParams.getText();
-        return text == null || validHex(text);
-    }
-
-    public boolean validAID() {
-        String aid = getSelectedAID();
-        if (aid == null)
-            return false;
-        return validAID(aid);
     }
 
     private static boolean validAID(JTextField field) {

@@ -266,7 +266,7 @@ public class CardInstance {
             //ugly, but the GP is designed in a way it does not allow me to do otherwise
             if (e.getMessage().startsWith("STRICT WARNING: ")) {
                 updateCardAuth(false);
-                fail(card, e, "E_secure_channel_error");
+                fail(card, e, "H_authentication");
             }
             fail(card, e, "E_unknown_error");
         }

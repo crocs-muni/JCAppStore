@@ -3,19 +3,23 @@ package cz.muni.crocs.appletstore.card.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.*;
+import jdk.nashorn.internal.scripts.JD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static javax.swing.JOptionPane.CLOSED_OPTION;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
 
 
@@ -30,7 +34,6 @@ public class InstallAction extends CardAction {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private boolean installed;
-    private boolean pgp = true; //now only pgp
     private File capfile;
     private AppletInfo info;
     private String titleBar;
@@ -71,15 +74,28 @@ public class InstallAction extends CardAction {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (capfile == null) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
-
-        if (fromCustomFile) {
-            //todo install dialog add custom verify option
-            showInstallDialog("custom_file", "verify_no_keybase.png");
+        if (!CardManagerFactory.getManager().isCard()) {
+            InformerFactory.getInformer().showWarning(textSrc.getString("missing_card"),
+                    Warning.Importance.SEVERE, Warning.CallBackIcon.CLOSE, null, 7000);
             return;
         }
 
-        JOptionPane pane = new JOptionPane(textSrc.getString("H_keybase_loading"),
+        if (capfile == null) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
+
+        if (fromCustomFile) {
+            verifyCustomInstallationAndShowInstallDialog();
+        } else {
+            verifyStoreInstallationAndShowInstallDialog();
+        }
+    }
+
+    private void verifyCustomInstallationAndShowInstallDialog() {
+        //todo install dialog add custom verify option
+        showInstallDialog("custom_file", "verify_no_pgp.png");
+    }
+
+    private void verifyStoreInstallationAndShowInstallDialog() {
+        JOptionPane pane = new JOptionPane(textSrc.getString("H_pgp_loading"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
                 new Object[]{}, null);
@@ -93,20 +109,21 @@ public class InstallAction extends CardAction {
 
             @Override
             public Void doInBackground() {
-                if (pgp) {
-                    result = new SignatureImpl().verifyPGPAndReturnMessage(signer, capfile);
-                } else {
-                    result = new SignatureImpl().verifyAndReturnMessage(signer, capfile);
+                //verify JCAppStore always
+                final Signature signature = new SignatureImpl();
+                result = signature.verifyPGPAndReturnMessage("JCAppStore", capfile);
+                if (signer != null && !signer.isEmpty()) {
+                    Tuple<String, String> another = signature.verifyPGPAndReturnMessage(signer, capfile);
+                    result = new Tuple<>(another.first, "JCAppStore: " + result.second + "<br>" + signer + ": " + another.second);
                 }
+                //keybase
+                //result = signature.verifyAndReturnMessage(signer, capfile);
                 return null;
             }
 
             @Override
             protected void done() {
                 dialog.dispose();
-                if (result == null) {
-                    result = new Tuple<>("verify.png", textSrc.getString("H_verified") + signer);
-                }
                 showInstallDialog(result.second, result.first);
             }
         }.execute();
@@ -119,14 +136,18 @@ public class InstallAction extends CardAction {
             return;
 
         InstallDialogWindow dialog = new InstallDialogWindow(file, info, installed, verifyResult);
-        int result = JOptionPane.showOptionDialog(null, dialog,
-                textSrc.getString("CAP_install_applet") + titleBar,
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon(Config.IMAGE_DIR + imgIcon),
-                new String[]{textSrc.getString("install"), textSrc.getString("cancel")}, "error");
+        String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
 
-        switch (result) {
+        JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
+                new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
+        JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + titleBar);
+        dialog.buildAdvanced(window);
+        window.setVisible(true);
+
+        window.dispose();
+        int selectedValue = getSelectedValue(buttons, pane.getValue() );//waiting line
+
+        switch (selectedValue) {
             case JOptionPane.YES_OPTION:
                 if (!dialog.validAID() || !dialog.validInstallParams()) {
                     InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
@@ -135,7 +156,7 @@ public class InstallAction extends CardAction {
                 }
                 break;
             case JOptionPane.NO_OPTION:
-            case JOptionPane.CLOSED_OPTION:
+            case CLOSED_OPTION:
                 return;
         }
 
@@ -161,5 +182,29 @@ public class InstallAction extends CardAction {
                 InformerFactory.getInformer().showWarning(textSrc.getString("installed"), Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000);
             });
         }, "Failed to install applet.", textSrc.getString("install_failed"));
+    }
+
+    //copied from JOptionPane to parse the JOptionPane return value
+    private int getSelectedValue(Object[] options, Object selectedValue) {
+        Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        if (fo != null && fo.isShowing()) {
+            fo.requestFocus();
+        }
+        if (selectedValue == null) {
+            return CLOSED_OPTION;
+        }
+        if (options == null) {
+            if (selectedValue instanceof Integer) {
+                return (Integer) selectedValue;
+            }
+            return CLOSED_OPTION;
+        }
+        for(int counter = 0, maxCounter = options.length;
+            counter < maxCounter; counter++) {
+            if (options[counter].equals(selectedValue)) {
+                return counter;
+            }
+        }
+        return CLOSED_OPTION;
     }
 }

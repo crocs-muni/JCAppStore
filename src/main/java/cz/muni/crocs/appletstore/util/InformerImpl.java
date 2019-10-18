@@ -14,12 +14,11 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @version 1.0
  */
 public class InformerImpl implements Informer, CallBack<Void> {
-
+    private Thread current;
     public static final Integer DELAY = 8000;
 
     private Informable context;
     private volatile Deque<Tuple<Warning, Integer>> queue = new LinkedBlockingDeque<>();
-    private volatile Deque<Warning> toClose = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
     public InformerImpl(Informable context) {
@@ -57,36 +56,27 @@ public class InformerImpl implements Informer, CallBack<Void> {
         fireWarning();
     }
 
-
     @Override
     public void closeWarning() {
-        if (!toClose.isEmpty()) {
-            context.hideWarning(toClose.pop());
-        }
+        context.hideWarning();
     }
 
     @Override
     public Void callBack() {
         closeWarning();
-        notifyAll();
+        current.interrupt();
         return null;
     }
 
-    private synchronized void fireWarning() {
-        if (busy)
-            return;
-
-        busy = true;
-        new Thread(() -> {
+    private Thread getNewNoticeSwitcherThread() {
+        return new Thread(() -> {
             while (true) {
-
                 if (queue.isEmpty()) {
+                    current = null;
                     busy = false;
                     return;
                 }
                 final Tuple<Warning, Integer> next = queue.pop();
-                toClose.add(next.first);
-
                 SwingUtilities.invokeLater(() -> {
                     context.showWarning(next.first);
                 });
@@ -95,17 +85,25 @@ public class InformerImpl implements Informer, CallBack<Void> {
                     try {
                         Thread.sleep(next.second);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        continue;
                     }
                     SwingUtilities.invokeLater(this::closeWarning);
                 } else {
                     try {
-                        wait();
+                        Thread.currentThread().wait();
                     } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                        //do nothing
                     }
                 }
             }
-        }).start();
+        });
+    }
+
+    private synchronized void fireWarning() {
+        if (busy)
+            return;
+        busy = true;
+        current = getNewNoticeSwitcherThread();
+        current.start();
     }
 }

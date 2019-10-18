@@ -109,20 +109,6 @@ public class Menu extends JMenuBar {
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
-        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("key_import")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ImportPGPKey pgpKey = new ImportPGPKey();
-                Object[] options = { textSrc.getString("import"), textSrc.getString("cancel") };
-                int result = JOptionPane.showOptionDialog(null, pgpKey, textSrc.getString("key_import"),
-                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-                        null, options, null);
-                if (result == JOptionPane.YES_OPTION){
-                    pgpKey.apply();
-                }
-            }
-        }, textSrc.getString("H_key_import"),Config.IMAGE_DIR + "key_small.png"));
-
         menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
             public void actionPerformed(ActionEvent e) {

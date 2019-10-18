@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -162,6 +164,23 @@ public class LeftMenu extends JPanel {
                 parent.getSearchablePane().showItems(searchInput.getText());
             }
         });
+
+//        searchInput.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//        });
     }
 }
 

@@ -7,11 +7,18 @@ import java.io.IOException;
 
 /**
  * Use various means to verify the signatures of signed aplets
- * keys are implicitly located at:   keybase    nowhere, it is downloaded from keybase server
- *                                   pgp        store: JCAppStore/store/keys/signer.asc
- *                                              custom: JCAppStore/keys
+ * The signature file name conventions: for JCAppStore  filename.sig
+ *                                      for author      filename.author.sig
  */
 public interface Signature {
+
+    final String storeAuthor = "JCAppStore";
+
+    default File getSignatureFileFromString(String author, String filename) {
+        if (author != null && author.equals(storeAuthor))
+            return new File(filename + ".sig");
+        return new File(filename + "." + author + ".sig");
+    }
 
     /**
      * Verify the file signature with auto author deduction

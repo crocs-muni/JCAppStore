@@ -75,7 +75,7 @@ public class Install extends GPCommand<Void> {
         //no applets dont install
         if (file.getAppletAIDs().size() == 0) return true;
 
-        final AID appletAID = data.getAID();
+        AID appletAID = data.getAID();
         AID customAID = data.getCustomAID() == null ? appletAID : AID.fromString(data.getCustomAID());
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();

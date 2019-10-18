@@ -21,19 +21,23 @@ public class PGP extends CmdTask {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private static boolean verified = false;
-    private String location;
+    private static String location;
     private boolean isWarn = false;
     private static Pattern pattern = Pattern.compile("Key fingerprint = ([0-9A-F ]+)");
 
     public PGP() throws LocalizedSignatureException {
-        location = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
+        String fromSettings = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (!verified) {
-            if (location == null || location.isEmpty()) {
+            if (fromSettings == null || fromSettings.isEmpty()) {
                 location = "gpg";
-                //todo try run gpg --help / about if not working norify no gpg specify path
+                if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
+                    throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
+                }
+            } else {
+                location = fromSettings;
+                if (!new File(location).exists())
+                    throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
             }
-            if (!new File(location).exists())
-                throw new LocalizedSignatureException("Keybase not present.", "no_pgp");
             verified = true;
         }
     }
@@ -43,30 +47,24 @@ public class PGP extends CmdTask {
             //todo run on mac
             return true;
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            String result = new CmdTask().add(location).add("verify")
-                    .add("-d").add("\"" + signatureFile.getAbsolutePath() + "\"")
-                    .add("-i").add("\"" + file.getAbsolutePath() + "\"")
+            String result = new CmdTask().add(location).add("--verify")
+                    .add("\"" + signatureFile.getAbsolutePath() + "\"")
+                    .add("\"" + file.getAbsolutePath() + "\"")
                     .processToString();
             isWarn = result.contains("WARNING");
             return result.contains("Good signature") && result.contains(author);
         } else return false;
     }
 
-    Tuple<String, String> verifySignature(String author, String filePath) throws LocalizedSignatureException {
-        return verifySignature(author, new File(filePath));
-    }
-
-
-    Tuple<String, String> verifySignature(String author, File file) throws LocalizedSignatureException {
+    Tuple<String, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (!file.exists())
-            return new Tuple<>("verify_no_keybase.png", textSrc.getString("H_no_file_pgp"));
-        File sig = new File(file + ".sig");
-        if (!sig.exists())
-            return new Tuple<>("verify_no_keybase.png", textSrc.getString("H_no_file_pgp"));
-        if (verifySignature(author, file, sig)) {
+            return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
+        if (!signatureFile.exists())
+            return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
+        if (verifySignature(author, file, signatureFile)) {
             return (isWarn) ?
                     new Tuple<>("verify_trust.png", textSrc.getString("H_verified_not_trusted") + author)
-                    : null;
+                    : new Tuple<>("verify.png", textSrc.getString("H_verified") + author);
         } else {
             return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
         }
@@ -93,62 +91,5 @@ public class PGP extends CmdTask {
             return m.group(1);
         }
         throw new LocalizedSignatureException("Failed to obtain key id.", "");
-    }
-
-    public boolean importKey(File key) throws LocalizedSignatureException {
-        Process p = new CmdTask().add(location).add("--import")
-                .add(key.getAbsolutePath()).process();
-        int res = p.exitValue();
-        p.destroy();
-        return res == 0;
-    }
-
-    public Tuple<String, String> importKeyAndGetErrorMessage(File key) {
-        try {
-            if (importKey(key)) {
-                return null;
-            }
-        } catch (LocalizedSignatureException e) {
-            e.printStackTrace();
-        }
-        return new Tuple<>("no_key.png", textSrc.getString("key_import_fail"));
-    }
-
-    public boolean setKeyTrust(String key, int level) throws LocalizedSignatureException {
-        level = Math.max(level, 1);
-        level = Math.min(level, 5);
-
-        Process p;
-        if (SystemUtils.IS_OS_WINDOWS) {
-            p = new CmdTask().add("(").add("echo").add("trust")
-                    .add("&echo").add(Integer.toString(level))
-                    .add("&echo").add("y")
-                    .add("&echo").add("quit").add(")")
-                    .add("|")
-                    .add(location)
-                    .add("--command-fd")
-                    .add("0").add("--edit-key").add(key).process();
-
-        } else {
-            p = new CmdTask().add("echo").add("-e")
-                    .add("\"" + level + "\ny\n\"").add("|")
-                    .add(location).add("--homedir")
-                    .add(".").add("--command-fd").add("0")
-                    .add("--expert").add("--edit-key").add(key).process();
-        }
-        int res = p.exitValue();
-        p.destroy();
-        return res == 0;
-    }
-
-    public Tuple<String, String> setKeyTrustAndGetErroMessage(String key, int level) {
-        try {
-            if (setKeyTrust(key, level)) {
-                return null;
-            }
-        } catch (LocalizedSignatureException e) {
-            e.printStackTrace();
-        }
-        return new Tuple<>("key_no_trust.png", textSrc.getString("key_trust_not_set"));
     }
 }

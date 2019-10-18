@@ -46,10 +46,6 @@ public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
             saved = Collections.emptyList();
         }
 
-        saved.forEach(item -> {
-            System.out.println(item.getAid().toString() + ", " + item.getKind());
-        });
-
         for (GPRegistryEntry entry : registry) {
             //global platform lists all packages two times skip the one with no modules in it
             if (entry.getType().equals(GPRegistryEntry.Kind.ExecutableLoadFile) && entry.getModules().size() == 0)

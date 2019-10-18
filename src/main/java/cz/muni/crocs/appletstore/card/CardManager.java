@@ -12,6 +12,12 @@ import java.util.Set;
 public interface CardManager {
 
     /**
+     * Check if card present
+     * @return true if card inserted
+     */
+    boolean isCard();
+
+    /**
      * Switches to the new aid as selected applet
      * should not select if card not plugged
      * @param aid AID to select

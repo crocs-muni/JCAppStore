@@ -91,13 +91,13 @@ public class BackgroundImageLoader {
             }
         }
         //NORMALIZE
-        for (int i = 0; i < size; ++i){
-            for (int j = 0; j < size; ++j) {
-                data[i * size + j] = (float)(data[i * size + j] / sum);
-                //System.out.print(data[i * size + j] + ", ");
-            }
-            //System.out.println();
-        }
+//        for (int i = 0; i < size; ++i){
+//            for (int j = 0; j < size; ++j) {
+//                data[i * size + j] = (float)(data[i * size + j] / sum);
+//                //System.out.print(data[i * size + j] + ", ");
+//            }
+//            //System.out.println();
+//        }
         return data;
     }
 

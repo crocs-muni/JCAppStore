@@ -49,7 +49,6 @@ public class Settings extends JPanel {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        buildPGP();
         buildLanguage();
         buildHint();
         buildErrorMode();
@@ -57,37 +56,10 @@ public class Settings extends JPanel {
     }
 
     public void apply() {
-        savePGP();
         saveBackgroundImage();
         saveLanguage();
         saveHint();
         saveErrorMode();
-    }
-
-    private void buildPGP() {
-        addTitleLabel(textSrc.getString("pgp_loc"), "");
-
-        JButton specify = new JButton(new AbstractAction(textSrc.getString("pgp_specify_loc")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = getPGPFileChooser();
-                int r = fileChooser.showOpenDialog(null);
-                if (r == JFileChooser.APPROVE_OPTION) {
-                    pgp.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                    pgp.setForeground(Color.BLACK);
-                    ((InputHintTextField)pgp).setShowHint(false);
-                }
-            }
-        });
-        add(specify, "span 2, align right, wrap");
-
-        String path = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
-        if (path == null) path = "";
-
-        pgp = new InputHintTextField(path, textSrc.getString("H_pgp_loc"));
-        pgp.setFont(OptionsFactory.getOptions().getFont(12f));
-        pgp.setBorder(frame);
-        add(pgp, "span 3, growx, wrap");
     }
 
     private void buildBackground() {
@@ -185,14 +157,10 @@ public class Settings extends JPanel {
 
             @Override
             public String getDescription() {
-                return "Images (png, jpeg/jpg, bmp) less than 1.5 MB";
+                return textSrc.getString("image_limit");
             }
         });
         return fileChooser;
-    }
-
-    private JFileChooser getPGPFileChooser() {
-        return getShaderFileChoser(new File(System.getProperty("user.home")));
     }
 
     private void addTitleLabel(String titleText, String constraints) {
@@ -245,10 +213,6 @@ public class Settings extends JPanel {
 
     private void saveErrorMode() {
         OptionsFactory.getOptions().addOption(Options.KEY_ERROR_MODE, verboseEnabled.isSelected() ? "verbose" : "default");
-    }
-
-    private void savePGP() {
-        OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, pgp.getText());
     }
 
     /**

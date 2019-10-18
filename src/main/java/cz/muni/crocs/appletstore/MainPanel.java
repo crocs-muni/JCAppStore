@@ -21,6 +21,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
+    private Component current = null;
 
     public MainPanel(BackgroundChangeable context) {
         localPanel = new LocalWindowPane();
@@ -97,14 +98,16 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
 
     @Override
     public void showWarning(JComponent component) {
-        add(component, BorderLayout.NORTH);
+        current = component;
+        add(current, BorderLayout.NORTH);
         revalidate();
-//        JOptionPane.showConfirmDialog(this, component);
     }
 
     @Override
-    public void hideWarning(JComponent component) {
-        remove(component);
+    public void hideWarning() {
+        if (current == null) return;
+        remove(current);
+        current = null;
         revalidate();
         repaint();
     }

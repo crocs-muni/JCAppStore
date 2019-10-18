@@ -45,6 +45,11 @@ public class CardManagerImpl implements CardManager {
     private volatile boolean busy = false;
 
     @Override
+    public boolean isCard() {
+        return terminals.getState() == Terminals.TerminalState.OK && card != null;
+    }
+
+    @Override
     public void switchApplet(AID aid) {
         if (card == null) {
             selectedAID = null;

@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.ui;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,7 +29,7 @@ public class Warning extends JPanel {
     }
 
     public Warning(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
-
+        setLayout(new MigLayout("center, gapy 20, insets 0 20 0 20"));
         MouseAdapter call = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -56,7 +57,7 @@ public class Warning extends JPanel {
                 image = "info.png";
         }
 
-        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
+//        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
 
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + image));
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -66,7 +67,7 @@ public class Warning extends JPanel {
         JLabel errorMsg = new HtmlLabel("<div style=\"max-width:90%;\">" + msg + "</div>");
         errorMsg.setFont(OptionsFactory.getOptions().getTitleFont(12f));
         errorMsg.setForeground(Color.BLACK);
-        add(errorMsg);
+        add(errorMsg, "growx");
 
         switch (type) {
             case CLOSE:
