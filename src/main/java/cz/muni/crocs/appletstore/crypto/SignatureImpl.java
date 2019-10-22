@@ -56,9 +56,28 @@ public class SignatureImpl implements Signature {
 
     @Override
     public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file) {
+        return verifyPGPAndReturnMessage(author, file, getSignatureFileFromString(author, file.getAbsolutePath()));
+    }
+
+    @Override
+    public Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    public Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) {
+        return verifyPGPAndReturnMessage(author, new File(file), new File(detachedSignature));
+    }
+
+    @Override
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) {
         try {
-            return new PGP().verifySignatureAndGetErrorMsg(
-                    author, file, getSignatureFileFromString(author, file.getAbsolutePath()));
+            return new PGP().verifySignatureAndGetErrorMsg(author, file, detachedSignature);
         } catch (LocalizedSignatureException e) {
             e.printStackTrace();
             return new Tuple<>("not_verified.png", textSrc.getString("H_verify_failed")

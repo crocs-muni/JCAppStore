@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  *
  * @author Jiří Horák
  */
-public class KeyBase extends CmdTask {
+//public class KeyBase extends CmdTask {
 //    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 //
 //    private static boolean verified = false;
@@ -38,7 +38,7 @@ public class KeyBase extends CmdTask {
 //
 //    boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
 //        if (SystemUtils.IS_OS_MAC) {
-//            //todo run on mac
+//            //run on mac
 //            return true;
 //        } else if (SystemUtils.IS_OS_WINDOWS) {
 //            return new CmdTask().add("\"" + keybase + "\"").add("verify")
@@ -46,7 +46,7 @@ public class KeyBase extends CmdTask {
 //                    .add("-i").add("\"" + file.getAbsolutePath() + "\"")
 //                    .processToString().contains("Signed by " + author);
 //        } else if (SystemUtils.IS_OS_UNIX) {
-//            //todo run on unix
+//            //run on unix
 //            return true;
 //        } else return false;
 //    }
@@ -68,4 +68,4 @@ public class KeyBase extends CmdTask {
 //            return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
 //        }
 //    }
-}
+//}

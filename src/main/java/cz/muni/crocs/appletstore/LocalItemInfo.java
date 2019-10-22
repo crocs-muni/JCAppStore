@@ -14,6 +14,8 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -48,6 +50,15 @@ public class LocalItemInfo extends HintPanel {
 
         send = new SendApduAction(null, call);
         delete = new DeleteAction(null, call);
+
+        JLabel close = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
+        close.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                unset();
+            }
+        });
+        add(close, "pos 90% 3%");
 
         name.setFont(OptionsFactory.getOptions().getTitleFont(16f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));

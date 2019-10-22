@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.ui.HintLabel;
 import cz.muni.crocs.appletstore.ui.HtmlLabel;
@@ -16,9 +15,12 @@ import pro.javacard.CAPFile;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
@@ -32,9 +34,8 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class InstallDialogWindow extends JPanel {
-
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-
+    //applet info and setting GUI components
     private JTextField name = new JTextField(50);
     private JTextField author = new JTextField(10);
     private JTextField version = new JTextField(10);
@@ -45,13 +46,14 @@ public class InstallDialogWindow extends JPanel {
     private JTextField[] customAIDs;
     private JPanel advanced = new JPanel();
     private ButtonGroup selectedAID = new ButtonGroup();
-
+    //applet install info variables
     private AppletInfo info;
     private CAPFile src;
     private boolean isInstalled;
 
+    private boolean initialized;
+    private File customSignatureFile;
     private Color wrong = new Color(0xA3383D);
-
     private static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
     public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
@@ -66,29 +68,16 @@ public class InstallDialogWindow extends JPanel {
      * @param parent parent window to resize on switch
      */
     public void buildAdvanced(Window parent) {
-        if (parent == null)
-            return;
-
-        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "arrow_small.png")), "gaptop 11");
-        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
-        more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(more, "gaptop 11, span 4, wrap");
-
-        more.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (advanced.isVisible()) {
-                    advanced.setVisible(false);
-                    remove(advanced);
-                } else {
-                    advanced.setVisible(true);
-                    add(advanced, "span 5, wrap");
-                }
-                parent.pack();
-            }
-        });
+        if (initialized) return;
+        initAdvanced(parent);
         buildAdvanced();
+    }
+
+    public void buildAdvancedAndCustomSigned(Window parent) {
+        if (initialized) return;
+        initAdvanced(parent);
+        buildAdvanced();
+        buildCustomSigned();
     }
 
     /**
@@ -122,6 +111,15 @@ public class InstallDialogWindow extends JPanel {
         if (aid == null)
             return false;
         return validAID(aid);
+    }
+
+    public boolean validCustomAID() {
+        return validAID(getCustomAppletName(getSelectedAID()));
+    }
+
+    public File getCustomSignatureFile() {
+        System.out.println(customSignatureFile.getAbsolutePath());
+        return customSignatureFile;
     }
 
     private void build(String verifiedMsg) {
@@ -170,9 +168,35 @@ public class InstallDialogWindow extends JPanel {
         return advanced.isVisible();
     }
 
-    private void buildAdvanced() {
+    private void initAdvanced(Window parent) {
+        if (parent == null)
+            return;
+
+        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "arrow_small.png")), "gaptop 11");
+        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
+        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
+        more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        add(more, "gaptop 11, span 4, wrap");
+
+        more.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (advanced.isVisible()) {
+                    advanced.setVisible(false);
+                    remove(advanced);
+                } else {
+                    advanced.setVisible(true);
+                    add(advanced, "span 5, wrap");
+                }
+                parent.pack();
+            }
+        });
         advanced.setLayout(new MigLayout());
         advanced.setVisible(false);
+        initialized = true;
+    }
+
+    private void buildAdvanced() {
         advanced.add(getHint("H_advanced_syntax", "300"), "span 5, wrap");
         advanced.add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
@@ -209,7 +233,31 @@ public class InstallDialogWindow extends JPanel {
             advanced.add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
                     "wrap, span 5, gapbottom 10");
         }
-        add(advanced, "span 5, wrap");
+    }
+
+    private void buildCustomSigned() {
+        JButton specifyCustomSignature = new JButton(textSrc.getString("custom_sign_button"));
+        specifyCustomSignature.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = getShaderFileChoser(FileSystemView.getFileSystemView().getDefaultDirectory());
+                int r = fileChooser.showOpenDialog(null);
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    customSignatureFile = fileChooser.getSelectedFile();
+                    specifyCustomSignature.setText(customSignatureFile.getName());
+                }
+            }
+        });
+        advanced.add(specifyCustomSignature, "span 5, wrap");
+        advanced.add(getHint("H_custom_sign", "600"), "span 5, wrap");
+    }
+
+    private JFileChooser getShaderFileChoser(File defaultFolder) {
+        JFileChooser fileChooser = new JFileChooser(defaultFolder);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        return fileChooser;
     }
 
     /**
@@ -225,7 +273,6 @@ public class InstallDialogWindow extends JPanel {
             selectedAID.add(button);
 
             JTextField f = new JTextField(applet.toString(), 50);
-            f.setEnabled(false);
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {

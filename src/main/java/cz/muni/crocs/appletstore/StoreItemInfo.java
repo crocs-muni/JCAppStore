@@ -6,7 +6,6 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.card.action.InstallAction;
-import cz.muni.crocs.appletstore.crypto.KeyBase;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;

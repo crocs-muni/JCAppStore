@@ -52,7 +52,7 @@ public class PGP extends CmdTask {
                     .add("\"" + file.getAbsolutePath() + "\"")
                     .processToString();
             isWarn = result.contains("WARNING");
-            return result.contains("Good signature") && result.contains(author);
+            return result.contains("Good signature") && (author == null || result.contains(author));
         } else return false;
     }
 
@@ -62,9 +62,15 @@ public class PGP extends CmdTask {
         if (!signatureFile.exists())
             return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
         if (verifySignature(author, file, signatureFile)) {
-            return (isWarn) ?
-                    new Tuple<>("verify_trust.png", textSrc.getString("H_verified_not_trusted") + author)
-                    : new Tuple<>("verify.png", textSrc.getString("H_verified") + author);
+            if (author == null) {
+                return (isWarn) ? new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
+                        textSrc.getString("H_verified_not_trusted"))
+                        : new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author"));
+            } else {
+                return (isWarn) ? new Tuple<>("verify_trust.png", textSrc.getString("H_verified") + author +
+                        textSrc.getString("H_verified_not_trusted"))
+                        : new Tuple<>("verify.png", textSrc.getString("H_verified") + author);
+            }
         } else {
             return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
         }

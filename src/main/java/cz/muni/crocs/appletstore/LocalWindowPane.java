@@ -212,7 +212,11 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
-            showError("E_authentication", "H_authentication", "announcement_white.png");
+            if (OptionsFactory.getOptions().isVerbose()) {
+                showError("E_no_life_state", "H_no_life_state", "announcement_white.png");
+            } else {
+                showError("E_communication", "H_communication", "plug-in-out.png");
+            }
             return false;
         }
         switch (isdLifeState) {

@@ -2,9 +2,7 @@ package cz.muni.crocs.appletstore.card.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +25,9 @@ public abstract class CardAction extends MouseAdapter {
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();
                 logger.warn(loggerMessage + ex.getMessage());
-                SwingUtilities.invokeLater(() -> {
-                    showFailed(title,
-                            OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                                    ex.getLocalizedMessage() : ex.getLocalizedMessageWithoutCause());
-                });
+                SwingUtilities.invokeLater(() -> showFailed(title,
+                        OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                                ex.getLocalizedMessage() : ex.getLocalizedMessageWithoutCause()));
                 SwingUtilities.invokeLater(call::onFail);
             }
             SwingUtilities.invokeLater(call::onFinish);
@@ -41,7 +37,7 @@ public abstract class CardAction extends MouseAdapter {
 
     private void showFailed(String title, String message) {
         JOptionPane.showMessageDialog(null,
-                "<html><duv width=\"350\">" + message + "</div></html>",
+                "<html><div width=\"350\">" + message + "</div></html>",
                 title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
     }
 

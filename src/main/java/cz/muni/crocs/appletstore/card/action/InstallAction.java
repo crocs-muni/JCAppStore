@@ -7,7 +7,6 @@ import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.*;
-import jdk.nashorn.internal.scripts.JD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
@@ -19,7 +18,7 @@ import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static javax.swing.JOptionPane.CLOSED_OPTION;
+import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
 
 
@@ -35,6 +34,7 @@ public class InstallAction extends CardAction {
 
     private boolean installed;
     private File capfile;
+    private CAPFile code;
     private AppletInfo info;
     private String titleBar;
     private String signer;
@@ -80,7 +80,13 @@ public class InstallAction extends CardAction {
             return;
         }
 
-        if (capfile == null) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
+        if (fromCustomFile) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
+        code = CapFileChooser.getCapFile(capfile);
+        if (code == null) {
+            InformerFactory.getInformer().showWarning(textSrc.getString("no_install_file"),
+                    Warning.Importance.SEVERE, Warning.CallBackIcon.CLOSE, null, 7000);
+            return;
+        }
 
         if (fromCustomFile) {
             verifyCustomInstallationAndShowInstallDialog();
@@ -90,58 +96,66 @@ public class InstallAction extends CardAction {
     }
 
     private void verifyCustomInstallationAndShowInstallDialog() {
-        //todo install dialog add custom verify option
-        showInstallDialog("custom_file", "verify_no_pgp.png");
+        final InstallDialogWindow dialogWindow = showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", true);
+        if (dialogWindow == null) return;
+        final File customSign = dialogWindow.getCustomSignatureFile();
+        if (customSign != null) {
+            verifySignatureRoutine(new Executable() {
+                @Override
+                void work() {
+                    final Signature signature = new SignatureImpl();
+                    result = signature.verifyPGPAndReturnMessage(null, capfile, customSign);
+                }
+
+                @Override
+                void after() {
+                    int choice = JOptionPane.showConfirmDialog(null,
+                            "<html><div width=\"350\">" + result.second + "<br>" +
+                                    textSrc.getString("install_ask") + "</div></html>",
+                            textSrc.getString("signature_title_dialog") ,
+                            JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                            new ImageIcon(Config.IMAGE_DIR + result.first));
+                    if (choice == YES_OPTION) {
+                        fireInstall(dialogWindow.getInstallOpts());
+                    }
+                }
+            });
+        } else {
+            fireInstall(dialogWindow.getInstallOpts());
+        }
     }
 
     private void verifyStoreInstallationAndShowInstallDialog() {
-        JOptionPane pane = new JOptionPane(textSrc.getString("H_pgp_loading"),
-                JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
-                new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
-                new Object[]{}, null);
-
-        JDialog dialog = pane.createDialog(null, textSrc.getString("wait_sec"));
-        dialog.setContentPane(pane);
-        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
-        new SwingWorker<Void, Void>() {
-            private Tuple<String, String> result;
-
+        verifySignatureRoutine(new Executable() {
             @Override
-            public Void doInBackground() {
-                //verify JCAppStore always
+            void work() {
                 final Signature signature = new SignatureImpl();
                 result = signature.verifyPGPAndReturnMessage("JCAppStore", capfile);
                 if (signer != null && !signer.isEmpty()) {
                     Tuple<String, String> another = signature.verifyPGPAndReturnMessage(signer, capfile);
                     result = new Tuple<>(another.first, "JCAppStore: " + result.second + "<br>" + signer + ": " + another.second);
                 }
-                //keybase
-                //result = signature.verifyAndReturnMessage(signer, capfile);
-                return null;
             }
 
             @Override
-            protected void done() {
-                dialog.dispose();
-                showInstallDialog(result.second, result.first);
+            void after() {
+                InstallDialogWindow dialogWindow = showInstallDialog(result.second, result.first, false);
+                if (dialogWindow == null) return;
+                fireInstall(dialogWindow.getInstallOpts());
             }
-        }.execute();
-        dialog.setVisible(true);
+        });
     }
 
-    private void showInstallDialog(String verifyResult, String imgIcon) {
-        CAPFile file = CapFileChooser.getCapFile(capfile);
-        if (file == null)
-            return;
-
-        InstallDialogWindow dialog = new InstallDialogWindow(file, info, installed, verifyResult);
+    private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean buildCustomInstall) {
+        InstallDialogWindow dialog = new InstallDialogWindow(code, info, installed, verifyResult);
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
 
         JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
         JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + titleBar);
-        dialog.buildAdvanced(window);
+        if (buildCustomInstall) dialog.buildAdvancedAndCustomSigned(window);
+        else dialog.buildAdvanced(window);
+        window.pack();
         window.setVisible(true);
 
         window.dispose();
@@ -149,19 +163,20 @@ public class InstallAction extends CardAction {
 
         switch (selectedValue) {
             case JOptionPane.YES_OPTION:
-                if (!dialog.validAID() || !dialog.validInstallParams()) {
+                if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
                     InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
-                    showInstallDialog(verifyResult, imgIcon);
-                    return;
+                    return showInstallDialog(verifyResult, imgIcon, buildCustomInstall);
                 }
                 break;
             case JOptionPane.NO_OPTION:
             case CLOSED_OPTION:
-                return;
+                return null;
         }
+        return dialog;
+    }
 
-        final InstallOpts opts = dialog.getInstallOpts();
-        logger.info("Install fired, list of AIDS: " + file.getApplets().toString());
+    private void fireInstall(final InstallOpts opts) {
+        logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
         logger.info("Install AID: " + opts.getAID());
 
         final CardManager manager = CardManagerFactory.getManager();
@@ -169,18 +184,19 @@ public class InstallAction extends CardAction {
         if (!OptionsFactory.getOptions().isVerbose()) {
             //if applet present dont change anything
             if (manager.getInstalledApplets().stream().noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
-                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(file.getPackageAID()))) {
+                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
                     opts.setForce(true);
                 }
             }
         }
 
         execute(() -> {
-            manager.install(file, opts);
+            manager.install(code, opts);
             manager.setLastAppletInstalled(opts.getAID());
             SwingUtilities.invokeLater(() -> {
                 InformerFactory.getInformer().showWarning(textSrc.getString("installed"), Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000);
             });
+            capfile = null;
         }, "Failed to install applet.", textSrc.getString("install_failed"));
     }
 
@@ -206,5 +222,42 @@ public class InstallAction extends CardAction {
             }
         }
         return CLOSED_OPTION;
+    }
+
+    private static void verifySignatureRoutine(Executable task) {
+        JOptionPane pane = new JOptionPane(textSrc.getString("H_pgp_loading"),
+                JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
+                new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
+                new Object[]{}, null);
+
+        JDialog dialog = pane.createDialog(null, textSrc.getString("wait_sec"));
+        dialog.setContentPane(pane);
+        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        new SwingWorker<Void, Void>() {
+            private Tuple<String, String> result;
+
+            @Override
+            public Void doInBackground() {
+                task.work();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                dialog.dispose();
+                task.after();
+            }
+        }.execute();
+        dialog.setVisible(true);
+    }
+
+    private abstract class Executable {
+        Tuple<String, String> result;
+        void setResult(Tuple<String, String> result) {
+            this.result = result;
+        }
+        abstract void work();
+        abstract void after();
     }
 }

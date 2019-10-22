@@ -100,4 +100,46 @@ public interface Signature {
      */
     Tuple<String, String> verifyPGPAndReturnMessage(String author, File file);
 
+    /**
+     * Verify the file signature with auto author deduction
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the signature, to verify that it was really signed by him, not by someone else
+     * @param file path to the file to verify
+     * @return true if signature successful
+     */
+    Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature);
+
+    /**
+     * Verify the file signature with auto author deduction
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the signature, to verify that it was really signed by him, not by someone else
+     * @param file file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature);
+
+    /**
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the file
+     * @param file path to the file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature);
+
+    /**
+     * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
+     * takes care of the situation if files do not exist and reproduces the message error
+     * verifies the internet connection and returns error message if not accessible
+     * @param author author of the file
+     * @param file file to verify
+     * @return tuple with first = imagename, second = message
+     */
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature);
+
 }
