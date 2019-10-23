@@ -189,7 +189,7 @@ public class OptionsImpl implements Options<String> {
     private Font getCustomFont(File fontFile) {
         if (fontFile == null || !fontFile.exists()) return getDefaultFont();
         try {
-            return Font.createFont(Font.TRUETYPE_FONT, fontFile);
+            return Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
             return getDefaultFont();

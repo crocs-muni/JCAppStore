@@ -31,6 +31,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         this.data = data;
         this.callback = callback;
         setOpaque(false);
+        setViewportBorder(null);
         getViewport().setOpaque(false);
         storeLayout.setOpaque(false);
 

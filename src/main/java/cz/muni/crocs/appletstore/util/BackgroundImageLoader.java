@@ -114,7 +114,7 @@ public class BackgroundImageLoader {
         int width = background.getWidth() - size * 2;
         int height = background.getHeight() - size * 2;
 
-        BufferedImage cut = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage cut = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics2D = cut.createGraphics();
         graphics2D.drawImage(background, 0, 0, width, height, size, size, width, height, null);
         graphics2D.dispose();

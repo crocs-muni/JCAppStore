@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlTitleLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -77,10 +78,10 @@ public class StoreItem extends JPanel implements Item {
     }
 
     private JLabel getLabel(String text, String css, Float fontSize, boolean title) {
-        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
-        label.setFont(title ?
-                OptionsFactory.getOptions().getTitleFont(fontSize) : OptionsFactory.getOptions().getFont(fontSize));
-        return label;
+        return (title) ?
+                new HtmlTitleLabel("<div style=\"" + css + "\">" + text + "</div>", fontSize)
+                :
+                new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>", fontSize);
     }
 
     private String getImgAddress(String imgName) {

@@ -83,8 +83,6 @@ public class InstallAction extends CardAction {
         if (fromCustomFile) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
         code = CapFileChooser.getCapFile(capfile);
         if (code == null) {
-            InformerFactory.getInformer().showWarning(textSrc.getString("no_install_file"),
-                    Warning.Importance.SEVERE, Warning.CallBackIcon.CLOSE, null, 7000);
             return;
         }
 

@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
@@ -56,6 +57,25 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Environment and style settings
      */
     private void setup() {
+        if (SystemUtils.IS_OS_UNIX) {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    try {
+                        UIManager.setLookAndFeel(info.getClassName());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedLookAndFeelException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+
+        }
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);

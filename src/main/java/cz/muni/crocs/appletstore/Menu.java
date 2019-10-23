@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.help.*;
+import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -12,8 +13,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -124,8 +123,8 @@ public class Menu extends JMenuBar {
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
-        midContainer.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
-        currentCard = new JLabel();
+        midContainer.add(new Text(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
+        currentCard = new Text();
         currentCard.setForeground(Color.white);
         midContainer.add(currentCard);
         add(midContainer);
@@ -201,12 +200,14 @@ public class Menu extends JMenuBar {
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
+        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         return menuItem;
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
+        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         menuItem.setIcon(new ImageIcon(image));
         return menuItem;
     }
@@ -224,6 +225,8 @@ public class Menu extends JMenuBar {
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
         JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
         setItemLook(rbMenuItem, descripton);
+        rbMenuItem.setFont(OptionsFactory.getOptions().getTitleFont());
+
         return rbMenuItem;
     }
 

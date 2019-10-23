@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.Title;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -34,16 +36,15 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
         add(Box.createRigidArea(new Dimension(50, 20)));
 
-        JLabel title = new JLabel(textSrc.getString("CAP_install_applet"));
-        title.setFont(OptionsFactory.getOptions().getTitleFont(16f));
-        title.setForeground(Color.WHITE);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(title);
+        JLabel label = new Title(textSrc.getString("CAP_install_applet"), 16f);
+        label.setForeground(Color.WHITE);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(label);
 
-        title = new JLabel(textSrc.getString("from_pc"));
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setForeground(Color.WHITE);
-        add(title);
+        label = new Text(textSrc.getString("from_pc"));
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        label.setForeground(Color.WHITE);
+        add(label);
     }
 
     @Override

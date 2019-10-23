@@ -82,6 +82,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         infoLayout = new LocalItemInfo(callback);
         windowLayout = new JPanel();
         windowScroll = new JScrollPane();
+        windowScroll.setViewportBorder(null);
 
         windowScroll.setOpaque(false);
         windowScroll.getViewport().setOpaque(false);

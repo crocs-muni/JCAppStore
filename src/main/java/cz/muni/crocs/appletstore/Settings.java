@@ -63,7 +63,7 @@ public class Settings extends JPanel {
     }
 
     private void buildBackground() {
-        addTitleLabel(textSrc.getString("background"), "span 3, wrap");
+        add(new Text(textSrc.getString("background")), "span 3, wrap");
 
         String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
         if (path.equals(DEFAULT_BG_PATH)) {
@@ -77,7 +77,7 @@ public class Settings extends JPanel {
         bgValue.setBorder(frame);
         add(bgValue, "span 3, growx, wrap");
 
-        add(new JLabel()); //empty space
+        add(new JLabel()); //todo eliminate jlabel empty space
 
         JButton defaultBg = new JButton(new AbstractAction(textSrc.getString("reset_default")) {
             @Override
@@ -105,13 +105,13 @@ public class Settings extends JPanel {
         add(getNewBg, "align right, wrap");
 
         //blur option
-        addTitleLabel(textSrc.getString("blur"), "");
+        add(new Text(textSrc.getString("blur")), "");
         slider.setEnabled(false);
         add(slider, "w 180, align right, span 2, wrap");
     }
 
     private void buildLanguage() {
-        addTitleLabel(textSrc.getString("language"), "");
+        add(new Text(textSrc.getString("language")), "");
 
         languageBox = new JComboBox<>(LANGUAGES);
         CustomComboBoxItem listItems = new CustomComboBoxItem();
@@ -121,13 +121,13 @@ public class Settings extends JPanel {
     }
 
     private void buildErrorMode() {
-        addTitleLabel(textSrc.getString("enable_verbose"), "");
+        add(new Text(textSrc.getString("enable_verbose")), "");
         verboseEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose"));
         add(verboseEnabled, "align right, span 2, w 180, wrap");
     }
 
     private void buildHint() {
-        addTitleLabel(textSrc.getString("enable_hints"), "");
+        add(new Text(textSrc.getString("enable_hints")),"");
         hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         add(hintEnabled, "align right, span 2, w 180, wrap");
     }
@@ -161,12 +161,6 @@ public class Settings extends JPanel {
             }
         });
         return fileChooser;
-    }
-
-    private void addTitleLabel(String titleText, String constraints) {
-        JLabel title = new JLabel(titleText);
-        title.setFont(OptionsFactory.getOptions().getFont());
-        add(title, constraints);
     }
 
     private String cutString(String value, int length) {

@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.action.DeleteAction;
 import cz.muni.crocs.appletstore.card.action.SendApduAction;
+import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.Title;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -30,7 +32,7 @@ public class LocalItemInfo extends HintPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private HintLabel name = new HintLabel();
-    private JLabel author = new JLabel();
+    private JLabel author = new Text();
     private HintLabel version = new HintLabel();
     private HintLabel sdk = new HintLabel();
     private HintLabel id = new HintLabel();;
@@ -60,7 +62,7 @@ public class LocalItemInfo extends HintPanel {
         });
         add(close, "pos 90% 3%");
 
-        name.setFont(OptionsFactory.getOptions().getTitleFont(16f));
+        name.setFont(OptionsFactory.getOptions().getTitleFont(18f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
         add(name, "span 2, wrap");
 
@@ -82,8 +84,7 @@ public class LocalItemInfo extends HintPanel {
         domain.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(domain, "span 2, wrap");
 
-        JLabel title = new JLabel(textSrc.getString("management"));
-        title.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 13f));
+        JLabel title = new Title(textSrc.getString("management"), 17f);
         add(title, "span 2, gaptop 15, wrap");
 
 //        rawApdu = new HintLabel(textSrc.getString("custom_command"),
