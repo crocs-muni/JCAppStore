@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.help;
 
-import cz.muni.crocs.appletstore.ui.Components;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 

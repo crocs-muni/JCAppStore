@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.Components;
+import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
@@ -82,8 +83,12 @@ public class LocalSubMenu extends JPanel {
     }
 
     private JButton getButton(String translationKey) {
-        JButton button = Components.getButton(textSrc.getString(translationKey), "",
-                12.f, Color.BLACK, Color.WHITE, false);
+        JButton button = new JButton("<html>" + textSrc.getString(translationKey) + "</div></html>");
+        button.setUI(new CustomButtonUI());
+        button.setFont(OptionsFactory.getOptions().getFont(Font.BOLD, 12f));
+        button.setForeground(Color.BLACK);
+//        button.setBackground(Color.WHITE);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setOpaque(false);
         return button;

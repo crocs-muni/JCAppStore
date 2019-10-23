@@ -113,7 +113,7 @@ public class Menu extends JMenuBar {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
-        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_small.png"));
+        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_black.png"));
     }
 
     private void buildReadersItem() {
