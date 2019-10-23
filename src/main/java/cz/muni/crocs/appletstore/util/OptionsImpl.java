@@ -48,7 +48,7 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");  //true false
         options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
-        options.put(Options.KEY_FONT, null);
+        options.put(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
         options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
         options.put(Options.KEY_PGP_LOCATION, "");
         options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
