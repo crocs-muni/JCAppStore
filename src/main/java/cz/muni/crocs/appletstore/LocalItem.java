@@ -4,8 +4,7 @@ import com.sun.istack.internal.NotNull;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -62,9 +61,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        Font basic = OptionsFactory.getOptions().getFont();
-
-        JLabel icon = new HtmlLabel("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
+        JLabel icon = new HtmlText("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
@@ -88,19 +85,19 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
             title = adjustLength(title, 15);
         else
             title = adjustLength(title, 25);
-        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", basic.deriveFont(16f)), gbc);
+        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", 16f), gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_START;
         author = adjustLength(author, 15);
-        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", basic.deriveFont(13f));
+        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", 13f);
         infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
         container.add(infoPanel, gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_END;
         version = adjustLength(version, 5);
-        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", basic.deriveFont(15f)), gbc);
+        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", 15f), gbc);
 
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
@@ -167,10 +164,8 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         super.paintComponent(g);
     }
 
-    private JLabel getLabel(String text, String css, Font font) {
-        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
-        label.setFont(font);
-        return label;
+    private JLabel getLabel(String text, String css, float size) {
+        return new HtmlText("<div style=\"" + css + "\">" + text + "</div>", size);
     }
 
     private static BufferedImage getIssuerImg() {

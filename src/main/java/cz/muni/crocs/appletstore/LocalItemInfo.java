@@ -2,13 +2,10 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.action.DeleteAction;
 import cz.muni.crocs.appletstore.card.action.SendApduAction;
-import cz.muni.crocs.appletstore.ui.Text;
-import cz.muni.crocs.appletstore.ui.Title;
+import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.ui.HintLabel;
-import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
@@ -31,13 +28,13 @@ import java.util.ResourceBundle;
 public class LocalItemInfo extends HintPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private HintLabel name = new HintLabel();
+    private HintLabel name = new HintTitle();
     private JLabel author = new Text();
-    private HintLabel version = new HintLabel();
-    private HintLabel sdk = new HintLabel();
-    private HintLabel id = new HintLabel();;
-    private HintLabel type = new HintLabel();
-    private HintLabel domain = new HintLabel();
+    private HintLabel version = new HintText();
+    private HintLabel sdk = new HintText();
+    private HintLabel id = new HintText();;
+    private HintLabel type = new HintText();
+    private HintLabel domain = new HintText();
     private HintLabel uninstall;
     //private HintLabel rawApdu;
 
@@ -93,7 +90,7 @@ public class LocalItemInfo extends HintPanel {
 //        rawApdu.addMouseListener(send);
 //        add(rawApdu, "wrap");
 
-        uninstall = new HintLabel(textSrc.getString("uninstall"), "", new ImageIcon(
+        uninstall = new HintText(textSrc.getString("uninstall"), "", new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(delete);

@@ -44,8 +44,7 @@ public class ErrorPane extends JPanel {
         JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
         panel.add(icon);
 
-        JLabel retry = new JLabel(textSrc.getString("retry"));
-        retry.setFont(OptionsFactory.getOptions().getFont(16f));
+        JLabel retry = new Text(textSrc.getString("retry"), 16f);
         retry.setForeground(Color.WHITE);
         panel.add(retry);
 
@@ -62,7 +61,7 @@ public class ErrorPane extends JPanel {
     public ErrorPane (String title, String message, String imgName) {
         this(title, imgName);
 
-        JLabel hint = new HtmlLabel("<p width=\"400\" align=\"center\">" + message + "</p>");
+        JLabel hint = new HtmlText("<p width=\"400\" align=\"center\">" + message + "</p>");
         hint.setBorder(new EmptyBorder(20, 20, 20, 20));
         hint.setFont(OptionsFactory.getOptions().getFont(16f));
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);

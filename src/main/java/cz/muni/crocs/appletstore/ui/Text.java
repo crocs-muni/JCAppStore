@@ -63,4 +63,37 @@ public class Text extends JLabel {
     public Text(float size) {
         setFont(OptionsFactory.getOptions().getFont(size));
     }
+
+    public Text(int style) {
+        setFont(OptionsFactory.getOptions().getFont(style));
+    }
+
+    public Text(String s, Icon icon, int style, float size, int i) {
+        super(s, icon, i);
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
+
+    public Text(String s, int style, float size, int i) {
+        super(s, i);
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
+
+    public Text(String s, int style, float size) {
+        super(s);
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
+
+    public Text(Icon icon, int style, float size, int i) {
+        super(icon, i);
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
+
+    public Text(Icon icon, int style, float size) {
+        super(icon);
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
+
+    public Text(int style, float size) {
+        setFont(OptionsFactory.getOptions().getFont(style, size));
+    }
 }

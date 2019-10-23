@@ -48,7 +48,7 @@ public class NotifLabel extends JLabel {
                     parent.revalidate();
                 } else {
                     JOptionPane.showMessageDialog(
-                            parent.getParent(), new HtmlLabel("<p width=\"250\">" + msg + "</p>"),
+                            parent.getParent(), new HtmlText("<p width=\"250\">" + msg + "</p>"),
                             textSrc.getString("event"),
                             JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "label.png"));
                 }

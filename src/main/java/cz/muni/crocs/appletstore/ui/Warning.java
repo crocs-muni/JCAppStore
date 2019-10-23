@@ -59,12 +59,12 @@ public class Warning extends JPanel {
 
 //        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
 
-        JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + image));
+        JLabel error = new Text(new ImageIcon(Config.IMAGE_DIR + image));
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
 
         //todo too long msg does not displays
-        JLabel errorMsg = new HtmlLabel("<div style=\"max-width:90%;\">" + msg + "</div>");
+        JLabel errorMsg = new HtmlText("<div style=\"max-width:90%;\">" + msg + "</div>");
         errorMsg.setFont(OptionsFactory.getOptions().getTitleFont(12f));
         errorMsg.setForeground(Color.BLACK);
         add(errorMsg, "growx");

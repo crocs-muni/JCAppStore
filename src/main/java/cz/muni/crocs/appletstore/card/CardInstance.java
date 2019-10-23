@@ -6,7 +6,7 @@ import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.ListContents;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
@@ -336,7 +336,7 @@ public class CardInstance {
     private boolean askDefault() {
         RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
                 null,
-                new HtmlLabel(textSrc.getString("I_use_default_keys_1") +
+                new HtmlText(textSrc.getString("I_use_default_keys_1") +
                         "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
                         textSrc.getString("I_use_default_keys_2")),
                 textSrc.getString("key_not_found"),

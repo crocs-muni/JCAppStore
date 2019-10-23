@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
@@ -35,10 +35,10 @@ public class DeleteDialogWindow extends JPanel {
         this.kind = kind;
 
         setLayout(new MigLayout("width 250px"));
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("advanced_settings") + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString("advanced_settings") + "</p>"),
                 "wrap, span 5, gapbottom 10");
 
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("pkg_id") + aid + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString("pkg_id") + aid + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
@@ -60,7 +60,7 @@ public class DeleteDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String key) {
-        JLabel hint = new HtmlLabel("<p width=\"600\">" + textSrc.getString(key) + "</p>");
+        JLabel hint = new HtmlText("<p width=\"600\">" + textSrc.getString(key) + "</p>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }

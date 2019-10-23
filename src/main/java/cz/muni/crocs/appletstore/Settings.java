@@ -72,7 +72,7 @@ public class Settings extends JPanel {
         }
         cutString(path);
 
-        JLabel bgValue = new HtmlLabel(path);
+        JLabel bgValue = new HtmlText(path);
         bgValue.setFont(OptionsFactory.getOptions().getFont(12f));
         bgValue.setBorder(frame);
         add(bgValue, "span 3, growx, wrap");

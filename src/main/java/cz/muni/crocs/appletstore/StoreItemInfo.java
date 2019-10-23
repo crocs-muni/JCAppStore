@@ -6,7 +6,6 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.card.action.InstallAction;
-import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
@@ -85,14 +84,12 @@ public class StoreItemInfo extends HintPanel {
         add(icon, "span 2 2, gapleft 50");
 
         String appName = dataSet.get(JsonParser.TAG_TITLE).getAsString();
-        JLabel name = new JLabel(appName + "  ");
-        name.setFont(titleFont);
+        JLabel name = new Title(appName + "  ", 20f);
         add(name, "align left, gaptop 40, width ::350, id title");
 
         buildMainInstallButton(dataSet, callback);
 
-        JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString());
-        author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
+        JLabel author = new Title(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString(), 15f);
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
@@ -123,7 +120,7 @@ public class StoreItemInfo extends HintPanel {
         if (!dataSet.get(JsonParser.TAG_HOST).getAsBoolean()) {
             add(Components.getNotice(
                     textSrc.getString("W_no_host_app"),
-                    OptionsFactory.getOptions().getFont(),
+                    14f,
                     new Color(255, 219, 148),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"),
                     "margin: 10px; width:500px")
@@ -141,13 +138,10 @@ public class StoreItemInfo extends HintPanel {
 
         addSubTitle("website", "H_website");
         final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
-        JLabel url = new HtmlLabel("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>");
+        JLabel url = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>", 14f);
         url.setOpaque(true);
-        Color bg = new Color(255, 255, 255, 80);
-        url.setBackground(bg);
+        url.setBackground(new Color(255, 255, 255, 80));
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        Font textFont = OptionsFactory.getOptions().getFont(14f);
-        url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
 

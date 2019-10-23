@@ -1,8 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import sun.management.counter.ByteArrayCounter;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -18,7 +16,7 @@ public class Components {
         return label;
     }
 
-    public static JPanel getNotice(String text, Font font, Color background, ImageIcon icon, String css) {
+    public static JPanel getNotice(String text, float fontSize, Color background, ImageIcon icon, String css) {
         final int depth = 5;
         // idea from https://stackoverflow.com/questions/13368103/jpanel-drop-shadow
         JPanel container = new JPanel() {
@@ -39,10 +37,9 @@ public class Components {
         );
 
         JLabel img = new JLabel(icon);
-        JLabel desc = new JLabel("<html><div style=\"" + css + "\">" + text + "</div></html>");
+        JLabel desc = new HtmlText("<div style=\"" + css + "\">" + text + "</div>", fontSize);
         img.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         desc.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        desc.setFont(font);
         container.add(img);
         container.add(desc);
         return container;
@@ -54,15 +51,14 @@ public class Components {
         return label;
     }
 
-    public static JLabel getLabel(String title, Font font) {
-        JLabel label = new JLabel(title);
-        if (font != null) label.setFont(font);
+    public static JLabel getLabel(String title, float size) {
+        JLabel label = new Text(title, size);
         label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         return label;
     }
 
-    public static JLabel getLabel(String title, Font font, Border border) {
-        JLabel label = getLabel(title, font);
+    public static JLabel getLabel(String title, float size, Border border) {
+        JLabel label = getLabel(title, size);
         label.setBorder(border);
         return label;
     }

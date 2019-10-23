@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.Components;
+import cz.muni.crocs.appletstore.ui.Text;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
@@ -75,7 +76,7 @@ public class LocalSubMenu extends JPanel {
     void setOnReload(Action a) { reload.addActionListener(a); }
 
     private JLabel getLabel(String translateKey) {
-        JLabel label = new JLabel(textSrc.getString(translateKey));
+        JLabel label = new Text(textSrc.getString(translateKey));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }

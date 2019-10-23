@@ -1,10 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
-import cz.muni.crocs.appletstore.ui.HtmlTitleLabel;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.HtmlTitle;
 import cz.muni.crocs.appletstore.util.JsonParser;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,9 +79,9 @@ public class StoreItem extends JPanel implements Item {
 
     private JLabel getLabel(String text, String css, Float fontSize, boolean title) {
         return (title) ?
-                new HtmlTitleLabel("<div style=\"" + css + "\">" + text + "</div>", fontSize)
+                new HtmlTitle("<div style=\"" + css + "\">" + text + "</div>", fontSize)
                 :
-                new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>", fontSize);
+                new HtmlText("<div style=\"" + css + "\">" + text + "</div>", fontSize);
     }
 
     private String getImgAddress(String imgName) {

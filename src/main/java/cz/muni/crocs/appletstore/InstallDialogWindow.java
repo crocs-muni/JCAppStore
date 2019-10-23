@@ -3,11 +3,8 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
-import cz.muni.crocs.appletstore.ui.HintLabel;
-import cz.muni.crocs.appletstore.ui.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.util.Tuple;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
@@ -124,9 +121,9 @@ public class InstallDialogWindow extends JPanel {
 
     private void build(String verifiedMsg) {
         setLayout(new MigLayout("width 250px"));
-        add(new HtmlLabel("<p width=\"600\">" + verifiedMsg + "</p>"), "wrap, span 5, gapbottom 10");
+        add(new HtmlText("<p width=\"600\">" + verifiedMsg + "</p>"), "wrap, span 5, gapbottom 10");
 
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString("W_do_not_unplug") + "</p>"),
                 "wrap, span 5, gapbottom 10");
 
         add(new JLabel(textSrc.getString("pkg_id")), "span 2");
@@ -230,7 +227,7 @@ public class InstallDialogWindow extends JPanel {
         advanced.add(new JLabel(textSrc.getString("force_install")), "span 4, wrap");
         advanced.add(getHint("H_force_install", "600"), "span 5, wrap");
         if (isInstalled) {
-            advanced.add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
+            advanced.add(new HtmlText("<p width=\"600\">" + textSrc.getString("W_installed") + "</p>"),
                     "wrap, span 5, gapbottom 10");
         }
     }
@@ -337,7 +334,7 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String langKey, String width) {
-        JLabel hint = new HtmlLabel("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>");
+        JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
