@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.ui.HtmlLabel;
 import cz.muni.crocs.appletstore.ui.HtmlTitleLabel;
+import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -70,10 +71,10 @@ public class StoreItem extends JPanel implements Item {
     }
 
     public StoreItem(JsonObject dataSet) {
-        this(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
-                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
-                dataSet.get(Config.JSON_TAG_LATEST).getAsString(),
-                dataSet.get(Config.JSON_TAG_ICON).getAsString()
+        this(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
+                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
+                dataSet.get(JsonParser.TAG_LATEST).getAsString(),
+                dataSet.get(JsonParser.TAG_ICON).getAsString()
                 );
     }
 

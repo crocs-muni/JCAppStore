@@ -11,6 +11,19 @@ import java.util.Set;
  */
 public interface IniParser {
 
+    String TAG_NAME = "name";
+    String TAG_KEY = "key";
+    String TAG_KEY_CHECK_VALUE = "kcv";
+    String TAG_DIVERSIFIER = "diversifier";
+    String TAG_AUTHENTICATED = "auth";
+    String TAG_ATR = "atr";
+    String TAG_CIN = "cin";
+    String TAG_IIN = "iin";
+    String TAG_CPLC = "cplc";
+    String TAG_DATA = "card_data";
+    String TAG_CAPABILITIES = "card_capabilities";
+    String TAG_KEY_INFO = "key_info";
+
     /**
      * Get value of INI under header specified in constructor
      * @param key key to get

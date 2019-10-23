@@ -11,8 +11,24 @@ import java.util.List;
  */
 public interface JsonParser {
 
+    String TAG_NAME = "name";
+    String TAG_TITLE = "title";
+    String TAG_ICON = "icon";
+    String TAG_LATEST = "latest";
+    String TAG_VERSION = "versions";
+    String TAG_BUILD = "builds";
+    String TAG_AUTHOR = "author";
+    String TAG_DESC = "description";
+    String TAG_URL = "url";
+    String TAG_USAGE = "usage";
+    String TAG_KEYS = "keys";
+    String TAG_HOST = "host_app";
+    String TAG_PGP_IDENTIFIER = "pgp"; //can be email or key ID
+    String TAG_PGP_SIGNER = "signed_by";
+
     /**
      * Get a list of JSON objects of the store items
+     *
      * @return list of store items
      * @throws FileNotFoundException no such file to read from
      */
@@ -20,6 +36,7 @@ public interface JsonParser {
 
     /**
      * Convert all objects in JsonArray to its String representation
+     *
      * @param array array of JSON objects
      * @return array of string representations of JSON array
      */

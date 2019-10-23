@@ -53,7 +53,7 @@ public class StoreItemInfo extends HintPanel {
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();
-                if (name != null && name.equals(dataSet.get(Config.JSON_TAG_TITLE).getAsString())) {
+                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
                     installed = true;
                     break;
                 }
@@ -80,18 +80,18 @@ public class StoreItemInfo extends HintPanel {
         });
         add(back, "pos 0 0");
 
-        JLabel icon = new JLabel(getIcon(dataSet.get(Config.JSON_TAG_ICON).getAsString()));
+        JLabel icon = new JLabel(getIcon(dataSet.get(JsonParser.TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 2 2, gapleft 50");
 
-        String appName = dataSet.get(Config.JSON_TAG_TITLE).getAsString();
+        String appName = dataSet.get(JsonParser.TAG_TITLE).getAsString();
         JLabel name = new JLabel(appName + "  ");
         name.setFont(titleFont);
         add(name, "align left, gaptop 40, width ::350, id title");
 
         buildMainInstallButton(dataSet, callback);
 
-        JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
+        JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString());
         author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
@@ -99,9 +99,9 @@ public class StoreItemInfo extends HintPanel {
     private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void, Void> callback) {
         JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"),
                 "margin: 1px 10px;", 20f, Color.WHITE, new Color(140, 196, 128), true);
-        final String appletName = dataSet.get(Config.JSON_TAG_NAME).getAsString();
-        final String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
-        final JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
+        final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
+        final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
+        final JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                 .get(latestV).getAsJsonArray();
         String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
 
@@ -111,8 +111,8 @@ public class StoreItemInfo extends HintPanel {
                     public void mouseClicked(MouseEvent e) {
                         fireInstall(appletName, getInfoPack(dataSet, latestV,
                                 sdks, sdks.size() - 1),
-                                dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
-                                dataSet.get(Config.JSON_TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 callback, installed, e);
                     }
                 });
@@ -120,7 +120,7 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void checkHostApp(JsonObject dataSet) {
-        if (!dataSet.get(Config.JSON_TAG_HOST).getAsBoolean()) {
+        if (!dataSet.get(JsonParser.TAG_HOST).getAsBoolean()) {
             add(Components.getNotice(
                     textSrc.getString("W_no_host_app"),
                     OptionsFactory.getOptions().getFont(),
@@ -133,14 +133,14 @@ public class StoreItemInfo extends HintPanel {
 
     private void buildDescription(JsonObject dataSet) {
         add(Components.getTextField(
-                dataSet.get(Config.JSON_TAG_DESC).getAsString(),
+                dataSet.get(JsonParser.TAG_DESC).getAsString(),
                 OptionsFactory.getOptions().getFont(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 40, wrap");
 
         addSubTitle("website", "H_website");
-        final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
+        final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
         JLabel url = new HtmlLabel("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>");
         url.setOpaque(true);
         Color bg = new Color(255, 255, 255, 80);
@@ -153,7 +153,7 @@ public class StoreItemInfo extends HintPanel {
 
         addSubTitle("use", "H_use");
         add(Components.getTextField(
-                dataSet.get(Config.JSON_TAG_USAGE).getAsString(),
+                dataSet.get(JsonParser.TAG_USAGE).getAsString(),
                 OptionsFactory.getOptions().getFont(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
@@ -166,20 +166,20 @@ public class StoreItemInfo extends HintPanel {
         addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
         addText("custom_sdk", "H_custom_sdk", "gapleft 20, gaptop 20, wrap");
 
-        String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
+        String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(JsonParser.TAG_VERSION));
         versionComboBox = getBoxSelection(versions);
 
         versionComboBox.addActionListener(e -> {
             String[] compilerVersions = parser.jsonArrayToDataArray(
                     dataSet.getAsJsonObject(
-                            Config.JSON_TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()
+                            JsonParser.TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()
                     )
             );
             compilerVersionComboBox.setModel(new JComboBox<>(compilerVersions).getModel());
         });
         add(versionComboBox, "gapleft 50, gapleft 20");
 
-        JsonObject builds = dataSet.getAsJsonObject(Config.JSON_TAG_BUILD);
+        JsonObject builds = dataSet.getAsJsonObject(JsonParser.TAG_BUILD);
         String[] compilerVersions = parser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
@@ -203,13 +203,13 @@ public class StoreItemInfo extends HintPanel {
                         }
 
                         String version = versions[versionIdx];
-                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
+                        JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
 
-                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
+                        fireInstall(dataSet.get(JsonParser.TAG_NAME).getAsString(),
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
-                                dataSet.get(Config.JSON_TAG_SIGNER).getAsString(),
-                                dataSet.get(Config.JSON_TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 call, installed, e);
                     }
                 });
@@ -286,13 +286,13 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private AppletInfo getInfoPack(JsonObject dataSet, String version, JsonArray sdks, int sdkIdx) {
-        return new AppletInfo(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
-                dataSet.get(Config.JSON_TAG_ICON).getAsString(),
+        return new AppletInfo(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
+                dataSet.get(JsonParser.TAG_ICON).getAsString(),
                 version,
-                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
+                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
                 sdks.get(sdkIdx).getAsString(),
                 null,
-                hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
+                hasKey(dataSet.get(JsonParser.TAG_KEYS).getAsString()));
     }
 
     private static String getInstallFileName(String appletName, String version, String sdkVersion) {
