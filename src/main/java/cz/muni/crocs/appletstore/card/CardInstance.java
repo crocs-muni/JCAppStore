@@ -113,7 +113,7 @@ public class CardInstance {
 
     private void updateCardAuth(boolean authenticated) throws LocalizedCardException {
         try {
-            IniParserImpl parser = new IniParserImpl(Config.CARD_TYPES_FILE, id, textSrc.getString("ini_commentary"));
+            IniParserImpl parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
             parser.addValue(IniParser.TAG_NAME, name)
                     .addValue(IniParser.TAG_KEY, masterKey)
                     .addValue(IniParser.TAG_KEY_CHECK_VALUE, kcv)
@@ -134,7 +134,7 @@ public class CardInstance {
     private boolean saveDetailsAndCheckMasterKey() throws LocalizedCardException {
         IniParserImpl parser;
         try {
-            parser = new IniParserImpl(Config.CARD_TYPES_FILE, id, textSrc.getString("ini_commentary"));
+            parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
             if (parser.isHeaderPresent()) {
                 name = parser.getValue(IniParser.TAG_NAME);
                 masterKey = parser.getValue(IniParser.TAG_KEY);
