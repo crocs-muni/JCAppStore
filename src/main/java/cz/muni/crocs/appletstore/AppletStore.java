@@ -57,25 +57,23 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Environment and style settings
      */
     private void setup() {
-        if (SystemUtils.IS_OS_LINUX) {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    try {
-                        UIManager.setLookAndFeel(info.getClassName());
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedLookAndFeelException e) {
-                        e.printStackTrace();
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else if (SystemUtils.IS_OS_MAC) {
+                //todo get optimal UI
+            } else if (SystemUtils.IS_OS_UNIX) {
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        UIManager.setLookAndFeel("Nimbus");
+                        break;
                     }
-                    break;
                 }
             }
-
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
         }
+
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);

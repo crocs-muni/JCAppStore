@@ -87,12 +87,6 @@ public class SplashScreen extends JWindow {
 
     private void runMainApp() {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            //ignore
-        }
-
-        try {
             new AppletStore();
         } catch (Exception e) {
             e.printStackTrace();
