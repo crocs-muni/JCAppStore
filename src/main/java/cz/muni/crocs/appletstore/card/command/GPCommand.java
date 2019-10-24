@@ -7,7 +7,7 @@ import pro.javacard.gp.GPSession;
  * @author Jiří Horák
  * @version 1.0
  */
-public abstract class GPCommand<T> implements CardCommand<T> {
+public abstract class GPCommand<T> implements CardCommand {
 
     protected GPSession context;
     protected String cardId;

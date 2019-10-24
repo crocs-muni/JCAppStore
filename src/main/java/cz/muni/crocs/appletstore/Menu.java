@@ -3,9 +3,8 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.help.AppletUsage;
-import cz.muni.crocs.appletstore.help.Cmd;
-import cz.muni.crocs.appletstore.help.HelpWrapper;
+import cz.muni.crocs.appletstore.help.*;
+import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -14,8 +13,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -116,7 +113,7 @@ public class Menu extends JMenuBar {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
-        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_small.png"));
+        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_black.png"));
     }
 
     private void buildReadersItem() {
@@ -126,8 +123,8 @@ public class Menu extends JMenuBar {
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
-        midContainer.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
-        currentCard = new JLabel();
+        midContainer.add(new Text(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
+        currentCard = new Text();
         currentCard.setForeground(Color.white);
         midContainer.add(currentCard);
         add(midContainer);
@@ -150,6 +147,20 @@ public class Menu extends JMenuBar {
                 new HelpWrapper(textSrc.getString("cmd"), new Cmd()).showIt();
             }
         }, textSrc.getString("H_cmd")));
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("auth")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWrapper(textSrc.getString("auth"), new MasterKey()).showIt();
+            }
+        }, textSrc.getString("H_auth")));
+
+//        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("pgp")) {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                new HelpWrapper(textSrc.getString("pgp"), new Keybase()).showIt();
+//            }
+//        }, textSrc.getString("H_pgp")));
     }
 
     /**
@@ -189,12 +200,14 @@ public class Menu extends JMenuBar {
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
+        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         return menuItem;
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
+        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         menuItem.setIcon(new ImageIcon(image));
         return menuItem;
     }
@@ -212,6 +225,8 @@ public class Menu extends JMenuBar {
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
         JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
         setItemLook(rbMenuItem, descripton);
+        rbMenuItem.setFont(OptionsFactory.getOptions().getTitleFont());
+
         return rbMenuItem;
     }
 

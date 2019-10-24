@@ -5,8 +5,9 @@ import apdu4j.HexUtils;
 import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
-import cz.muni.crocs.appletstore.card.command.List;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.card.command.ListContents;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,9 @@ import javax.smartcardio.CardTerminal;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
@@ -47,7 +48,7 @@ public class CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private ArrayList<AppletInfo> applets;
+    private Set<AppletInfo> applets;
 
     /**
      * Compares the card id and updates card data if needed
@@ -89,8 +90,12 @@ public class CardInstance {
      *
      * @return modifiable applet list
      */
-    java.util.List<AppletInfo> getApplets() {
+    Set<AppletInfo> getApplets() {
         return applets;
+    }
+
+    void setApplets(Set<AppletInfo> applets) {
+        this.applets = applets;
     }
 
     void removeAppletInfo(AppletInfo info) {
@@ -108,12 +113,12 @@ public class CardInstance {
 
     private void updateCardAuth(boolean authenticated) throws LocalizedCardException {
         try {
-            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_LIST, id, textSrc.getString("ini_commentary"));
-            parser.addValue(Config.INI_NAME, name)
-                    .addValue(Config.INI_KEY, masterKey)
-                    .addValue(Config.INI_KEY_CHECK_VALUE, kcv)
-                    .addValue(Config.INI_DIVERSIFIER, diversifier)
-                    .addValue(Config.INI_AUTHENTICATED, authenticated ? "true" : "false")
+            IniParserImpl parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
+            parser.addValue(IniParser.TAG_NAME, name)
+                    .addValue(IniParser.TAG_KEY, masterKey)
+                    .addValue(IniParser.TAG_KEY_CHECK_VALUE, kcv)
+                    .addValue(IniParser.TAG_DIVERSIFIER, diversifier)
+                    .addValue(IniParser.TAG_AUTHENTICATED, authenticated ? "true" : "false")
                     .store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
@@ -129,31 +134,31 @@ public class CardInstance {
     private boolean saveDetailsAndCheckMasterKey() throws LocalizedCardException {
         IniParserImpl parser;
         try {
-            parser = new IniParserImpl(Config.INI_CARD_LIST, id, textSrc.getString("ini_commentary"));
+            parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
             if (parser.isHeaderPresent()) {
-                name = parser.getValue(Config.INI_NAME);
-                masterKey = parser.getValue(Config.INI_KEY);
-                kcv = parser.getValue(Config.INI_KEY_CHECK_VALUE).toUpperCase();
-                diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
-                doAuth = parser.getValue(Config.INI_AUTHENTICATED).toLowerCase().equals("true");
+                name = parser.getValue(IniParser.TAG_NAME);
+                masterKey = parser.getValue(IniParser.TAG_KEY);
+                kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
+                diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
+                doAuth = parser.getValue(IniParser.TAG_AUTHENTICATED).toLowerCase().equals("true");
                 return !(masterKey == null || masterKey.isEmpty());
             }
 
             logger.info("Card " + id + " saved into card list database.");
-            parser.addValue(Config.INI_NAME, name)
-                    .addValue(Config.INI_KEY, "")
+            parser.addValue(IniParser.TAG_NAME, name)
+                    .addValue(IniParser.TAG_KEY, "")
                     //key check value from provider, default none
-                    .addValue(Config.INI_KEY_CHECK_VALUE, "")
+                    .addValue(IniParser.TAG_KEY_CHECK_VALUE, "")
                     //one of: <no_value>, EMV, KDF3, VISA2
-                    .addValue(Config.INI_DIVERSIFIER, "")
-                    .addValue(Config.INI_AUTHENTICATED, "true")
-                    .addValue(Config.INI_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
-                    .addValue(Config.INI_CIN, details.getCin())
-                    .addValue(Config.INI_IIN, details.getIin())
-                    .addValue(Config.INI_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
-                    .addValue(Config.INI_DATA, details.getCardData())
-                    .addValue(Config.INI_CAPABILITIES, details.getCardCapabilities())
-                    .addValue(Config.INI_KEY_INFO, details.getKeyInfo())
+                    .addValue(IniParser.TAG_DIVERSIFIER, "")
+                    .addValue(IniParser.TAG_AUTHENTICATED, "true")
+                    .addValue(IniParser.TAG_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
+                    .addValue(IniParser.TAG_CIN, details.getCin())
+                    .addValue(IniParser.TAG_IIN, details.getIin())
+                    .addValue(IniParser.TAG_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
+                    .addValue(IniParser.TAG_DATA, details.getCardData())
+                    .addValue(IniParser.TAG_CAPABILITIES, details.getCardCapabilities())
+                    .addValue(IniParser.TAG_KEY_INFO, details.getKeyInfo())
                     .store();
             return false;
         } catch (IOException e) {
@@ -166,18 +171,18 @@ public class CardInstance {
      * extract functionality into one connection process
      */
     private void getCardListWithDefaultPassword() throws LocalizedCardException, CardException {
-        if (!(new File(Config.INI_CARD_TYPES).exists())) {
+        if (!(new File(Config.CARD_TYPES_FILE).exists())) {
             throw new LocalizedCardException("No types present.", "E_missing_types");
         }
 
         try {
-            IniParserImpl parser = new IniParserImpl(Config.INI_CARD_TYPES,
+            IniParserImpl parser = new IniParserImpl(Config.CARD_TYPES_FILE,
                     CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
             if (parser.isHeaderPresent()) {
-                name = parser.getValue(Config.INI_NAME);
-                masterKey = parser.getValue(Config.INI_KEY);
-                kcv = parser.getValue(Config.INI_KEY_CHECK_VALUE).toUpperCase();
-                diversifier = parser.getValue(Config.INI_DIVERSIFIER).toUpperCase();
+                name = parser.getValue(IniParser.TAG_NAME);
+                masterKey = parser.getValue(IniParser.TAG_KEY);
+                kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
+                diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
             } else {
                 if (!askDefault()) {
                     logger.warn("Card type not found: " + CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
@@ -201,28 +206,26 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        List list = new List();
-        executeCommand(list);
-        applets = list.getResult();
+        ListContents listContents = new ListContents();
+        executeCommands(listContents);
+        applets = listContents.getResult();
     }
 
     /**
      * Executes any desired command using secure channel
      *
-     * @param command command instance to execute
+     * @param commands commands to execute
      * @throws CardException unable to perform command
      */
-    void executeCommand(GPCommand command) throws LocalizedCardException, CardException {
+    void executeCommands(GPCommand ... commands) throws LocalizedCardException, CardException {
         Card card;
         GPSession context = null;
         APDUBIBO channel;
 
         try {
             card = terminal.connect("*");
-            //card.beginExclusive();
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
         } catch (CardException e) {
-//            if (card != null) card.endExclusive();
             throw new LocalizedCardException("Could not connect to selected reader: " +
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
@@ -261,37 +264,38 @@ public class CardInstance {
         try {
             secureConnect(context);
         } catch (GPException e) {
-            card.endExclusive();
             //ugly, but the GP is designed in a way it does not allow me to do otherwise
             if (e.getMessage().startsWith("STRICT WARNING: ")) {
                 updateCardAuth(false);
-                fail(card, e, "E_secure_channel_error");
+                fail(card, e, "H_authentication");
             }
             fail(card, e, "E_unknown_error");
         }
 
         try {
-            command.setCardId(id);
-            command.setGP(context);
-            command.execute();
+            for (GPCommand command : commands) {
+                command.setCardId(id);
+                command.setGP(context);
+                command.execute();
+            }
         } catch (GPException e) {
-            fail(card, e, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
         } catch (IOException e) {
-            fail(card, e, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", e);
         } finally {
-            //card.endExclusive();
             card.disconnect(true);
         }
     }
 
+    private void failNoDisconnect(Exception e, String translationKey) throws LocalizedCardException {
+    }
+
     private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
-        //card.endExclusive();
         card.disconnect(true);
         throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, translationKey), e);
     }
 
     private void fail(Card card, Exception e, String translationKey) throws LocalizedCardException, CardException {
-        card.endExclusive();
         card.disconnect(true);
         throw new LocalizedCardException(e.getMessage(), translationKey, e);
     }
@@ -332,7 +336,7 @@ public class CardInstance {
     private boolean askDefault() {
         RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
                 null,
-                new HtmlLabel(textSrc.getString("I_use_default_keys_1") +
+                new HtmlText(textSrc.getString("I_use_default_keys_1") +
                         "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
                         textSrc.getString("I_use_default_keys_2")),
                 textSrc.getString("key_not_found"),

@@ -36,7 +36,7 @@ public interface Informer {
      * @param status status level of the Warning.Importance enum, e.g. SEVERE, INFO ...
      * @param icon icon to show
      * @param callable action to perform on click
-     * @param milis duration after which the message is closed
+     * @param milis duration after which the message is closed, null if do not close
      */
     void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis);
 

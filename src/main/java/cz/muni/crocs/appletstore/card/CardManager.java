@@ -12,6 +12,12 @@ import java.util.Set;
 public interface CardManager {
 
     /**
+     * Check if card present
+     * @return true if card inserted
+     */
+    boolean isCard();
+
+    /**
      * Switches to the new aid as selected applet
      * should not select if card not plugged
      * @param aid AID to select
@@ -25,6 +31,12 @@ public interface CardManager {
     boolean isAppletSelected();
 
     /**
+     * Check if applet selected
+     * @return true if applet with AID provided selected
+     */
+    boolean isAppletSelected(AID applet);
+
+    /**
      * Get state of the terminal instance
      * @return Terminals.TerminalState value (NO_CARD / NO_READER / OK)
      */
@@ -32,7 +44,7 @@ public interface CardManager {
 
     /**
      * Return set of connected terminal names
-     * @return
+     * @return set of all terminals
      */
     Set<String> getTerminals();
     CardTerminal getSelectedTerminal();
@@ -44,7 +56,7 @@ public interface CardManager {
      * Get applets on card
      * @return applets info list
      */
-    List<AppletInfo> getInstalledApplets();
+    Set<AppletInfo> getInstalledApplets();
 
     /**
      * Get card identifier
@@ -74,7 +86,7 @@ public interface CardManager {
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessary steps to be ready to work with
      *
-     * @return @link Terminals::checkTerminals()
+     * @link Terminals::checkTerminals()
      */
     void loadCard() throws LocalizedCardException;
 
@@ -113,15 +125,6 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      */
     void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
-
-    /**
-     * Install new applet onto current card
-     * @param file file with the applet (already parsed)
-     * @param data data from install user, namely 3 items: install params, force install and custom AID
-     * @param info additional applet data from store
-     * @throws LocalizedCardException exception with localized text on failure
-     */
-    void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException;
 
     /**
      * Uninstall applet from the card

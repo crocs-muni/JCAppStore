@@ -15,7 +15,7 @@ import java.net.URLConnection;
  * Created by Jiří on 21. 6. 2017.
  */
 
-public class InternetConnection {
+public class GitHubInternetConnection {
 
     /**
      * Check for the latest version and internet connection as well

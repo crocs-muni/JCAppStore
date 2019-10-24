@@ -24,8 +24,8 @@ import java.util.zip.ZipInputStream;
  * @author Jiří Horák
  * @version 1.0
  */
-public class AppletDownloader {
-    private static final Logger logger = LogManager.getLogger(AppletDownloader.class);
+public class StoreDownloader {
+    private static final Logger logger = LogManager.getLogger(StoreDownloader.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private File zipFile = new File(Config.APP_STORE_DIR, "JCAppStoreContent.zip");
@@ -35,7 +35,7 @@ public class AppletDownloader {
 
     private ProcessTrackable parent;
 
-    public AppletDownloader(String address, ProcessTrackable parentThread) {
+    public StoreDownloader(String address, ProcessTrackable parentThread) {
         parent = parentThread;
         this.address = address;
     }
@@ -112,7 +112,6 @@ public class AppletDownloader {
 
             while (entry != null) {
                 String fileName = entry.getName().substring(32); //TODO: can be invalid if changed the package id length
-                System.out.println(fileName);
 
                 File newFile = new File(Config.APP_STORE_DIR, fileName);
                 logger.info("file unzip : " + newFile.getAbsoluteFile());

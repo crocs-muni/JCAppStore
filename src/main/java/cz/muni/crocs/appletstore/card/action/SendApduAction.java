@@ -1,5 +1,6 @@
-package cz.muni.crocs.appletstore;
+package cz.muni.crocs.appletstore.card.action;
 
+import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import pro.javacard.gp.GPRegistryEntry;

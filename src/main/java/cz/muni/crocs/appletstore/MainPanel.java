@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,11 +21,15 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
-
+    private Component current = null;
 
     public MainPanel(BackgroundChangeable context) {
-        localPanel = new LocalWindowPane(context);
-        storePanel = new StoreWindowManager(context);
+        localPanel = new LocalWindowPane();
+        storePanel = new StoreWindowManager();
+        OnEventCallBack<Void, Void, Void> callback = new WorkCallback(context, localPanel);
+
+        localPanel.build(callback);
+        storePanel.setCallbackOnAction(callback);
 
         createHierarchy();
         InformerFactory.setInformer(this);
@@ -76,7 +81,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         return (storePanel.isVisible()) ? storePanel : localPanel;
     }
 
-    public LocalWindowPane getLocalPanel() {
+    public LocalWindowPane getRefreshablePane() {
         return localPanel;
     }
 
@@ -85,7 +90,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         if (info == null || info.isEmpty())
             return;
         JOptionPane.showMessageDialog(this,
-                info,
+                "<html><div width=\"350\">" + info + "</div></html>",
                 textSrc.getString("info"),
                 JOptionPane.QUESTION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + "info.png"));
@@ -93,14 +98,16 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
 
     @Override
     public void showWarning(JComponent component) {
-        add(component, BorderLayout.NORTH);
+        current = component;
+        add(current, BorderLayout.NORTH);
         revalidate();
-//        JOptionPane.showConfirmDialog(this, component);
     }
 
     @Override
-    public void hideWarning(JComponent component) {
-        remove(component);
+    public void hideWarning() {
+        if (current == null) return;
+        remove(current);
+        current = null;
         revalidate();
         repaint();
     }

@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class StyledItemRenderer<T> extends JPanel implements ListCellRenderer<T> {
-    private JLabel label = new JLabel();
+    private JLabel label = new Text();
 
     public StyledItemRenderer() {
         setPreferredSize(new Dimension(80, 20));

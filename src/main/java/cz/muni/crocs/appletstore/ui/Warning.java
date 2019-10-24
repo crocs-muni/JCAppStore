@@ -2,8 +2,8 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.CallBack;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,12 +28,14 @@ public class Warning extends JPanel {
         RETRY, CLOSE, NO_ICON
     }
 
-    public Warning(String msg, Importance status, CallBackIcon type, CallBack iconOnClick) {
-
+    public Warning(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
+        setLayout(new MigLayout("center, gapy 20, insets 0 20 0 20"));
         MouseAdapter call = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                iconOnClick.callBack();
+                for (CallBack c : onClick) {
+                    c.callBack();
+                }
             }
         };
 
@@ -45,27 +47,27 @@ public class Warning extends JPanel {
                 break;
             case SEVERE:
                 image = "announcement.png";
-                setBackground(new Color(193, 95, 42));
+                setBackground(new Color(193, 137, 56));
                 break;
             case INFO:
                 image = "info.png";
-                setBackground(new Color(193, 149, 40));
+                setBackground(new Color(159, 193, 55));
                 break;
             default:
                 image = "info.png";
         }
 
-        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
+//        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
 
-        JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + image));
+        JLabel error = new Text(new ImageIcon(Config.IMAGE_DIR + image));
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(error);
 
         //todo too long msg does not displays
-        JLabel errorMsg = new HtmlLabel("<div style=\"max-width:90%;\">" + msg + "</div>");
+        JLabel errorMsg = new HtmlText("<div style=\"max-width:90%;\">" + msg + "</div>");
         errorMsg.setFont(OptionsFactory.getOptions().getTitleFont(12f));
         errorMsg.setForeground(Color.BLACK);
-        add(errorMsg);
+        add(errorMsg, "growx");
 
         switch (type) {
             case CLOSE:

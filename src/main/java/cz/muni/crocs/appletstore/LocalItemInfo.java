@@ -1,10 +1,11 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.action.DeleteAction;
+import cz.muni.crocs.appletstore.card.action.SendApduAction;
+import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.ui.HintLabel;
-import cz.muni.crocs.appletstore.ui.HintPanel;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
@@ -12,6 +13,8 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -25,14 +28,15 @@ import java.util.ResourceBundle;
 public class LocalItemInfo extends HintPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private HintLabel name = new HintLabel();
-    private JLabel author = new JLabel();
-    private HintLabel version = new HintLabel();
-    private HintLabel id = new HintLabel();;
-    private HintLabel type = new HintLabel();
-    private HintLabel domain = new HintLabel();
-    private JLabel uninstall;
-    private JLabel rawApdu;
+    private HintLabel name = new HintTitle();
+    private JLabel author = new Text();
+    private HintLabel version = new HintText();
+    private HintLabel sdk = new HintText();
+    private HintLabel id = new HintText();;
+    private HintLabel type = new HintText();
+    private HintLabel domain = new HintText();
+    private HintLabel uninstall;
+    //private HintLabel rawApdu;
 
     private SendApduAction send;
     private DeleteAction delete;
@@ -46,7 +50,16 @@ public class LocalItemInfo extends HintPanel {
         send = new SendApduAction(null, call);
         delete = new DeleteAction(null, call);
 
-        name.setFont(OptionsFactory.getOptions().getTitleFont(16f));
+        JLabel close = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
+        close.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                unset();
+            }
+        });
+        add(close, "pos 90% 3%");
+
+        name.setFont(OptionsFactory.getOptions().getTitleFont(18f));
         name.setBorder(new EmptyBorder(30, 0, 10, 5));
         add(name, "span 2, wrap");
 
@@ -55,6 +68,9 @@ public class LocalItemInfo extends HintPanel {
 
         version.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(version, "span 2, wrap");
+
+        sdk.setBorder(new EmptyBorder(5, 0, 5, 5));
+        add(sdk, "span 2, wrap");
 
         id.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(id, "span 2, wrap");
@@ -65,18 +81,17 @@ public class LocalItemInfo extends HintPanel {
         domain.setBorder(new EmptyBorder(5, 0, 5, 5));
         add(domain, "span 2, wrap");
 
-        JLabel title = new JLabel(textSrc.getString("management"));
-        title.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 13f));
+        JLabel title = new Title(textSrc.getString("management"), 17f);
         add(title, "span 2, gaptop 15, wrap");
 
-        rawApdu = new JLabel(textSrc.getString("custom_command"), new ImageIcon(
-                Config.IMAGE_DIR + "raw_apdu.png"), SwingConstants.CENTER);
-        rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        rawApdu.addMouseListener(send);
-        add(rawApdu, "wrap");
+//        rawApdu = new HintLabel(textSrc.getString("custom_command"),
+//                textSrc.getString("no_support_yet"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
+//        rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//        rawApdu.addMouseListener(send);
+//        add(rawApdu, "wrap");
 
-        uninstall = new JLabel(textSrc.getString("uninstall"), new ImageIcon(
-                Config.IMAGE_DIR + "delete.png"), SwingConstants.CENTER);
+        uninstall = new HintText(textSrc.getString("uninstall"), "", new ImageIcon(
+                Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(delete);
         add(uninstall, "wrap");
@@ -93,26 +108,35 @@ public class LocalItemInfo extends HintPanel {
         }
         delete.setInfo(info);
         send.setInfo(info);
-        String ver = info.getVersion();
 
-        name.setText("<html><p width=\"280\">" + info.getName() + "</p></html>",
-                textSrc.getString("H_name"));
-        author.setText("<html><p width=\"280\">" + textSrc.getString("author") +
-                info.getAuthor() + "</p></html>");
-        version.setText("<html><p width=\"280\">" + textSrc.getString("version") +
-                ((ver == null || ver.isEmpty()) ? "??" : info.getVersion()) + "</p></html>",
-                textSrc.getString("H_version"));
-        id.setText("<html><p width=\"280\">ID: " + info.getAid().toString(),
-                textSrc.getString("H_id"));
-        type.setText("<html><p width=\"280\">" + textSrc.getString("type") +
-                getType(info.getKind()) + "</p></html>", textSrc.getString("H_type"));
-        domain.setText("<html><p width=\"280\">" + textSrc.getString("sd_assigned") +
-                ((info.getDomain() == null) ? "unknown" : info.getDomain().toString()),
-                textSrc.getString("H_sd_assinged"));
+        setLabel(name, info.getName() == null ? info.getAid().toString() : info.getName(), "H_name");
+        setLabel(author, textSrc.getString("author") + getValue(info.getAuthor()));
+        setLabel(version, textSrc.getString("version") + getValue(info.getVersion()), "H_version");
+        setLabel(sdk, textSrc.getString("sdk_version") + getValue(info.getSdk()), "H_custom_sdk");
+        setLabel(id, textSrc.getString("aid") + info.getAid().toString(), "H_id");
+        setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
+        setLabel(domain, textSrc.getString("sd_assigned") +
+                ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
-        rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
+        uninstall.setHint(textSrc.getString(info.getKind() == GPRegistryEntry.Kind.Application ?
+                "H_uninstall_apk" : "H_uninstall_pkg"));
+//        rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
+    }
+
+    private String getValue(String maybe) {
+        if (maybe == null || maybe.isEmpty())
+            return textSrc.getString("unknown");
+        return maybe;
+    }
+
+    private void setLabel(HintLabel label, String data, String keyHint) {
+        label.setText("<html><p width=\"280\">" + data + "</p></html>", textSrc.getString(keyHint));
+    }
+
+    private void setLabel(JLabel label, String data) {
+        label.setText("<html><p width=\"280\">" + data + "</p></html>");
     }
 
     /**

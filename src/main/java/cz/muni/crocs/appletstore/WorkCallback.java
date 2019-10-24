@@ -5,9 +5,11 @@ import cz.muni.crocs.appletstore.util.OnEventCallBack;
 public class WorkCallback implements OnEventCallBack<Void, Void, Void> {
 
     private BackgroundChangeable context;
+    private Refreshable content;
 
-    public WorkCallback(BackgroundChangeable context) {
+    public WorkCallback(BackgroundChangeable context, Refreshable content) {
         this.context = context;
+        this.content = content;
     }
 
     @Override
@@ -24,8 +26,8 @@ public class WorkCallback implements OnEventCallBack<Void, Void, Void> {
 
     @Override
     public Void onFinish() {
-        //todo show user the OK notice
         context.switchEnabled(true);
+        content.refresh();
         return null;
     }
 }

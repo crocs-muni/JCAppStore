@@ -22,6 +22,7 @@ public class CapFileChooser {
 
     public static CAPFile getCapFile(File from) {
         CAPFile instcap = null;
+        if (from == null) return null;
         try (FileInputStream fin = new FileInputStream(from)) {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {
@@ -32,7 +33,7 @@ public class CapFileChooser {
         return instcap;
     }
 
-    public static CAPFile chooseCapFile(File dir) {
+    public static File chooseCapFile(File dir) {
         JFileChooser fileChooser = new JFileChooser(dir);
         fileChooser.setFileView(new CapFileView());
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -46,7 +47,7 @@ public class CapFileChooser {
                 InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") + cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
                 return null;
             }
-            return getCapFile(cap);
+            return cap;
         }
         return null;
     }

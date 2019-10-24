@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -65,6 +67,7 @@ public class LeftMenu extends JPanel {
 
         setButton(remote, textSrc.getString("app_store"), false);
         remote.setOpaque(false);
+        remote.setBackground(choosedButtonBG);
         remote.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         container.add(remote, gbc);
 
@@ -100,6 +103,8 @@ public class LeftMenu extends JPanel {
     private void setChoosed() {
         local.setBorder(isLocal);
         remote.setBorder(!isLocal);
+        local.setOpaque(isLocal);
+        remote.setOpaque(!isLocal);
     }
 
     /**
@@ -124,10 +129,6 @@ public class LeftMenu extends JPanel {
                     isLocal = true;
                     setChoosed();
                     parent.setLocalPanelVisible();
-
-                    local.setOpaque(true);
-                    local.setBackground(choosedButtonBG);
-                    remote.setOpaque(false);
                 }
             }
         });
@@ -138,10 +139,7 @@ public class LeftMenu extends JPanel {
                     isLocal = false;
                     setChoosed();
                     parent.setStorePaneVisible();
-
-                    remote.setOpaque(true);
-                    remote.setBackground(choosedButtonBG);
-                    local.setOpaque(false);
+                    parent.getSearchablePane().refresh();
                 } else {
                     parent.getSearchablePane().showItems(null);
                 }
@@ -162,6 +160,23 @@ public class LeftMenu extends JPanel {
                 parent.getSearchablePane().showItems(searchInput.getText());
             }
         });
+
+//        searchInput.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                parent.getSearchablePane().showItems(searchInput.getText());
+//            }
+//        });
     }
 }
 

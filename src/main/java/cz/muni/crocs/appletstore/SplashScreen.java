@@ -74,13 +74,13 @@ public class SplashScreen extends JWindow {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(Color.BLACK);
-        String numbers = "";
+        StringBuilder numbers = new StringBuilder();
         for (int i = 0; i < progress; i++) {
-            numbers += String.valueOf(r.nextInt(10));
-            if ((i + 1) % 4 == 0) numbers += "  ";
+            numbers.append(r.nextInt(10));
+            if ((i + 1) % 4 == 0) numbers.append("  ");
         }
         g2d.setFont(font.deriveFont(20f));
-        g2d.drawString(numbers, 30, 120);
+        g2d.drawString(numbers.toString(), 30, 120);
         g2d.setFont(font.deriveFont(12f));
         g2d.drawString(loader.getInfo(), 78, 98);
     }

@@ -19,6 +19,8 @@ public interface Options<ValueType> {
     String KEY_STYLESHEET = "stylesheet";
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
+    String KEY_PGP_LOCATION = "gpg";
+    String KEY_ERROR_MODE = "mode";
 
     /**
      * Get option for app
@@ -91,4 +93,10 @@ public interface Options<ValueType> {
      * @return default styleSheet for app
      */
     StyleSheet getDefaultStyleSheet();
+
+    /**
+     * Check if system in verbose advanced use
+     * @return true if verbose
+     */
+    boolean isVerbose();
 }

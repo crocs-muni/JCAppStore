@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.HtmlLabel;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.Title;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
         add(Box.createRigidArea(new Dimension(50, 30)));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        JLabel icon = new HtmlLabel("<img src=\"file:///" +
+        JLabel icon = new HtmlText("<img src=\"file:///" +
                 new File(Config.IMAGE_DIR + "install_icon.png").getAbsolutePath() +
                 "\" width=\"83\" height=\"56\" />");
         icon.setMaximumSize(new Dimension(83, 56));
@@ -34,16 +35,15 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
 
         add(Box.createRigidArea(new Dimension(50, 20)));
 
-        JLabel title = new JLabel(textSrc.getString("CAP_install_applet"));
-        title.setFont(OptionsFactory.getOptions().getTitleFont(16f));
-        title.setForeground(Color.WHITE);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        add(title);
+        JLabel label = new Title(textSrc.getString("CAP_install_applet"), 16f);
+        label.setForeground(Color.WHITE);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(label);
 
-        title = new JLabel(textSrc.getString("from_pc"));
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setForeground(Color.WHITE);
-        add(title);
+        label = new Text(textSrc.getString("from_pc"));
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        label.setForeground(Color.WHITE);
+        add(label);
     }
 
     @Override

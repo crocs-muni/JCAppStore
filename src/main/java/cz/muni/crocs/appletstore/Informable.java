@@ -17,9 +17,8 @@ public interface Informable {
 
     /**
      * Hide supplied component if shown
-     * @param component component component to hide
      */
-    void hideWarning(JComponent component);
+    void hideWarning();
 
     /**
      * Show info to user

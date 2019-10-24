@@ -26,12 +26,13 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
+    private JsonObject currentlyShown;
 
-    public StoreWindowPane(List<JsonObject> data, BackgroundChangeable context) {
+    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void, Void> callback) {
         this.data = data;
-        this.callback = new WorkCallback(context);
-
+        this.callback = callback;
         setOpaque(false);
+        setViewportBorder(null);
         getViewport().setOpaque(false);
         storeLayout.setOpaque(false);
 
@@ -64,22 +65,31 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         showPanel(items);
     }
 
+    @Override
+    public void refresh() {
+        if (currentlyShown == null)
+            showItems(null);
+        else
+            showInfo(currentlyShown);
+    }
+
     private void showInfo(JsonObject dataSet) {
-        StoreItemInfo info = new StoreItemInfo(dataSet, this, callback);
-        setViewportView(info);
+        currentlyShown = dataSet;
+        setViewportView(new StoreItemInfo(dataSet, this, callback));
     }
 
     private void showPanel(Collection<StoreItem> sortedItems) {
         storeLayout.removeAll();
         if (sortedItems.size() == 0) {
             storeLayout.add(new StoreItem(textSrc.getString("no_results"),
-                    "no_results.png", "", ""));
+                    "", "", "no_results.png"));
         } else {
             for (StoreItem item : sortedItems) {
                 storeLayout.add(item);
             }
         }
         storeLayout.revalidate();
+        currentlyShown = null;
         setViewportView(storeLayout);
     }
 

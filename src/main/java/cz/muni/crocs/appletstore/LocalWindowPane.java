@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.card.action.InstallAction;
+import cz.muni.crocs.appletstore.card.action.ReloadAction;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.DisablePanel;
@@ -8,16 +10,18 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
-
 
 /**
  * Panel that lists all card contents. Allows the applet
@@ -26,12 +30,12 @@ import java.util.List;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LocalWindowPane extends DisablePanel implements Searchable {
+public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
     private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private OnEventCallBack<Void, Void, Void> callback;
+    private LocalSubMenu submenu;
     private LocalItemInfo infoLayout;
     private JPanel windowLayout;
     private JScrollPane windowScroll;
@@ -41,19 +45,60 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
     private GridBagConstraints constraints;
 
-    public LocalWindowPane(BackgroundChangeable context) {
-        callback = new WorkCallback(context);
+    public LocalWindowPane() {
         setOpaque(false);
 
+        submenu = new LocalSubMenu();
+
         GridBagLayout gb = new GridBagLayout();
-        gb.columnWeights = new double[]{1, 0.1d};
-        gb.rowWeights = new double[]{1};
+        gb.columnWeights = new double[]{1d, 0.1d};
+        gb.rowWeights = new double[]{0.01d, 1d};
         this.setLayout(gb);
 
         constraints = new GridBagConstraints();
+    }
 
-        setupComponents();
-        updatePanes();
+    /**
+     * Setup the panel with constructed callback
+     * must be called once on construction, separated
+     * because the callback also needs this //todo ugly
+     */
+    public void build(OnEventCallBack<Void, Void, Void> callback) {
+        removeAll();
+
+        submenu.setOnSubmit(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showItems(null);
+            }
+        });
+        submenu.setOnReload(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ReloadAction(callback).mouseClicked(null);
+            }
+        });
+
+        infoLayout = new LocalItemInfo(callback);
+        windowLayout = new JPanel();
+        windowScroll = new JScrollPane();
+        windowScroll.setViewportBorder(null);
+
+        windowScroll.setOpaque(false);
+        windowScroll.getViewport().setOpaque(false);
+        windowScroll.setOpaque(false);
+        windowScroll.setBorder(BorderFactory.createEmptyBorder());
+        windowScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        windowScroll.getVerticalScrollBar().setUI(new CustomScrollBarUI());
+        windowScroll.getVerticalScrollBar().setUnitIncrement(16);
+        windowScroll.getVerticalScrollBar().setOpaque(false);
+
+        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
+        windowLayout.setBorder(new EmptyBorder(10, 50, 50, 50));
+        windowLayout.setOpaque(false);
+
+        installCmd.addMouseListener(new InstallAction(callback));
+        refresh();
     }
 
     @Override
@@ -71,22 +116,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         }
     }
 
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
-//        super.paintComponent(g);
-//    }
-
     @Override
-    public void setVisible(boolean aFlag) {
-        super.setVisible(aFlag);
-        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
-    }
-
-    /**
-     * Update the local pane according to the info obtained from the Card Manager
-     */
-    public void updatePanes() {
+    public void refresh() {
         removeAll();
         infoLayout.set(null);
 
@@ -95,9 +126,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         if (verifyTerminalState(manager.getTerminalState())
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
 
-            List<AppletInfo> cardApplets = manager.getInstalledApplets();
+            Set<AppletInfo> cardApplets = manager.getInstalledApplets();
             if (cardApplets == null) {
-                showError("no-card.png", "failed_to_list_aps");
+                showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null returned.");
                 return;
             } else {
@@ -105,8 +136,14 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
             }
 
             constraints.fill = GridBagConstraints.BOTH;
+
             constraints.gridx = 0;
             constraints.gridy = 0;
+            constraints.gridwidth = 2;
+            add(submenu, constraints);
+
+            constraints.gridy = 1;
+            constraints.gridwidth = 1;
             add(windowScroll, constraints);
             constraints.gridx = 1;
 
@@ -117,35 +154,39 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         revalidate();
     }
 
-    public void updatePanes(String errorTitleKey, String errorText) {
+    @Override
+    public void showError(String keyTitle, String keyText, String imgName) {
         removeAll();
-        add(new ErrorPane(textSrc.getString(errorTitleKey), errorText, "announcement_white.png"));
+        if (keyText == null)
+            add(new ErrorPane(textSrc.getString(keyTitle), imgName));
+        else
+            add(new ErrorPane(textSrc.getString(keyTitle), textSrc.getString(keyText), imgName));
         revalidate();
     }
 
-    /**
-     * Setup Swing components
-     */
-    private void setupComponents() {
-        infoLayout = new LocalItemInfo(callback);
-        windowLayout = new JPanel();
-        windowScroll = new JScrollPane();
-
-        windowScroll.setOpaque(false);
-        windowScroll.getViewport().setOpaque(false);
-        windowScroll.setOpaque(false);
-        windowScroll.setBorder(BorderFactory.createEmptyBorder());
-        windowScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        windowScroll.getVerticalScrollBar().setUI(new CustomScrollBarUI());
-        windowScroll.getVerticalScrollBar().setUnitIncrement(16);
-        windowScroll.getVerticalScrollBar().setOpaque(false);
-
-        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
-        windowLayout.setBorder(new EmptyBorder(50, 50, 50, 50));
-        windowLayout.setOpaque(false);
-
-        installCmd.addMouseListener(new InstallAction(callback));
+    @Override
+    public void showError(String keyTitle, String text, String imgName, LocalizedException cause) {
+        removeAll();
+        if (text == null)
+            add(new ErrorPane(textSrc.getString(keyTitle), imgName));
+        else
+            add(new ErrorPane(textSrc.getString(keyTitle), text +
+                    (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
+                            cause.getLocalizedMessage() : cause.getLocalizedMessageWithoutCause()), imgName));
+        revalidate();
     }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
+    }
+
+//    @Override
+//    protected void paintComponent(Graphics g) {
+//        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
+//        super.paintComponent(g);
+//    }
 
     /**
      * Verify whether the terminal is persent and card inserted
@@ -157,10 +198,10 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
             case OK:
                 break;
             case NO_CARD:
-                showError("no-card.png", "no_card");
+                showError("no_card", null, "no-card.png");
                 return false;
             case NO_READER:
-                showError("no-reader.png", "no_reader");
+                showError("no_reader", null, "no-reader.png");
                 return false;
             case LOADING:
                 add(new LoadingPaneCircle());
@@ -172,7 +213,11 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
 
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
-            showError("E_authentication", "H_authentication", "announcement_white.png");
+            if (OptionsFactory.getOptions().isVerbose()) {
+                showError("E_no_life_state", "H_no_life_state", "announcement_white.png");
+            } else {
+                showError("E_communication", "H_communication", "plug-in-out.png");
+            }
             return false;
         }
         switch (isdLifeState) {
@@ -196,15 +241,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
         }
     }
 
-    private void showError(String keyTitle, String keyDesc, String imgName) {
-        add(new ErrorPane(textSrc.getString(keyTitle), textSrc.getString(keyDesc), imgName));
-    }
-
-    private void showError(String imageName, String titleKey) {
-        add(new ErrorPane(textSrc.getString(titleKey), imageName));
-    }
-
-    private void loadApplets(List<AppletInfo> applets, CardManager manager) {
+    private void loadApplets(Set<AppletInfo> applets, CardManager manager) {
         items.clear();
         for (AppletInfo appletInfo : applets) {
             LocalItem item = new LocalItem(appletInfo);
@@ -232,7 +269,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable {
                     "no_results.png", "", "", null));
         } else {
             for (LocalItem item : sortedItems) {
-                windowLayout.add(item);
+                if (submenu.accept(item.info.getKind()))
+                    windowLayout.add(item);
             }
         }
         windowLayout.add(installCmd);

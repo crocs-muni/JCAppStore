@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
@@ -29,8 +30,8 @@ import java.io.IOException;
 
 public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
-    public static final int PREFFERED_WIDTH = 1100;
-    public static final int PREFFERED_HEIGHT = 550;
+    private static final int PREFFERED_WIDTH = 1100;
+    private static final int PREFFERED_HEIGHT = 550;
 
     private boolean windowOpened = true;
     private MainPanel window;
@@ -56,9 +57,27 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Environment and style settings
      */
     private void setup() {
+        if (SystemUtils.IS_OS_UNIX) {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    try {
+                        UIManager.setLookAndFeel(info.getClassName());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedLookAndFeelException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+
+        }
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
-        //setDefaultLookAndFeelDecorated(false);
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("Menu.background", Color.BLACK);
         UIManager.put("Menu.foreground", Color.WHITE);
@@ -107,25 +126,22 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                     if (result > 0) {
                         if (result == 2) {
                             try {
-                                SwingUtilities.invokeLater(() -> {
-                                    switchEnabled(false);
-                                });
+                                SwingUtilities.invokeLater(() -> switchEnabled(false));
                                 manager.loadCard();
                             } catch (LocalizedCardException e) {
                                 e.printStackTrace();
-                                window.getLocalPanel().updatePanes("E_loading_failed",
-                                        e.getLocalizedMessage() + "<br> CARD: " + manager.getLastCardDescriptor());
+                                window.getRefreshablePane().showError("E_loading_failed",
+                                        "CARD: " + manager.getLastCardDescriptor() + "<br>",
+                                        "announcement_white.png", e);
                                 continue;
                             } finally {
-                                SwingUtilities.invokeLater(() -> {
-                                    switchEnabled(true);
-                                });
+                                SwingUtilities.invokeLater(() -> switchEnabled(true));
                             }
                         }
 
                         SwingUtilities.invokeLater(() -> {
                             if (result == 2) {
-                                window.getLocalPanel().updatePanes();
+                                window.getRefreshablePane().refresh();
                                 menu.setCard(manager.getCardDescriptor());
                             }
 
@@ -135,11 +151,9 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                     Thread.sleep(2000);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    SwingUtilities.invokeLater(() -> {
-                        InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE);
-                    });
+                    SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE));
                     logger.info("Terminal routine interrupted, should not happened.", e);
-                    window.getLocalPanel().updatePanes();
+                    window.getRefreshablePane().refresh();
                     checkTerminalsRoutine();
                 }
             }

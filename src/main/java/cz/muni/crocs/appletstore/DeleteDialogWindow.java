@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
@@ -35,10 +35,10 @@ public class DeleteDialogWindow extends JPanel {
         this.kind = kind;
 
         setLayout(new MigLayout("width 250px"));
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("advanced_settings") + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString("advanced_settings") + "</p>"),
                 "wrap, span 5, gapbottom 10");
 
-        add(new HtmlLabel("<p width=\"600\">" + textSrc.getString("pkg_id") + aid + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString("pkg_id") + aid + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
         JLabel more = new JLabel(textSrc.getString("advanced_settings"));
@@ -60,7 +60,7 @@ public class DeleteDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String key) {
-        JLabel hint = new HtmlLabel("<p width=\"600\">" + textSrc.getString(key) + "</p>");
+        JLabel hint = new HtmlText("<p width=\"600\">" + textSrc.getString(key) + "</p>");
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
@@ -71,13 +71,13 @@ public class DeleteDialogWindow extends JPanel {
      */
     public String confirm() {
         if (keys == KeysPresence.PRESENT) {
-            return textSrc.getString("applet") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
         }
         if (keys == KeysPresence.UNKNOWN) {
-            return textSrc.getString("applet") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {
-            return textSrc.getString("E_delete_sd"); //todo allow deleting SD?
+            return textSrc.getString("E_delete_sd");
         }
         return null;
     }

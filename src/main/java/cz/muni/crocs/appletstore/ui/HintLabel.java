@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -21,8 +21,22 @@ public class HintLabel extends JLabel {
         this.hint = hint;
     }
 
+    public HintLabel(Icon icon, String hint) {
+        super(icon);
+        this.hint = hint;
+    }
+
+    public HintLabel(String text, String hint, Icon icon) {
+        super(text, icon, JLabel.LEFT);
+        this.hint = hint;
+    }
+
     public void setText(String text, String hint) {
         super.setText(text);
+        setHint(hint);
+    }
+
+    public void setHint(String hint) {
         this.hint = hint;
     }
 }

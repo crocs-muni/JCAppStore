@@ -14,12 +14,11 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @version 1.0
  */
 public class InformerImpl implements Informer, CallBack<Void> {
-
+    private Thread current;
     public static final Integer DELAY = 8000;
 
     private Informable context;
     private volatile Deque<Tuple<Warning, Integer>> queue = new LinkedBlockingDeque<>();
-    private volatile Deque<Warning> toClose = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
     public InformerImpl(Informable context) {
@@ -43,8 +42,12 @@ public class InformerImpl implements Informer, CallBack<Void> {
 
     @Override
     public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis) {
-        queue.add(new Tuple<>(new Warning(msg, status, icon, callable == null ? this : callable), milis));
-        fireWarning();
+        if (callable == null) {
+            showWarningToClose(msg, status, milis);
+        } else {
+            queue.add(new Tuple<>(new Warning(msg, status, icon, callable, this), milis));
+            fireWarning();
+        }
     }
 
     @Override
@@ -53,48 +56,54 @@ public class InformerImpl implements Informer, CallBack<Void> {
         fireWarning();
     }
 
-
     @Override
     public void closeWarning() {
-        if (!toClose.isEmpty()) {
-            context.hideWarning(toClose.pop());
-        }
+        context.hideWarning();
     }
 
     @Override
     public Void callBack() {
         closeWarning();
+        current.interrupt();
         return null;
+    }
+
+    private Thread getNewNoticeSwitcherThread() {
+        return new Thread(() -> {
+            while (true) {
+                if (queue.isEmpty()) {
+                    current = null;
+                    busy = false;
+                    return;
+                }
+                final Tuple<Warning, Integer> next = queue.pop();
+                SwingUtilities.invokeLater(() -> {
+                    context.showWarning(next.first);
+                });
+
+                if (next.second != null) {
+                    try {
+                        Thread.sleep(next.second);
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
+                    SwingUtilities.invokeLater(this::closeWarning);
+                } else {
+                    try {
+                        Thread.currentThread().wait();
+                    } catch (InterruptedException e) {
+                        //do nothing
+                    }
+                }
+            }
+        });
     }
 
     private synchronized void fireWarning() {
         if (busy)
             return;
-
         busy = true;
-        System.out.println("Running");
-        new Thread(() -> {
-            while (true) {
-                System.out.println(queue.toString());
-
-                if (queue.isEmpty()) {
-                    busy = false;
-                    return;
-                }
-                final Tuple<Warning, Integer> next = queue.pop();
-                toClose.add(next.first);
-
-                System.out.println(next.first.getBackground());
-                SwingUtilities.invokeLater(() -> {
-                    context.showWarning(next.first);
-                });
-                try {
-                    Thread.sleep(next.second);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                SwingUtilities.invokeLater(this::closeWarning);
-            }
-        }).start();
+        current = getNewNoticeSwitcherThread();
+        current.start();
     }
 }

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Parser class that focuses only on one header inside INI file:
@@ -9,6 +10,19 @@ import java.io.IOException;
  * @version 1.0
  */
 public interface IniParser {
+
+    String TAG_NAME = "name";
+    String TAG_KEY = "key";
+    String TAG_KEY_CHECK_VALUE = "kcv";
+    String TAG_DIVERSIFIER = "diversifier";
+    String TAG_AUTHENTICATED = "auth";
+    String TAG_ATR = "atr";
+    String TAG_CIN = "cin";
+    String TAG_IIN = "iin";
+    String TAG_CPLC = "cplc";
+    String TAG_DATA = "card_data";
+    String TAG_CAPABILITIES = "card_capabilities";
+    String TAG_KEY_INFO = "key_info";
 
     /**
      * Get value of INI under header specified in constructor
@@ -43,5 +57,11 @@ public interface IniParser {
      * Check header presence
      * @return true if header, given in constructor, present
      */
-    boolean isHeaderPresent() ;
+    boolean isHeaderPresent();
+
+    /**
+     * Get all keys from header given
+     * @return set of keys
+     */
+    Set<String> keySet();
 }

@@ -1,16 +1,18 @@
-package cz.muni.crocs.appletstore;
+package cz.muni.crocs.appletstore.card.action;
 
+import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.DeleteDialogWindow;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
-import javax.smartcardio.CardException;
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -21,15 +23,14 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class DeleteAction extends MouseAdapter {
+public class DeleteAction extends CardAction {
     private static final Logger logger = LoggerFactory.getLogger(DeleteAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletInfo info;
-    private final OnEventCallBack<Void, Void, Void> call;
 
     public DeleteAction(AppletInfo info, OnEventCallBack<Void, Void, Void> call) {
-        this.call = call;
+        super(call);
         this.info = info;
     }
 
@@ -44,8 +45,6 @@ public class DeleteAction extends MouseAdapter {
             return;
         }
 
-        logger.info("Delete applet: " + info.toString());
-
         DeleteDialogWindow opts = new DeleteDialogWindow(info.getAid().toString(), info.getKind(), info.hasKeys());
         switch (showDialog(textSrc.getString("CAP_delete_applet"), opts, "delete.png", "delete")) {
             case JOptionPane.NO_OPTION:
@@ -54,32 +53,37 @@ public class DeleteAction extends MouseAdapter {
             case JOptionPane.YES_OPTION:
                 break;
         }
+        logger.info("Delete applet: " + info.toString());
 
-        String msg = opts.confirm();
-        if (msg != null) {
-            switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
-                case JOptionPane.NO_OPTION:
-                case JOptionPane.CLOSED_OPTION:
-                    return;
-                case JOptionPane.YES_OPTION:
+        final CardManager manager = CardManagerFactory.getManager();
+        boolean willForce = opts.willForce();
+        //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
+        if (!OptionsFactory.getOptions().isVerbose() && info.getKind() == Kind.ExecutableLoadFile) {
+            for (AID mod : info.getModules()) {
+                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+                    willForce = true;
                     break;
+                }
             }
         }
-        call.onStart();
 
-        new Thread(() ->  {
-            try {
-                CardManagerFactory.getManager().uninstall(info, opts.willForce());
-            } catch (LocalizedCardException ex) {
-                ex.printStackTrace();
-                logger.warn("Failed to uninstall applet: " + ex.getMessage());
-                SwingUtilities.invokeLater(() -> {
-                    showFailed(textSrc.getString("delete_failed"), ex.getLocalizedMessage());
-                });
-                SwingUtilities.invokeLater(call::onFail);
+        if (willForce || info.getKind() != Kind.ExecutableLoadFile) {
+            String msg = opts.confirm();
+            if (msg != null) {
+                switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
+                    case JOptionPane.NO_OPTION:
+                    case JOptionPane.CLOSED_OPTION:
+                        return;
+                    case JOptionPane.YES_OPTION:
+                        break;
+                }
             }
-            SwingUtilities.invokeLater(call::onFinish);
-        }).start();
+        }
+
+        final boolean finalWillForce = willForce;
+        execute(() -> {
+            manager.uninstall(info, finalWillForce);
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
     }
 
     private static int showDialog(String title, Object msg, String imgname, String confirmBtnKey) {
@@ -92,10 +96,5 @@ public class DeleteAction extends MouseAdapter {
                 new ImageIcon(Config.IMAGE_DIR + imgname),
                 new String[]{textSrc.getString(confirmBtnKey), textSrc.getString("cancel")},
                 "error");
-    }
-
-    private static void showFailed(String title, String message) {
-        JOptionPane.showMessageDialog(null,
-                message, title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
     }
 }

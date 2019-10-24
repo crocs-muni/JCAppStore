@@ -5,7 +5,9 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import cz.muni.crocs.appletstore.card.action.InstallAction;
 import cz.muni.crocs.appletstore.ui.*;
+import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
@@ -14,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,10 +23,10 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.security.Key;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Item detail in store
@@ -39,8 +40,6 @@ public class StoreItemInfo extends HintPanel {
 
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-    private final Font titleFont = OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f);
-    private final Font textFont = OptionsFactory.getOptions().getFont(Font.PLAIN, 16f);
 
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
@@ -49,17 +48,16 @@ public class StoreItemInfo extends HintPanel {
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
-        List<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
+        Set<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();
-                if (name != null && name.equals(dataSet.get(Config.JSON_TAG_TITLE).getAsString())) {
+                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
                     installed = true;
                     break;
                 }
             }
         }
-
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
@@ -81,71 +79,69 @@ public class StoreItemInfo extends HintPanel {
         });
         add(back, "pos 0 0");
 
-        JLabel icon = new JLabel(getIcon(dataSet.get(Config.JSON_TAG_ICON).getAsString()));
+        JLabel icon = new JLabel(getIcon(dataSet.get(JsonParser.TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 2 2, gapleft 50");
 
-        String appName = dataSet.get(Config.JSON_TAG_TITLE).getAsString();
-        JLabel name = new JLabel(appName);
-        name.setFont(titleFont);
-        add(name, "align left, gaptop 40, width ::350");
+        String appName = dataSet.get(JsonParser.TAG_TITLE).getAsString();
+        JLabel name = new Title(appName + "  ", 20f);
+        add(name, "align left, gaptop 40, width ::350, id title");
 
-        JButton install = Components.getButton(textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"), "margin: 1px 10px;",
-                20f, Color.WHITE, new Color(140, 196, 128), true);
+        buildMainInstallButton(dataSet, callback);
+
+        JLabel author = new Title(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString(), 15f);
+        add(author, "align left, gapbottom 40, width ::350, wrap");
+    }
+
+    private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void, Void> callback) {
+        JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
+        final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
+        final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
+        final JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
+                .get(latestV).getAsJsonArray();
+        String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
+
         install.addMouseListener(
                 new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        String latestV = dataSet.get(Config.JSON_TAG_LATEST).getAsString();
-                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
-                                .get(latestV).getAsJsonArray();
-                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback, installed, e);
+                        fireInstall(appletName, getInfoPack(dataSet, latestV,
+                                sdks, sdks.size() - 1),
+                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                callback, installed, e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
-
-        JLabel author = new JLabel(textSrc.getString("author") + dataSet.get(Config.JSON_TAG_AUTHOR).getAsString());
-        author.setFont(OptionsFactory.getOptions().getTitleFont(15f));
-        add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
     private void checkHostApp(JsonObject dataSet) {
-        if (!dataSet.get(Config.JSON_TAG_HOST).getAsString().trim().toLowerCase().equals("true")) {
-            add(Components.getNotice(
-                    textSrc.getString("W_no_host_app"),
-                    OptionsFactory.getOptions().getFont(),
-                    new Color(255, 219, 148),
-                    new ImageIcon(Config.IMAGE_DIR + "info.png"),
-                    "margin: 10px; width:500px")
+        if (!dataSet.get(JsonParser.TAG_HOST).getAsBoolean()) {
+            add(getNotice(textSrc.getString("W_no_host_app"), 14f, new Color(255, 219, 148),
+                    new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
             , "gap 20, span 4, gaptop 40, growx, wrap");
         }
     }
 
     private void buildDescription(JsonObject dataSet) {
-        add(Components.getTextField(
-                dataSet.get(Config.JSON_TAG_DESC).getAsString(),
-                OptionsFactory.getOptions().getFont(),
+        add(TextField.getTextField(
+                dataSet.get(JsonParser.TAG_DESC).getAsString(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 40, wrap");
 
         addSubTitle("website", "H_website");
-        final String urlAddress = dataSet.get(Config.JSON_TAG_URL).getAsString();
-        JLabel url = new HtmlLabel("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>");
+        final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
+        JLabel url = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>", 14f);
         url.setOpaque(true);
-        Color bg = new Color(255, 255, 255, 80);
-        url.setBackground(bg);
+        url.setBackground(new Color(255, 255, 255, 80));
         url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        Font textFont = OptionsFactory.getOptions().getFont(14f);
-        url.setFont(textFont);
         url.addMouseListener(new URLAdapter(urlAddress));
         add(url, "span 4, gaptop 10, gapleft 20, wrap");
 
         addSubTitle("use", "H_use");
-        add(Components.getTextField(
-                dataSet.get(Config.JSON_TAG_USAGE).getAsString(),
-                OptionsFactory.getOptions().getFont(),
+        add(TextField.getTextField(
+                dataSet.get(JsonParser.TAG_USAGE).getAsString(),
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 20, wrap");
@@ -157,32 +153,25 @@ public class StoreItemInfo extends HintPanel {
         addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
         addText("custom_sdk", "H_custom_sdk", "gapleft 20, gaptop 20, wrap");
 
-        String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(Config.JSON_TAG_VERSION));
+        String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(JsonParser.TAG_VERSION));
         versionComboBox = getBoxSelection(versions);
-        //todo disables the build combobox exchange...?
-        //versionComboBox.setSelectedItem(dataSet.get(Config.JSON_TAG_LATEST).getAsString());
+
         versionComboBox.addActionListener(e -> {
             String[] compilerVersions = parser.jsonArrayToDataArray(
                     dataSet.getAsJsonObject(
-                            Config.JSON_TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()
+                            JsonParser.TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()
                     )
             );
             compilerVersionComboBox.setModel(new JComboBox<>(compilerVersions).getModel());
         });
         add(versionComboBox, "gapleft 50, gapleft 20");
 
-        JsonObject builds = dataSet.getAsJsonObject(Config.JSON_TAG_BUILD);
+        JsonObject builds = dataSet.getAsJsonObject(JsonParser.TAG_BUILD);
         String[] compilerVersions = parser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
 
-        JButton customInst = Components.getButton(
-                textSrc.getString(installed ? "CAP_reinstall" : "CAP_install"),
-                "margin: 1px 10px;",
-                18f,
-                Color.WHITE,
-                new Color(155, 151, 152),
-                true);
+        JButton customInst = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(155, 151, 152));
         customInst.addMouseListener(
                 new MouseAdapter() {
                     @Override
@@ -195,33 +184,31 @@ public class StoreItemInfo extends HintPanel {
                         }
 
                         String version = versions[versionIdx];
-                        JsonArray sdks = dataSet.get(Config.JSON_TAG_BUILD).getAsJsonObject()
+                        JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
 
-                        fireInstall(dataSet.get(Config.JSON_TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, version, sdks, compilerIdx), call, installed, e);
+                        fireInstall(dataSet.get(JsonParser.TAG_NAME).getAsString(),
+                                getInfoPack(dataSet, version, sdks, compilerIdx),
+                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                call, installed, e);
                     }
                 });
-        add(customInst, "gapleft 10, wrap");
+        add(customInst, "gapleft 10");
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
-        HintLabel title = Components.getHintLabel(
-                textSrc.getString(titleKey),
-                textSrc.getString(hintKey),
-                titleFont,
-                BorderFactory.createEmptyBorder(20, 20, 0, 20)
-        );
+        HintLabel title = new HintTitle( textSrc.getString(titleKey), textSrc.getString(hintKey), 20f);
+        title.setFocusable(true);
+        title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
         add(title, "span 4, gaptop 20, wrap");
     }
 
     private void addText(String titleKey, String hintKey, String constraints) {
-        add(Components.getHintLabel(
-                textSrc.getString(titleKey),
-                textSrc.getString(hintKey),
-                textFont,
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ), constraints);
+        HintLabel label = new HintText(textSrc.getString(titleKey), textSrc.getString(hintKey), 16f);
+        label.setFocusable(true);
+        label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(label, constraints);
     }
 
     private JComboBox<String> getBoxSelection(String[] values) {
@@ -275,18 +262,23 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private AppletInfo getInfoPack(JsonObject dataSet, String version, JsonArray sdks, int sdkIdx) {
-        return new AppletInfo(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
-                dataSet.get(Config.JSON_TAG_ICON).getAsString(),
+        return new AppletInfo(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
+                dataSet.get(JsonParser.TAG_ICON).getAsString(),
                 version,
-                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
+                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
                 sdks.get(sdkIdx).getAsString(),
-                hasKey(dataSet.get(Config.JSON_TAG_KEYS).getAsString()));
+                null,
+                hasKey(dataSet.get(JsonParser.TAG_KEYS).getAsString()));
     }
 
-    private static void fireInstall(String name, AppletInfo info, OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
+    private static String getInstallFileName(String appletName, String version, String sdkVersion) {
+        return Config.APP_STORE_CAPS_DIR + Config.S +
+                appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
+    }
 
-        File file = new File(Config.APP_STORE_CAPS_DIR + Config.SEP +
-                name + Config.SEP + name + "_v" + info.getVersion() + "_sdk" + info.getSdk() + ".cap");
+    private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
+                                    OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
+        File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
 
         if (!file.exists()) {
@@ -296,6 +288,47 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(), info, file, installed, call).mouseClicked(e);
+        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
+                info, file, installed, signer, identifier, call).mouseClicked(e);
+    }
+
+    private JButton getButton(String translationKey, Color background) {
+        JButton button = new JButton("<html><div style=\"margin: 1px 10px;\">" +
+                textSrc.getString(translationKey) + "</div></html>");
+        button.setUI(new CustomButtonUI());
+        button.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f));
+        button.setForeground(Color.WHITE);
+        button.setBackground(background);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    private static JPanel getNotice(String text, float fontSize, Color background, ImageIcon icon, String css) {
+        final int depth = 5;
+        // idea from https://stackoverflow.com/questions/13368103/jpanel-drop-shadow
+        JPanel container = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                int color = 0;
+                int maxOp = 80;
+                for (int i = 0; i < depth; i++) {
+                    g.setColor(new Color(color, color, color, ((maxOp / depth) * i)));
+                    g.drawRect(i, i, this.getWidth() - ((i * 2) + 1), this.getHeight() - ((i * 2) + 1));
+                }
+                g.setColor(background);
+                g.fillRect(depth, depth, getWidth() - depth * 2, getHeight() - depth * 2);
+            }
+        };
+        container.setBorder(BorderFactory.createCompoundBorder(
+                container.getBorder(), BorderFactory.createEmptyBorder(depth, depth, depth, depth))
+        );
+
+        JLabel img = new JLabel(icon);
+        JLabel desc = new HtmlText("<div style=\"" + css + "\">" + text + "</div>", fontSize);
+        img.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        desc.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        container.add(img);
+        container.add(desc);
+        return container;
     }
 }

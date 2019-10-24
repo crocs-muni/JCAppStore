@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
+import com.sun.istack.internal.NotNull;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -32,7 +32,6 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     private static BufferedImage issuer = getIssuerImg();
 
     private static BufferedImage newItem;
-    private static int newItemDimen = 40;
     private String searchQuery;
     private JPanel container;
     private String name; //either name or AID if name missing
@@ -62,9 +61,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        Font basic = OptionsFactory.getOptions().getFont();
-
-        JLabel icon = new HtmlLabel("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
+        JLabel icon = new HtmlText("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
@@ -84,20 +81,23 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        title = adjustLength(title, 25);
-        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", basic.deriveFont(16f)), gbc);
+        if (info != null && info.getName() == null)
+            title = adjustLength(title, 15);
+        else
+            title = adjustLength(title, 25);
+        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", 16f), gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_START;
         author = adjustLength(author, 15);
-        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", basic.deriveFont(13f));
+        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", 13f);
         infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
         container.add(infoPanel, gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
         gbc.anchor = GridBagConstraints.LAST_LINE_END;
         version = adjustLength(version, 5);
-        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", basic.deriveFont(15f)), gbc);
+        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", 15f), gbc);
 
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
@@ -107,7 +107,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     public LocalItem(AppletInfo info) {
         this(
-                (info.getName() == null) ? Arrays.toString(info.getAid().getBytes()) : info.getName(),
+                (info.getName() == null) ? info.getAid().toString() : info.getName(),
                 (info.getImage() == null) ? "wrong-image-name" : info.getImage(),
                 (info.getAuthor() == null) ? textSrc.getString("unknown") : info.getAuthor(),
                 (info.getVersion() == null) ? "" : info.getVersion(),
@@ -121,7 +121,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     }
 
     @Override
-    public int compareTo(Item o) {
+    public int compareTo(@NotNull Item o) {
         if (!(o instanceof LocalItem))
             return 1;
 
@@ -135,14 +135,16 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         } else if (other.info.getKind() == Kind.IssuerSecurityDomain || other.info.getKind() == Kind.SecurityDomain) {
             return 1;
         }
-        return name.compareTo(other.name);
+
+        return 13 * name.compareTo(other.name) + info.getKind().compareTo(other.info.getKind());
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        boolean isSelected = info != null && manager.isAppletSelected(info.getAid());
         if (info != null) {
             Graphics2D g2d = (Graphics2D) g;
-            if (info.isSelected()) {
+            if (isSelected) {
                 container.setBackground(selected);
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
@@ -152,21 +154,18 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
                 g2d.setComposite(old);
             }
             if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
-//                GraphicsTool.paintFocus(g2d, new Rectangle2D.Float(0f, 0f, getWidth(), getHeight()), 4);
+                int newItemDimen = 40;
                 g2d.drawImage(newItem, getWidth() - newItemDimen, 0, newItemDimen, newItemDimen, null);
             }
         }
-        if (!info.isSelected()) {
+        if (!isSelected) {
             container.setBackground(Color.WHITE);
         }
-
         super.paintComponent(g);
     }
 
-    private JLabel getLabel(String text, String css, Font font) {
-        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
-        label.setFont(font);
-        return label;
+    private JLabel getLabel(String text, String css, float size) {
+        return new HtmlText("<div style=\"" + css + "\">" + text + "</div>", size);
     }
 
     private static BufferedImage getIssuerImg() {
