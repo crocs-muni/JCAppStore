@@ -26,15 +26,14 @@ import java.util.concurrent.TimeoutException;
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreWindowManager extends JPanel implements
-        CallBack<Void>, Searchable, ProcessModifiable<StoreWindowManager.StoreState> {
+public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable, Store {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private OnEventCallBack<Void, Void, Void> callbackOnAction;
     private Component currentComponent = null;
     private Searchable store;
-    private volatile StoreState state = StoreState.UNINITIALIZED;
+    private volatile State state = State.UNINITIALIZED;
     private GridBagConstraints constraints;
 
     public StoreWindowManager() {
@@ -54,11 +53,7 @@ public class StoreWindowManager extends JPanel implements
         this.callbackOnAction = callbackOnAction;
     }
 
-    public enum StoreState {
-        UNINITIALIZED, NO_CONNECTION, WORKING, OK, INSTALLING, REBUILD, FAILED, TIMEOUT
-    }
-
-    public synchronized void setState(StoreState state) {
+    public synchronized void setState(State state) {
         this.state = state;
     }
 
@@ -69,14 +64,14 @@ public class StoreWindowManager extends JPanel implements
 
     @Override
     public Void callBack() {
-        setState(StoreState.UNINITIALIZED);
+        setState(State.UNINITIALIZED);
         updateGUI();
         return null;
     }
 
     @Override
     public void showItems(String query) {
-        if (state == StoreState.OK) {
+        if (state == State.OK) {
             store.showItems(query);
         }
     }
@@ -99,16 +94,16 @@ public class StoreWindowManager extends JPanel implements
             case INSTALLING: //if OK or WORKING, do nothing
                 return;
             case REBUILD:
-                setState(StoreState.OK);
+                setState(State.OK);
                 setupWindow();
                 return;
             case TIMEOUT:
-                setState(StoreState.UNINITIALIZED);
+                setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_timeout"),
                         "error.png", this), false);
                 return;
             case FAILED:
-                setState(StoreState.UNINITIALIZED);
+                setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_generic"),
                         "error.png", this), false);
                 return;
@@ -118,7 +113,7 @@ public class StoreWindowManager extends JPanel implements
                 setupWindow();
                 return;
             default:
-                setState(StoreState.WORKING);
+                setState(State.WORKING);
                 init();
         }
     }
@@ -129,19 +124,16 @@ public class StoreWindowManager extends JPanel implements
      * runs the window setup
      */
     private void init() {
-        DownloaderWorker workerThread = new DownloaderWorker(this);
+        StoreWorker workerThread = new StoreWorker(this);
         addLoading(workerThread);
         workerThread.execute();
 
         new Thread(() -> {
             try {
-                String result = workerThread.get(200, TimeUnit.SECONDS);
-                if (!result.equals("done")) {
-                    OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
-                }
+                setState(workerThread.get(200, TimeUnit.SECONDS));
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
-                setState(StoreState.TIMEOUT);
+                setState(State.TIMEOUT);
             } finally {
                 updateGUI();
             }
@@ -166,7 +158,7 @@ public class StoreWindowManager extends JPanel implements
     /**
      * Add loading and start a new thread with 0,5 sec progress update
      */
-    private void addLoading(DownloaderWorker downloader) {
+    private void addLoading(StoreWorker downloader) {
         final LoadingPane loadingPane =
                 new LoadingPane(textSrc.getString("waiting_internet"));
         putNewPane(loadingPane, true);
@@ -211,7 +203,7 @@ public class StoreWindowManager extends JPanel implements
     private void setFailed() {
         putNewPane(new ErrorPane(textSrc.getString("W_store_loading"),
                 "error.png", this), false);
-        setState(StoreState.UNINITIALIZED);
+        setState(State.UNINITIALIZED);
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
     }
 }

@@ -1,8 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.ProcessModifiable;
-import cz.muni.crocs.appletstore.StoreWindowManager;
+import cz.muni.crocs.appletstore.Store;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,51 +12,52 @@ import java.util.ResourceBundle;
 /**
  * Store downloader which checks internet connection,
  *   and launches AppletDownloader if not up to date
- *   returns "done" when up to date or no connection
- *   returns "&lt;version&gt;" version of the newest obtained store
+ *   returns Store.State value to update the store accordingly
  *
  * @author Jiří Horák
  * @version 1.0
  */
-public class DownloaderWorker extends SwingWorker<String, Object> implements ProcessTrackable {
+public class StoreWorker extends SwingWorker<Store.State, Object> implements ProcessTrackable {
 
-    private static final Logger logger = LogManager.getLogger(DownloaderWorker.class);
+    private static final Logger logger = LogManager.getLogger(StoreWorker.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private ProcessModifiable<StoreWindowManager.StoreState> parent;
+    private Store parent;
 
-    public DownloaderWorker(ProcessModifiable<StoreWindowManager.StoreState> parent) {
+    public StoreWorker(Store parent) {
         this.parent = parent;
     }
 
     public void setLoaderMessage(String message) {
-        parent.setProcessMessage(message);
+        SwingUtilities.invokeLater(() -> parent.setProcessMessage(message));
     }
 
     @Override
-    public String doInBackground() {
+    public Store.State doInBackground() {
         setProgress(0);
 
+        final Options<String> options = OptionsFactory.getOptions();
         String[] storeInfo = GitHubInternetConnection.checkAndGetLatestReleaseVersion(
-                OptionsFactory.getOptions().getOption(Options.KEY_GITHUB_LATEST_VERSION)
+                options.getOption(Options.KEY_GITHUB_LATEST_VERSION)
         );
 
         if (storeInfo == null) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("E_no_internet"));
-            parent.setState(StoreWindowManager.StoreState.NO_CONNECTION);
-            return "done";
+            return Store.State.NO_CONNECTION;
         } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("done"));
-            parent.setState(StoreWindowManager.StoreState.REBUILD);
-            return "done";
+            return Store.State.REBUILD;
         }
-        AppletDownloader downloader = new AppletDownloader(storeInfo[1], this);
-        if (!downloader.run()) parent.setState(StoreWindowManager.StoreState.FAILED);
-        else parent.setState(StoreWindowManager.StoreState.REBUILD);
-
-        return storeInfo[2];
+        StoreDownloader downloader = new StoreDownloader(storeInfo[1], this);
+        if (!downloader.run()) {
+            return Store.State.FAILED;
+        }
+        else {
+            options.addOption(Options.KEY_GITHUB_LATEST_VERSION, storeInfo[2]);
+            return Store.State.REBUILD;
+        }
     }
 
     @Override
