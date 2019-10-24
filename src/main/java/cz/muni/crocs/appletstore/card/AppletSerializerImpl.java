@@ -2,11 +2,12 @@ package cz.muni.crocs.appletstore.card;
 
 import java.io.*;
 import java.util.List;
+import java.util.Set;
 
-public class AppletSerializerImpl implements AppletSerializer<List<AppletInfo>> {
+public class AppletSerializerImpl implements AppletSerializer<Set<AppletInfo>> {
 
     @Override
-    public void serialize(List<AppletInfo> data, File file) throws LocalizedCardException {
+    public void serialize(Set<AppletInfo> data, File file) throws LocalizedCardException {
         try (FileOutputStream fos = new FileOutputStream(file);
              ObjectOutputStream out = new ObjectOutputStream(fos)) {
 
@@ -18,16 +19,16 @@ public class AppletSerializerImpl implements AppletSerializer<List<AppletInfo>> 
     }
 
     @Override
-    public List<AppletInfo> deserialize(File file) throws LocalizedCardException {
+    public Set<AppletInfo> deserialize(File file) throws LocalizedCardException {
         if (!file.exists())
             throw new LocalizedCardException("No file.", "E_no_applets_file");
 
-        List<AppletInfo> result;
+        Set<AppletInfo> result;
 
         try (FileInputStream fis = new FileInputStream(file);
              ObjectInputStream in = new ObjectInputStream(fis)) {
 
-            result = (List<AppletInfo>) in.readObject();
+            result = (Set<AppletInfo>) in.readObject();
 
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save applets into file.", "E_deserialize_applets", e);

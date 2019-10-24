@@ -76,6 +76,13 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         }
     }
 
+    @Override
+    public void refresh() {
+        if (state == State.OK) {
+            store.refresh();
+        }
+    }
+
     /**
      * Force the store to update
      */

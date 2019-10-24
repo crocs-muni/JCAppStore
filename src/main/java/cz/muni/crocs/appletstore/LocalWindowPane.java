@@ -126,7 +126,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         if (verifyTerminalState(manager.getTerminalState())
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
 
-            List<AppletInfo> cardApplets = manager.getInstalledApplets();
+            Set<AppletInfo> cardApplets = manager.getInstalledApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null returned.");
@@ -241,7 +241,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
     }
 
-    private void loadApplets(List<AppletInfo> applets, CardManager manager) {
+    private void loadApplets(Set<AppletInfo> applets, CardManager manager) {
         items.clear();
         for (AppletInfo appletInfo : applets) {
             LocalItem item = new LocalItem(appletInfo);

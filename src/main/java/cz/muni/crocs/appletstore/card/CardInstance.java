@@ -21,9 +21,9 @@ import javax.smartcardio.CardTerminal;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
@@ -48,7 +48,7 @@ public class CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private List<AppletInfo> applets;
+    private Set<AppletInfo> applets;
 
     /**
      * Compares the card id and updates card data if needed
@@ -90,11 +90,11 @@ public class CardInstance {
      *
      * @return modifiable applet list
      */
-    List<AppletInfo> getApplets() {
+    Set<AppletInfo> getApplets() {
         return applets;
     }
 
-    void setApplets(List<AppletInfo> applets) {
+    void setApplets(Set<AppletInfo> applets) {
         this.applets = applets;
     }
 

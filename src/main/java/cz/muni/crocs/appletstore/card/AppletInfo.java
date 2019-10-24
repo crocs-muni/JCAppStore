@@ -9,10 +9,7 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Simplified GPRegistryEntry version with additional information obtained from our database (about specific applet)
@@ -71,7 +68,7 @@ public class AppletInfo implements Serializable {
         }
     }
 
-    public AppletInfo(GPRegistryEntry registry, List<AppletInfo> savedApplets) {
+    public AppletInfo(GPRegistryEntry registry, Set<AppletInfo> savedApplets) {
         if (registry != null) {
             aid = registry.getAID().toString();
             lifecycle = registry.getLifeCycle();
@@ -148,7 +145,7 @@ public class AppletInfo implements Serializable {
         author = getAuthorByRid(registry);
     }
 
-    private void getAdditionalInfo(List<AppletInfo> savedApplets, GPRegistryEntry entry) {
+    private void getAdditionalInfo(Set<AppletInfo> savedApplets, GPRegistryEntry entry) {
         for (AppletInfo saved : savedApplets) {
             if (saved.aid != null && saved.aid.equals(aid)) {
                 this.name = saved.name;
@@ -205,5 +202,18 @@ public class AppletInfo implements Serializable {
      */
     public void setAID (String aid) {
         this.aid = aid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppletInfo that = (AppletInfo) o;
+        return (kind == null || kind == that.kind) && Objects.equals(aid, that.aid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(kind, aid);
     }
 }

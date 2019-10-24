@@ -26,6 +26,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
+    private JsonObject currentlyShown;
 
     public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void, Void> callback) {
         this.data = data;
@@ -64,7 +65,16 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         showPanel(items);
     }
 
+    @Override
+    public void refresh() {
+        if (currentlyShown == null)
+            showItems(null);
+        else
+            showInfo(currentlyShown);
+    }
+
     private void showInfo(JsonObject dataSet) {
+        currentlyShown = dataSet;
         setViewportView(new StoreItemInfo(dataSet, this, callback));
     }
 
@@ -79,6 +89,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
             }
         }
         storeLayout.revalidate();
+        currentlyShown = null;
         setViewportView(storeLayout);
     }
 

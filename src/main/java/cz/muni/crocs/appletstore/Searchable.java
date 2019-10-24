@@ -13,4 +13,9 @@ public interface Searchable {
      *              display all items if empty query
      */
     void showItems(String query);
+
+    /**
+     * Refreshes currently displayed page
+     */
+    void refresh();
 }

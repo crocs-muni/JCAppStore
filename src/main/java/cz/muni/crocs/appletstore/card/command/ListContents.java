@@ -12,10 +12,7 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.smartcardio.CardException;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Parses all installed applets to display them in app
@@ -23,27 +20,27 @@ import java.util.List;
  * @author Jiří Horák
  * @version 1.0
  */
-public class ListContents extends GPCommand<ArrayList<AppletInfo>> {
+public class ListContents extends GPCommand<Set<AppletInfo>> {
 
     @Override
     public boolean execute() throws CardException, GPException, IOException {
-        result = new ArrayList<>();
+        result = new HashSet<>();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
-        AppletSerializer<List<AppletInfo>> savedData = new AppletSerializerImpl();
+        AppletSerializer<Set<AppletInfo>> savedData = new AppletSerializerImpl();
         File file = new File(Config.APP_DATA_DIR + Config.S + cardId);
 
-        List<AppletInfo> saved;
+        Set<AppletInfo> saved;
         if (file.exists()) {
             try {
                 saved = savedData.deserialize(file);
             } catch (LocalizedCardException e) {
                 e.printStackTrace();
-                saved = Collections.emptyList();
+                saved = Collections.emptySet();
             }
         } else {
-            saved = Collections.emptyList();
+            saved = Collections.emptySet();
         }
 
         for (GPRegistryEntry entry : registry) {

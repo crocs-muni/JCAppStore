@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Item detail in store
@@ -47,7 +48,7 @@ public class StoreItemInfo extends HintPanel {
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
-        List<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
+        Set<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();

@@ -44,8 +44,12 @@ public class PGP extends CmdTask {
 
     boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            //todo run on mac
-            return true;
+            String result = new CmdTask().add(location).add("--verify")
+                    .add("\"" + signatureFile.getAbsolutePath() + "\"")
+                    .add("\"" + file.getAbsolutePath() + "\"")
+                    .processToString();
+            isWarn = result.contains("WARNING");
+            return result.contains("Good signature") && (author == null || result.contains(author));
         } else if (SystemUtils.IS_OS_WINDOWS) {
             String result = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")

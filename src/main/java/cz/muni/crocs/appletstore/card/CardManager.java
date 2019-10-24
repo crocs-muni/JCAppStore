@@ -56,7 +56,7 @@ public interface CardManager {
      * Get applets on card
      * @return applets info list
      */
-    List<AppletInfo> getInstalledApplets();
+    Set<AppletInfo> getInstalledApplets();
 
     /**
      * Get card identifier

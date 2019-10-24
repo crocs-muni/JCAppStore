@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.APDUBIBO;
 import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
+import cz.muni.crocs.appletstore.AppletStore;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Manager providing all functionality over card
@@ -102,8 +104,8 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public List<AppletInfo> getInstalledApplets() {
-        return card == null ? null : Collections.unmodifiableList(card.getApplets());
+    public Set<AppletInfo> getInstalledApplets() {
+        return card == null ? null : Collections.unmodifiableSet(card.getApplets());
     }
 
     @Override
@@ -179,7 +181,7 @@ public class CardManagerImpl implements CardManager {
     public Integer getCardLifeCycle() {
         if (card == null)
             return 0;
-        List<AppletInfo> infoList = card.getApplets();
+        Set<AppletInfo> infoList = card.getApplets();
         if (infoList == null)
             return 0;
 
@@ -211,16 +213,7 @@ public class CardManagerImpl implements CardManager {
             capFile = CAPFile.fromStream(fin);
         }
 
-        try {
-            installImpl(capFile, data);
-        } catch (CardException e) {
-            e.printStackTrace();
-            loadCard();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } catch (LocalizedCardException e) {
-            loadCard();
-            throw e;
-        }
+        install(capFile, data);
     }
 
     @Override
@@ -238,32 +231,49 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void saveData(final CAPFile file, final InstallOpts data) throws LocalizedCardException {
-        AppletInfo info = data.getInfo();
-        //now we rewrite the default aid as custom aid that was used
-        info.setAID(data.getCustomAID());
-        List<AppletInfo> appletInfoList = card.getApplets();
-        //add applet
-        appletInfoList.add(info);
-        //add package instance, donst save image as the package wont be distinguishable from applet
-        appletInfoList.add(new AppletInfo(info.getName(), null, info.getVersion(), info.getAuthor(),
-                info.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS));
-        AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
+        AppletInfo applet = data.getInfo();
+        //now rewrite the default aid as custom aid that was used
+        applet.setAID(data.getCustomAID());
+        //save only applets that have some meaningful information, e.g. re-install in store will override previous info
+        Set<AppletInfo> appletInfoList = getAppletsToSave(card.getApplets());
+
+        AppletInfo pkg = new AppletInfo(applet.getName(), null, applet.getVersion(), applet.getAuthor(),
+                applet.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS);
+        insertOrRewrite(applet, appletInfoList);
+        insertOrRewrite(pkg, appletInfoList);
+
+        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
+    private void insertOrRewrite(AppletInfo item, Set<AppletInfo> to) {
+        if(!to.add(item)) {
+            to.remove(item);
+            to.add(item);
+        }
+    }
+
+    private Set<AppletInfo> getAppletsToSave(Set<AppletInfo> all) {
+        return all.stream().filter(a -> a.getAuthor() != null ||
+                        a.getVersion() != null ||
+                        a.getSdk() != null ||
+                        a.getName() != null)
+                .collect(Collectors.toSet());
+    }
+
     private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
-        List<AppletInfo> appletInfoList = card.getApplets();
+        Set<AppletInfo> appletInfoList = card.getApplets();
         deleteInfo(appletInfoList, applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
             for (AID aid : applet.getModules()) {
                 deleteInfo(appletInfoList, aid);
             }
         }
-        AppletSerializer<List<AppletInfo>> toSave = new AppletSerializerImpl();
+        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
-    private void deleteInfo(List<AppletInfo> list, AID toDelete) {
+    private void deleteInfo(Set<AppletInfo> list, AID toDelete) {
         Iterator<AppletInfo> info = list.iterator();
         while(info.hasNext()) {
             AppletInfo nfo = info.next();
