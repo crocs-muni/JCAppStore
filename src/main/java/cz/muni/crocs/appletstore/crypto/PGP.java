@@ -28,17 +28,22 @@ public class PGP extends CmdTask {
     public PGP() throws LocalizedSignatureException {
         String fromSettings = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (!verified) {
-            if (fromSettings == null || fromSettings.isEmpty()) {
-                location = "gpg";
-                if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
-                    throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
+            try {
+                if (fromSettings == null || fromSettings.isEmpty()) {
+                    location = "gpg";
+                    if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
+                        throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
+                    }
+                } else {
+                    location = fromSettings;
+                    if (!new File(location).exists())
+                        throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
                 }
-            } else {
-                location = fromSettings;
-                if (!new File(location).exists())
-                    throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
+                verified = true;
+            } catch (LocalizedSignatureException e) {
+                throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
             }
-            verified = true;
+
         }
     }
 

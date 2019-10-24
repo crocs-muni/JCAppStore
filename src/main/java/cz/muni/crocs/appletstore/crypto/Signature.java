@@ -67,7 +67,7 @@ public interface Signature {
      * @param file path to the file to verify
      * @return true if signature successful
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, String file);
+    Tuple<String, String> verifyAndReturnMessage(String author, String file) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -78,7 +78,7 @@ public interface Signature {
      * @param file file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, File file);
+    Tuple<String, String> verifyAndReturnMessage(String author, File file) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -88,7 +88,7 @@ public interface Signature {
      * @param file path to the file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -98,7 +98,7 @@ public interface Signature {
      * @param file file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -109,7 +109,7 @@ public interface Signature {
      * @param file path to the file to verify
      * @return true if signature successful
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature);
+    Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -120,7 +120,7 @@ public interface Signature {
      * @param file file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature);
+    Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -130,7 +130,7 @@ public interface Signature {
      * @param file path to the file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -140,6 +140,6 @@ public interface Signature {
      * @param file file to verify
      * @return tuple with first = imagename, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature);
+    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
 
 }

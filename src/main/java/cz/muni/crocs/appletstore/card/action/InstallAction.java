@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.card.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
 import cz.muni.crocs.appletstore.ui.Warning;
@@ -102,7 +103,11 @@ public class InstallAction extends CardAction {
                 @Override
                 void work() {
                     final Signature signature = new SignatureImpl();
-                    result = signature.verifyPGPAndReturnMessage(null, capfile, customSign);
+                    try {
+                        result = signature.verifyPGPAndReturnMessage(null, capfile, customSign);
+                    } catch (LocalizedSignatureException e) {
+                        result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
+                    }
                 }
 
                 @Override
@@ -128,10 +133,14 @@ public class InstallAction extends CardAction {
             @Override
             void work() {
                 final Signature signature = new SignatureImpl();
-                result = signature.verifyPGPAndReturnMessage("JCAppStore", capfile);
-                if (signer != null && !signer.isEmpty()) {
-                    Tuple<String, String> another = signature.verifyPGPAndReturnMessage(signer, capfile);
-                    result = new Tuple<>(another.first, "JCAppStore: " + result.second + "<br>" + signer + ": " + another.second);
+                try {
+                    result = signature.verifyPGPAndReturnMessage("JCAppStore", capfile);
+                    if (signer != null && !signer.isEmpty()) {
+                        Tuple<String, String> another = signature.verifyPGPAndReturnMessage(signer, capfile);
+                        result = new Tuple<>(another.first, "JCAppStore: " + result.second + "<br>" + signer + ": " + another.second);
+                    }
+                } catch (LocalizedSignatureException e) {
+                    result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
                 }
             }
 

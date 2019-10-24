@@ -57,7 +57,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Environment and style settings
      */
     private void setup() {
-        if (SystemUtils.IS_OS_UNIX) {
+        if (SystemUtils.IS_OS_LINUX) {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     try {

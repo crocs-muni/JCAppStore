@@ -40,50 +40,43 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public Tuple<String, String> verifyAndReturnMessage(String author, String file) {
+    public Tuple<String, String> verifyAndReturnMessage(String author, String file) throws LocalizedSignatureException {
         return verifyAndReturnMessage(author, new File(file));
     }
 
     @Override
-    public Tuple<String, String> verifyAndReturnMessage(String author, File file) {
+    public Tuple<String, String> verifyAndReturnMessage(String author, File file) throws LocalizedSignatureException {
         throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Tuple<String, String> verifyPGPAndReturnMessage(String author, String file) {
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, String file) throws LocalizedSignatureException {
         return verifyPGPAndReturnMessage(author, new File(file));
     }
 
     @Override
-    public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file) {
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file)  throws LocalizedSignatureException {
         return verifyPGPAndReturnMessage(author, file, getSignatureFileFromString(author, file.getAbsolutePath()));
     }
 
     @Override
-    public Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature) {
+    public Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException{
         throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature) {
+    public Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException{
         throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) {
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException {
         return verifyPGPAndReturnMessage(author, new File(file), new File(detachedSignature));
     }
 
     @Override
-    public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) {
-        try {
-            return new PGP().verifySignatureAndGetErrorMsg(author, file, detachedSignature);
-        } catch (LocalizedSignatureException e) {
-            e.printStackTrace();
-            return new Tuple<>("not_verified.png", textSrc.getString("H_verify_failed")
-                    + (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                    e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
-        }
+    public Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException {
+        return new PGP().verifySignatureAndGetErrorMsg(author, file, detachedSignature);
     }
 
     private void throwIfNotExists(File f) throws LocalizedSignatureException {
