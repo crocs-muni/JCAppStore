@@ -44,9 +44,8 @@ public class PGP extends CmdTask {
 
     boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            String result = new CmdTask().add(location).add("--verify")
-                    .add("\"" + signatureFile.getAbsolutePath() + "\"")
-                    .add("\"" + file.getAbsolutePath() + "\"")
+            String result = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
+                    + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
                     .processToString();
             isWarn = result.contains("WARNING");
             return result.contains("Good signature") && (author == null || result.contains(author));
@@ -61,10 +60,9 @@ public class PGP extends CmdTask {
     }
 
     Tuple<String, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
-        if (!file.exists())
+        if (!file.exists() || !signatureFile.exists())
             return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
-        if (!signatureFile.exists())
-            return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
+
         if (verifySignature(author, file, signatureFile)) {
             if (author == null) {
                 return (isWarn) ? new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
