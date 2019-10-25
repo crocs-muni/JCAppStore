@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.util.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +87,23 @@ public class SplashScreen extends JWindow {
     }
 
     private void runMainApp() {
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else if (SystemUtils.IS_OS_MAC) {
+                System.setProperty("com.apple.mrj.application.apple.menu.about.name", "JCAppStore");
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else if (SystemUtils.IS_OS_UNIX) {
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        UIManager.setLookAndFeel("Nimbus");
+                        break;
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         try {
             new AppletStore();
         } catch (Exception e) {

@@ -1,8 +1,13 @@
 package cz.muni.crocs.appletstore.ui;
 
+import com.apple.laf.AquaButtonUI;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
+import javax.swing.plaf.ButtonUI;
+import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.metal.MetalButtonUI;
+import javax.swing.plaf.multi.MultiButtonUI;
 import java.awt.*;
 
 /**
@@ -24,8 +29,10 @@ public class CustomJmenu extends JMenu {
     private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
+        setOpaque(true);
         setFont(OptionsFactory.getOptions().getFont(12f));
         setForeground(Color.WHITE);
+        setBackground(Color.BLACK);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }
 

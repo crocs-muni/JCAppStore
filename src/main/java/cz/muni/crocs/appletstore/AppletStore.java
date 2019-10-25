@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import com.apple.eawt.Application;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
@@ -42,6 +43,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         logger.info("------- App started");
 
         setup();
+        SetIcon();
         initComponents();
 
         //save options on close & kill routine
@@ -53,34 +55,29 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         });
     }
 
+    private void SetIcon() {
+        setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+        Application.getApplication().setDockIconImage(
+                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+    }
+
     /**
      * Environment and style settings
      */
     private void setup() {
-        try {
-            if (SystemUtils.IS_OS_WINDOWS) {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } else if (SystemUtils.IS_OS_MAC) {
-                //todo get optimal UI
-            } else if (SystemUtils.IS_OS_UNIX) {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        UIManager.setLookAndFeel("Nimbus");
-                        break;
-                    }
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
 
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
-        UIManager.put("Menu.background", Color.BLACK);
+        UIManager.put("MenuItem.opaque", true);
+        UIManager.put("MenuItem.background", Color.BLACK);
+
+        UIManager.put("Menu.background", new javax.swing.plaf.ColorUIResource(Color.BLACK));
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.selectionBackground", Color.WHITE);
         UIManager.put("Menu.selectionForeground", Color.BLACK);
+        UIManager.put("Menu.opaque", true);
+
         UIManager.put("MenuBar.borderColor", Color.BLACK);
     }
 
