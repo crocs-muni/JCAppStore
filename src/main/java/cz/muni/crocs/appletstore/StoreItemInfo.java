@@ -117,7 +117,7 @@ public class StoreItemInfo extends HintPanel {
 
     private void checkHostApp(JsonObject dataSet) {
         if (!dataSet.get(JsonParser.TAG_HOST).getAsBoolean()) {
-            add(getNotice(textSrc.getString("W_no_host_app"), 14f, new Color(255, 219, 148),
+            add(getNotice(textSrc.getString("W_no_host_app"), 14f, new Color(255, 186, 134),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
             , "gap 20, span 4, gaptop 40, growx, wrap");
         }
@@ -130,14 +130,16 @@ public class StoreItemInfo extends HintPanel {
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 40, wrap");
 
-        addSubTitle("website", "H_website");
         final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
-        JLabel url = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>", 14f);
-        url.setOpaque(true);
-        url.setBackground(new Color(255, 255, 255, 80));
-        url.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        url.addMouseListener(new URLAdapter(urlAddress));
-        add(url, "span 4, gaptop 10, gapleft 20, wrap");
+        if (!urlAddress.isEmpty()) {
+            addSubTitle("website", "H_website");
+            JLabel url = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>", 14f);
+            url.setOpaque(true);
+            url.setBackground(new Color(255, 255, 255, 80));
+            url.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            url.addMouseListener(new URLAdapter(urlAddress));
+            add(url, "span 4, gaptop 10, gapleft 20, wrap");
+        }
 
         addSubTitle("use", "H_use");
         add(TextField.getTextField(

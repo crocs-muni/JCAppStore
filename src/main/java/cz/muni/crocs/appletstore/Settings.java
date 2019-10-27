@@ -40,6 +40,7 @@ public class Settings extends JPanel {
     private JComboBox<Tuple<String, String>> languageBox;
     private JCheckBox hintEnabled = new JCheckBox();
     private JCheckBox verboseEnabled = new JCheckBox();
+    private JCheckBox jcMemoryKept = new JCheckBox();
     private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
@@ -50,6 +51,7 @@ public class Settings extends JPanel {
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildLanguage();
+        builJCKeep();
         buildHint();
         buildErrorMode();
         buildBackground();
@@ -60,6 +62,7 @@ public class Settings extends JPanel {
         saveLanguage();
         saveHint();
         saveErrorMode();
+        saveJCKeep();
     }
 
     private void buildBackground() {
@@ -124,6 +127,12 @@ public class Settings extends JPanel {
         add(new Text(textSrc.getString("enable_verbose")), "");
         verboseEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose"));
         add(verboseEnabled, "align right, span 2, w 180, wrap");
+    }
+
+    private void builJCKeep() {
+        add(new Text(textSrc.getString("enable_jcmemory")), "");
+        jcMemoryKept.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).toLowerCase().trim().equals("true"));
+        add(jcMemoryKept, "align right, span 2, w 180, wrap");
     }
 
     private void buildHint() {
@@ -207,6 +216,10 @@ public class Settings extends JPanel {
 
     private void saveErrorMode() {
         OptionsFactory.getOptions().addOption(Options.KEY_ERROR_MODE, verboseEnabled.isSelected() ? "verbose" : "default");
+    }
+
+    private void saveJCKeep() {
+        OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY, jcMemoryKept.isSelected() ? "true" : "false");
     }
 
     /**

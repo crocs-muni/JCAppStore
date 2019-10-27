@@ -206,20 +206,19 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        ListContents listContents = new ListContents();
-        executeCommands(listContents);
+        ListContents listContents = new ListContents(id);
+        secureExecuteCommands(listContents);
         applets = listContents.getResult();
     }
 
     /**
-     * Executes any desired command using secure channel
-     *
+     * Executes any desired command without using secure channel
      * @param commands commands to execute
+     * @throws LocalizedCardException unable to perform command
      * @throws CardException unable to perform command
      */
-    void executeCommands(GPCommand ... commands) throws LocalizedCardException, CardException {
+    void executeCommands(GPCommand... commands) throws LocalizedCardException, CardException {
         Card card;
-        GPSession context = null;
         APDUBIBO channel;
 
         try {
@@ -230,52 +229,9 @@ public class CardInstance {
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
 
-        //todo should consider this if implementing send-raw-apdu approach, now assummes default selected
-//        // Send all raw APDU-s to the default-selected application of the card
-//        if (args.has(OPT_APDU)) {
-//            // Select the application, if present
-//            AID target = null;
-//            if (args.has(OPT_APPLET)) {
-//                target = AID.fromString(args.valueOf(OPT_APPLET));
-//            } else if (cap != null) {
-//                target = cap.getAppletAIDs().get(0);
-//            }
-//            if (target != null) {
-//                verbose("Selecting " + target);
-//                channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, target.getBytes()));
-//            }
-//            for (Object s : args.valuesOf(OPT_APDU)) {
-//                CommandAPDU c = new CommandAPDU(HexUtils.stringToBin((String) s));
-//                channel.transmit(c);
-//            }
-//        }
-
-        try {
-            //always find out the SD, does not support custom SD
-            context = GPSession.discover(channel);
-        } catch (IllegalArgumentException il) {
-            fail(card, il, "no_channel");
-        } catch (GPException ex) {
-            fail(card, ex, "E_fail_to_detect_sd");
-        } catch (IOException e) {
-            fail(card, e, "E_fail_to_detect_sd");
-        }
-
-        try {
-            secureConnect(context);
-        } catch (GPException e) {
-            //ugly, but the GP is designed in a way it does not allow me to do otherwise
-            if (e.getMessage().startsWith("STRICT WARNING: ")) {
-                updateCardAuth(false);
-                fail(card, e, "H_authentication");
-            }
-            fail(card, e, "E_unknown_error");
-        }
-
         try {
             for (GPCommand command : commands) {
-                command.setCardId(id);
-                command.setGP(context);
+                command.setChannel(channel);
                 command.execute();
             }
         } catch (GPException e) {
@@ -287,31 +243,45 @@ public class CardInstance {
         }
     }
 
-    private void failNoDisconnect(Exception e, String translationKey) throws LocalizedCardException {
-    }
-
-    private void fail(Card card, GPException e, String translationKey) throws LocalizedCardException, CardException {
-        card.disconnect(true);
-        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, translationKey), e);
-    }
-
-    private void fail(Card card, Exception e, String translationKey) throws LocalizedCardException, CardException {
-        card.disconnect(true);
-        throw new LocalizedCardException(e.getMessage(), translationKey, e);
-    }
-
     /**
-     * Assumes that masterKey variable is set. Tries to secure connect with it
-     * If successful, loads the card contents
-     * This method may brick the card if bad masterKey set
+     * Executes any desired command using secure channel
+     * @param commands commands to execute
+     * @throws CardException unable to perform command
      */
-    private void secureConnect(GPSession context) throws CardException, GPException {
-        GPCardKeys key = PlaintextKeys.derivedFromMasterKey(HexUtils.hex2bin(masterKey), HexUtils.hex2bin(kcv), getDiversifier(diversifier));
-        try {
-            context.openSecureChannel(key, null, null, GPSession.defaultMode.clone());
-        } catch (IOException e) {
-            throw new CardException(e);
-        }
+    void secureExecuteCommands(GPCommand... commands) throws LocalizedCardException, CardException {
+        executeCommands(new GPCommand() {
+            @Override
+            public boolean execute() throws CardException, GPException, LocalizedCardException, IOException {
+                try {
+                    context = GPSession.discover(channel);
+                } catch (IllegalArgumentException il) {
+                    throw new LocalizedCardException(il.getMessage(), "no_channel", il);
+                } catch (GPException ex) {
+                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), ex);
+                } catch (IOException e) {
+                    throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", e);
+                }
+
+                try {
+                    GPCardKeys key = PlaintextKeys.derivedFromMasterKey(HexUtils.hex2bin(masterKey), HexUtils.hex2bin(kcv), getDiversifier(diversifier));
+                    context.openSecureChannel(key, null, null, GPSession.defaultMode.clone());
+                } catch (GPException e) {
+                    //ugly, but the GP is designed in a way it does not allow me to do otherwise
+                    if (e.getMessage().startsWith("STRICT WARNING: ")) {
+                        updateCardAuth(false);
+                        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "H_authentication"), e);
+                    }
+                    throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
+                }
+
+                for (GPCommand command : commands) {
+                    command.setGP(context);
+                    command.setChannel(channel);
+                    command.execute();
+                }
+                return true;
+            }
+        });
     }
 
     /**
@@ -346,7 +316,7 @@ public class CardInstance {
         SwingUtilities.invokeLater(task);
         try {
             return task.get();
-        } catch (InterruptedException| ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
             return false;
         }

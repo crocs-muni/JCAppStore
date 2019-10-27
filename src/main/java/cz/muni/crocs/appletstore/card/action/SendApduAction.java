@@ -33,7 +33,6 @@ public class SendApduAction extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
 
-        //TODO:: implement / delete
         if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile)
             return;
         int result = JOptionPane.showConfirmDialog(

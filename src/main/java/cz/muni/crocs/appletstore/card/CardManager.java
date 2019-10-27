@@ -135,8 +135,11 @@ public interface CardManager {
     void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException;
 
     /**
-     * Unsupported yet.
-     * @throws LocalizedCardException exception with localized text on failure
+     * Send command to applet
+     * @param AID target applet AID to send the command to
+     * @param APDU commandAPDU to send
+     * @return response bytes of the command, or null if failed
+     * @throws LocalizedCardException when failed to
      */
-    void sendApdu(String AID) throws LocalizedCardException;
+    byte[] sendApdu(String AID, String APDU) throws LocalizedCardException;
 }

@@ -52,6 +52,7 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
         options.put(Options.KEY_PGP_LOCATION, "");
         options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
+        options.put(Options.KEY_KEEP_JCMEMORY, "true");
     }
 
     @Override
@@ -92,6 +93,11 @@ public class OptionsImpl implements Options<String> {
     @Override
     public boolean isVerbose() {
         return getOption(Options.KEY_ERROR_MODE).trim().toLowerCase().equals("verbose");
+    }
+
+    @Override
+    public boolean keepJCMemory() {
+        return getOption(Options.KEY_KEEP_JCMEMORY).trim().toLowerCase().equals("true");
     }
 
     @Override

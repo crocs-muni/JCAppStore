@@ -1,13 +1,8 @@
 package cz.muni.crocs.appletstore.ui;
 
-import com.apple.laf.AquaButtonUI;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
-import javax.swing.plaf.ButtonUI;
-import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.metal.MetalButtonUI;
-import javax.swing.plaf.multi.MultiButtonUI;
 import java.awt.*;
 
 /**

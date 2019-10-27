@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import com.apple.eawt.Application;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
@@ -57,8 +56,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
     private void SetIcon() {
         setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
-        Application.getApplication().setDockIconImage(
-                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+//        Application.getApplication().setDockIconImage(
+//                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
     }
 
     /**

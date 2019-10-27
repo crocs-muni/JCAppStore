@@ -32,7 +32,6 @@ public abstract class CardAction extends MouseAdapter {
             }
             SwingUtilities.invokeLater(call::onFinish);
         }).start();
-
     }
 
     private void showFailed(String title, String message) {

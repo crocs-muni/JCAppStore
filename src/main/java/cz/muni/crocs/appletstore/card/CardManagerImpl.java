@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -230,6 +229,74 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
+    @Override
+    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
+        }
+
+        while (busy) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                logger.info("The card was busy when uninstall() called, waiting interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        }
+        busy = true;
+
+        try {
+            GPCommand delete = new Delete(nfo, force);
+            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
+            card.secureExecuteCommands(delete, new GPCommand() {
+                @Override
+                public boolean execute() throws LocalizedCardException {
+                    deleteData(nfo, force);
+                    return true;
+                }
+            }, contents);
+            card.setApplets(contents.getResult());
+            selectedAID = null;
+        } catch (CardException e) {
+            loadCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } finally {
+            busy = false;
+            notifyAll();
+        }
+    }
+
+    @Override
+    public synchronized byte[] sendApdu(String AID, String APDU) throws LocalizedCardException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
+        }
+
+        while (busy) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                logger.info("The card was busy when sendApdu() called, waiting interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        }
+        busy = true;
+
+        GPCommand<byte[]> send = new Transmit(AID, APDU);
+        try {
+            card.executeCommands(send);
+        } catch (CardException e) {
+            loadCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } finally {
+            busy = false;
+            notifyAll();
+        }
+        return send.getResult();
+    }
+
     private void saveData(final CAPFile file, final InstallOpts data) throws LocalizedCardException {
         AppletInfo applet = data.getInfo();
         //now rewrite the default aid as custom aid that was used
@@ -284,51 +351,8 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
-    @Override
-    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
-        if (card == null) {
-            throw new LocalizedCardException("No card recognized.", "no_card");
-        }
-
-        while (busy) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                logger.info("The card was busy when uninstall() called, waiting interrupted.");
-                Thread.currentThread().interrupt();
-            }
-        }
-        busy = true;
-
-        try {
-            Delete delete = new Delete(nfo, force);
-            ListContents contents = new ListContents();
-            card.executeCommands(delete, new GPCommand() {
-                @Override
-                public boolean execute() throws LocalizedCardException {
-                    deleteData(nfo, force);
-                    return true;
-                }
-            }, contents);
-            card.setApplets(contents.getResult());
-            selectedAID = null;
-        } catch (CardException e) {
-            loadCard();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            busy = false;
-            notifyAll();
-        }
-    }
-
-    @Override
-    public synchronized void sendApdu(String AID) throws LocalizedCardException {
-        throw new UnsupportedOperationException("Not implemented yet.");
-    }
-
     /**
-     * Performs the only card insecure-channel use (e.g. GET)
+     * Performs card insecure-channel use (e.g. GET)
      * to get data from inserted card
      */
     private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
@@ -345,12 +369,13 @@ public class CardManagerImpl implements CardManager {
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
 
-        GetDetails command = new GetDetails(channel);
+        GPCommand<CardDetails> command = new GetDetails(channel);
+        command.setChannel(channel);
         command.execute();
         card.endExclusive();
         card.disconnect(false);
 
-        CardDetails details = command.getOuput();
+        CardDetails details = command.getResult();
         details.setAtr(card.getATR());
         return details;
     }
@@ -373,9 +398,10 @@ public class CardManagerImpl implements CardManager {
 
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
-            Install install = new Install(file, data);
-            ListContents contents = new ListContents();
-            card.executeCommands(install, new GPCommand() {
+            GPCommand install = new Install(file, data);
+            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
+
+            card.secureExecuteCommands(install, new GPCommand() {
                 @Override
                 public boolean execute() throws LocalizedCardException {
                     saveData(file, data);

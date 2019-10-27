@@ -22,6 +22,12 @@ import java.util.*;
  */
 public class ListContents extends GPCommand<Set<AppletInfo>> {
 
+    private String cardId;
+
+    public ListContents(String cardId) {
+        this.cardId = cardId;
+    }
+
     @Override
     public boolean execute() throws CardException, GPException, IOException {
         result = new HashSet<>();

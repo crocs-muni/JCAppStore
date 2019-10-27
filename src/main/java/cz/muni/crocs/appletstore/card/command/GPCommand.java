@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.card.command;
 
+import apdu4j.APDUBIBO;
 import pro.javacard.gp.GPSession;
 
 /**
@@ -10,7 +11,7 @@ import pro.javacard.gp.GPSession;
 public abstract class GPCommand<T> implements CardCommand {
 
     protected GPSession context;
-    protected String cardId;
+    protected APDUBIBO channel;
 
     protected T result;
     public T getResult() {
@@ -20,7 +21,7 @@ public abstract class GPCommand<T> implements CardCommand {
     public void setGP(GPSession session) {
         context = session;
     }
-    public void setCardId(String cardId) {
-        this.cardId = cardId;
+    public void setChannel(APDUBIBO channel) {
+        this.channel = channel;
     }
 }
