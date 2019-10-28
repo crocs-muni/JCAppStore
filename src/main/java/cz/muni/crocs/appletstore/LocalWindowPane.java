@@ -21,7 +21,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
-import java.util.List;
 
 /**
  * Panel that lists all card contents. Allows the applet
@@ -63,7 +62,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
      * must be called once on construction, separated
      * because the callback also needs this //todo ugly
      */
-    public void build(OnEventCallBack<Void, Void, Void> callback) {
+    public void build(OnEventCallBack<Void, Void> callback) {
         removeAll();
 
         submenu.setOnSubmit(new AbstractAction() {

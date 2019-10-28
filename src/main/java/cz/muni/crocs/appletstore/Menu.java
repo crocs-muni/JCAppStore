@@ -3,8 +3,10 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.help.*;
 import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -94,6 +96,39 @@ public class Menu extends JMenuBar {
     private void buildFileItem() {
         CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
         add(menu);
+
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (CardManagerFactory.getManager().isCard()) {
+                    new FreeMemoryAction(new OnEventCallBack<Void, Integer>() {
+                        @Override
+                        public void onStart() {
+                            context.setEnabled(false);
+                        }
+
+                        @Override
+                        public void onFail() {
+                            context.setEnabled(true);
+                        }
+
+                        @Override
+                        public Void onFinish() {
+                            context.setEnabled(true);
+                            return null;
+                        }
+
+                        @Override
+                        public Void onFinish(Integer integer) {
+                            context.setEnabled(true);
+                            //todo better dialog and more info...
+                            JOptionPane.showMessageDialog(null, "Available free space: " + integer);
+                            return null;
+                        }
+                    }).mouseClicked(null);
+                }
+            }
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
 
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override

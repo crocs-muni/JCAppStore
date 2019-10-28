@@ -9,11 +9,9 @@ import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
-import pro.javacard.gp.GPSession;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
+
 
 /**
  * Modified install process from GPPro

@@ -11,9 +11,9 @@ import java.awt.event.MouseAdapter;
 
 public abstract class CardAction extends MouseAdapter {
     private static final Logger logger = LoggerFactory.getLogger(CardAction.class);
-    private final OnEventCallBack<Void, Void, Void> call;
+    protected final OnEventCallBack<Void, Void> call;
 
-    public CardAction(OnEventCallBack<Void, Void, Void> call) {
+    public CardAction(OnEventCallBack<Void, Void> call) {
         this.call = call;
     }
 
@@ -34,7 +34,7 @@ public abstract class CardAction extends MouseAdapter {
         }).start();
     }
 
-    private void showFailed(String title, String message) {
+    protected void showFailed(String title, String message) {
         JOptionPane.showMessageDialog(null,
                 "<html><div width=\"350\">" + message + "</div></html>",
                 title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));

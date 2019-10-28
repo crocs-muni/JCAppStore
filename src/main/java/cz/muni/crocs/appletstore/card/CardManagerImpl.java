@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.APDUBIBO;
 import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
-import cz.muni.crocs.appletstore.AppletStore;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
@@ -57,7 +56,7 @@ public class CardManagerImpl implements CardManager {
             return;
         }
 
-        if (aid.equals(selectedAID)) {
+        if (aid == null || aid.equals(selectedAID)) {
             selectedAID = null;
             aid = null;
         }
@@ -205,7 +204,7 @@ public class CardManagerImpl implements CardManager {
     @Override
     public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
         if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
-                file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+                file.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"));
 
         CAPFile capFile;
         try (FileInputStream fin = new FileInputStream(file)) {

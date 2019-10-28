@@ -26,7 +26,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     public MainPanel(BackgroundChangeable context) {
         localPanel = new LocalWindowPane();
         storePanel = new StoreWindowManager();
-        OnEventCallBack<Void, Void, Void> callback = new WorkCallback(context, localPanel);
+        OnEventCallBack<Void, Void> callback = new WorkCallback(context, localPanel);
 
         localPanel.build(callback);
         storePanel.setCallbackOnAction(callback);

@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -53,7 +54,7 @@ public class InstallAction extends CardAction {
      * @param call callback that is called before action and after failure or after success
      */
     public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer,
-                         String identifier, OnEventCallBack<Void, Void, Void> call) {
+                         String identifier, OnEventCallBack<Void, Void> call) {
         super(call);
         this.installed = installed;
         this.capfile = capfile;
@@ -63,13 +64,13 @@ public class InstallAction extends CardAction {
         this.info = info;
     }
 
-    public InstallAction(OnEventCallBack<Void, Void, Void> call) {
+    public InstallAction(OnEventCallBack<Void, Void> call) {
         this("", null, null, false, null, "", call);
         this.fromCustomFile = true;
     }
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, String signer,
-                         String identifier, OnEventCallBack<Void, Void, Void> call) {
+                         String identifier, OnEventCallBack<Void, Void> call) {
         this(titleBar, info, capfile, false, signer, identifier, call);
     }
 
@@ -86,7 +87,63 @@ public class InstallAction extends CardAction {
         if (code == null) {
             return;
         }
+        checkIfEnoughSpaceAndInstall(call);
+//        if (installed) {
+//            doInstall();
+//        } else {
+//            checkIfEnoughSpaceAndInstall(call);
+//        }
+    }
 
+    private void checkIfEnoughSpaceAndInstall(OnEventCallBack<Void, Void> call) {
+        FreeMemoryAction memoryAction = new FreeMemoryAction(new OnEventCallBack<Void, Integer>() {
+            @Override
+            public void onStart() {
+                call.onStart();
+            }
+
+            @Override
+            public void onFail() {
+                call.onFail();
+            }
+
+            @Override
+            public Void onFinish() {
+                call.onFinish();
+                return null;
+            }
+
+            @Override
+            public Void onFinish(Integer value) {
+                if (value < 0)
+                    return onFinish();
+                long size = 0;
+                try {
+                    size = capfile.length();
+                } catch (SecurityException sec) {
+                    sec.printStackTrace();
+                    return onFinish();
+                }
+                call.onFinish();
+
+                if (size > value) {
+                    int res = JOptionPane.showConfirmDialog(null, "TODO add icons and custom buttons, the size of application is more then remaining card storage " + value + ", " +
+                            "the installation might fail. continue anyway?");
+                    if (res == YES_OPTION) {
+                        doInstall();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    doInstall();
+                }
+                return null;
+            }
+        });
+        memoryAction.mouseClicked(null);
+    }
+
+    private void doInstall() {
         if (fromCustomFile) {
             verifyCustomInstallationAndShowInstallDialog();
         } else {
@@ -242,8 +299,6 @@ public class InstallAction extends CardAction {
         dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
         new SwingWorker<Void, Void>() {
-            private Tuple<String, String> result;
-
             @Override
             public Void doInBackground() {
                 task.work();

@@ -29,7 +29,7 @@ public class DeleteAction extends CardAction {
 
     private AppletInfo info;
 
-    public DeleteAction(AppletInfo info, OnEventCallBack<Void, Void, Void> call) {
+    public DeleteAction(AppletInfo info, OnEventCallBack<Void, Void> call) {
         super(call);
         this.info = info;
     }

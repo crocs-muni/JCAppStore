@@ -27,6 +27,10 @@ public class LocalSubMenu extends JPanel {
         submit = getButton("filter");
         reload = getButton("card_refresh");
 
+        sd.setBorder(BorderFactory.createEmptyBorder());
+        app.setBorder(BorderFactory.createEmptyBorder());
+        pkg.setBorder(BorderFactory.createEmptyBorder());
+
         add(getLabel("sds"));
         add(sd);
         add(Box.createRigidArea(new Dimension(6, 0)));
@@ -79,6 +83,7 @@ public class LocalSubMenu extends JPanel {
     private JLabel getLabel(String translateKey) {
         JLabel label = new Text(textSrc.getString(translateKey));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setForeground(Color.WHITE);
         return label;
     }
 
@@ -86,8 +91,7 @@ public class LocalSubMenu extends JPanel {
         JButton button = new JButton("<html>" + textSrc.getString(translationKey) + "</div></html>");
         button.setUI(new CustomButtonUI());
         button.setFont(OptionsFactory.getOptions().getFont(Font.BOLD, 12f));
-        button.setForeground(Color.BLACK);
-//        button.setBackground(Color.WHITE);
+        button.setForeground(Color.WHITE);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setOpaque(false);

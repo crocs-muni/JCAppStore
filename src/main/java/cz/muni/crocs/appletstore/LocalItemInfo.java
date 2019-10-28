@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.action.DeleteAction;
+import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.card.action.SendApduAction;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -36,12 +38,12 @@ public class LocalItemInfo extends HintPanel {
     private HintLabel type = new HintText();
     private HintLabel domain = new HintText();
     private HintLabel uninstall;
-    //private HintLabel rawApdu;
+    private HintLabel rawApdu;
 
     private SendApduAction send;
     private DeleteAction delete;
 
-    public LocalItemInfo(OnEventCallBack<Void, Void, Void> call) {
+    public LocalItemInfo(OnEventCallBack<Void, Void> call) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
         setOpaque(false);
@@ -54,6 +56,7 @@ public class LocalItemInfo extends HintPanel {
         close.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                CardManagerFactory.getManager().switchApplet(null);
                 unset();
             }
         });
@@ -84,11 +87,28 @@ public class LocalItemInfo extends HintPanel {
         JLabel title = new Title(textSrc.getString("management"), 17f);
         add(title, "span 2, gaptop 15, wrap");
 
-//        rawApdu = new HintLabel(textSrc.getString("custom_command"),
-//                textSrc.getString("no_support_yet"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
-//        rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//        rawApdu.addMouseListener(send);
-//        add(rawApdu, "wrap");
+        rawApdu = new HintLabel(textSrc.getString("custom_command"),
+                textSrc.getString("no_support_yet"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
+        rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        rawApdu.addMouseListener(new FreeMemoryAction(new OnEventCallBack<Void, Integer>() {
+            @Override
+            public void onStart() {
+            }
+
+            @Override
+            public void onFail() {
+            }
+
+            @Override
+            public Void onFinish() {
+                return null;
+            }
+
+            @Override
+            public Void onFinish(Integer value) {
+                return null;
+            }
+        }));        add(rawApdu, "wrap");
 
         uninstall = new HintText(textSrc.getString("uninstall"), "", new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"));

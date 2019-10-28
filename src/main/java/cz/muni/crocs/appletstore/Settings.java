@@ -50,10 +50,11 @@ public class Settings extends JPanel {
         this.context = context;
         setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        buildLanguage();
-        builJCKeep();
-        buildHint();
+        buildPGP();
+        buildJCKeep();
         buildErrorMode();
+        buildLanguage();
+        buildHint();
         buildBackground();
     }
 
@@ -63,10 +64,41 @@ public class Settings extends JPanel {
         saveHint();
         saveErrorMode();
         saveJCKeep();
+        savePGP();
+    }
+
+    private void buildPGP() {
+        add(new Text(textSrc.getString("pgp_loc")), "");
+
+        JButton specify = new JButton(new AbstractAction(textSrc.getString("pgp_specify_loc")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = getPGPFileChooser();
+                int r = fileChooser.showOpenDialog(null);
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    pgp.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    pgp.setForeground(Color.BLACK);
+                    ((InputHintTextField)pgp).setShowHint(false);
+                }
+            }
+        });
+        add(specify, "span 2, align right, wrap");
+
+        String path = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
+        if (path == null) path = "";
+
+        pgp = new InputHintTextField(path, textSrc.getString("H_pgp_loc"));
+        pgp.setFont(OptionsFactory.getOptions().getFont(12f));
+        pgp.setBorder(frame);
+        add(pgp, "span 3, growx, wrap");
+    }
+
+    private JFileChooser getPGPFileChooser() {
+        return getShaderFileChoser(new File(System.getProperty("user.home")));
     }
 
     private void buildBackground() {
-        add(new Text(textSrc.getString("background")), "span 3, wrap");
+        add(new Text(textSrc.getString("background")), "");
 
         String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
         if (path.equals(DEFAULT_BG_PATH)) {
@@ -74,13 +106,9 @@ public class Settings extends JPanel {
             slider.setEnabled(false);
         }
         cutString(path);
-
         JLabel bgValue = new HtmlText(path);
         bgValue.setFont(OptionsFactory.getOptions().getFont(12f));
         bgValue.setBorder(frame);
-        add(bgValue, "span 3, growx, wrap");
-
-        add(new JLabel()); //todo eliminate jlabel empty space
 
         JButton defaultBg = new JButton(new AbstractAction(textSrc.getString("reset_default")) {
             @Override
@@ -107,6 +135,8 @@ public class Settings extends JPanel {
         });
         add(getNewBg, "align right, wrap");
 
+        add(bgValue, "span 3, growx, wrap");
+
         //blur option
         add(new Text(textSrc.getString("blur")), "");
         slider.setEnabled(false);
@@ -120,24 +150,28 @@ public class Settings extends JPanel {
         CustomComboBoxItem listItems = new CustomComboBoxItem();
         languageBox.setMaximumRowCount(4);
         languageBox.setRenderer(listItems);
+        String lang = OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE);
+        if (lang != null && !lang.isEmpty()) {
+            languageBox.setSelectedItem(lang);
+        }
         add(languageBox, "align right, span 2, w 180, wrap");
     }
 
     private void buildErrorMode() {
         add(new Text(textSrc.getString("enable_verbose")), "");
-        verboseEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose"));
+        verboseEnabled.setSelected("verbose".equals(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE)));
         add(verboseEnabled, "align right, span 2, w 180, wrap");
     }
 
-    private void builJCKeep() {
+    private void buildJCKeep() {
         add(new Text(textSrc.getString("enable_jcmemory")), "");
-        jcMemoryKept.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).toLowerCase().trim().equals("true"));
+        jcMemoryKept.setSelected("true".equals(OptionsFactory.getOptions().getOption(Options.KEY_KEEP_JCMEMORY)));
         add(jcMemoryKept, "align right, span 2, w 180, wrap");
     }
 
     private void buildHint() {
         add(new Text(textSrc.getString("enable_hints")),"");
-        hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
+        hintEnabled.setSelected("true".equals(OptionsFactory.getOptions().getOption(Options.KEY_HINT)));
         add(hintEnabled, "align right, span 2, w 180, wrap");
     }
 
@@ -202,11 +236,15 @@ public class Settings extends JPanel {
         }
     }
 
+    private void savePGP() {
+        OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, pgp.getText());
+    }
+
     private void saveLanguage() {
         if (LANGUAGES[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
         OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)LANGUAGES[languageBox.getSelectedIndex()].first);
         showAlertChange();
-        //Config.translation = new Translation(Config.options.get(Options.KEY_LANGUAGE));
+        //Locale.setDefault(new Locale());
     }
 
     private void saveHint() {

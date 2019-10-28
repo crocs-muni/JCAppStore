@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 
-public class WorkCallback implements OnEventCallBack<Void, Void, Void> {
+public class WorkCallback implements OnEventCallBack<Void, Void> {
 
     private BackgroundChangeable context;
     private Refreshable content;
@@ -13,21 +13,24 @@ public class WorkCallback implements OnEventCallBack<Void, Void, Void> {
     }
 
     @Override
-    public Void onStart() {
+    public void onStart() {
         context.switchEnabled(false);
-        return null;
     }
 
     @Override
-    public Void onFail() {
+    public void onFail() {
         context.switchEnabled(true);
-        return null;
     }
 
     @Override
     public Void onFinish() {
         context.switchEnabled(true);
         content.refresh();
+        return null;
+    }
+
+    @Override
+    public Void onFinish(Void aVoid) {
         return null;
     }
 }

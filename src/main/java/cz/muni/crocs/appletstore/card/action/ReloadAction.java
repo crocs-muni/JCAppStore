@@ -20,7 +20,7 @@ public class ReloadAction extends CardAction {
     private static final Logger logger = LoggerFactory.getLogger(ReloadAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    public ReloadAction(OnEventCallBack<Void, Void, Void> call) {
+    public ReloadAction(OnEventCallBack<Void, Void> call) {
         super(call);
     }
 

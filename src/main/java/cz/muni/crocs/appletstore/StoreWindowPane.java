@@ -22,13 +22,13 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private OnEventCallBack<Void, Void, Void> callback;
+    private OnEventCallBack<Void, Void> callback;
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
     private JsonObject currentlyShown;
 
-    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void, Void> callback) {
+    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
         this.data = data;
         this.callback = callback;
         setOpaque(false);

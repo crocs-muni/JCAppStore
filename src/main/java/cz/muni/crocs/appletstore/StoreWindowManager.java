@@ -30,7 +30,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private OnEventCallBack<Void, Void, Void> callbackOnAction;
+    private OnEventCallBack<Void, Void> callbackOnAction;
     private Component currentComponent = null;
     private Searchable store;
     private volatile State state = State.UNINITIALIZED;
@@ -49,7 +49,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         constraints.gridy = 0;
     }
 
-    void setCallbackOnAction(OnEventCallBack<Void, Void, Void> callbackOnAction) {
+    void setCallbackOnAction(OnEventCallBack<Void, Void> callbackOnAction) {
         this.callbackOnAction = callbackOnAction;
     }
 

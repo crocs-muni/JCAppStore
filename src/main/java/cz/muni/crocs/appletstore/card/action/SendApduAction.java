@@ -19,9 +19,9 @@ public class SendApduAction extends MouseAdapter {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletInfo info;
-    private final OnEventCallBack<Void, Void, Void> call;
+    private final OnEventCallBack<Void, Void> call;
 
-    public SendApduAction(AppletInfo info, OnEventCallBack<Void, Void, Void> call) {
+    public SendApduAction(AppletInfo info, OnEventCallBack<Void, Void> call) {
         this.call = call;
         this.info = info;
     }

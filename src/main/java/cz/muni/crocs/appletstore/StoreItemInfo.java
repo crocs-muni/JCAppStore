@@ -45,7 +45,7 @@ public class StoreItemInfo extends HintPanel {
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
 
-    public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callBack) {
+    public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
         Set<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
@@ -67,7 +67,7 @@ public class StoreItemInfo extends HintPanel {
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
 
-    private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void, Void> callback) {
+    private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callback) {
         JLabel back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "back.png"));
         back.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         back.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -85,15 +85,17 @@ public class StoreItemInfo extends HintPanel {
 
         String appName = dataSet.get(JsonParser.TAG_TITLE).getAsString();
         JLabel name = new Title(appName + "  ", 20f);
+        name.setForeground(Color.WHITE);
         add(name, "align left, gaptop 40, width ::350, id title");
 
         buildMainInstallButton(dataSet, callback);
 
         JLabel author = new Title(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString(), 15f);
+        author.setForeground(Color.WHITE);
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
-    private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void, Void> callback) {
+    private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void> callback) {
         JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
         final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
         final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
@@ -149,7 +151,7 @@ public class StoreItemInfo extends HintPanel {
         ), "span 4, gap 20, gaptop 20, wrap");
     }
 
-    private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void, Void> call) {
+    private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void> call) {
         addSubTitle("custom_install", "H_custom_install");
 
         addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
@@ -202,6 +204,7 @@ public class StoreItemInfo extends HintPanel {
     private void addSubTitle(String titleKey, String hintKey) {
         HintLabel title = new HintTitle( textSrc.getString(titleKey), textSrc.getString(hintKey), 20f);
         title.setFocusable(true);
+        title.setForeground(Color.WHITE);
         title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
         add(title, "span 4, gaptop 20, wrap");
     }
@@ -209,6 +212,7 @@ public class StoreItemInfo extends HintPanel {
     private void addText(String titleKey, String hintKey, String constraints) {
         HintLabel label = new HintText(textSrc.getString(titleKey), textSrc.getString(hintKey), 16f);
         label.setFocusable(true);
+        label.setForeground(Color.WHITE);
         label.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(label, constraints);
     }
@@ -279,7 +283,7 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
-                                    OnEventCallBack<Void, Void, Void> call, boolean installed, MouseEvent e) {
+                                    OnEventCallBack<Void, Void> call, boolean installed, MouseEvent e) {
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
 

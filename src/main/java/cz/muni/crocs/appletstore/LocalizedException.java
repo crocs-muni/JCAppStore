@@ -6,9 +6,12 @@ import java.util.ResourceBundle;
 public class LocalizedException extends Exception {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private String translated;
+    private boolean isKey = true;
 
     public LocalizedException(String cause) {
         super(cause);
+        this.translated = cause;
+        isKey = false;
     }
 
     public LocalizedException(Throwable cause) {
@@ -36,14 +39,19 @@ public class LocalizedException extends Exception {
 
     @Override
     public String getLocalizedMessage() {
+        if (!isKey)
+            return translated;
         if (translated != null)
             return textSrc.getString(translated) + "<br>" + getMessage();
         return getMessage();
     }
 
     public String getLocalizedMessageWithoutCause() {
+        if (!isKey)
+            return translated;
         if (translated != null)
             return textSrc.getString(translated);
+        //todo do not return empty, it creates empty message boxes
         return "";
     }
 }

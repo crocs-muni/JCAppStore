@@ -1,13 +1,24 @@
 package cz.muni.crocs.appletstore.card.action;
 
+import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
+import cz.muni.crocs.appletstore.card.KeysPresence;
+
+import java.io.File;
+
+import static cz.muni.crocs.appletstore.Config.S;
 
 public class JCMemory {
 
     public static AppletInfo getInfo() {
-        AppletInfo info = new AppletInfo("JCMemory", "jcmem.png", "1.0", "CRoCS", "2.2.2");
-        info.setAID(getAID());
+        return new AppletInfo("JCMemory", "jcmem.png", "1.0", "CRoCS", "2.2.2",
+                getAID(), KeysPresence.NO_KEYS);
+    }
+
+    public static AppletInfo getPackageInfo() {
+        AppletInfo info = getInfo();
+        info.setAID(getPackageAID());
         return info;
     }
 
@@ -16,10 +27,19 @@ public class JCMemory {
     }
 
     public static String getAID() {
-        return "";
+        return "4A43416C675465737531";
+    }
+
+    public static String getPackageAID() {
+        return "4A43416C6754657375";
     }
 
     public static String getAPDU() {
-        return "";
+        //the command is ignored, only do not start 0x00 as this is CLA for domain
+        return "B0000000";
+    }
+
+    public static File getSource() {
+        return new File(Config.APP_STORE_CAPS_DIR + S + "JCMemory", "JCMemory_v1.0_sdk2.2.2");
     }
 }
