@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
+import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -87,7 +88,7 @@ public class InstallDialogWindow extends JPanel {
         AppletInfo details;
         if (info == null) {
             details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
-                    sdk.getText(), aid, KeysPresence.UNKNOWN);
+                    sdk.getText(), aid, KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
         } else {
             details = info;
             info.setAID(aid);

@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -37,21 +40,26 @@ public class LocalizedException extends Exception {
         this.translated = translated;
     }
 
-    @Override
-    public String getLocalizedMessage() {
-        if (!isKey)
-            return translated;
-        if (translated != null)
-            return textSrc.getString(translated) + "<br>" + getMessage();
-        return getMessage();
+    public void setTranslationKey(String key) {
+        this.isKey = true;
+        this.translated = key;
     }
 
-    public String getLocalizedMessageWithoutCause() {
+    public void setTranslation(String text) {
+        this.isKey = false;
+        this.translated = text;
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+        boolean verbose = OptionsFactory.getOptions().isVerbose();
         if (!isKey)
             return translated;
-        if (translated != null)
+        if (translated != null) {
+            if (verbose)
+                return textSrc.getString(translated) + "<br>" + getMessage();
             return textSrc.getString(translated);
-        //todo do not return empty, it creates empty message boxes
-        return "";
+        }
+        return (verbose) ? getMessage() : textSrc.getString("E_default_try_again");
     }
 }

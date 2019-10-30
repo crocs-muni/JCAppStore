@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.crypto.PGP;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
@@ -238,6 +239,7 @@ public class Settings extends JPanel {
 
     private void savePGP() {
         OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, pgp.getText());
+        PGP.invalidate();
     }
 
     private void saveLanguage() {

@@ -17,9 +17,9 @@ public class FreeMemoryAction extends CardAction {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static final Logger logger = LoggerFactory.getLogger(CardAction.class);
-    private OnEventCallBack<Void, Integer> customCall;
+    private OnEventCallBack<Void, byte[]> customCall;
 
-    public FreeMemoryAction(OnEventCallBack<Void, Integer> call) {
+    public FreeMemoryAction(OnEventCallBack<Void, byte[]> call) {
         super(null);
         customCall = call;
     }
@@ -37,6 +37,7 @@ public class FreeMemoryAction extends CardAction {
                     return new JCSystemInfo().getSystemInfo();
                 } catch (LocalizedCardException ex) {
                     ex.printStackTrace();
+                    logger.warn("Failed to obtain the free memory space: " + ex.getMessage());
                     e = ex;
                 }
                 return null;
@@ -45,15 +46,11 @@ public class FreeMemoryAction extends CardAction {
             @Override
             protected void done() {
                 if (e != null) {
-                    customCall.onFail();
-                    logger.warn("Failed to obtain the free memory space: " + e.getMessage());
-                    SwingUtilities.invokeLater(() -> showFailed(textSrc.getString("memory_failed"),
-                            OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                                    e.getLocalizedMessage() : e.getLocalizedMessageWithoutCause()));
+                    customCall.onFinish(null);
                 } else {
-                    int availableSpace = -1;
+                    byte[] availableSpace = null;
                     try {
-                        availableSpace = getAvailableMemory(get());
+                        availableSpace = get();
                     } catch (InterruptedException | ExecutionException ex) {
                         //ignore
                         ex.printStackTrace();
@@ -66,7 +63,7 @@ public class FreeMemoryAction extends CardAction {
         worker.execute();
     }
 
-    static int getAvailableMemory() {
+    public static int getAvailableMemory() {
         try {
             return getAvailableMemory(new JCSystemInfo().getSystemInfo());
         } catch (LocalizedCardException e) {
@@ -75,7 +72,7 @@ public class FreeMemoryAction extends CardAction {
         }
     }
 
-    static int getAvailableMemory(byte[] response) {
+    public static int getAvailableMemory(byte[] response) {
         //supposes big endian
         return (int)response[3] << 0x08 + (int)response[4];
     }

@@ -42,7 +42,7 @@ public class AppletInfo implements Serializable {
         this.sdk = sdk;
     }
 
-    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid, KeysPresence hasKeys) {
+    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid, KeysPresence hasKeys, GPRegistryEntry.Kind kind) {
         this.aid = strAid;
         this.name = name;
         this.image = image;
@@ -50,6 +50,7 @@ public class AppletInfo implements Serializable {
         this.author = author;
         this.sdk = sdk;
         this.hasKeys = hasKeys;
+        this.kind = kind;
     }
 
     /**

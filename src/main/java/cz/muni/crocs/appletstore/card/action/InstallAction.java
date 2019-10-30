@@ -96,7 +96,7 @@ public class InstallAction extends CardAction {
     }
 
     private void checkIfEnoughSpaceAndInstall(OnEventCallBack<Void, Void> call) {
-        FreeMemoryAction memoryAction = new FreeMemoryAction(new OnEventCallBack<Void, Integer>() {
+        FreeMemoryAction memoryAction = new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
             @Override
             public void onStart() {
                 call.onStart();
@@ -114,10 +114,15 @@ public class InstallAction extends CardAction {
             }
 
             @Override
-            public Void onFinish(Integer value) {
-                if (value < 0)
-                    return onFinish();
-                long size = 0;
+            public Void onFinish(byte[] value) {
+                //todo if value == null show info failed to get card memory
+                if (value == null) {
+                    call.onFinish();
+                    doInstall();
+                    return null;
+                }
+                int cardMemory = FreeMemoryAction.getAvailableMemory(value);
+                long size;
                 try {
                     size = capfile.length();
                 } catch (SecurityException sec) {
@@ -125,8 +130,8 @@ public class InstallAction extends CardAction {
                     return onFinish();
                 }
                 call.onFinish();
-
-                if (size > value) {
+                //todo compute real free memory based on installed stuff
+                if (size > cardMemory) {
                     int res = JOptionPane.showConfirmDialog(null, "TODO add icons and custom buttons, the size of application is more then remaining card storage " + value + ", " +
                             "the installation might fail. continue anyway?");
                     if (res == YES_OPTION) {

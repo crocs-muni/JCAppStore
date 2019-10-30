@@ -39,7 +39,11 @@ public class JCSystemInfo {
         }
 
         if (!OptionsFactory.getOptions().keepJCMemory()) {
+            //todo somehow not uninstalled
             manager.uninstall(JCMemory.getPackageInfo(), true);
+        } else {
+            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
+            //manager.loadCard();
         }
         return size;
     }

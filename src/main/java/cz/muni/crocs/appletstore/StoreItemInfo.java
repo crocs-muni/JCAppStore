@@ -13,6 +13,7 @@ import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -274,7 +275,8 @@ public class StoreItemInfo extends HintPanel {
                 dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
                 sdks.get(sdkIdx).getAsString(),
                 null,
-                hasKey(dataSet.get(JsonParser.TAG_KEYS).getAsString()));
+                hasKey(dataSet.get(JsonParser.TAG_KEYS).getAsString()),
+                GPRegistryEntry.Kind.Application);
     }
 
     private static String getInstallFileName(String appletName, String version, String sdkVersion) {

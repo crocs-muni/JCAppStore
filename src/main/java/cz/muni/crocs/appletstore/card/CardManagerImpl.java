@@ -304,7 +304,7 @@ public class CardManagerImpl implements CardManager {
         Set<AppletInfo> appletInfoList = getAppletsToSave(card.getApplets());
 
         AppletInfo pkg = new AppletInfo(applet.getName(), null, applet.getVersion(), applet.getAuthor(),
-                applet.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS);
+                applet.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile);
         insertOrRewrite(applet, appletInfoList);
         insertOrRewrite(pkg, appletInfoList);
 

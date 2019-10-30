@@ -25,9 +25,7 @@ public abstract class CardAction extends MouseAdapter {
             } catch (LocalizedCardException ex) {
                 ex.printStackTrace();
                 logger.warn(loggerMessage + ex.getMessage());
-                SwingUtilities.invokeLater(() -> showFailed(title,
-                        OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                                ex.getLocalizedMessage() : ex.getLocalizedMessageWithoutCause()));
+                SwingUtilities.invokeLater(() -> showFailed(title, ex.getLocalizedMessage()));
                 SwingUtilities.invokeLater(call::onFail);
             }
             SwingUtilities.invokeLater(call::onFinish);

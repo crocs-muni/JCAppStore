@@ -47,6 +47,10 @@ public class PGP extends CmdTask {
         }
     }
 
+    public static void invalidate() {
+        verified = false;
+    }
+
     boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
             String result = new CmdTask().add("bash").add("-c").add(location + " --verify \'"

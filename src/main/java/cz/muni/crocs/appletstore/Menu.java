@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Menu extends JMenuBar {
-
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletStore context;
@@ -93,6 +92,7 @@ public class Menu extends JMenuBar {
         buildReadersItem();
         buildHelpItem();
     }
+
     private void buildFileItem() {
         CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
         add(menu);
@@ -100,33 +100,9 @@ public class Menu extends JMenuBar {
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (CardManagerFactory.getManager().isCard()) {
-                    new FreeMemoryAction(new OnEventCallBack<Void, Integer>() {
-                        @Override
-                        public void onStart() {
-                            context.setEnabled(false);
-                        }
-
-                        @Override
-                        public void onFail() {
-                            context.setEnabled(true);
-                        }
-
-                        @Override
-                        public Void onFinish() {
-                            context.setEnabled(true);
-                            return null;
-                        }
-
-                        @Override
-                        public Void onFinish(Integer integer) {
-                            context.setEnabled(true);
-                            //todo better dialog and more info...
-                            JOptionPane.showMessageDialog(null, "Available free space: " + integer);
-                            return null;
-                        }
-                    }).mouseClicked(null);
-                }
+                JOptionPane.showMessageDialog(null,
+                        new CardInfoPanel(context), textSrc.getString("card_info"),
+                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
 
@@ -134,22 +110,24 @@ public class Menu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Settings settings = new Settings(context);
-                Object[] options = { textSrc.getString("ok"), textSrc.getString("cancel") };
+                Object[] options = {textSrc.getString("ok"), textSrc.getString("cancel")};
                 int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                         null, options, null);
-                if (result == JOptionPane.YES_OPTION){
+                if (result == JOptionPane.YES_OPTION) {
                     settings.apply();
                 }
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
-        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        }, textSrc.getString("H_quit"),Config.IMAGE_DIR + "close_black.png"));
+        menu.add(
+
+                menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.exit(0);
+                    }
+                }, textSrc.getString("H_quit"), Config.IMAGE_DIR + "close_black.png"));
     }
 
     private void buildReadersItem() {
@@ -207,7 +185,7 @@ public class Menu extends JMenuBar {
      */
     private JMenuItem menuItemWithKeyShortcutAndIcon(AbstractAction action, String imagePath,
                                                      String descripton, int keyEvent, int inputEventMask) {
-        JMenuItem menuItem = menuItemWithKeyShortcut(action, descripton, keyEvent,inputEventMask);
+        JMenuItem menuItem = menuItemWithKeyShortcut(action, descripton, keyEvent, inputEventMask);
         menuItem.setIcon(new ImageIcon(imagePath));
 
         return menuItem;
@@ -255,7 +233,7 @@ public class Menu extends JMenuBar {
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         Dimension preferred = component.getPreferredSize();
-        component.setPreferredSize(new Dimension(200, (int)preferred.getHeight()));
+        component.setPreferredSize(new Dimension(200, (int) preferred.getHeight()));
     }
 
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {

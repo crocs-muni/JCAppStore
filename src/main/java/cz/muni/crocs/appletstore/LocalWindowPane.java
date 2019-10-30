@@ -169,9 +169,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         if (text == null)
             add(new ErrorPane(textSrc.getString(keyTitle), imgName));
         else
-            add(new ErrorPane(textSrc.getString(keyTitle), text +
-                    (OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE).equals("verbose") ?
-                            cause.getLocalizedMessage() : cause.getLocalizedMessageWithoutCause()), imgName));
+            add(new ErrorPane(textSrc.getString(keyTitle), text + cause.getLocalizedMessage(), imgName));
         revalidate();
     }
 
@@ -213,7 +211,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
             if (OptionsFactory.getOptions().isVerbose()) {
-                showError("E_no_life_state", "H_no_life_state", "announcement_white.png");
+                showError("E_no_life_state", "H_no_life_state", "plug-in-out.png");
             } else {
                 showError("E_communication", "H_communication", "plug-in-out.png");
             }

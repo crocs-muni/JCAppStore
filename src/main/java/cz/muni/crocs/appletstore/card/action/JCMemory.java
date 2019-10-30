@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.File;
 
@@ -13,13 +14,12 @@ public class JCMemory {
 
     public static AppletInfo getInfo() {
         return new AppletInfo("JCMemory", "jcmem.png", "1.0", "CRoCS", "2.2.2",
-                getAID(), KeysPresence.NO_KEYS);
+                getAID(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.Application);
     }
 
     public static AppletInfo getPackageInfo() {
-        AppletInfo info = getInfo();
-        info.setAID(getPackageAID());
-        return info;
+        return new AppletInfo("JCMemory", "", "1.0", "CRoCS", "2.2.2",
+                getPackageAID(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile);
     }
 
     public static InstallOpts getInstallOptions() {
@@ -40,6 +40,6 @@ public class JCMemory {
     }
 
     public static File getSource() {
-        return new File(Config.APP_STORE_CAPS_DIR + S + "JCMemory", "JCMemory_v1.0_sdk2.2.2");
+        return new File(Config.APP_STORE_CAPS_DIR + S + "JCMemory", "JCMemory_v1.0_sdk2.2.2.cap");
     }
 }
