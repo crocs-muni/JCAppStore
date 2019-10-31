@@ -12,7 +12,7 @@ import java.awt.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class CustomButton extends JButton {
+public class LeftMenuButton extends JButton {
 
     private CompoundBorder innerChoosed = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(0, 5,0 , 0), Color.BLACK),
@@ -22,7 +22,7 @@ public class CustomButton extends JButton {
             new EmptyBorder(new Insets(8, 8,8, 8)));
     private EmptyBorder defaultBorder = new EmptyBorder(new Insets(12, 21,12, 12));
 
-    public CustomButton(String imgName, boolean isTitle) {
+    public LeftMenuButton(String imgName, boolean isTitle) {
         super();
         setUI(new CustomButtonUI());
         setFont(isTitle ? OptionsFactory.getOptions().getTitleFont() : OptionsFactory.getOptions().getFont());

@@ -1,15 +1,13 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.ui.CustomButton;
+import cz.muni.crocs.appletstore.ui.LeftMenuButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -31,8 +29,8 @@ public class LeftMenu extends JPanel {
     private InputHintTextField searchInput;
     private JLabel searchIcon;
 
-    private CustomButton local = new CustomButton("creditcard.png", false);
-    private CustomButton remote = new CustomButton("shop.png", false);
+    private LeftMenuButton local = new LeftMenuButton("creditcard.png", false);
+    private LeftMenuButton remote = new LeftMenuButton("shop.png", false);
     private boolean isLocal = true;
 
     private Color choosedButtonBG = new Color(255, 255, 255, 60);
@@ -113,7 +111,7 @@ public class LeftMenu extends JPanel {
      * @param text button title
      * @param defaultChoosed whether the button is choosed by default
      */
-    private void setButton(CustomButton button, String text, boolean defaultChoosed) {
+    private void setButton(LeftMenuButton button, String text, boolean defaultChoosed) {
         button.setText(text);
         button.setBorder(defaultChoosed);
     }

@@ -28,11 +28,32 @@ public class SplashScreen extends JWindow {
     private ProcessTrackable loader = new LoaderWorker();
     private Font font = new Font("Courier", Font.PLAIN, 14);
     private boolean update;
+    private String numbers = "";
 
     private SplashScreen() {
         Container container = getContentPane();
         container.setLayout(null);
-        JLabel bg = new JLabel(new ImageIcon("src/main/resources/img/splash.png"));
+        JLabel bg = new JLabel(new ImageIcon("src/main/resources/img/splash.png")) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D)g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(Color.BLACK);
+                if (progress > 2) {
+                    numbers = numbers.substring(0, progress - 2);
+                } else {
+                    numbers = "";
+                }
+                numbers += String.valueOf(r.nextInt(10)) + String.valueOf(r.nextInt(10));
+                numbers = numbers.substring(0, progress);
+
+                g2d.setFont(font.deriveFont(20f));
+                g2d.drawString(spaced(numbers), 30, 120);
+                g2d.setFont(font.deriveFont(12f));
+                g2d.drawString(loader.getInfo(), 78, 98);
+            }
+        };
         bg.setBounds(0, 0, 300, 189);
         add(bg);
         loadProgressBar();
@@ -54,7 +75,7 @@ public class SplashScreen extends JWindow {
             } else {
                 update = true;
             }
-
+            revalidate();
             repaint();
             if (loader.getProgress() > 15) {
                 timer.stop();
@@ -68,37 +89,24 @@ public class SplashScreen extends JWindow {
         timer.start();
     }
 
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setColor(Color.BLACK);
-        StringBuilder numbers = new StringBuilder();
-        for (int i = 0; i < progress; i++) {
-            numbers.append(r.nextInt(10));
-            if ((i + 1) % 4 == 0) numbers.append("  ");
+    private String spaced(String values) {
+        StringBuilder builder = new StringBuilder();
+        for (int j = 0; j < values.length(); j++) {
+            builder.append(values.charAt(j));
+            if (j % 4 == 3) builder.append(" ");
         }
-        g2d.setFont(font.deriveFont(20f));
-        g2d.drawString(numbers.toString(), 30, 120);
-        g2d.setFont(font.deriveFont(12f));
-        g2d.drawString(loader.getInfo(), 78, 98);
+        return builder.toString();
     }
 
     private void runMainApp() {
         try {
-            if (SystemUtils.IS_OS_WINDOWS) {
+            if (SystemUtils.IS_OS_LINUX) {
+                //UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+                //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } else if (SystemUtils.IS_OS_MAC) {
-                System.setProperty("com.apple.mrj.application.apple.menu.about.name", "JCAppStore");
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } else if (SystemUtils.IS_OS_UNIX) {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        UIManager.setLookAndFeel("Nimbus");
-                        break;
-                    }
+                if (SystemUtils.IS_OS_MAC) {
+                    System.setProperty("com.apple.mrj.application.apple.menu.about.name", "JCAppStore");
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {

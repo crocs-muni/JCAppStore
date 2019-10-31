@@ -24,7 +24,6 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -306,6 +305,8 @@ public class StoreItemInfo extends HintPanel {
         button.setUI(new CustomButtonUI());
         button.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 20f));
         button.setForeground(Color.WHITE);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
         button.setBackground(background);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;

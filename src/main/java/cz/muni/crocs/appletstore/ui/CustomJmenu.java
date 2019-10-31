@@ -25,6 +25,7 @@ public class CustomJmenu extends JMenu {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
         setOpaque(true);
+        setFocusPainted(false);
         setFont(OptionsFactory.getOptions().getFont(12f));
         setForeground(Color.WHITE);
         setBackground(Color.BLACK);

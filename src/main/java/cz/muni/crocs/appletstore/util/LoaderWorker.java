@@ -38,7 +38,7 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
             waitWhile(500);
         }
 
-        info = textSrc.getString("lanuch");
+        info = textSrc.getString("launch");
         waitWhile(500);
         setProgress(getMaximum());
         return null;

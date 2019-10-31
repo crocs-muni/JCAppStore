@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalTextFieldUI;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -17,27 +18,21 @@ public class InputHintTextField extends JTextField implements FocusListener {
     public InputHintTextField(final String hint) {
         super(hint);
         this.hint = hint;
-        isHint = true;
-        setBorder(null);
-        setOpaque(false);
-        addFocusListener(this);
-        setBackground(new Color(0, 0, 0, 0));
+        setup();
     }
 
     public InputHintTextField(String text, final String hint) {
         super(text == null || text.isEmpty() ? hint : text);
         this.hint = hint;
+        setup();
+    }
+
+    private void setup() {
         isHint = true;
         setBorder(null);
         setOpaque(false);
         addFocusListener(this);
-        setBackground(new Color(0, 0, 0, 0));
     }
-
-//    @Override
-//    protected void paintBorder(Graphics g) {
-//        //deleted
-//    }
 
     @Override
     public void focusGained(FocusEvent e) {
@@ -63,6 +58,5 @@ public class InputHintTextField extends JTextField implements FocusListener {
     public String getText() {
         return isHint ? "" : super.getText();
     }
-
 
 }

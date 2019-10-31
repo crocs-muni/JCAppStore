@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
@@ -33,7 +34,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
 
-    private boolean windowOpened = true;
+    private volatile boolean windowOpened = true;
     private MainPanel window;
     private Menu menu;
     private GlassPaneBlocker blocker = new GlassPaneBlocker();
@@ -42,9 +43,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         logger.info("------- App started");
 
         setup();
-        SetIcon();
-        initComponents();
-
         //save options on close & kill routine
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -52,10 +50,14 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                 windowOpened = false;
             }
         });
+        setBar();
+        initComponents();
     }
 
-    private void SetIcon() {
+    private void setBar() {
+        setTitle("JCAppStore");
         setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+        //todo uncomment for apple branch
 //        Application.getApplication().setDockIconImage(
 //                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
     }
@@ -64,30 +66,31 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Environment and style settings
      */
     private void setup() {
-
+        JFrame.setDefaultLookAndFeelDecorated(true);
         HTMLEditorKit kit = new HTMLEditorKit();
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("MenuItem.opaque", true);
-        UIManager.put("MenuItem.background", Color.BLACK);
+        UIManager.put("MenuItem.background", Color.WHITE);
         UIManager.put("Menu.background", new javax.swing.plaf.ColorUIResource(Color.BLACK));
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.selectionBackground", Color.BLACK);
         UIManager.put("Menu.selectionForeground", Color.WHITE);
         UIManager.put("Menu.opaque", true);
-
         UIManager.put("MenuBar.borderColor", Color.BLACK);
+        UIManager.put("Button.focus", new Color(0, 0, 0, 0));
+        UIManager.put("ToggleButton.focus", new Color(0, 0, 0, 0));
+        UIManager.put("CheckBox.focus", new Color(0, 0, 0, 0));
+        UIManager.put("TabbedPane.focus", new Color(0, 0, 0, 0));
+        UIManager.put("RadioButton.focus", new Color(0, 0, 0, 0));
+        UIManager.put("Slider.focus", new Color(0, 0, 0, 0));
+        UIManager.put("ComboBox.focus", new Color(0, 0, 0, 0));
     }
 
     /**
      * Build Swing components and start routine
      */
     private void initComponents() {
-        try {
-            setIconImage(ImageIO.read(new File(Config.IMAGE_DIR + "icon.png")));
-        } catch (IOException e) {
-            //ignore
-        }
         setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
         window = new MainPanel(this);
         setContentPane(window);
