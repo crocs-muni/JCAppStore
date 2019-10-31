@@ -24,11 +24,10 @@ public class CustomJmenu extends JMenu {
     private void defaultSettings(String description, int mnemonic) {
         setMnemonic(mnemonic);
         getAccessibleContext().setAccessibleDescription(description);
-        setOpaque(true);
+        setOpaque(false);
         setFocusPainted(false);
         setFont(OptionsFactory.getOptions().getFont(12f));
         setForeground(Color.WHITE);
-        setBackground(Color.BLACK);
         setMargin(new Insets(0,0 ,0 ,0 ));
     }
 
@@ -47,17 +46,19 @@ public class CustomJmenu extends JMenu {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (getModel().isPressed()) {
-            g.setColor(Color.WHITE);
-            //setForeground(Color.BLACK);
-        } else if (getModel().isRollover()) {
-            g.setColor(Color.BLACK);
-        } else {
-            g.setColor(Color.BLACK);
-        }
+        g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g);
     }
+
+//    @Override
+//    public void paint(Graphics g) {
+//        super.paint(g);
+//
+//        g.setColor(Color.BLACK);
+//        g.fillRect(0, 0, getWidth(), getHeight());
+//        paintComponent(g);
+//    }
 
     @Override
     public void setContentAreaFilled(boolean b) {

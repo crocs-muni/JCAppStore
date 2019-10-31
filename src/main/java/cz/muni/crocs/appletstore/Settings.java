@@ -49,7 +49,6 @@ public class Settings extends JPanel {
 
     public Settings(BackgroundChangeable context) {
         this.context = context;
-        setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildPGP();
         buildJCKeep();

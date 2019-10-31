@@ -71,7 +71,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         kit.setStyleSheet(OptionsFactory.getOptions().getDefaultStyleSheet());
         UIManager.put("MenuItem.selectionBackground", Color.WHITE);
         UIManager.put("MenuItem.opaque", true);
-        UIManager.put("MenuItem.background", Color.WHITE);
+        UIManager.put("MenuItem.background", Color.BLACK);
         UIManager.put("Menu.background", new javax.swing.plaf.ColorUIResource(Color.BLACK));
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.selectionBackground", Color.BLACK);
@@ -102,7 +102,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
         //start routine
         checkTerminalsRoutine();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
     }
