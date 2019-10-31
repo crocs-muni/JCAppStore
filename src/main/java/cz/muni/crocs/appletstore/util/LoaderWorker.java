@@ -26,21 +26,26 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
     public Void doInBackground() {
         setProgress(0);
         //first get options will force to initialize
-        OptionsFactory.getOptions();
-
-        info = textSrc.getString("detect_cards");
-        CardManager manager = CardManagerFactory.getManager();
-        manager.needsCardRefresh();
         try {
-            manager.loadCard();
-        } catch (LocalizedCardException e) {
-            info = textSrc.getString("failed_detect");
-            waitWhile(500);
-        }
+            OptionsFactory.getOptions();
 
-        info = textSrc.getString("launch");
-        waitWhile(500);
-        setProgress(getMaximum());
+            info = textSrc.getString("detect_cards");
+            CardManager manager = CardManagerFactory.getManager();
+            manager.needsCardRefresh();
+            try {
+                manager.loadCard();
+            } catch (LocalizedCardException e) {
+                info = textSrc.getString("failed_detect");
+                waitWhile(500);
+            }
+
+            info = textSrc.getString("launch");
+            waitWhile(500);
+            setProgress(getMaximum());
+        } catch (Exception e) {
+            info = textSrc.getString("failed: " + e.getMessage());
+            waitWhile(2000);
+        }
         return null;
     }
 

@@ -91,6 +91,7 @@ public class IniParserImpl implements IniParser {
 
     public Set<String> keySet() {
         Profile.Section section = ini.get(header);
-        return ini.get(header).keySet();
+        if (section == null) return null;
+        return section.keySet();
     }
 }

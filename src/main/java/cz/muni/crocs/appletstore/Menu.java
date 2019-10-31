@@ -3,15 +3,12 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.help.*;
 import cz.muni.crocs.appletstore.ui.Text;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
-import javax.swing.plaf.metal.MetalButtonUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

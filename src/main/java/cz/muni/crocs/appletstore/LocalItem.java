@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import com.sun.istack.internal.NotNull;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
@@ -121,7 +120,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     }
 
     @Override
-    public int compareTo(@NotNull Item o) {
+    public int compareTo(Item o) {
         if (!(o instanceof LocalItem))
             return 1;
 

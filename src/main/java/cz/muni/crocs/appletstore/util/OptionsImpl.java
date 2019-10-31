@@ -9,6 +9,7 @@ import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.io.*;
 import java.util.HashMap;
+import java.util.Set;
 
 import static cz.muni.crocs.appletstore.Config.S;
 
@@ -130,7 +131,10 @@ public class OptionsImpl implements Options<String> {
         try {
             if (!file.createNewFile()) {
                 IniParser parser = new IniParserImpl(file, HEADER, "");
-                for (String key : parser.keySet()) {
+                Set<String> keyset = parser.keySet();
+                if (keyset == null)
+                    return;
+                for (String key : keyset) {
                     options.put(key, parser.getValue(key));
                 }
                 if (options.size() == 0) {
@@ -139,7 +143,7 @@ public class OptionsImpl implements Options<String> {
             } else {
                 setDefaults();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             setDefaults();
             logger.warn("Failed to read app options.");

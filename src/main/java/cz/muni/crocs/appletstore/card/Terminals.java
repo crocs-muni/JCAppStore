@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.TerminalManager;
+import jnasmartcardio.Smartcardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,15 +120,16 @@ public class Terminals {
             if (!checkCardPresence(selectedReader)) {
                 selectedReader = checkAnyCardPresence();
             }
-        } catch (CardException | NoSuchAlgorithmException e) {
+
+        } catch (CardException | NoSuchAlgorithmException | Smartcardio.EstablishContextException e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
-                    null, "<html><div width=\"450\"" + e.getMessage() + "</div></html>",
-                    "Start", JOptionPane.INFORMATION_MESSAGE));
             logger.warn("Failed to check terminal.", e);
             state = TerminalState.NO_READER;
             return (old != state) ? 2 : 0;
         }
+//        } catch (Smartcardio.EstablishContextException e) {
+//            todo throw and dont start app not very likely to work when no reader
+//        }
         if (needToRefresh || old != state) return 2;
         if (cardReaderMap.keySet().hashCode() != oldHash) return 1;
         return 0;
