@@ -28,6 +28,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
     private Component current = null;
+    private LoggerConsole console;
 
     public MainPanel(BackgroundChangeable context) {
         setOneTouchExpandable(true);
@@ -42,8 +43,12 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
 
         buildStoreContents();
         buildLogger();
-
         InformerFactory.setInformer(this);
+    }
+
+    public void toggleLogger() {
+        setDividerSize(getBottomComponent() == null ? 5 : 0);
+        setBottomComponent(getBottomComponent() == null ? (LoggerConsoleImpl)console : null);
     }
 
     /**
@@ -68,7 +73,8 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     }
 
     void buildLogger() {
-        setRightComponent(new LoggerConsoleImpl());
+        console = new LoggerConsoleImpl();
+        setRightComponent(null);
     }
 
     /**

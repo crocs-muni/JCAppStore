@@ -70,7 +70,7 @@ public class PGP extends CmdTask {
 
     Tuple<String, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (!file.exists() || !signatureFile.exists())
-            return new Tuple<>("no_asc.png", textSrc.getString("H_no_file_pgp"));
+            return new Tuple<>("verify_trust.png", textSrc.getString("H_no_file_pgp"));
 
         if (verifySignature(author, file, signatureFile)) {
             if (author == null) {

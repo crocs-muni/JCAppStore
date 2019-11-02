@@ -52,7 +52,7 @@ public class LocalizedException extends Exception {
 
     @Override
     public String getLocalizedMessage() {
-        boolean verbose = OptionsFactory.getOptions().isVerbose();
+        boolean verbose = OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE);
         if (!isKey)
             return translated;
         if (translated != null) {

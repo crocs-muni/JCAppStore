@@ -210,7 +210,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     private boolean verifyCardLifeState(Integer isdLifeState) {
         if (isdLifeState == null) {
-            if (OptionsFactory.getOptions().isVerbose()) {
+            if (OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE)) {
                 showError("E_no_life_state", "H_no_life_state", "plug-in-out.png");
             } else {
                 showError("E_communication", "H_communication", "plug-in-out.png");
@@ -262,8 +262,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     private void showPanel(Collection<LocalItem> sortedItems) {
         windowLayout.removeAll();
         if (sortedItems.size() == 0) {
-            windowLayout.add(new LocalItem(textSrc.getString("no_results"),
-                    "no_results.png", "", "", null));
+            windowLayout.add(new NotFoundItem());
         } else {
             for (LocalItem item : sortedItems) {
                 if (submenu.accept(item.info.getKind()))

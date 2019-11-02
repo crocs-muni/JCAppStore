@@ -42,18 +42,18 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void setDefaults() {
-        //todo use delimiter of system
         options.clear();
         options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
         options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
-        options.put(Options.KEY_HINT, "true");  //true false
+        options.put(Options.KEY_HINT, "true");
         options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
         options.put(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
         options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
         options.put(Options.KEY_PGP_LOCATION, "");
-        options.put(Options.KEY_ERROR_MODE, "default"); // default / verbose
+        options.put(Options.KEY_VERBOSE_MODE, "false");
         options.put(Options.KEY_KEEP_JCMEMORY, "true");
+        options.put(Options.KEY_DELETE_IMPLICIT, "true");
     }
 
     @Override
@@ -92,18 +92,16 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
-    public boolean isVerbose() {
-        return getOption(Options.KEY_ERROR_MODE).trim().toLowerCase().equals("verbose");
+    public boolean is(String key) {
+        return getOption(key).trim().toLowerCase().equals("true");
     }
 
-    @Override
-    public boolean keepJCMemory() {
-        return getOption(Options.KEY_KEEP_JCMEMORY).trim().toLowerCase().equals("true");
-    }
 
     @Override
     public String getOption(String name) {
-        return options.get(name);
+        if (options.containsKey(name))
+            return options.get(name);
+        return "";
     }
 
     @Override

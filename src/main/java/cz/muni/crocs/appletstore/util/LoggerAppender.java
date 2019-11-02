@@ -32,7 +32,7 @@ public class LoggerAppender extends AbstractAppender {
     @Override
     public void append(LogEvent event) {
         Level l = event.getLevel();
-        if (!OptionsFactory.getOptions().isVerbose() && (l == Level.DEBUG || l == Level.TRACE))
+        if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && (l == Level.DEBUG || l == Level.TRACE))
             return;
 
         String message = new String(this.getLayout().toByteArray(event));

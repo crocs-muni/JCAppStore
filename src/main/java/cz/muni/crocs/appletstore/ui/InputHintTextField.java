@@ -56,7 +56,7 @@ public class InputHintTextField extends JTextField implements FocusListener {
 
     @Override
     public String getText() {
-        return isHint ? "" : super.getText();
+        return (isHint || super.getText().equals(hint)) ? "" : super.getText();
     }
 
 }

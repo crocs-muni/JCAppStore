@@ -42,6 +42,7 @@ public class Settings extends JPanel {
     private JCheckBox hintEnabled = new JCheckBox();
     private JCheckBox verboseEnabled = new JCheckBox();
     private JCheckBox jcMemoryKept = new JCheckBox();
+    private JCheckBox implicitDelete = new JCheckBox();
     private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
@@ -52,6 +53,7 @@ public class Settings extends JPanel {
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildPGP();
         buildJCKeep();
+        buildImplicitDelete();
         buildErrorMode();
         buildLanguage();
         buildHint();
@@ -65,6 +67,7 @@ public class Settings extends JPanel {
         saveErrorMode();
         saveJCKeep();
         savePGP();
+        saveImplicitDelete();
     }
 
     private void buildPGP() {
@@ -157,21 +160,27 @@ public class Settings extends JPanel {
         add(languageBox, "align right, span 2, w 180, wrap");
     }
 
+    private void buildImplicitDelete() {
+        add(new Text(textSrc.getString("implicit_delete")), "");
+        implicitDelete.setSelected(OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT));
+        add(implicitDelete, "align right, span 2, w 180, wrap");
+    }
+
     private void buildErrorMode() {
         add(new Text(textSrc.getString("enable_verbose")), "");
-        verboseEnabled.setSelected("verbose".equals(OptionsFactory.getOptions().getOption(Options.KEY_ERROR_MODE)));
+        verboseEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
         add(verboseEnabled, "align right, span 2, w 180, wrap");
     }
 
     private void buildJCKeep() {
         add(new Text(textSrc.getString("enable_jcmemory")), "");
-        jcMemoryKept.setSelected("true".equals(OptionsFactory.getOptions().getOption(Options.KEY_KEEP_JCMEMORY)));
+        jcMemoryKept.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
         add(jcMemoryKept, "align right, span 2, w 180, wrap");
     }
 
     private void buildHint() {
         add(new Text(textSrc.getString("enable_hints")),"");
-        hintEnabled.setSelected("true".equals(OptionsFactory.getOptions().getOption(Options.KEY_HINT)));
+        hintEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
         add(hintEnabled, "align right, span 2, w 180, wrap");
     }
 
@@ -248,13 +257,17 @@ public class Settings extends JPanel {
         //Locale.setDefault(new Locale());
     }
 
+    private void saveImplicitDelete() {
+        OptionsFactory.getOptions().addOption(Options.KEY_DELETE_IMPLICIT, implicitDelete.isSelected() ? "true" : "false");
+    }
+
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
         HintPanel.enableHint(hintEnabled.isSelected());
     }
 
     private void saveErrorMode() {
-        OptionsFactory.getOptions().addOption(Options.KEY_ERROR_MODE, verboseEnabled.isSelected() ? "verbose" : "default");
+        OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE, verboseEnabled.isSelected() ? "true" : "false");
     }
 
     private void saveJCKeep() {

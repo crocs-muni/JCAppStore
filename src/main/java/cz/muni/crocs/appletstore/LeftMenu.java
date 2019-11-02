@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -25,9 +27,14 @@ import java.util.ResourceBundle;
 public class LeftMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private JPanel container = new JPanel(new GridBagLayout());;
+    private JPanel container = new JPanel(new GridBagLayout());
+    ;
     private InputHintTextField searchInput;
     private JLabel searchIcon;
+    private boolean close = false;
+
+    private ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
+    private ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
 
     private LeftMenuButton local = new LeftMenuButton("creditcard.png", false);
     private LeftMenuButton remote = new LeftMenuButton("shop.png", false);
@@ -78,8 +85,8 @@ public class LeftMenu extends JPanel {
         searchPane.setOpaque(false);
         searchPane.setBorder(new CompoundBorder(
                 new EmptyBorder(5, 15, 15, 15), //outer margin
-                new MatteBorder(0, 0,5 ,0, Color.BLACK))); //inner nice bottom line
-        searchPane.setMaximumSize( new Dimension(Integer.MAX_VALUE, 60));
+                new MatteBorder(0, 0, 5, 0, Color.BLACK))); //inner nice bottom line
+        searchPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         searchPane.setOpaque(false); //transparent ?? or color
 
         searchInput = new InputHintTextField(textSrc.getString("search"));
@@ -88,8 +95,8 @@ public class LeftMenu extends JPanel {
         searchInput.setPreferredSize(new Dimension(160, 30));
         searchPane.add(searchInput);
 
-        searchIcon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "search.png"));
-        searchIcon.setBorder(new EmptyBorder(5, 5, 5,5 ));
+        searchIcon = new JLabel(searchImage);
+        searchIcon.setBorder(new EmptyBorder(5, 5, 5, 5));
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
         return searchPane;
@@ -107,13 +114,28 @@ public class LeftMenu extends JPanel {
 
     /**
      * Set button properties
-     * @param button CustomButton instance
-     * @param text button title
+     *
+     * @param button         CustomButton instance
+     * @param text           button title
      * @param defaultChoosed whether the button is choosed by default
      */
     private void setButton(LeftMenuButton button, String text, boolean defaultChoosed) {
         button.setText(text);
         button.setBorder(defaultChoosed);
+    }
+
+    private void resetSearch() {
+        close = false;
+        searchIcon.setIcon(searchImage);
+        searchInput.setText("");
+    }
+
+    private void checkIfSetClose() {
+        boolean hasSearchText = !searchInput.getText().isEmpty();
+        if (close != hasSearchText) {
+            searchIcon.setIcon(hasSearchText ? closeImage : searchImage);
+        }
+        close = hasSearchText;
     }
 
     /**
@@ -148,7 +170,8 @@ public class LeftMenu extends JPanel {
         searchIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
+                resetSearch();
+                parent.getSearchablePane().showItems(null);
             }
         });
         //searching on enter press
@@ -156,25 +179,28 @@ public class LeftMenu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 parent.getSearchablePane().showItems(searchInput.getText());
+                checkIfSetClose();
             }
         });
 
-//        searchInput.getDocument().addDocumentListener(new DocumentListener() {
-//            @Override
-//            public void insertUpdate(DocumentEvent e) {
-//                parent.getSearchablePane().showItems(searchInput.getText());
-//            }
-//
-//            @Override
-//            public void removeUpdate(DocumentEvent e) {
-//                parent.getSearchablePane().showItems(searchInput.getText());
-//            }
-//
-//            @Override
-//            public void changedUpdate(DocumentEvent e) {
-//                parent.getSearchablePane().showItems(searchInput.getText());
-//            }
-//        });
+        searchInput.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                parent.getSearchablePane().showItems(searchInput.getText());
+                checkIfSetClose();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                parent.getSearchablePane().showItems(searchInput.getText());
+                checkIfSetClose();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+        });
     }
 }
 

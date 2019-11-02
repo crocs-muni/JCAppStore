@@ -37,7 +37,7 @@ public class LocalItemInfo extends HintPanel {
     private HintLabel id = new HintText();;
     private HintLabel type = new HintText();
     private HintLabel domain = new HintText();
-    private HintLabel uninstall;
+    private JLabel uninstall;
     //private HintLabel rawApdu;
 
     private SendApduAction send;
@@ -121,8 +121,6 @@ public class LocalItemInfo extends HintPanel {
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
         uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
-        uninstall.setHint(textSrc.getString(info.getKind() == GPRegistryEntry.Kind.Application ?
-                "H_uninstall_apk" : "H_uninstall_pkg"));
 //        rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }

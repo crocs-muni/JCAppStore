@@ -25,7 +25,7 @@ public class Menu extends JMenuBar {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletStore context;
-    private JMenu readers;
+    private CustomJmenu readers;
     private JLabel currentCard;
 
     public Menu(AppletStore parent) {
@@ -58,13 +58,13 @@ public class Menu extends JMenuBar {
                 readersPresent.add(item);
                 readers.add(item);
             }
-            readers.repaint();
-
+            readers.setNotify(true);
         } else {
             JMenuItem item = menuItemDisabled(textSrc.getString("no_reader"), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
             readers.add(item);
+            readers.setNotify(false);
         }
     }
 
@@ -103,6 +103,13 @@ public class Menu extends JMenuBar {
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
 
+        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("logger")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.getWindow().toggleLogger();
+            }
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_L, InputEvent.ALT_MASK));
+
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,14 +124,12 @@ public class Menu extends JMenuBar {
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
 
-        menu.add(
-
-                menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        System.exit(0);
-                    }
-                }, textSrc.getString("H_quit"), Config.IMAGE_DIR + "close_black.png"));
+        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        }, textSrc.getString("H_quit"), Config.IMAGE_DIR + "close_black.png"));
     }
 
     private void buildReadersItem() {
@@ -197,7 +202,6 @@ public class Menu extends JMenuBar {
     private JMenuItem menuItemWithKeyShortcut(AbstractAction action, String descripton,
                                               int keyEvent, int inputEventMask) {
         JMenuItem menuItem = menuItemNoShortcut(action, descripton);
-
         menuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
         return menuItem;
     }

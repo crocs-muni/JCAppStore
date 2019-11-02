@@ -212,7 +212,7 @@ public class CardInstance {
     }
 
     /**
-     * Executes any desired command without using secure channel
+     * Executes any desired command without establishing secure channel
      * @param commands commands to execute
      * @throws LocalizedCardException unable to perform command
      * @throws CardException unable to perform command

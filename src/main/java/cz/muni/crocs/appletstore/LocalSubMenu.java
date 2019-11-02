@@ -17,35 +17,32 @@ public class LocalSubMenu extends JPanel {
     private JCheckBox app = new JCheckBox();
     private JCheckBox pkg = new JCheckBox();
 
-    private JButton submit;
     private JButton reload;
 
     public LocalSubMenu() {
         setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
         setOpaque(false);
 
-        submit = getButton("filter");
         reload = getButton("card_refresh");
 
         sd.setBorder(BorderFactory.createEmptyBorder());
         app.setBorder(BorderFactory.createEmptyBorder());
         pkg.setBorder(BorderFactory.createEmptyBorder());
 
-        add(getLabel("sds"));
-        add(sd);
-        add(Box.createRigidArea(new Dimension(6, 0)));
         add(getLabel("applets"));
         add(app);
         add(Box.createRigidArea(new Dimension(6, 0)));
+        add(getLabel("sds"));
+        add(sd);
+        add(Box.createRigidArea(new Dimension(6, 0)));
         add(getLabel("packages"));
         add(pkg);
-        add(submit);
         add(Box.createRigidArea(new Dimension(15, 0)));
         add(reload);
         add(Box.createRigidArea(new Dimension(10, 0)));
-        sd.setSelected(false);
         app.setSelected(true);
-        pkg.setSelected(true);
+        sd.setSelected(false);
+        pkg.setSelected(false);
         setPreferredSize(new Dimension(Integer.MAX_VALUE, sd.getPreferredSize().height));
     }
 
@@ -57,7 +54,7 @@ public class LocalSubMenu extends JPanel {
         return app.isSelected();
     }
 
-    public boolean showPacakge() {
+    public boolean showPackage() {
         return pkg.isSelected();
     }
 
@@ -66,7 +63,7 @@ public class LocalSubMenu extends JPanel {
             case Application:
                 return showApplet();
             case ExecutableLoadFile:
-                return showPacakge();
+                return showPackage();
             case SecurityDomain:
             case IssuerSecurityDomain:
                 return showDomain();
@@ -76,7 +73,9 @@ public class LocalSubMenu extends JPanel {
     }
 
     void setOnSubmit(Action a) {
-        submit.addActionListener(a);
+        app.addActionListener(a);
+        sd.addActionListener(a);
+        pkg.addActionListener(a);
     }
     void setOnReload(Action a) { reload.addActionListener(a); }
 

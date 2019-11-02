@@ -3,9 +3,12 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.APDUBIBO;
 import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
+import apdu4j.ResponseAPDU;
+
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +170,7 @@ public class CardManagerImpl implements CardManager {
             throw ex;
         } catch (Exception e) {
             card = null;
-            throw new LocalizedCardException(e.getMessage(), OptionsFactory.getOptions().isVerbose() ? "unable_to_translate" : "E_default", e);
+            throw new LocalizedCardException(e.getMessage(), "E_default", e);
         } finally {
             busy = false;
             notifyAll();
@@ -267,7 +270,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized byte[] sendApdu(String AID, String APDU) throws LocalizedCardException {
+    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -283,7 +286,7 @@ public class CardManagerImpl implements CardManager {
         }
         busy = true;
 
-        GPCommand<byte[]> send = new Transmit(AID, APDU);
+        GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
         try {
             card.executeCommands(send);
         } catch (CardException e) {

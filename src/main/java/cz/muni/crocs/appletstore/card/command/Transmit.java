@@ -13,7 +13,7 @@ import pro.javacard.gp.ISO7816;
 import javax.smartcardio.CardException;
 import java.io.IOException;
 
-public class Transmit extends GPCommand<byte[]> {
+public class Transmit extends GPCommand<ResponseAPDU> {
     private static final Logger logger = LoggerFactory.getLogger(Transmit.class);
 
     private AID targetAid;
@@ -40,8 +40,7 @@ public class Transmit extends GPCommand<byte[]> {
         response = channel.transmit(c);
         logger.debug("<< " + HexUtils.bin2hex(response.getBytes()));
         if (response.getSW() != 0x9000) return false;
-        result = response.getData();
-        //todo ask whether to select back 00A40400 00
+        result = response;
         return true;
     }
 }

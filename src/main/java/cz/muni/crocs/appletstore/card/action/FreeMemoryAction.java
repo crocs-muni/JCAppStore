@@ -2,8 +2,6 @@ package cz.muni.crocs.appletstore.card.action;
 
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,7 @@ public class FreeMemoryAction extends CardAction {
             @Override
             protected byte[] doInBackground() {
                 try {
-                    return new JCSystemInfo().getSystemInfo();
+                    return CardCommands.getSystemInfo();
                 } catch (LocalizedCardException ex) {
                     ex.printStackTrace();
                     logger.warn("Failed to obtain the free memory space: " + ex.getMessage());
@@ -65,7 +63,10 @@ public class FreeMemoryAction extends CardAction {
 
     public static int getAvailableMemory() {
         try {
-            return getAvailableMemory(new JCSystemInfo().getSystemInfo());
+            byte[] bytes = CardCommands.getSystemInfo();
+            if (bytes == null)
+                return -1;
+            return getAvailableMemory(bytes);
         } catch (LocalizedCardException e) {
             e.printStackTrace();
             return -1;
@@ -73,7 +74,7 @@ public class FreeMemoryAction extends CardAction {
     }
 
     public static int getAvailableMemory(byte[] response) {
-        //supposes big endian
-        return (int)response[3] << 0x08 + (int)response[4];
+        //big endian
+        return (int)response[0] << 0x08 + (int)response[1];
     }
 }

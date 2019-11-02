@@ -45,13 +45,14 @@ public class InstallAction extends CardAction {
 
     /**
      * Create an install action
-     * @param titleBar title of the dialog
-     * @param info info about the applet to install
-     * @param capfile file with the compiled sourcecode
-     * @param installed whether installed on the card already
-     * @param signer signer's name
+     *
+     * @param titleBar   title of the dialog
+     * @param info       info about the applet to install
+     * @param capfile    file with the compiled sourcecode
+     * @param installed  whether installed on the card already
+     * @param signer     signer's name
      * @param identifier signer's identifier, can be either his email or key ID
-     * @param call callback that is called before action and after failure or after success
+     * @param call       callback that is called before action and after failure or after success
      */
     public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer,
                          String identifier, OnEventCallBack<Void, Void> call) {
@@ -87,69 +88,7 @@ public class InstallAction extends CardAction {
         if (code == null) {
             return;
         }
-        checkIfEnoughSpaceAndInstall(call);
-//        if (installed) {
-//            doInstall();
-//        } else {
-//            checkIfEnoughSpaceAndInstall(call);
-//        }
-    }
 
-    private void checkIfEnoughSpaceAndInstall(OnEventCallBack<Void, Void> call) {
-        FreeMemoryAction memoryAction = new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
-            @Override
-            public void onStart() {
-                call.onStart();
-            }
-
-            @Override
-            public void onFail() {
-                call.onFail();
-            }
-
-            @Override
-            public Void onFinish() {
-                call.onFinish();
-                return null;
-            }
-
-            @Override
-            public Void onFinish(byte[] value) {
-                //todo if value == null show info failed to get card memory
-                if (value == null) {
-                    call.onFinish();
-                    doInstall();
-                    return null;
-                }
-                int cardMemory = FreeMemoryAction.getAvailableMemory(value);
-                long size;
-                try {
-                    size = capfile.length();
-                } catch (SecurityException sec) {
-                    sec.printStackTrace();
-                    return onFinish();
-                }
-                call.onFinish();
-                //todo compute real free memory based on installed stuff
-                if (size > cardMemory) {
-                    int res = JOptionPane.showConfirmDialog(null, "<html>The size of application: " +
-                                    size + ", remaining card storage " + cardMemory + ", " +
-                            "the installation might fail. Continue anyway?</html>");
-                    if (res == YES_OPTION) {
-                        doInstall();
-                    } else {
-                        return null;
-                    }
-                } else {
-                    doInstall();
-                }
-                return null;
-            }
-        });
-        memoryAction.mouseClicked(null);
-    }
-
-    private void doInstall() {
         if (fromCustomFile) {
             verifyCustomInstallationAndShowInstallDialog();
         } else {
@@ -178,7 +117,7 @@ public class InstallAction extends CardAction {
                     int choice = JOptionPane.showConfirmDialog(null,
                             "<html><div width=\"350\">" + result.second + "<br>" +
                                     textSrc.getString("install_ask") + "</div></html>",
-                            textSrc.getString("signature_title_dialog") ,
+                            textSrc.getString("signature_title_dialog"),
                             JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
                             new ImageIcon(Config.IMAGE_DIR + result.first));
                     if (choice == YES_OPTION) {
@@ -229,7 +168,7 @@ public class InstallAction extends CardAction {
         window.setVisible(true);
 
         window.dispose();
-        int selectedValue = getSelectedValue(buttons, pane.getValue() );//waiting line
+        int selectedValue = getSelectedValue(buttons, pane.getValue());//waiting line
 
         switch (selectedValue) {
             case JOptionPane.YES_OPTION:
@@ -251,7 +190,7 @@ public class InstallAction extends CardAction {
 
         final CardManager manager = CardManagerFactory.getManager();
         //if easy mode && package already present
-        if (!OptionsFactory.getOptions().isVerbose()) {
+        if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE)) {
             //if applet present dont change anything
             if (manager.getInstalledApplets().stream().noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
                 if (manager.getInstalledApplets().stream().anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
@@ -260,6 +199,60 @@ public class InstallAction extends CardAction {
             }
         }
 
+        new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
+            @Override
+            public void onStart() {
+                call.onStart();
+            }
+
+            @Override
+            public void onFail() {
+                call.onFail();
+            }
+
+            @Override
+            public Void onFinish() {
+                call.onFinish();
+                return null;
+            }
+
+            @Override
+            public Void onFinish(byte[] value) {
+                //todo if value == null show info failed to get card memory
+                if (value == null) {
+                    call.onFinish();
+                    doInstall(opts, manager);
+                    return null;
+                }
+                int cardMemory = FreeMemoryAction.getAvailableMemory(value);
+                long size;
+                try {
+                    size = capfile.length();
+                } catch (SecurityException sec) {
+                    sec.printStackTrace();
+                    return onFinish();
+                }
+                call.onFinish();
+                //todo compute real free memory based on installed stuff
+                if (!installed && size > cardMemory) {
+                    //todo translate
+                    int res = JOptionPane.showConfirmDialog(null, "<html>The size of application: " +
+                            size + ", remaining card storage " + cardMemory + ", " +
+                            "the installation might fail. Continue anyway?</html>");
+                    if (res == YES_OPTION) {
+                        doInstall(opts, manager);
+                    } else {
+                        return null;
+                    }
+                } else {
+                    doInstall(opts, manager);
+                }
+                return null;
+            }
+        }).mouseClicked(null);
+    }
+
+    private void doInstall(final InstallOpts opts, CardManager manager) {
         execute(() -> {
             manager.install(code, opts);
             manager.setLastAppletInstalled(opts.getAID());
@@ -285,8 +278,8 @@ public class InstallAction extends CardAction {
             }
             return CLOSED_OPTION;
         }
-        for(int counter = 0, maxCounter = options.length;
-            counter < maxCounter; counter++) {
+        for (int counter = 0, maxCounter = options.length;
+             counter < maxCounter; counter++) {
             if (options[counter].equals(selectedValue)) {
                 return counter;
             }
@@ -322,10 +315,13 @@ public class InstallAction extends CardAction {
 
     private abstract class Executable {
         Tuple<String, String> result;
+
         void setResult(Tuple<String, String> result) {
             this.result = result;
         }
+
         abstract void work();
+
         abstract void after();
     }
 }

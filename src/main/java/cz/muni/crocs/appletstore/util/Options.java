@@ -20,8 +20,9 @@ public interface Options<ValueType> {
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
     String KEY_PGP_LOCATION = "gpg";
-    String KEY_ERROR_MODE = "mode";
+    String KEY_VERBOSE_MODE = "verbose";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
+    String KEY_DELETE_IMPLICIT = "delete_pkg";
 
     /**
      * Get option for app
@@ -96,14 +97,8 @@ public interface Options<ValueType> {
     StyleSheet getDefaultStyleSheet();
 
     /**
-     * Check if system in verbose advanced use
-     * @return true if verbose
+     * Check for boolean condition
+     * @return true if key evaluated to true
      */
-    boolean isVerbose();
-
-    /**
-     * Check if JCMemory applet should be kept on the card
-     * @return true if keep
-     */
-    boolean keepJCMemory();
+    boolean is(String key);
 }

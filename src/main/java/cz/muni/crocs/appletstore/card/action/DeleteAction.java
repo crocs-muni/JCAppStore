@@ -6,10 +6,12 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
+import pro.javacard.gp.GPRegistryEntry;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
@@ -45,6 +47,11 @@ public class DeleteAction extends CardAction {
             return;
         }
 
+        if (OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT)) {
+            AppletInfo pkg = getPackageOf(info);
+            if (pkg != null) info = pkg;
+        }
+
         DeleteDialogWindow opts = new DeleteDialogWindow(info.getAid().toString(), info.getKind(), info.hasKeys());
         switch (showDialog(textSrc.getString("CAP_delete_applet"), opts, "delete.png", "delete")) {
             case JOptionPane.NO_OPTION:
@@ -56,9 +63,9 @@ public class DeleteAction extends CardAction {
         logger.info("Delete applet: " + info.toString());
 
         final CardManager manager = CardManagerFactory.getManager();
-        boolean willForce = opts.willForce();
+        boolean willForce = opts.willForce() || OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
         //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
-        if (!OptionsFactory.getOptions().isVerbose() && info.getKind() == Kind.ExecutableLoadFile) {
+        if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && info.getKind() == Kind.ExecutableLoadFile) {
             for (AID mod : info.getModules()) {
                 if (manager.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
                     willForce = true;
@@ -96,5 +103,18 @@ public class DeleteAction extends CardAction {
                 new ImageIcon(Config.IMAGE_DIR + imgname),
                 new String[]{textSrc.getString(confirmBtnKey), textSrc.getString("cancel")},
                 "error");
+    }
+
+    private AppletInfo getPackageOf(AppletInfo applet) {
+        for (AppletInfo info : CardManagerFactory.getManager().getInstalledApplets()) {
+            if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
+                for (AID instance : info.getModules()) {
+                    if (instance.equals(applet.getAid())) {
+                        return info;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

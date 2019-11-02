@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
-import org.ini4j.Registry;
 import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 

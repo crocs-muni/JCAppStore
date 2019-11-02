@@ -2,14 +2,14 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -23,44 +23,38 @@ public class DeleteDialogWindow extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JCheckBox forceUninstall = new JCheckBox();
-    private JCheckBox advanced = new JCheckBox();
-
     private KeysPresence keys;
     private GPRegistryEntry.Kind kind;
 
 
     public DeleteDialogWindow(String aid, GPRegistryEntry.Kind kind, KeysPresence hasKeys) {
-
+        setLayout(new MigLayout("width 250px"));
         this.keys = hasKeys;
         this.kind = kind;
 
-        setLayout(new MigLayout("width 250px"));
-        add(new HtmlText("<p width=\"600\">" + textSrc.getString("advanced_settings") + "</p>"),
-                "wrap, span 5, gapbottom 10");
+        boolean implicit = OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
+        boolean pkg = kind == GPRegistryEntry.Kind.ExecutableLoadFile;
+        String question;
+        if (!implicit) {
+                question = textSrc.getString("H_uninstall_pkg");
+                question += (pkg) ? textSrc.getString("H_uninstall_apk_pkg_remain") : "";
+        } else {
+            question = textSrc.getString("H_uninstall_apk");
+        }
 
-        add(new HtmlText("<p width=\"600\">" + textSrc.getString("pkg_id") + aid + "</p>"),
+        add(new HtmlText("<p width=\"600\">" + question + "</p>"), "wrap, span 5, gapbottom 10");
+        add(new HtmlText("<p width=\"600\">" + textSrc.getString(pkg && !implicit ? "pkg_id" : "app_id") + aid + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
-        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
-        more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
-        add(more, "span 2");
-
-        advanced.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                forceUninstall.setEnabled(advanced.isSelected());
-            }
-        });
-        add(advanced, "wrap");
-
-        add(forceUninstall);
-        forceUninstall.setEnabled(false);
-        add(new JLabel(textSrc.getString("chbox_force_delete")), "span 4, wrap");
-        add(getHint("chbox_force_delete_expl"), "span 5, wrap");
+        if (!implicit) {
+            add(forceUninstall);
+            add(new Text(textSrc.getString("chbox_force_delete")), "span 4, wrap");
+            add(getHint("chbox_force_delete_expl"), "span 5, wrap");
+        }
     }
 
     private JLabel getHint(String key) {
-        JLabel hint = new HtmlText("<p width=\"600\">" + textSrc.getString(key) + "</p>");
+        JLabel hint = new HtmlText("<p width=\"600\">" + textSrc.getString(key) + "</p>", 11f);
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
@@ -83,6 +77,6 @@ public class DeleteDialogWindow extends JPanel {
     }
 
     public boolean willForce() {
-        return advanced.isSelected() && forceUninstall.isSelected();
+        return forceUninstall.isSelected();
     }
 }

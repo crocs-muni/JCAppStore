@@ -1,51 +1,64 @@
 package cz.muni.crocs.appletstore.card.action;
 
+import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
-import java.io.File;
 import java.io.IOException;
 
-public class JCSystemInfo {
+public class CardCommands {
 
-    byte[] getSystemInfo() throws LocalizedCardException {
+    public static boolean setDefaultSelected(String aid) throws LocalizedCardException {
+        final CardManager manager = CardManagerFactory.getManager();
+        ResponseAPDU response = manager.sendApdu(aid, "");
+        return response.getSW() == 0x9000;
+    }
+
+    public static byte[] getSystemInfo() throws LocalizedCardException {
+        byte[] result;
         final CardManager manager = CardManagerFactory.getManager();
 
-        byte[] size = null;
+        ResponseAPDU response = null;
         try {
-            size = manager.sendApdu(JCMemory.getAID(), JCMemory.getAPDU());
+            response = manager.sendApdu(JCMemory.getAID(), JCMemory.getAPDU());
         } catch (LocalizedCardException e) {
             //ignore
             e.printStackTrace();
         }
-        if (size != null) {
+        result = getData(response);
+        if (result != null) {
             uninstallIfNotKeep(manager, false);
-            return size;
+            return result;
         }
 
-
         try {
-            File f = JCMemory.getSource();
-            System.out.println(f.exists());
             manager.install(JCMemory.getSource(), JCMemory.getInstallOptions());
         } catch (IOException e) {
             return null;
         }
 
         try {
-            size = manager.sendApdu(JCMemory.getAID(), JCMemory.getAPDU());
+            response = manager.sendApdu(JCMemory.getAID(), JCMemory.getAPDU());
         } catch (LocalizedCardException e) {
             //ignore
             e.printStackTrace();
         }
         uninstallIfNotKeep(manager, true);
-        return size;
+        return getData(response);
     }
 
-    private void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException {
-        if (!OptionsFactory.getOptions().keepJCMemory()) {
+    private static byte[] getData(ResponseAPDU responseAPDU) throws LocalizedCardException {
+        if (responseAPDU != null && responseAPDU.getSW() == 0x9000) {
+            return responseAPDU.getBytes();
+        }
+        return null;
+    }
+
+    private static void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException {
+        if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
             manager.uninstall(JCMemory.getPackageInfo(), true);
             //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
 

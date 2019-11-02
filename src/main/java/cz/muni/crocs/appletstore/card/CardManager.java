@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
+import apdu4j.ResponseAPDU;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
@@ -138,8 +139,8 @@ public interface CardManager {
      * Send command to applet
      * @param AID target applet AID to send the command to
      * @param APDU commandAPDU to send
-     * @return response bytes of the command, or null if failed
-     * @throws LocalizedCardException when failed to
+     * @return response, or null if failed
+     * @throws LocalizedCardException when failed to execute the command transfer
      */
-    byte[] sendApdu(String AID, String APDU) throws LocalizedCardException;
+    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException;
 }

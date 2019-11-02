@@ -335,7 +335,7 @@ public class InstallDialogWindow extends JPanel {
     }
 
     private JLabel getHint(String langKey, String width) {
-        JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>");
+        JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>", 10f);
         hint.setForeground(Color.DARK_GRAY);
         return hint;
     }
