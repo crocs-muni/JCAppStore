@@ -121,7 +121,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         infoLayout.set(null);
 
         CardManager manager = CardManagerFactory.getManager();
-        logger.info("Local pane updated: " + manager.getTerminalState().toString());
+        logger.debug("Local pane updated: " + manager.getTerminalState().toString());
         if (verifyTerminalState(manager.getTerminalState())
                 && verifyCardLifeState(manager.getCardLifeCycle())) {
 

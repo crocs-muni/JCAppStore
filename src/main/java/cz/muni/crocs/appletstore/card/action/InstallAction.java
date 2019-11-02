@@ -132,8 +132,9 @@ public class InstallAction extends CardAction {
                 call.onFinish();
                 //todo compute real free memory based on installed stuff
                 if (size > cardMemory) {
-                    int res = JOptionPane.showConfirmDialog(null, "TODO add icons and custom buttons, the size of application is more then remaining card storage " + value + ", " +
-                            "the installation might fail. continue anyway?");
+                    int res = JOptionPane.showConfirmDialog(null, "<html>The size of application: " +
+                                    size + ", remaining card storage " + cardMemory + ", " +
+                            "the installation might fail. Continue anyway?</html>");
                     if (res == YES_OPTION) {
                         doInstall();
                     } else {

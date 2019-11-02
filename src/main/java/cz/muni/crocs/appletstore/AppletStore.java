@@ -8,19 +8,14 @@ import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
-import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * App main window
@@ -40,7 +35,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private GlassPaneBlocker blocker = new GlassPaneBlocker();
 
     public AppletStore() {
-        logger.info("------- App started");
+        logger.info("------- App started --------");
 
         setup();
         //save options on close & kill routine
@@ -114,7 +109,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         CardManager manager = CardManagerFactory.getManager();
 
         new Thread(() -> {
-            logger.info("------- routine started");
+            logger.info("------- Routine started -------");
             while (windowOpened) {
                 try {
                     int result = manager.needsCardRefresh();
@@ -148,7 +143,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                 } catch (Exception e) {
                     e.printStackTrace();
                     SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE));
-                    logger.info("Terminal routine interrupted, should not happened.", e);
+                    logger.info("------ Terminal routine interrupted, should not happened.", e);
                     window.getRefreshablePane().refresh();
                     checkTerminalsRoutine();
                 }

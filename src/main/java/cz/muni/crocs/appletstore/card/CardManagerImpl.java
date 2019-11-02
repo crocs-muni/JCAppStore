@@ -127,7 +127,7 @@ public class CardManagerImpl implements CardManager {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.info("The card was busy when needsCardRefresh() called, waiting interrupted.");
+                logger.warn("The card was busy when needsCardRefresh() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -147,7 +147,7 @@ public class CardManagerImpl implements CardManager {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.info("The card was busy when loadCard() called, waiting interrupted.");
+                logger.warn("The card was busy when loadCard() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -239,7 +239,7 @@ public class CardManagerImpl implements CardManager {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                logger.info("The card was busy when uninstall() called, waiting interrupted.");
+                logger.warn("The card was busy when uninstall() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -277,7 +277,7 @@ public class CardManagerImpl implements CardManager {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                logger.info("The card was busy when sendApdu() called, waiting interrupted.");
+                logger.warn("The card was busy when sendApdu() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -389,7 +389,7 @@ public class CardManagerImpl implements CardManager {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                logger.info("The card was busy when install() called, waiting interrupted.");
+                logger.warn("The card was busy when install() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }

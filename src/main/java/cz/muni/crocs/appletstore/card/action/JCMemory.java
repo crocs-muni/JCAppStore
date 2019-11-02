@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
+import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public class JCMemory {
 
     public static AppletInfo getPackageInfo() {
         return new AppletInfo("JCMemory", "", "1.0", "CRoCS", "2.2.2",
-                getPackageAID(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile);
+                getPackageAID(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile, AID.fromString(getAID()));
     }
 
     public static InstallOpts getInstallOptions() {

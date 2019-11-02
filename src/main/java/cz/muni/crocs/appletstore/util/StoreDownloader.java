@@ -101,7 +101,7 @@ public class StoreDownloader {
     Corrected errors, the source code on the website is not fully functional, at least for windows.
      */
     private boolean unZipIt() {
-        logger.info("Unzipping the store...");
+        logger.debug("Unzipping the store...");
         parent.setLoaderMessage(textSrc.getString("unzip"));
         ZipInputStream input;
         ZipEntry entry;
@@ -114,7 +114,7 @@ public class StoreDownloader {
                 String fileName = entry.getName().substring(32); //TODO: can be invalid if changed the package id length
 
                 File newFile = new File(Config.APP_STORE_DIR, fileName);
-                logger.info("file unzip : " + newFile.getAbsoluteFile());
+                logger.debug("file unzip : " + newFile.getAbsoluteFile());
                 File par = new File(newFile.getParent());
                 par.mkdirs();
 

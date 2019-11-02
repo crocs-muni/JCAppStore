@@ -1,8 +1,13 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,11 +24,15 @@ import java.util.ResourceBundle;
 public class MainPanel extends BackgroundImgPanel implements Informable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private JPanel content;
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
     private Component current = null;
 
     public MainPanel(BackgroundChangeable context) {
+        setOneTouchExpandable(true);
+        setDividerLocation(150);
+
         localPanel = new LocalWindowPane();
         storePanel = new StoreWindowManager();
         OnEventCallBack<Void, Void> callback = new WorkCallback(context, localPanel);
@@ -31,28 +40,35 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         localPanel.build(callback);
         storePanel.setCallbackOnAction(callback);
 
-        createHierarchy();
+        buildStoreContents();
+        buildLogger();
+
         InformerFactory.setInformer(this);
     }
 
     /**
-     * Build Swing components
+     * Build store, upper part of the split pane
      */
-    private void createHierarchy() {
-        setLayout(new BorderLayout());
-
-        JPanel content = new JPanel();
-        content.setLayout(new OverlayLayout(content));
+    private void buildStoreContents() {
+        content = new JPanel(new BorderLayout());
         content.setOpaque(false);
-        content.add(localPanel);
-        content.add(storePanel);
+        JPanel pages = new JPanel();
+        pages.setLayout(new OverlayLayout(pages));
+        pages.setOpaque(false);
+        pages.add(localPanel);
+        pages.add(storePanel);
         LeftMenu leftMenu = new LeftMenu(this);
 
         setOpaque(false);
-        add(leftMenu, BorderLayout.WEST);
-        add(content, BorderLayout.CENTER);
+        content.add(leftMenu, BorderLayout.WEST);
+        content.add(pages, BorderLayout.CENTER);
 
         setLocalPanelVisible();
+        setLeftComponent(content);
+    }
+
+    void buildLogger() {
+        setRightComponent(new LoggerConsoleImpl());
     }
 
     /**
@@ -99,16 +115,17 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     @Override
     public void showWarning(JComponent component) {
         current = component;
-        add(current, BorderLayout.NORTH);
-        revalidate();
+        content.add(current, BorderLayout.NORTH);
+        content.revalidate();
     }
 
     @Override
     public void hideWarning() {
         if (current == null) return;
-        remove(current);
+        content.remove(current);
+        content.revalidate();
+        content.repaint();
+
         current = null;
-        revalidate();
-        repaint();
     }
 }

@@ -42,15 +42,22 @@ public class AppletInfo implements Serializable {
         this.sdk = sdk;
     }
 
-    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid, KeysPresence hasKeys, GPRegistryEntry.Kind kind) {
+    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid) {
+        this(name, image, version, author, sdk);
         this.aid = strAid;
-        this.name = name;
-        this.image = image;
-        this.version = version;
-        this.author = author;
-        this.sdk = sdk;
+    }
+
+    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid,
+                      KeysPresence hasKeys, GPRegistryEntry.Kind kind) {
+        this(name, image, version, author, sdk, strAid);
         this.hasKeys = hasKeys;
         this.kind = kind;
+    }
+
+    public AppletInfo(String name, String image, String version, String author, String sdk, String strAid,
+                      KeysPresence hasKeys, GPRegistryEntry.Kind kind, AID ... instances) {
+        this(name, image, version, author, sdk, strAid, hasKeys, kind);
+        this.modules = Arrays.asList(instances);
     }
 
     /**

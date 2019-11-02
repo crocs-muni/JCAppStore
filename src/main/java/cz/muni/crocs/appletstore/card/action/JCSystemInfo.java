@@ -20,8 +20,11 @@ public class JCSystemInfo {
             //ignore
             e.printStackTrace();
         }
-        if (size != null)
+        if (size != null) {
+            uninstallIfNotKeep(manager, false);
             return size;
+        }
+
 
         try {
             File f = JCMemory.getSource();
@@ -37,14 +40,19 @@ public class JCSystemInfo {
             //ignore
             e.printStackTrace();
         }
-
-        if (!OptionsFactory.getOptions().keepJCMemory()) {
-            //todo somehow not uninstalled
-            manager.uninstall(JCMemory.getPackageInfo(), true);
-        } else {
-            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
-            //manager.loadCard();
-        }
+        uninstallIfNotKeep(manager, true);
         return size;
+    }
+
+    private void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException {
+        if (!OptionsFactory.getOptions().keepJCMemory()) {
+            manager.uninstall(JCMemory.getPackageInfo(), true);
+            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
+
+        } else if (refresh) {
+            manager.loadCard();
+            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
+
+        }
     }
 }

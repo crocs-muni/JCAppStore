@@ -37,7 +37,7 @@ public class CmdTask {
      */
     public Process process() throws LocalizedSignatureException {
         try {
-            logger.info(process.stream().collect(Collectors.joining(" ", ">> ", "[ENTER]")));
+            logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
             Process result = new ProcessBuilder(process).redirectErrorStream(true).start();
             result.waitFor();
             return result;
@@ -70,7 +70,7 @@ public class CmdTask {
             logger.error("Couldn't read command output:" , e);
         }
         process.destroy();
-        logger.info(result);
+        logger.debug(result);
         return result;
     }
 }
