@@ -92,7 +92,6 @@ public class Terminals {
 
         try {
             final TerminalFactory tf;
-            //todo find out which SPEC
             tf = TerminalManager.getTerminalFactory(null);
             CardTerminals terminals = tf.terminals();
 

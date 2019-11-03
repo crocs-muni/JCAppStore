@@ -37,7 +37,7 @@ public class SendApduAction extends MouseAdapter {
             return;
         int result = JOptionPane.showConfirmDialog(
                 null,
-                "TODO" /*todo create insert-apdu pane*/,
+                "TODO" /*todo create insert-apdu pane or delete this*/,
                 textSrc.getString("send_APDU_to") + info.getName(),
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,

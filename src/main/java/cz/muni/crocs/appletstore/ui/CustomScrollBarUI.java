@@ -12,6 +12,10 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
 
     private short opacity = 0;
 
+    public CustomScrollBarUI() {
+        minimumThumbSize = new Dimension(10, 10);
+    }
+
     @Override
     protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
         Graphics2D g2 = (Graphics2D) g.create();

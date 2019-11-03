@@ -47,7 +47,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     }
 
     public void toggleLogger() {
-        setDividerSize(getBottomComponent() == null ? 5 : 0);
+        setDividerSize(getBottomComponent() == null ? 15 : 0);
         setBottomComponent(getBottomComponent() == null ? (LoggerConsoleImpl)console : null);
     }
 
@@ -67,6 +67,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         setOpaque(false);
         content.add(leftMenu, BorderLayout.WEST);
         content.add(pages, BorderLayout.CENTER);
+        content.setMinimumSize(new Dimension(content.getMinimumSize().width, 250));
 
         setLocalPanelVisible();
         setLeftComponent(content);
@@ -74,7 +75,8 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
 
     void buildLogger() {
         console = new LoggerConsoleImpl();
-        setRightComponent(null);
+        setDividerSize(0);
+        setBottomComponent(null);
     }
 
     /**

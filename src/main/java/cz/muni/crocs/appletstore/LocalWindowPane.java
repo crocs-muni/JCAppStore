@@ -59,8 +59,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     /**
      * Setup the panel with constructed callback
-     * must be called once on construction, separated
-     * because the callback also needs this //todo ugly
+     * must be called once on construction todo ugly
      */
     public void build(OnEventCallBack<Void, Void> callback) {
         removeAll();

@@ -37,6 +37,8 @@ public class BackgroundImgPanel extends JSplitPane {
     }
 
     private void setup() {
+        setContinuousLayout(true);
+        setUI(new CustomSplitPaneUI());
         setBorder(null);
 
         String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);

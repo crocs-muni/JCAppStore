@@ -107,7 +107,6 @@ public class AppletInfo implements Serializable {
     }
 
     private void deduceData(GPRegistryEntry registry) {
-        //todo creates new instance each time maybe consider adding a factory builder
         try {
             IniParserImpl parser = new IniParserImpl(Config.DATA_DIR + "well_known_aids.ini",
                     HexUtils.bin2hex(registry.getAID().getBytes()));
@@ -126,7 +125,6 @@ public class AppletInfo implements Serializable {
     }
 
     private String getAuthorByRid(GPRegistryEntry registry) {
-        //todo builder
         try {
             IniParserImpl parser = new IniParserImpl(Config.DATA_DIR + "well_known_rids.ini",
                     registry.getAID().toString().toUpperCase().substring(0, 10));

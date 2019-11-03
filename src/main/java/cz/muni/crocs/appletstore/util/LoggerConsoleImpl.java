@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.text.Document;
+import java.awt.*;
 
 public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
     //logger xml-file defined
@@ -24,6 +25,8 @@ public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
         setViewportBorder(null);
         getVerticalScrollBar().setUI(new CustomScrollBarUI());
         getHorizontalScrollBar().setUI(new CustomScrollBarUI());
+
+        setMinimumSize(new Dimension(getMinimumSize().width, 0));
 
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
         Configuration configuration = loggerContext.getConfiguration();

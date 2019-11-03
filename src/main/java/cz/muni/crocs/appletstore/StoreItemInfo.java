@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Item detail in store
  * allows custom version installation,
- * provides item info & todo signatures
+ * provides item info
  *
  * @author Jiří Horák
  * @version 1.0
