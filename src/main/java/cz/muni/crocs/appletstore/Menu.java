@@ -4,7 +4,9 @@ import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.help.*;
+import cz.muni.crocs.appletstore.ui.CustomNotifiableJmenu;
 import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
@@ -25,7 +27,7 @@ public class Menu extends JMenuBar {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletStore context;
-    private CustomJmenu readers;
+    private CustomNotifiableJmenu readers;
     private JLabel currentCard;
 
     public Menu(AppletStore parent) {
@@ -91,24 +93,12 @@ public class Menu extends JMenuBar {
     }
 
     private void buildFileItem() {
-        CustomJmenu menu = new CustomJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
+        CustomJmenu menu = new CustomNotifiableJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
         add(menu);
 
-        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,
-                        new CardInfoPanel(context), textSrc.getString("card_info"),
-                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
-            }
-        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
+        menu.add(buildCardSubMenu());
 
-        menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("logger")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                context.getWindow().toggleLogger();
-            }
-        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_L, InputEvent.ALT_MASK));
+        menu.add(buildWindowSettingsSubMenu());
 
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
@@ -132,8 +122,49 @@ public class Menu extends JMenuBar {
         }, textSrc.getString("H_quit"), Config.IMAGE_DIR + "close_black.png"));
     }
 
+    private JMenuItem buildCardSubMenu() {
+        JMenu submenu = new CustomJmenu(textSrc.getString("card"));
+        setItemLook(submenu, textSrc.getString("card_desc"));
+
+        submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,
+                        new CardInfoPanel(context), textSrc.getString("card_info"),
+                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+            }
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
+
+        return submenu;
+    }
+
+    private JMenuItem buildWindowSettingsSubMenu() {
+        JMenu submenu = new CustomJmenu(textSrc.getString("display"));
+        setItemLook(submenu, textSrc.getString("display_desc"));
+
+        submenu.add(selectableMenuItem(new AbstractAction(textSrc.getString("logger")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.getWindow().toggleLogger();
+            }
+        }, "", KeyEvent.VK_L, InputEvent.ALT_MASK));
+
+        submenu.add(new JSeparator());
+
+        JMenuItem verbose = selectableMenuItem(new AbstractAction(textSrc.getString("enable_verbose")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE,
+                        OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_V, InputEvent.ALT_MASK);
+        verbose.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
+        submenu.add(verbose);
+        return submenu;
+    }
+
     private void buildReadersItem() {
-        readers = new CustomJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
+        readers = new CustomNotifiableJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
         add(readers);
         resetTerminalButtonGroup();
 
@@ -215,14 +246,12 @@ public class Menu extends JMenuBar {
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
-        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         return menuItem;
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
         JMenuItem menuItem = new JMenuItem(action);
         setItemLook(menuItem, descripton);
-        menuItem.setFont(OptionsFactory.getOptions().getTitleFont());
         menuItem.setIcon(new ImageIcon(image));
         return menuItem;
     }
@@ -230,19 +259,23 @@ public class Menu extends JMenuBar {
     private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
-        component.setFont(OptionsFactory.getOptions().getFont(10f));
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         Dimension preferred = component.getPreferredSize();
         component.setPreferredSize(new Dimension(200, (int) preferred.getHeight()));
+        component.setFont(OptionsFactory.getOptions().getTitleFont());
     }
 
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
         JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
         setItemLook(rbMenuItem, descripton);
-        rbMenuItem.setFont(OptionsFactory.getOptions().getTitleFont());
-
         return rbMenuItem;
     }
 
+    private JRadioButtonMenuItem selectableMenuItem(Action action, String descripton, int keyEvent, int inputEventMask) {
+        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(action);
+        setItemLook(rbMenuItem, descripton);
+        rbMenuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
+        return rbMenuItem;
+    }
 }

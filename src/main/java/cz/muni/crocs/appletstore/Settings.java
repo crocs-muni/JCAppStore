@@ -54,7 +54,7 @@ public class Settings extends JPanel {
         buildPGP();
         buildJCKeep();
         buildImplicitDelete();
-        buildErrorMode();
+        //buildErrorMode();
         buildLanguage();
         buildHint();
         buildBackground();
@@ -64,7 +64,7 @@ public class Settings extends JPanel {
         saveBackgroundImage();
         saveLanguage();
         saveHint();
-        saveErrorMode();
+        //saveErrorMode();
         saveJCKeep();
         savePGP();
         saveImplicitDelete();
