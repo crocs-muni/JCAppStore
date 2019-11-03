@@ -62,8 +62,8 @@ public class StoreItemInfo extends HintPanel {
         setLayout(new MigLayout());
 
         buildHeader(dataSet, store, callBack);
-        checkHostApp(dataSet);
         buildDescription(dataSet);
+        checkHostApp(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
 
@@ -111,15 +111,18 @@ public class StoreItemInfo extends HintPanel {
                                 sdks, sdks.size() - 1),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
-                                callback, installed, e);
+                                callback,
+                                installed,
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
     }
 
     private void checkHostApp(JsonObject dataSet) {
-        if (!dataSet.get(JsonParser.TAG_HOST).getAsBoolean()) {
-            add(getNotice(textSrc.getString("W_no_host_app"), 14f, new Color(255, 186, 134),
+        if (!dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
+            add(getNotice(textSrc.getString("W_default_app"), 14f, new Color(255, 220, 181),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
             , "gap 20, span 4, gaptop 40, growx, wrap");
         }
@@ -195,7 +198,10 @@ public class StoreItemInfo extends HintPanel {
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
-                                call, installed, e);
+                                call,
+                                installed,
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                e);
                     }
                 });
         add(customInst, "gapleft 10");
@@ -284,7 +290,9 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
-                                    OnEventCallBack<Void, Void> call, boolean installed, MouseEvent e) {
+                                    OnEventCallBack<Void, Void> call, boolean installed,
+                                    boolean defaultSelected, MouseEvent e) {
+
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
 
@@ -296,7 +304,7 @@ public class StoreItemInfo extends HintPanel {
         }
 
         new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, installed, signer, identifier, call).mouseClicked(e);
+                info, file, installed, defaultSelected, signer, identifier, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

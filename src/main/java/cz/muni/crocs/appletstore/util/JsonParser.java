@@ -22,7 +22,7 @@ public interface JsonParser {
     String TAG_URL = "url";
     String TAG_USAGE = "usage";
     String TAG_KEYS = "keys";
-    String TAG_HOST = "host_app";
+    String TAG_DEFAULT_SELECTED = "default_selected";
     String TAG_PGP_IDENTIFIER = "pgp"; //can be email or key ID
     String TAG_PGP_SIGNER = "signed_by";
 

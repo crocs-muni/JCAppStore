@@ -7,7 +7,6 @@ import pro.javacard.CAPFile;
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 public interface CardManager {
@@ -99,16 +98,16 @@ public interface CardManager {
     Integer getCardLifeCycle();
 
     /**
-     * Set the last applet AID installed
-     * @param aid that was installed, null to delete
-     */
-    void setLastAppletInstalled(AID aid);
-
-    /**
      * Get the last installed applet aid
      * @return AID of the last installed applet
      */
     AID getLastAppletInstalledAid();
+
+    /**
+     * Get the default selected applet AID
+     * @return null if not default selected applet, AID otherwise
+     */
+    AID getDefaultSelected() throws LocalizedCardException;
 
     /**
      * Install new applet onto current card
@@ -126,6 +125,22 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      */
     void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
+
+    /**
+     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
+     * @param file file with the applet
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, IOException;
+
+    /**
+     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
+     * @param file file with the applet (already parsed)
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException;
 
     /**
      * Uninstall applet from the card

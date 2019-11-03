@@ -9,7 +9,6 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
 import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -195,32 +194,68 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void setLastAppletInstalled(AID aid) {
-        lastInstalled = aid;
-    }
-
-    @Override
     public AID getLastAppletInstalledAid() {
         return lastInstalled;
     }
 
     @Override
-    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
-        if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
-                file.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"));
-
-        CAPFile capFile;
-        try (FileInputStream fin = new FileInputStream(file)) {
-            capFile = CAPFile.fromStream(fin);
+    public AID getDefaultSelected() throws LocalizedCardException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
         }
 
-        install(capFile, data);
+        while (busy) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                logger.warn("The card was busy when getDefaultSelected() called, waiting interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        }
+        busy = true;
+
+        try {
+            GPCommand<Optional<AID>> selected = new GetDefaultSelected();
+            card.secureExecuteCommands(selected);
+            return selected.getResult().isPresent() ? selected.getResult().get() : null;
+        } catch (CardException e) {
+            loadCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } finally {
+            busy = false;
+            notifyAll();
+        }
+    }
+
+    @Override
+    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
+        install(toCapFile(file), data);
     }
 
     @Override
     public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
         try {
-            installImpl(file, data);
+            installImpl(file, data, false);
+        } catch (CardException e) {
+            e.printStackTrace();
+            loadCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } catch (LocalizedCardException e) {
+            loadCard();
+            throw e;
+        }
+    }
+
+    @Override
+    public synchronized void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, IOException {
+        installAndSelectAsDefault(toCapFile(file), data);
+    }
+
+    @Override
+    public synchronized void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException {
+        try {
+            installImpl(file, data, true);
         } catch (CardException e) {
             e.printStackTrace();
             loadCard();
@@ -297,6 +332,15 @@ public class CardManagerImpl implements CardManager {
             notifyAll();
         }
         return send.getResult();
+    }
+
+    private CAPFile toCapFile(File f) throws IOException, LocalizedCardException {
+        if (!f.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
+                f.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"));
+
+        try (FileInputStream fin = new FileInputStream(f)) {
+            return CAPFile.fromStream(fin);
+        }
     }
 
     private void saveData(final CAPFile file, final InstallOpts data) throws LocalizedCardException {
@@ -382,7 +426,8 @@ public class CardManagerImpl implements CardManager {
         return details;
     }
 
-    private synchronized void installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
+    private synchronized void installImpl(final CAPFile file, InstallOpts data,
+                                          boolean defaultSelected) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -400,7 +445,7 @@ public class CardManagerImpl implements CardManager {
 
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
-            GPCommand install = new Install(file, data);
+            GPCommand install = new Install(file, data, defaultSelected);
             GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
 
             card.secureExecuteCommands(install, new GPCommand() {
@@ -412,6 +457,7 @@ public class CardManagerImpl implements CardManager {
             }, contents);
             selectedAID = null;
             card.setApplets(contents.getResult());
+            lastInstalled = data.getAID();
         } finally {
             busy = false;
             notifyAll();

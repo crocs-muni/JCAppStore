@@ -18,7 +18,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -35,6 +34,7 @@ public class InstallAction extends CardAction {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private boolean installed;
+    private boolean defaultSelected;
     private File capfile;
     private CAPFile code;
     private AppletInfo info;
@@ -54,10 +54,11 @@ public class InstallAction extends CardAction {
      * @param identifier signer's identifier, can be either his email or key ID
      * @param call       callback that is called before action and after failure or after success
      */
-    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, String signer,
-                         String identifier, OnEventCallBack<Void, Void> call) {
+    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, boolean defaultSelected,
+                         String signer, String identifier, OnEventCallBack<Void, Void> call) {
         super(call);
         this.installed = installed;
+        this.defaultSelected = defaultSelected;
         this.capfile = capfile;
         this.titleBar = titleBar;
         this.signer = signer;
@@ -66,13 +67,13 @@ public class InstallAction extends CardAction {
     }
 
     public InstallAction(OnEventCallBack<Void, Void> call) {
-        this("", null, null, false, null, "", call);
+        this("", null, null, false, false, null, "", call);
         this.fromCustomFile = true;
     }
 
     public InstallAction(String titleBar, AppletInfo info, File capfile, String signer,
                          String identifier, OnEventCallBack<Void, Void> call) {
-        this(titleBar, info, capfile, false, signer, identifier, call);
+        this(titleBar, info, capfile, false, false, signer, identifier, call);
     }
 
     @Override
@@ -192,8 +193,10 @@ public class InstallAction extends CardAction {
         //if easy mode && package already present
         if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE)) {
             //if applet present dont change anything
-            if (manager.getInstalledApplets().stream().noneMatch(a -> a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
-                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
+            if (manager.getInstalledApplets().stream().noneMatch(a ->
+                    a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+                if (manager.getInstalledApplets().stream().anyMatch(a ->
+                        a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
                     opts.setForce(true);
                 }
             }
@@ -253,12 +256,20 @@ public class InstallAction extends CardAction {
     }
 
     private void doInstall(final InstallOpts opts, CardManager manager) {
+        if (defaultSelected) {
+            //todo ask user which to set as default selected
+            //todo create get default selected app (just get GPSession and get default selected.isPresent())
+            //todo defaultSelected = user decision
+        }
+
         execute(() -> {
-            manager.install(code, opts);
-            manager.setLastAppletInstalled(opts.getAID());
-            SwingUtilities.invokeLater(() -> {
-                InformerFactory.getInformer().showWarning(textSrc.getString("installed"), Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000);
-            });
+            if (defaultSelected)
+                manager.installAndSelectAsDefault(code, opts);
+            else
+                manager.install(code, opts);
+            SwingUtilities.invokeLater(() ->
+                    InformerFactory.getInformer().showWarning(textSrc.getString("installed"),
+                            Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000));
             capfile = null;
         }, "Failed to install applet.", textSrc.getString("install_failed"));
     }

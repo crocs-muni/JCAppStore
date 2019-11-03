@@ -24,10 +24,12 @@ public class Install extends GPCommand<Void> {
 
     private final CAPFile file;
     private InstallOpts data;
+    private boolean defaultSelected;
 
-    public Install(CAPFile f, InstallOpts data) {
+    public Install(CAPFile f, InstallOpts data, boolean defaultSelected) {
         this.file = f;
         this.data = data;
+        this.defaultSelected = defaultSelected;
     }
 
     @Override
@@ -65,20 +67,22 @@ public class Install extends GPCommand<Void> {
                 }
                 throw e;
             } catch (IOException e) {
-                //todo
                 e.printStackTrace();
+                throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e);
             }
         }
-
-        //no applets dont install
         if (file.getAppletAIDs().size() == 0) return true;
 
         AID appletAID = data.getAID();
         AID customAID = data.getCustomAID() == null ? appletAID : AID.fromString(data.getCustomAID());
 
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
+        if (defaultSelected) privs.add(GPRegistryEntry.Privilege.CardReset);
+
         if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
             try {
+                //todo do not delete default selected !!!
+                //ask about it
                 context.deleteAID(registry.getDefaultSelectedAID().get(), false);
             } catch (IOException e) {
                 e.printStackTrace();
