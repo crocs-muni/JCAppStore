@@ -114,7 +114,7 @@ public interface CardManager {
      * Get the default selected applet AID
      * @return null if not default selected applet, AID otherwise
      */
-    AID getDefaultSelected() throws LocalizedCardException;
+    AID getDefaultSelected();
 
     /**
      * Install new applet onto current card

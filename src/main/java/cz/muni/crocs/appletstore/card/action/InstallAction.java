@@ -37,7 +37,6 @@ public class InstallAction extends CardAction {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private static final int LIMITED_BY_API = 0x7FFF;
 
     private boolean installed;
     private boolean defaultSelected;
@@ -232,7 +231,7 @@ public class InstallAction extends CardAction {
                     checkDefaultSelected(opts, manager);
                     return null;
                 }
-                int cardMemory = FreeMemoryAction.getAvailableMemory(value);
+                int cardMemory = JCMemory.getPersistentMemory(value);
                 long size;
                 try {
                     size = capfile.length();
@@ -242,7 +241,7 @@ public class InstallAction extends CardAction {
                 }
                 call.onFinish();
                 //if no reinstall and memory is not max and applet size + 1kB install space > remaining memory
-                if (!installed && cardMemory < LIMITED_BY_API && size + 1024 > cardMemory) {
+                if (!installed && cardMemory < JCMemory.LIMITED_BY_API && size + 1024 > cardMemory) {
                     int res = JOptionPane.showConfirmDialog(null,
                             "<html>" + textSrc.getString("no_space_1") + (size + 1024) +
                                     textSrc.getString("no_space_2") + cardMemory +

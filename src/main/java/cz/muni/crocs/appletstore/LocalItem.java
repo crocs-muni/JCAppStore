@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
@@ -29,8 +30,11 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static BufferedImage issuer = getIssuerImg();
+    private static final int LABELDIMEN = 40;
 
     private static BufferedImage newItem;
+    private static BufferedImage superSelected;
+
     private String searchQuery;
     private JPanel container;
     private String name; //either name or AID if name missing
@@ -45,8 +49,10 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
         try {
             newItem = ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
+            superSelected = ImageIO.read(new File(Config.IMAGE_DIR + "super.png"));
         } catch (IOException e) {
             newItem = null;
+            superSelected = null;
         }
 
         searchQuery = title + author + ((info == null) ? "" : Arrays.toString(info.getAid().getBytes()));
@@ -141,8 +147,10 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
     @Override
     protected void paintComponent(Graphics g) {
         boolean isSelected = info != null && manager.isAppletStoreSelected(info.getAid());
+
         if (info != null) {
             Graphics2D g2d = (Graphics2D) g;
+
             if (isSelected) {
                 container.setBackground(selected);
                 Composite old = g2d.getComposite();
@@ -153,8 +161,9 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
                 g2d.setComposite(old);
             }
             if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
-                int newItemDimen = 40;
-                g2d.drawImage(newItem, getWidth() - newItemDimen, 0, newItemDimen, newItemDimen, null);
+                g2d.drawImage(newItem, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
+            } else if (info.getAid() != null && info.getAid().equals(manager.getDefaultSelected()) && superSelected != null) {
+                g2d.drawImage(superSelected, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
             }
         }
         if (!isSelected) {

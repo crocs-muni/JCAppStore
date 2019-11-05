@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.card.action;
 
-import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import org.slf4j.Logger;
@@ -47,42 +46,18 @@ public class FreeMemoryAction extends CardAction {
                 if (e != null) {
                     customCall.onFinish(null);
                 } else {
-                    byte[] availableSpace = null;
+                    byte[] data = null;
                     try {
-                        availableSpace = get();
+                        data = get();
                     } catch (InterruptedException | ExecutionException ex) {
                         //ignore
                         ex.printStackTrace();
                     }
-                    customCall.onFinish(availableSpace);
+                    customCall.onFinish(data);
                 }
             }
         };
 
         worker.execute();
-    }
-
-    public static int getAvailableMemory() {
-        try {
-            byte[] bytes = CardCommands.getSystemInfo();
-            if (bytes == null)
-                return -1;
-            return getAvailableMemory(bytes);
-        } catch (LocalizedCardException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    private static int toUnsigned(byte b) {
-        if ((b & 0x80) == 0x80) {
-            return 128 + (b & 0x7F);
-        }
-        return b;
-    }
-
-    public static int getAvailableMemory(byte[] response) {
-        //big endian
-        return (toUnsigned(response[0]) << 8) + toUnsigned(response[1]);
     }
 }
