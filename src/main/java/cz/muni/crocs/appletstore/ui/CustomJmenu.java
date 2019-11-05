@@ -52,11 +52,9 @@ public class CustomJmenu extends JMenu {
     }
 
     private void uiSettings() {
-        setOpaque(false);
         setFocusPainted(false);
         setFont(OptionsFactory.getOptions().getFont(12f));
         setForeground(Color.WHITE);
-        setMargin(new Insets(0, 0, 0, 0));
     }
 
     private void defaultSettings(String description, int mnemonic) {

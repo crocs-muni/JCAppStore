@@ -228,7 +228,7 @@ public class InstallAction extends CardAction {
             public Void onFinish(byte[] value) {
                 if (value == null) {
                     call.onFinish();
-                    checkDefaultSelected(opts, manager);
+                    doInstall(opts, manager);
                     return null;
                 }
                 int cardMemory = JCMemory.getPersistentMemory(value);
@@ -247,31 +247,24 @@ public class InstallAction extends CardAction {
                                     textSrc.getString("no_space_2") + cardMemory +
                                     textSrc.getString("no_space_3") + "</html>");
                     if (res == YES_OPTION) {
-                        checkDefaultSelected(opts, manager);
+                        doInstall(opts, manager);
                     } else {
                         return null;
                     }
                 } else {
-                    checkDefaultSelected(opts, manager);
+                    doInstall(opts, manager);
                 }
                 return null;
             }
         }).mouseClicked(null);
     }
 
-    private void checkDefaultSelected(final InstallOpts opts, final CardManager manager) {
+    private void doInstall(final InstallOpts opts, final CardManager manager) {
         if (defaultSelected) {
             //custom applet never reaches this section
-            AppletInfo info;
-            try {
-                AID defaultSelected = manager.getDefaultSelected();
-                info = manager.getInfoOf(defaultSelected);
-            } catch (LocalizedCardException e) {
-                e.printStackTrace();
-                info = null;
-            }
-            if (info != null && info.getKind() != Kind.IssuerSecurityDomain
-                    && info.getKind() != Kind.SecurityDomain) {
+            AID selected = manager.getDefaultSelected();
+            AppletInfo info = manager.getInfoOf(selected);
+            if (info != null && info.getKind() != Kind.IssuerSecurityDomain && info.getKind() != Kind.SecurityDomain) {
                 int result = JOptionPane.showOptionDialog(null,
                         textSrc.getString("default_selected_ask1") + info.getName() +
                                 textSrc.getString("default_selected_ask2") + opts.getName(),
@@ -284,51 +277,7 @@ public class InstallAction extends CardAction {
 
                 defaultSelected = result == YES_OPTION;
             } // else defaultSelected == true -> silently set as default selected
-            doInstall(opts, manager);
-
-//            new SwingWorker<AppletInfo, Void>() {
-//                @Override
-//                public AppletInfo doInBackground() {
-//                    try {
-//                        AID defaultSelected = manager.getDefaultSelected();
-//                        return manager.getInfoOf(defaultSelected);
-//                    } catch (LocalizedCardException e) {
-//                        e.printStackTrace();
-//                        return null;
-//                    }
-//                }
-//
-//                @Override
-//                protected void done() {
-//                    AppletInfo cardSelected;
-//                    try {
-//                        cardSelected = get();
-//                        System.out.println(cardSelected == null ? "No default selected" : cardSelected.getName());
-//                    } catch (InterruptedException | ExecutionException e) {
-//                        e.printStackTrace();
-//                        cardSelected = null;
-//                    }
-//                    if (cardSelected != null && cardSelected.getKind() != Kind.IssuerSecurityDomain
-//                            && cardSelected.getKind() != Kind.SecurityDomain) {
-//                        int result = JOptionPane.showOptionDialog(null,
-//                                textSrc.getString("default_selected_ask1") + cardSelected.getName() +
-//                                        textSrc.getString("default_selected_ask2") + opts.getName(),
-//                                textSrc.getString("default_selected_ask_title"),
-//                                YES_NO_OPTION, PLAIN_MESSAGE,
-//                                new ImageIcon("src/main/resources/img/bug.png"),
-//                                new String[]{textSrc.getString("default_selected_yes"),
-//                                        textSrc.getString("default_selected_no")},
-//                                textSrc.getString("default_selected_yes"));
-//
-//                        defaultSelected = result == YES_OPTION;
-//                    } // else defaultSelected == true -> silently set as default selected
-//                    doInstall(opts, manager);
-//                }
-//            }.execute();
-        } else doInstall(opts, manager);
-    }
-
-    private void doInstall(final InstallOpts opts, final CardManager manager) {
+        }
         execute(() -> {
             if (defaultSelected)
                 manager.installAndSelectAsDefault(code, opts);
@@ -390,7 +339,6 @@ public class InstallAction extends CardAction {
         }.execute();
         dialog.setVisible(true);
     }
-
 
 
     private abstract class Executable {

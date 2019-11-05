@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
+import cz.muni.crocs.appletstore.card.action.JCMemory;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import net.miginfocom.swing.MigLayout;
@@ -43,7 +44,7 @@ public class CardInfoPanel extends JPanel {
                         self.add(new Text(textSrc.getString("memory_could_not_obtain")));
                     } else {
                         self.add(new Text(textSrc.getString("card_free_memory")), "");
-                        self.add(new Text(String.valueOf(FreeMemoryAction.getAvailableMemory(apduData))), "align right, wrap");
+                        self.add(new Text(String.valueOf(JCMemory.getPersistentMemory(apduData))), "align right, wrap");
                     }
                     self.revalidate();
                     self.repaint();

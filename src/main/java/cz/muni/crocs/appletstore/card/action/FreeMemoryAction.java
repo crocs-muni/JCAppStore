@@ -32,7 +32,7 @@ public class FreeMemoryAction extends CardAction {
             @Override
             protected byte[] doInBackground() {
                 try {
-                    return CardCommands.getSystemInfo();
+                    return JCMemory.getSystemInfo();
                 } catch (LocalizedCardException ex) {
                     ex.printStackTrace();
                     logger.warn("Failed to obtain the free memory space: " + ex.getMessage());

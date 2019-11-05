@@ -13,7 +13,7 @@ import java.awt.*;
 public class CustomNotifiableJmenu extends CustomJmenu {
 
     private Color defaultColor = Color.BLACK;
-    private Color notifyColor = new Color(212, 164, 86);
+    private Color notifyColor = new Color(177, 129, 96);
     private boolean notify = false;
 
     private static final int DELAY = 250;

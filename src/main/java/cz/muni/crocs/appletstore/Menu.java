@@ -123,7 +123,7 @@ public class Menu extends JMenuBar {
     }
 
     private JMenuItem buildCardSubMenu() {
-        JMenu submenu = new CustomJmenu(textSrc.getString("card"));
+        JMenu submenu = jmenuWithBackground(textSrc.getString("card"));
         setItemLook(submenu, textSrc.getString("card_desc"));
 
         submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
@@ -139,7 +139,7 @@ public class Menu extends JMenuBar {
     }
 
     private JMenuItem buildWindowSettingsSubMenu() {
-        JMenu submenu = new CustomJmenu(textSrc.getString("display"));
+        JMenu submenu = jmenuWithBackground(textSrc.getString("display"));
         setItemLook(submenu, textSrc.getString("display_desc"));
 
         submenu.add(selectableMenuItem(new AbstractAction(textSrc.getString("logger")) {
@@ -224,6 +224,17 @@ public class Menu extends JMenuBar {
         return menuItem;
     }
 
+    private JMenu jmenuWithBackground(String title) {
+        return new CustomJmenu(title) {
+            @Override
+            public void paint(Graphics g) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paint(g);
+            }
+        };
+    }
+
     /**
      * @param action         action to perform
      * @param keyEvent       KeyEvent key constant
@@ -261,20 +272,32 @@ public class Menu extends JMenuBar {
         component.setBackground(new Color(0xffffff));
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
-        Dimension preferred = component.getPreferredSize();
-        component.setPreferredSize(new Dimension(200, (int) preferred.getHeight()));
         component.setFont(OptionsFactory.getOptions().getTitleFont());
     }
 
     private JRadioButtonMenuItem selectableMenuItem(String title, String descripton) {
-        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title);
+        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(title) {
+            @Override
+            public void paint(Graphics g) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paint(g);
+            }
+        };
         setItemLook(rbMenuItem, descripton);
         return rbMenuItem;
     }
 
-    private JRadioButtonMenuItem selectableMenuItem(Action action, String descripton, int keyEvent, int inputEventMask) {
-        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(action);
-        setItemLook(rbMenuItem, descripton);
+    private JRadioButtonMenuItem selectableMenuItem(Action action, String description, int keyEvent, int inputEventMask) {
+        JRadioButtonMenuItem rbMenuItem = new JRadioButtonMenuItem(action) {
+            @Override
+            public void paint(Graphics g) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paint(g);
+            }
+        };
+        setItemLook(rbMenuItem, description);
         rbMenuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
         return rbMenuItem;
     }
