@@ -33,7 +33,6 @@ public class GetDefaultSelected extends GPCommand<Optional<AID>> {
             logger.error("Failed to get registry from session.", e);
             return false;
         }
-        System.out.println(result.get().toString());
         return true;
     }
 }

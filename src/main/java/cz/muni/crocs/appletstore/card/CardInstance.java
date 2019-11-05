@@ -5,12 +5,14 @@ import apdu4j.HexUtils;
 import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
+import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.gp.*;
 import pro.javacard.gp.PlaintextKeys.Diversification;
 
@@ -22,6 +24,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -49,6 +52,7 @@ public class CardInstance {
     private final CardDetails details;
     private final CardTerminal terminal;
     private Set<AppletInfo> applets;
+    private AID defaultSelected;
 
     /**
      * Compares the card id and updates card data if needed
@@ -105,6 +109,14 @@ public class CardInstance {
                 return;
             }
         }
+    }
+
+    public AID getDefaultSelected() {
+        return defaultSelected;
+    }
+
+    public void setDefaultSelected(AID defaultSelected) {
+        this.defaultSelected = defaultSelected;
     }
 
     public String getName() {
@@ -206,9 +218,11 @@ public class CardInstance {
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        ListContents listContents = new ListContents(id);
-        secureExecuteCommands(listContents);
+        GPCommand<Set<AppletInfo>> listContents = new ListContents(id);
+        GPCommand<Optional<AID>> selected = new GetDefaultSelected();
+        secureExecuteCommands(listContents, selected);
         applets = listContents.getResult();
+        defaultSelected = selected.getResult().orElse(null);
     }
 
     /**

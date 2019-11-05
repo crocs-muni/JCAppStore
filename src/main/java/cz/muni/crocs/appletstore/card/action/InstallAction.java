@@ -263,46 +263,69 @@ public class InstallAction extends CardAction {
     private void checkDefaultSelected(final InstallOpts opts, final CardManager manager) {
         if (defaultSelected) {
             //custom applet never reaches this section
+            AppletInfo info;
+            try {
+                AID defaultSelected = manager.getDefaultSelected();
+                info = manager.getInfoOf(defaultSelected);
+            } catch (LocalizedCardException e) {
+                e.printStackTrace();
+                info = null;
+            }
+            if (info != null && info.getKind() != Kind.IssuerSecurityDomain
+                    && info.getKind() != Kind.SecurityDomain) {
+                int result = JOptionPane.showOptionDialog(null,
+                        textSrc.getString("default_selected_ask1") + info.getName() +
+                                textSrc.getString("default_selected_ask2") + opts.getName(),
+                        textSrc.getString("default_selected_ask_title"),
+                        YES_NO_OPTION, PLAIN_MESSAGE,
+                        new ImageIcon("src/main/resources/img/bug.png"),
+                        new String[]{textSrc.getString("default_selected_yes"),
+                                textSrc.getString("default_selected_no")},
+                        textSrc.getString("default_selected_yes"));
 
-            new SwingWorker<AppletInfo, Void>() {
-                @Override
-                public AppletInfo doInBackground() {
-                    try {
-                        AID defaultSelected = manager.getDefaultSelected();
-                        return manager.getInfoOf(defaultSelected);
-                    } catch (LocalizedCardException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
+                defaultSelected = result == YES_OPTION;
+            } // else defaultSelected == true -> silently set as default selected
+            doInstall(opts, manager);
 
-                @Override
-                protected void done() {
-                    AppletInfo cardSelected;
-                    try {
-                        cardSelected = get();
-                        System.out.println(cardSelected == null ? "No default selected" : cardSelected.getName());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                        cardSelected = null;
-                    }
-                    if (cardSelected != null && cardSelected.getKind() != Kind.IssuerSecurityDomain
-                            && cardSelected.getKind() != Kind.SecurityDomain) {
-                        int result = JOptionPane.showOptionDialog(null,
-                                textSrc.getString("default_selected_ask1") + cardSelected.getName() +
-                                        textSrc.getString("default_selected_ask2") + opts.getName(),
-                                textSrc.getString("default_selected_ask_title"),
-                                YES_NO_OPTION, PLAIN_MESSAGE,
-                                new ImageIcon("src/main/resources/img/bug.png"),
-                                new String[]{textSrc.getString("default_selected_yes"),
-                                        textSrc.getString("default_selected_no")},
-                                textSrc.getString("default_selected_yes"));
-
-                        defaultSelected = result == YES_OPTION;
-                    } // else defaultSelected == true -> silently set as default selected
-                    doInstall(opts, manager);
-                }
-            }.execute();
+//            new SwingWorker<AppletInfo, Void>() {
+//                @Override
+//                public AppletInfo doInBackground() {
+//                    try {
+//                        AID defaultSelected = manager.getDefaultSelected();
+//                        return manager.getInfoOf(defaultSelected);
+//                    } catch (LocalizedCardException e) {
+//                        e.printStackTrace();
+//                        return null;
+//                    }
+//                }
+//
+//                @Override
+//                protected void done() {
+//                    AppletInfo cardSelected;
+//                    try {
+//                        cardSelected = get();
+//                        System.out.println(cardSelected == null ? "No default selected" : cardSelected.getName());
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        e.printStackTrace();
+//                        cardSelected = null;
+//                    }
+//                    if (cardSelected != null && cardSelected.getKind() != Kind.IssuerSecurityDomain
+//                            && cardSelected.getKind() != Kind.SecurityDomain) {
+//                        int result = JOptionPane.showOptionDialog(null,
+//                                textSrc.getString("default_selected_ask1") + cardSelected.getName() +
+//                                        textSrc.getString("default_selected_ask2") + opts.getName(),
+//                                textSrc.getString("default_selected_ask_title"),
+//                                YES_NO_OPTION, PLAIN_MESSAGE,
+//                                new ImageIcon("src/main/resources/img/bug.png"),
+//                                new String[]{textSrc.getString("default_selected_yes"),
+//                                        textSrc.getString("default_selected_no")},
+//                                textSrc.getString("default_selected_yes"));
+//
+//                        defaultSelected = result == YES_OPTION;
+//                    } // else defaultSelected == true -> silently set as default selected
+//                    doInstall(opts, manager);
+//                }
+//            }.execute();
         } else doInstall(opts, manager);
     }
 

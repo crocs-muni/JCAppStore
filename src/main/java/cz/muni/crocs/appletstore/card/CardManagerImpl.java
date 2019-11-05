@@ -208,32 +208,33 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public AID getDefaultSelected() throws LocalizedCardException {
-        if (card == null) {
-            throw new LocalizedCardException("No card recognized.", "no_card");
-        }
-
-        while (busy) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                logger.warn("The card was busy when getDefaultSelected() called, waiting interrupted.");
-                Thread.currentThread().interrupt();
-            }
-        }
-        busy = true;
-
-        try {
-            GPCommand<Optional<AID>> selected = new GetDefaultSelected();
-            card.secureExecuteCommands(selected);
-            return selected.getResult().isPresent() ? selected.getResult().get() : null;
-        } catch (CardException e) {
-            loadCard();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            busy = false;
-            notifyAll();
-        }
+//        if (card == null) {
+//            throw new LocalizedCardException("No card recognized.", "no_card");
+//        }
+//
+//        while (busy) {
+//            try {
+//                wait();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//                logger.warn("The card was busy when getDefaultSelected() called, waiting interrupted.");
+//                Thread.currentThread().interrupt();
+//            }
+//        }
+//        busy = true;
+//
+//        try {
+//            GPCommand<Optional<AID>> selected = new GetDefaultSelected();
+//            card.secureExecuteCommands(selected);
+//            return selected.getResult().isPresent() ? selected.getResult().get() : null;
+//        } catch (CardException e) {
+//            loadCard();
+//            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+//        } finally {
+//            busy = false;
+//            notifyAll();
+//        }
+        return card.getDefaultSelected();
     }
 
     @Override
@@ -466,6 +467,8 @@ public class CardManagerImpl implements CardManager {
             selectedAID = null;
             card.setApplets(contents.getResult());
             lastInstalled = data.getAID();
+            //todo maybe not necessary
+            if (defaultSelected) card.setDefaultSelected(lastInstalled);
         } finally {
             busy = false;
             notifyAll();
