@@ -44,7 +44,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         getVerticalScrollBar().setOpaque(false);
 
         storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
-        storeLayout.setBorder(new EmptyBorder(50, 50, 50, 50));
+        storeLayout.setBorder(new EmptyBorder(0, 50, 50, 50));
         loadStore();
     }
 

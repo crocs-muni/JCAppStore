@@ -1,11 +1,9 @@
 package cz.muni.crocs.appletstore.ui;
 
-import cz.muni.crocs.appletstore.Config;
-
 import java.awt.*;
 
 /**
- * Idea from http://forums.devshed.com/java-help-9/vertical-flowlayout-593580.html
+ * Idea from https://stackoverflow.com/questions/3679886/how-can-i-let-jtoolbars-wrap-to-the-next-line-flowlayout-without-them-being-hi/4611117
  * the problem of scrolling is that flow layout always allows extending to the right
  * inside scroll pane and thus the vertical scroll never occurs
  *
@@ -31,8 +29,8 @@ public class CustomFlowLayout extends FlowLayout {
         return getMinSize(target);
     }
 
+    //todo rewrite
     private Dimension getMinSize(Container target) {
-        //prevent from thread collision
         synchronized (target.getTreeLock()) {
             int hgap = getHgap();
             int vgap = getVgap();

@@ -6,8 +6,10 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Locale;
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Applet store logic implementation
- *
+ * <p>
  * CallBack >> allows the store to be reloaded in call() method
  * Searchable >> allows the store to act like searchable object
  * ProcessModifiable >> allows the store loading process to give status & result information
@@ -35,18 +37,22 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private Searchable store;
     private volatile State state = State.UNINITIALIZED;
     private GridBagConstraints constraints;
+    private StoreSubMenu submenu;
 
     public StoreWindowManager() {
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
 
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
+        submenu = new StoreSubMenu();
+        submenu.setOnReload(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, "");
+                setState(State.UNINITIALIZED);
+                updateGUI();
+            }
+        });
     }
 
     void setCallbackOnAction(OnEventCallBack<Void, Void> callbackOnAction) {
@@ -132,7 +138,15 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
      */
     private void init() {
         StoreWorker workerThread = new StoreWorker(this);
-        addLoading(workerThread);
+
+        //todo check if working - needs to be connected to network that is connected but no signal
+        addLoading(workerThread, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                workerThread.cancel(true);
+                setState(State.NO_CONNECTION);
+            }
+        });
         workerThread.execute();
 
         new Thread(() -> {
@@ -156,23 +170,39 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         if (fill) constraints.fill = GridBagConstraints.BOTH;
         else constraints.fill = GridBagConstraints.NONE;
         removeAll();
+        defaultConstraints();
         currentComponent = component;
         add(currentComponent, constraints, 0);
         revalidate();
         repaint();
     }
 
+    private void defaultConstraints() {
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+    }
+
     /**
      * Add loading and start a new thread with 0,5 sec progress update
      */
-    private void addLoading(StoreWorker downloader) {
+    private void addLoading(StoreWorker downloader, AbstractAction abortAction) {
         final LoadingPane loadingPane =
                 new LoadingPane(textSrc.getString("waiting_internet"));
         putNewPane(loadingPane, true);
         new Thread(() -> {
+            int i = 0;
+
             try {
                 while (loadingPane.update(downloader.getProgress())) {
-                    Thread.sleep(200);
+                    Thread.sleep(300);
+
+                    if (i == 15) {
+                        loadingPane.showAbort(abortAction);
+                    }
+                    i++;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -201,7 +231,20 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         }
         StoreWindowPane store = new StoreWindowPane(data, callbackOnAction);
         this.store = store;
-        putNewPane(store, true);
+
+        removeAll();
+        defaultConstraints();
+        constraints.weighty = 0.05;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        add(submenu, constraints);
+        constraints.gridy = 1;
+        constraints.weighty = 1.0;
+
+        currentComponent = store;
+        add(store, constraints);
+        revalidate();
+        repaint();
     }
 
     /**

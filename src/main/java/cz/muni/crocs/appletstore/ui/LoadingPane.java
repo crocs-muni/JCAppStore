@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 
 /**
@@ -11,6 +13,7 @@ import java.awt.*;
  * @version 1.0
  */
 public class LoadingPane extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final int width = 300;
     private final int height = 5;
@@ -52,19 +55,11 @@ public class LoadingPane extends JPanel {
         return progress <= 100;
     }
 
-//    private static Shape createRingShape(int progress, int widthHeight) {
-//
-//        Arc2D.Float outer = new Arc2D.Float(Arc2D.OPEN);
-//        outer.setFrameFromCenter(new Point(0, 0), new Point(widthHeight, widthHeight));
-//        outer.setAngleStart(1);
-//        outer.setAngleExtent(-progress * 3.6);
-//
-//        Ellipse2D inner = new Ellipse2D.Float();
-//        inner.setFrameFromCenter(new Point(0, 0), new Point(widthHeight - 4, widthHeight - 4));
-//
-//        Area area = new Area(outer);
-//        area.subtract(new Area(inner));
-//        return area;
-//    }
+    public void showAbort(AbstractAction abstractAction) {
+        JButton abort = new JButton(textSrc.getString("abort"));
+        abort.setAction(abstractAction);
+        abort.setUI(new CustomButtonUI());
+        add(abort);
+    }
 }
 
