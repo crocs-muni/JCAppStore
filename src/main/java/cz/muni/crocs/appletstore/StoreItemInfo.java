@@ -63,7 +63,7 @@ public class StoreItemInfo extends HintPanel {
 
         buildHeader(dataSet, store, callBack);
         buildDescription(dataSet);
-        checkHostApp(dataSet);
+        checkDefaultSelected(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
 
@@ -120,8 +120,8 @@ public class StoreItemInfo extends HintPanel {
         add(install, "align right, span 1 2, wrap");
     }
 
-    private void checkHostApp(JsonObject dataSet) {
-        if (!dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
+    private void checkDefaultSelected(JsonObject dataSet) {
+        if (dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
             add(getNotice(textSrc.getString("W_default_app"), 14f, new Color(255, 220, 181),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
             , "gap 20, span 4, gaptop 40, growx, wrap");

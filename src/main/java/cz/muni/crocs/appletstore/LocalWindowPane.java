@@ -175,7 +175,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     @Override
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
-        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
+        infoLayout.setVisible(CardManagerFactory.getManager().isAppletStoreSelected());
     }
 
 //    @Override
@@ -246,7 +246,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     manager.switchApplet(item.info.getAid());
-                    if (manager.isAppletSelected())
+                    if (manager.isAppletStoreSelected())
                         infoLayout.set(item.info);
                     else
                         infoLayout.unset();

@@ -19,6 +19,7 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
+import java.applet.AppletContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -69,12 +70,12 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public boolean isAppletSelected() {
+    public boolean isAppletStoreSelected() {
         return selectedAID != null;
     }
 
     @Override
-    public boolean isAppletSelected(AID applet) {
+    public boolean isAppletStoreSelected(AID applet) {
         return applet != null && applet.equals(selectedAID);
     }
 
@@ -106,6 +107,13 @@ public class CardManagerImpl implements CardManager {
     @Override
     public Set<AppletInfo> getInstalledApplets() {
         return card == null ? null : Collections.unmodifiableSet(card.getApplets());
+    }
+
+    @Override
+    public AppletInfo getInfoOf(AID aid) {
+        if (aid == null) return null;
+        Optional<AppletInfo> info = card.getApplets().stream().filter(a -> aid.equals(a.getAid())).findFirst();
+        return info.orElse(null);
     }
 
     @Override

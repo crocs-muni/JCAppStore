@@ -140,7 +140,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     @Override
     protected void paintComponent(Graphics g) {
-        boolean isSelected = info != null && manager.isAppletSelected(info.getAid());
+        boolean isSelected = info != null && manager.isAppletStoreSelected(info.getAid());
         if (info != null) {
             Graphics2D g2d = (Graphics2D) g;
             if (isSelected) {

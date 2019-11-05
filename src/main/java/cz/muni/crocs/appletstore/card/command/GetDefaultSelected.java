@@ -25,7 +25,7 @@ public class GetDefaultSelected extends GPCommand<Optional<AID>> {
         try {
             GPRegistry registry = context.getRegistry();
             if (registry == null)
-                result = new Optional<>();
+                result = Optional.empty();
             else
                 result = registry.getDefaultSelectedAID();
         } catch (IOException e) {
@@ -33,6 +33,7 @@ public class GetDefaultSelected extends GPCommand<Optional<AID>> {
             logger.error("Failed to get registry from session.", e);
             return false;
         }
+        System.out.println(result.get().toString());
         return true;
     }
 }

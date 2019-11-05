@@ -25,16 +25,16 @@ public interface CardManager {
     void switchApplet(AID aid);
 
     /**
-     * Check if any applet selected
+     * Check if any applet selected by store (not by card)
      * @return true if any card applet selected
      */
-    boolean isAppletSelected();
+    boolean isAppletStoreSelected();
 
     /**
-     * Check if applet selected
+     * Check if applet selected by store (not by card)
      * @return true if applet with AID provided selected
      */
-    boolean isAppletSelected(AID applet);
+    boolean isAppletStoreSelected(AID applet);
 
     /**
      * Get state of the terminal instance
@@ -57,6 +57,13 @@ public interface CardManager {
      * @return applets info list
      */
     Set<AppletInfo> getInstalledApplets();
+
+    /**
+     * Return applet info associated with AID given
+     * @param aid aid to search for
+     * @return AppletInfo or null
+     */
+    AppletInfo getInfoOf(AID aid);
 
     /**
      * Get card identifier

@@ -44,7 +44,7 @@ public class FeedbackFatalError {
                     new String[]{textSrc.getString("send"), textSrc.getString("send_not")},
                     "error");
 
-            if (result == 0) {
+            if (result == JOptionPane.YES_OPTION) {
                 sendMail(content.getUserText(), content.hasAttachment());
             } else {
                 System.exit(result);

@@ -10,14 +10,17 @@ import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
+import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -25,6 +28,7 @@ import static pro.javacard.gp.GPRegistryEntry.Kind;
 
 /**
  * Class to add to button as listener target to perform applet installation
+ * todo add requires install opts item, remove these long args and replace with object StoreInstallBundleOpts
  *
  * @author Jiří Horák
  * @version 1.0
@@ -32,6 +36,8 @@ import static pro.javacard.gp.GPRegistryEntry.Kind;
 public class InstallAction extends CardAction {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
+    private static final int LIMITED_BY_API = 0x7FFF;
 
     private boolean installed;
     private boolean defaultSelected;
@@ -221,10 +227,9 @@ public class InstallAction extends CardAction {
 
             @Override
             public Void onFinish(byte[] value) {
-                //todo if value == null show info failed to get card memory
                 if (value == null) {
                     call.onFinish();
-                    doInstall(opts, manager);
+                    checkDefaultSelected(opts, manager);
                     return null;
                 }
                 int cardMemory = FreeMemoryAction.getAvailableMemory(value);
@@ -233,35 +238,75 @@ public class InstallAction extends CardAction {
                     size = capfile.length();
                 } catch (SecurityException sec) {
                     sec.printStackTrace();
-                    return onFinish();
+                    size = 0; //pretend nothing happened
                 }
                 call.onFinish();
-                //todo compute real free memory based on installed stuff
-                if (!installed && size > cardMemory) {
-                    //todo translate
-                    int res = JOptionPane.showConfirmDialog(null, "<html>The size of application: " +
-                            size + ", remaining card storage " + cardMemory + ", " +
-                            "the installation might fail. Continue anyway?</html>");
+                //if no reinstall and memory is not max and applet size + 1kB install space > remaining memory
+                if (!installed && cardMemory < LIMITED_BY_API && size + 1024 > cardMemory) {
+                    int res = JOptionPane.showConfirmDialog(null,
+                            "<html>" + textSrc.getString("no_space_1") + (size + 1024) +
+                                    textSrc.getString("no_space_2") + cardMemory +
+                                    textSrc.getString("no_space_3") + "</html>");
                     if (res == YES_OPTION) {
-                        doInstall(opts, manager);
+                        checkDefaultSelected(opts, manager);
                     } else {
                         return null;
                     }
                 } else {
-                    doInstall(opts, manager);
+                    checkDefaultSelected(opts, manager);
                 }
                 return null;
             }
         }).mouseClicked(null);
     }
 
-    private void doInstall(final InstallOpts opts, CardManager manager) {
+    private void checkDefaultSelected(final InstallOpts opts, final CardManager manager) {
         if (defaultSelected) {
-            //todo ask user which to set as default selected
-            //todo create get default selected app (just get GPSession and get default selected.isPresent())
-            //todo defaultSelected = user decision
-        }
+            //custom applet never reaches this section
 
+            new SwingWorker<AppletInfo, Void>() {
+                @Override
+                public AppletInfo doInBackground() {
+                    try {
+                        AID defaultSelected = manager.getDefaultSelected();
+                        return manager.getInfoOf(defaultSelected);
+                    } catch (LocalizedCardException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+
+                @Override
+                protected void done() {
+                    AppletInfo cardSelected;
+                    try {
+                        cardSelected = get();
+                        System.out.println(cardSelected == null ? "No default selected" : cardSelected.getName());
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                        cardSelected = null;
+                    }
+                    if (cardSelected != null && cardSelected.getKind() != Kind.IssuerSecurityDomain
+                            && cardSelected.getKind() != Kind.SecurityDomain) {
+                        int result = JOptionPane.showOptionDialog(null,
+                                textSrc.getString("default_selected_ask1") + cardSelected.getName() +
+                                        textSrc.getString("default_selected_ask2") + opts.getName(),
+                                textSrc.getString("default_selected_ask_title"),
+                                YES_NO_OPTION, PLAIN_MESSAGE,
+                                new ImageIcon("src/main/resources/img/bug.png"),
+                                new String[]{textSrc.getString("default_selected_yes"),
+                                        textSrc.getString("default_selected_no")},
+                                textSrc.getString("default_selected_yes"));
+
+                        defaultSelected = result == YES_OPTION;
+                    } // else defaultSelected == true -> silently set as default selected
+                    doInstall(opts, manager);
+                }
+            }.execute();
+        } else doInstall(opts, manager);
+    }
+
+    private void doInstall(final InstallOpts opts, final CardManager manager) {
         execute(() -> {
             if (defaultSelected)
                 manager.installAndSelectAsDefault(code, opts);
@@ -323,6 +368,8 @@ public class InstallAction extends CardAction {
         }.execute();
         dialog.setVisible(true);
     }
+
+
 
     private abstract class Executable {
         Tuple<String, String> result;
