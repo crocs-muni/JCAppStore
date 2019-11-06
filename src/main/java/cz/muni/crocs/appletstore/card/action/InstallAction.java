@@ -14,13 +14,11 @@ import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
-import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -28,7 +26,6 @@ import static pro.javacard.gp.GPRegistryEntry.Kind;
 
 /**
  * Class to add to button as listener target to perform applet installation
- * todo add requires install opts item, remove these long args and replace with object StoreInstallBundleOpts
  *
  * @author Jiří Horák
  * @version 1.0
@@ -38,47 +35,34 @@ public class InstallAction extends CardAction {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
 
+    private InstallBundle data;
     private boolean installed;
     private boolean defaultSelected;
-    private File capfile;
     private CAPFile code;
-    private AppletInfo info;
-    private String titleBar;
-    private String signer;
-    private String identifier;
+
     private boolean fromCustomFile = false;
 
     /**
      * Create an install action
      *
-     * @param titleBar   title of the dialog
-     * @param info       info about the applet to install
-     * @param capfile    file with the compiled sourcecode
+     * @param installData data for install
      * @param installed  whether installed on the card already
-     * @param signer     signer's name
-     * @param identifier signer's identifier, can be either his email or key ID
      * @param call       callback that is called before action and after failure or after success
      */
-    public InstallAction(String titleBar, AppletInfo info, File capfile, boolean installed, boolean defaultSelected,
-                         String signer, String identifier, OnEventCallBack<Void, Void> call) {
+    public InstallAction(InstallBundle installData, boolean installed, boolean defaultSelected, OnEventCallBack<Void, Void> call) {
         super(call);
+        this.data = installData;
         this.installed = installed;
         this.defaultSelected = defaultSelected;
-        this.capfile = capfile;
-        this.titleBar = titleBar;
-        this.signer = signer;
-        this.identifier = identifier;
-        this.info = info;
     }
 
     public InstallAction(OnEventCallBack<Void, Void> call) {
-        this("", null, null, false, false, null, "", call);
+        this(InstallBundle.empty(), false, false, call);
         this.fromCustomFile = true;
     }
 
-    public InstallAction(String titleBar, AppletInfo info, File capfile, String signer,
-                         String identifier, OnEventCallBack<Void, Void> call) {
-        this(titleBar, info, capfile, false, false, signer, identifier, call);
+    public InstallAction(InstallBundle installData, OnEventCallBack<Void, Void> call) {
+        this(installData, false, false, call);
     }
 
     @Override
@@ -89,8 +73,8 @@ public class InstallAction extends CardAction {
             return;
         }
 
-        if (fromCustomFile) capfile = CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR);
-        code = CapFileChooser.getCapFile(capfile);
+        if (fromCustomFile) data.setCapfile(CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR));
+        code = CapFileChooser.getCapFile(data.getCapfile());
         if (code == null) {
             return;
         }
@@ -112,7 +96,7 @@ public class InstallAction extends CardAction {
                 void work() {
                     final Signature signature = new SignatureImpl();
                     try {
-                        result = signature.verifyPGPAndReturnMessage(null, capfile, customSign);
+                        result = signature.verifyPGPAndReturnMessage(null, data.getCapfile(), customSign);
                     } catch (LocalizedSignatureException e) {
                         result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
                     }
@@ -142,10 +126,12 @@ public class InstallAction extends CardAction {
             void work() {
                 final Signature signature = new SignatureImpl();
                 try {
-                    result = signature.verifyPGPAndReturnMessage("JCAppStore", capfile);
-                    if (signer != null && !signer.isEmpty()) {
-                        Tuple<String, String> another = signature.verifyPGPAndReturnMessage(signer, capfile);
-                        result = new Tuple<>(another.first, "JCAppStore: " + result.second + "<br>" + signer + ": " + another.second);
+                    result = signature.verifyPGPAndReturnMessage("JCAppStore", data.getCapfile());
+                    if (data.getSigner() != null && !data.getSigner().isEmpty()) {
+                        Tuple<String, String> another =
+                                signature.verifyPGPAndReturnMessage(data.getSigner(), data.getCapfile());
+                        result = new Tuple<>(another.first,
+                                "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
                     }
                 } catch (LocalizedSignatureException e) {
                     result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
@@ -162,12 +148,12 @@ public class InstallAction extends CardAction {
     }
 
     private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean buildCustomInstall) {
-        InstallDialogWindow dialog = new InstallDialogWindow(code, info, installed, verifyResult);
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), installed, verifyResult);
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
 
         JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
-        JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + titleBar);
+        JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
         if (buildCustomInstall) dialog.buildAdvancedAndCustomSigned(window);
         else dialog.buildAdvanced(window);
         window.pack();
@@ -227,19 +213,17 @@ public class InstallAction extends CardAction {
             @Override
             public Void onFinish(byte[] value) {
                 if (value == null) {
-                    call.onFinish();
                     doInstall(opts, manager);
                     return null;
                 }
                 int cardMemory = JCMemory.getPersistentMemory(value);
                 long size;
                 try {
-                    size = capfile.length();
+                    size = data.getCapfile().length();
                 } catch (SecurityException sec) {
                     sec.printStackTrace();
                     size = 0; //pretend nothing happened
                 }
-                call.onFinish();
                 //if no reinstall and memory is not max and applet size + 1kB install space > remaining memory
                 if (!installed && cardMemory < JCMemory.LIMITED_BY_API && size + 1024 > cardMemory) {
                     int res = JOptionPane.showConfirmDialog(null,
@@ -249,6 +233,7 @@ public class InstallAction extends CardAction {
                     if (res == YES_OPTION) {
                         doInstall(opts, manager);
                     } else {
+                        call.onFinish();
                         return null;
                     }
                 } else {
@@ -286,7 +271,7 @@ public class InstallAction extends CardAction {
             SwingUtilities.invokeLater(() ->
                     InformerFactory.getInformer().showWarning(textSrc.getString("installed"),
                             Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000));
-            capfile = null;
+            data.setCapfile(null);
         }, "Failed to install applet.", textSrc.getString("install_failed"));
     }
 

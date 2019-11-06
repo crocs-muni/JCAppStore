@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 public class CardInfoPanel extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    public CardInfoPanel(BackgroundChangeable changeable) {
+    public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
         setLayout(new MigLayout());
         final CardInfoPanel self = this;
 
@@ -27,11 +27,13 @@ public class CardInfoPanel extends JPanel {
                 @Override
                 public void onFail() {
                     changeable.switchEnabled(true);
+                    refreshable.refresh();
                 }
 
                 @Override
                 public Void onFinish() {
                     changeable.switchEnabled(true);
+                    refreshable.refresh();
                     return null;
                 }
 
@@ -48,6 +50,7 @@ public class CardInfoPanel extends JPanel {
                     }
                     self.revalidate();
                     self.repaint();
+                    refreshable.refresh();
                     return null;
                 }
             }).mouseClicked(null);

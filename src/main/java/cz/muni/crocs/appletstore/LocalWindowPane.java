@@ -44,7 +44,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     private GridBagConstraints constraints;
 
-    public LocalWindowPane() {
+    public LocalWindowPane(OnEventCallBack<Void, Void> callback) {
         setOpaque(false);
 
         submenu = new LocalSubMenu();
@@ -55,14 +55,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         this.setLayout(gb);
 
         constraints = new GridBagConstraints();
-    }
-
-    /**
-     * Setup the panel with constructed callback
-     * must be called once on construction todo ugly
-     */
-    public void build(OnEventCallBack<Void, Void> callback) {
-        removeAll();
 
         submenu.setOnSubmit(new AbstractAction() {
             @Override
@@ -127,7 +119,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             Set<AppletInfo> cardApplets = manager.getInstalledApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
-                logger.warn("Applet list failed, null returned.");
+                logger.warn("Applet list failed, null as applet array returned.");
                 return;
             } else {
                 loadApplets(manager.getInstalledApplets(), manager);

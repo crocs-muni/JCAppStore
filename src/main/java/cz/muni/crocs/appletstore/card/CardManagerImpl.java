@@ -439,8 +439,8 @@ public class CardManagerImpl implements CardManager {
             selectedAID = null;
             card.setApplets(contents.getResult());
             lastInstalled = data.getAID();
-            //todo maybe not necessary
-            if (defaultSelected) card.setDefaultSelected(lastInstalled);
+            //not necessary
+            //if (defaultSelected) card.setDefaultSelected(lastInstalled);
         } finally {
             busy = false;
             notifyAll();

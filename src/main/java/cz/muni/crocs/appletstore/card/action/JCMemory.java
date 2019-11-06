@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card.action;
 
 import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.Refreshable;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -147,12 +148,8 @@ public class JCMemory {
     private static void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException {
         if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
             manager.uninstall(JCMemory.getPackageInfo(), true);
-            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
-
         } else if (refresh) {
             manager.loadCard();
-            //todo somehow force the localpanel to refresh, manager is (maybe) refreshed...
-
         }
     }
 }

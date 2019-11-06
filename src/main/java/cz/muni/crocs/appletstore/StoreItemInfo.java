@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.card.action.InstallAction;
+import cz.muni.crocs.appletstore.card.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -303,8 +304,8 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
-        new InstallAction(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, installed, defaultSelected, signer, identifier, call).mouseClicked(e);
+        new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
+                info, file, signer, identifier), installed, defaultSelected, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

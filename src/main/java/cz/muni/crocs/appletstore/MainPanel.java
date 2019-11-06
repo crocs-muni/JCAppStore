@@ -11,6 +11,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -34,12 +35,26 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         setOneTouchExpandable(true);
         setDividerLocation(150);
 
-        localPanel = new LocalWindowPane();
-        storePanel = new StoreWindowManager();
-        OnEventCallBack<Void, Void> callback = new WorkCallback(context, localPanel);
+        OnEventCallBack<Void, Void> callback = new WorkCallback(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(false);
+            }
+        }, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(true);
+            }
+        }, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(true);
+                localPanel.refresh();
+            }
+        });
 
-        localPanel.build(callback);
-        storePanel.setCallbackOnAction(callback);
+        localPanel = new LocalWindowPane(callback);
+        storePanel = new StoreWindowManager(callback);
 
         buildStoreContents();
         buildLogger();

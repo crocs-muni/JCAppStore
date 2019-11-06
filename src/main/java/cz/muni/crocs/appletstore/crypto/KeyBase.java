@@ -63,7 +63,7 @@ import java.util.ResourceBundle;
 //        if (!sig.exists())
 //            return new Tuple<>("verify_no_keybase.png", "H_no_file_keybase");
 //        if (verifySignature(author, file, sig)) {
-//            return new Tuple<>("verify.png", textSrc.getString("H_verified") + "JCAppStore"); //todo get author
+//            return new Tuple<>("verify.png", textSrc.getString("H_verified") + "JCAppStore"); //to do get author
 //        } else {
 //            return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
 //        }

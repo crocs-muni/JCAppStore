@@ -250,7 +250,7 @@ public class OptionsImpl implements Options<String> {
 //                    populateOptions("eng");
 //                }
 //                //context.dispose();
-//                //todo problem cannot get language while fetching options
+//                //problem cannot get language while fetching options
 //                JOptionPane.showMessageDialog(null, "Changes will apply after an restart.");
 //
 //            }

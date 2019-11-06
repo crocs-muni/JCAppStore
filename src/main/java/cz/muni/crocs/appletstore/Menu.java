@@ -130,7 +130,7 @@ public class Menu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null,
-                        new CardInfoPanel(context), textSrc.getString("card_info"),
+                        new CardInfoPanel(context, context.getWindow().getRefreshablePane()), textSrc.getString("card_info"),
                         JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));

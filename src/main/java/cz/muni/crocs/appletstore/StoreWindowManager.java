@@ -39,7 +39,9 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private GridBagConstraints constraints;
     private StoreSubMenu submenu;
 
-    public StoreWindowManager() {
+    public StoreWindowManager(OnEventCallBack<Void, Void> callbackOnAction) {
+        this.callbackOnAction = callbackOnAction;
+
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
@@ -53,10 +55,6 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 updateGUI();
             }
         });
-    }
-
-    void setCallbackOnAction(OnEventCallBack<Void, Void> callbackOnAction) {
-        this.callbackOnAction = callbackOnAction;
     }
 
     public synchronized void setState(State state) {
