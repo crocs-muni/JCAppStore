@@ -16,8 +16,9 @@ public class Config {
     public static final String APP_ROOT_DIR = getDefaultAppRootFolder();
     public static final File APP_DATA_DIR = checkFolders(APP_ROOT_DIR + S + "data");
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + S + "store");
-    public static final File APP_STORE_CAPS_DIR = checkFolders(APP_ROOT_DIR + S + "store" + S + "JCApplets");
     public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + S + "my_applets");
+
+    public static final File APP_STORE_CAPS_DIR = new File(APP_ROOT_DIR + S + "store" + S + "JCApplets");
 
     //app internal dirs
     public static final String RESOURCES_DIR = "src"+S+"main"+S+"resources"+S;

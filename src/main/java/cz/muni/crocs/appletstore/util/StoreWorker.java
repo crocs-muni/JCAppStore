@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -45,7 +46,7 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
             setProgress(100);
             setLoaderMessage(textSrc.getString("E_no_internet"));
             return Store.State.NO_CONNECTION;
-        } else if (storeInfo[0].equals("ok") && checkNotEmpty()) {
+        } else if (storeInfo[0].equals("ok") && checkValidStoreDir()) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("done"));
             return Store.State.REBUILD;
@@ -70,16 +71,19 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
      *
      * @return true if not necessary to re-download
      */
-    private static boolean checkNotEmpty() {
-        //TODO try to be more sophisticated about the file contents, eg. lookup specific file/s
+    private static boolean checkValidStoreDir() {
         String[] files = Config.APP_STORE_DIR.list();
-        if (files != null && files.length == 0) {
-            return false;
-        } else if (files == null) {
+        if (files == null) {
             logger.error("Could not read store folder: " + Config.APP_ROOT_DIR);
             return false;
+        }  else if (files.length < 3) {
+            logger.error("Missing files in store folder: " + Config.APP_ROOT_DIR);
+            return false;
         } else {
-            return true;
+            return Config.APP_STORE_CAPS_DIR.exists() &&
+                    new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
+                            + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
+                            + Config.FILE_INFO_SUFFIX).exists();
         }
     }
 
