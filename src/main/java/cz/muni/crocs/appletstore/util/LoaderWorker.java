@@ -3,6 +3,9 @@ package cz.muni.crocs.appletstore.util;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import jnasmartcardio.Smartcardio;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 
@@ -19,6 +22,7 @@ import static java.lang.Thread.sleep;
  */
 public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrackable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
 
     private String info = textSrc.getString("loading_opts");
 
@@ -31,16 +35,15 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
 
             info = textSrc.getString("detect_cards");
             CardManager manager = CardManagerFactory.getManager();
-            manager.needsCardRefresh();
             try {
+                manager.needsCardRefresh();
                 manager.loadCard();
             } catch (LocalizedCardException e) {
                 info = textSrc.getString("failed_detect");
                 waitWhile(500);
             }
-
             info = textSrc.getString("launch");
-            waitWhile(500);
+            waitWhile(100);
             setProgress(getMaximum());
         } catch (Exception e) {
             info = textSrc.getString("failed: " + e.getMessage());

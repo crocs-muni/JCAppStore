@@ -140,8 +140,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             add(infoLayout, constraints);
 
             infoLayout.setBackground(Color.WHITE);
+            revalidate();
         }
-        revalidate();
     }
 
     @Override
@@ -193,6 +193,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                 return false;
             case LOADING:
                 add(new LoadingPaneCircle());
+                return false;
+            case NO_SERVICE:
+                showError("E_service", "H_service", "offline.png");
                 return false;
             default:
         }

@@ -13,7 +13,7 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
     private short opacity = 0;
 
     public CustomScrollBarUI() {
-        minimumThumbSize = new Dimension(10, 10);
+        minimumThumbSize = new Dimension(20, 20);
     }
 
     @Override
@@ -22,18 +22,27 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         JScrollBar scrollBar = (JScrollBar) c;
-        if (!scrollBar.isEnabled() || r.width > r.height) {
-            return;
-        } else if (isDragging) {
-            g2.setPaint(new Color(120, 120, 120, alpha(true)));
 
-        } else if (isThumbRollover() || (r.y > 0)) {
-            g2.setPaint(new Color(255, 255, 255, alpha(true)));
-
+        if (!scrollBar.isEnabled()) return;
+        if (scrollBar.getOrientation() == Adjustable.HORIZONTAL) {
+            if (isDragging) {
+                g2.setPaint(new Color(120, 120, 120, alpha(true)));
+            } else if (isThumbRollover() || (r.x > 0)) {
+                g2.setPaint(new Color(255, 255, 255, alpha(true)));
+            } else {
+                g2.setPaint(new Color(60, 60, 60, alpha(false)));
+            }
+            g2.fillRect(r.x + 4, r.y, Math.max(20, r.width - 8), r.height);
         } else {
-            g2.setPaint(new Color(60, 60, 60, alpha(false)));
+            if (isDragging) {
+                g2.setPaint(new Color(120, 120, 120, alpha(true)));
+            } else if (isThumbRollover() || (r.y > 0)) {
+                g2.setPaint(new Color(255, 255, 255, alpha(true)));
+            } else {
+                g2.setPaint(new Color(60, 60, 60, alpha(false)));
+            }
+            g2.fillRect(r.x, r.y + 4, r.width, Math.max(20, r.height - 8));
         }
-        g2.fillRect(r.x, r.y + 5, r.width - 5, r.height - 10);
         g2.dispose();
     }
 

@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.util;
 
-import com.sun.istack.internal.NotNull;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.*;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -13,7 +12,7 @@ public class LoggerAppender extends AbstractAppender {
     private volatile LoggerConsole appender;
     public static final int LINES = 150;
 
-    public LoggerAppender(@NotNull LoggerConsole console) {
+    public LoggerAppender(LoggerConsole console) {
         super("JCAppStore", null, PatternLayout.createDefaultLayout(), false);
 
         this.appender = console;

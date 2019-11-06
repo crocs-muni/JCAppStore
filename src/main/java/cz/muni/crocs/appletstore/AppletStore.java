@@ -3,11 +3,13 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.Terminals;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
 import cz.muni.crocs.appletstore.ui.Warning;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
+import jnasmartcardio.Smartcardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.*;
@@ -16,6 +18,8 @@ import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * App main window
@@ -25,6 +29,7 @@ import java.awt.image.BufferedImage;
  */
 
 public class AppletStore extends JFrame implements BackgroundChangeable {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
@@ -109,10 +114,19 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         CardManager manager = CardManagerFactory.getManager();
 
         new Thread(() -> {
+            int counter = 0;
             logger.info("------- Routine started -------");
             while (windowOpened) {
                 try {
                     int result = manager.needsCardRefresh();
+
+                    if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
+                        SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(
+                                textSrc.getString("H_service"), Warning.Importance.FATAL, 20000));
+                        logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
+                        window.getRefreshablePane().refresh();
+                        break;
+                    }
 
                     if (result > 0) {
                         if (result == 2) {
@@ -139,13 +153,21 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
                             menu.resetTerminalButtonGroup();
                         });
                     }
+                    counter = 0;
                     Thread.sleep(2000);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(e.getMessage(), Warning.Importance.SEVERE));
-                    logger.info("------ Terminal routine interrupted, should not happened.", e);
+                    counter++;
                     window.getRefreshablePane().refresh();
-                    checkTerminalsRoutine();
+                    if (counter > 10) {
+                        logger.info("[ROUTINE] Terminal routine killed after 10 failures.", e);
+                        SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(
+                                textSrc.getString("H_routine"), Warning.Importance.FATAL, 20000));
+                        break;
+                    } else {
+                        logger.info("[ROUTINE] Terminal routine caught an error: " + e.getMessage() +
+                                ". The routine continues for: " + counter, e);
+                    }
                 }
             }
         }).start();

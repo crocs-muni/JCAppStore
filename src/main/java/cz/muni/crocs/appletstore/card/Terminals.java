@@ -26,7 +26,7 @@ public class Terminals {
     private static final Logger logger = LoggerFactory.getLogger(Terminals.class);
 
     public enum TerminalState {
-        NO_READER, NO_CARD, LOADING, OK
+        NO_READER, NO_CARD, LOADING, OK, NO_SERVICE
     }
 
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
@@ -120,15 +120,15 @@ public class Terminals {
                 selectedReader = checkAnyCardPresence();
             }
 
-        } catch (CardException | NoSuchAlgorithmException | Smartcardio.EstablishContextException e) {
+        } catch (Smartcardio.EstablishContextException | Smartcardio.JnaPCSCException | Smartcardio.JnaCardException e) {
+            state = TerminalState.NO_SERVICE;
+            return (old != state) ? 2 : 0;
+        } catch (CardException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             logger.warn("Failed to check terminal.", e);
             state = TerminalState.NO_READER;
             return (old != state) ? 2 : 0;
         }
-//        } catch (Smartcardio.EstablishContextException e) {
-//            todo throw and dont start app not very likely to work when no reader
-//        }
         if (needToRefresh || old != state) return 2;
         if (cardReaderMap.keySet().hashCode() != oldHash) return 1;
         return 0;
