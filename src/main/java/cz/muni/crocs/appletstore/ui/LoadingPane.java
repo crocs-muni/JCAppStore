@@ -3,6 +3,8 @@ package cz.muni.crocs.appletstore.ui;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -21,9 +23,14 @@ public class LoadingPane extends JPanel {
     private String message;
     private Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
 
+    private GridBagConstraints constraints;
+
     public LoadingPane(String initialMsg) {
+        setLayout(new GridBagLayout());
         setOpaque(false);
         this.message = initialMsg;
+        this.constraints = new GridBagConstraints();
+        this.constraints.insets = new Insets(80, 0, 0, 0);
     }
 
     public void setMessage(String msg) {
@@ -56,10 +63,19 @@ public class LoadingPane extends JPanel {
     }
 
     public void showAbort(AbstractAction abstractAction) {
-        JButton abort = new JButton(textSrc.getString("abort"));
-        abort.setAction(abstractAction);
+        removeAll();
+        JButton abort = new JButton(abstractAction);
+        abort.setText(textSrc.getString("abort"));
+        abort.setForeground(Color.WHITE);
+        abort.setBorder(new CompoundBorder(new LineBorder(Color.WHITE, 1),
+                BorderFactory.createEmptyBorder(3, 15, 3, 15)));
+        abort.setFont(OptionsFactory.getOptions().getFont(13f));
         abort.setUI(new CustomButtonUI());
-        add(abort);
+        abort.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        abort.setOpaque(false);
+        add(abort, constraints);
+        revalidate();
+        repaint();
     }
 }
 

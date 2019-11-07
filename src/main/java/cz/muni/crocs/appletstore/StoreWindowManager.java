@@ -120,7 +120,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 return;
             case NO_CONNECTION:
                 InformerFactory.getInformer().showWarning(textSrc.getString("W_internet"),
-                        Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
+                        Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this, Informer.INFINITY);
                 setupWindow();
                 return;
             default:
@@ -137,7 +137,6 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private void init() {
         StoreWorker workerThread = new StoreWorker(this);
 
-        //todo check if working - needs to be connected to network that is connected but no signal
         addLoading(workerThread, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -198,6 +197,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                     Thread.sleep(300);
 
                     if (i == 15) {
+                        System.out.println("Abort show");
                         loadingPane.showAbort(abortAction);
                     }
                     i++;

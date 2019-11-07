@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class InformerImpl implements Informer, CallBack<Void> {
     private Thread current;
-    public static final Integer DELAY = 8000;
+    private static final Integer DELAY = 8000;
 
     private Informable context;
     private volatile Deque<Tuple<Warning, Integer>> queue = new LinkedBlockingDeque<>();

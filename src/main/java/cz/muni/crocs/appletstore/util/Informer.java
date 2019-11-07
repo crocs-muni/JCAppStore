@@ -8,6 +8,8 @@ import cz.muni.crocs.appletstore.ui.Warning;
  */
 public interface Informer {
 
+    public static int INFINITY = Integer.MAX_VALUE;
+
     /**
      * Show ingo to the user
      * @param info string text to show
