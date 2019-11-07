@@ -63,8 +63,8 @@ public class StoreDownloader {
         try {
             URLConnection connection = new URL(address).openConnection();
             connection.connect();
-            size = connection.getContentLength();
-            if (size == -1) return false;
+            size = connection.getContentLength(); // -1 == unknown
+
 
             BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
             FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
@@ -73,10 +73,13 @@ public class StoreDownloader {
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
                 downloaded += bytesRead;
-                parent.safeSetProgress((downloaded * 100) / size); //80% of progress
+                if (size == -1) parent.safeSetProgress(80);
+                else parent.safeSetProgress((downloaded * 100) / size);
             }
             in.close();
             fileOutputStream.close();
+
+            if (size == -1) size = downloaded; //if unknown, update
             return true;
 
         } catch (IOException ex) {
