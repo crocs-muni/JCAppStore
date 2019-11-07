@@ -206,6 +206,7 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public AID getDefaultSelected() {
+        if (card == null) return null;
         return card.getDefaultSelected();
     }
 

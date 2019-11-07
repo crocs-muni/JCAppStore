@@ -12,7 +12,6 @@ import java.awt.*;
  */
 public class CustomNotifiableJmenu extends CustomJmenu {
 
-    private Color defaultColor = Color.BLACK;
     private Color notifyColor = new Color(177, 129, 96);
     private boolean notify = false;
 
@@ -59,7 +58,7 @@ public class CustomNotifiableJmenu extends CustomJmenu {
                 notify = false;
             }
         } else {
-            g.setColor(defaultColor);
+            g.setColor(Color.BLACK);
         }
         g.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g);

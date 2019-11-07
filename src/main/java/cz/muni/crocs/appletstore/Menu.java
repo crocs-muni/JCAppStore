@@ -94,7 +94,6 @@ public class Menu extends JMenuBar {
 
     private void buildFileItem() {
         CustomJmenu menu = new CustomNotifiableJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
-        add(menu);
 
         menu.add(buildCardSubMenu());
 
@@ -120,6 +119,8 @@ public class Menu extends JMenuBar {
                 System.exit(0);
             }
         }, textSrc.getString("H_quit"), Config.IMAGE_DIR + "close_black.png"));
+
+        add(menu);
     }
 
     private JMenuItem buildCardSubMenu() {

@@ -38,12 +38,12 @@ public class CustomSplitPaneDivider extends BasicSplitPaneDivider {
             g.setColor(new Color(255, 255, 255, 100));
             g.drawRect(0, 0, size.width, size.height);
             b.paintBorder(this, g, 0, 0, size.width, size.height);
-            Graphics2D g2d = (Graphics2D)g;
-            g2d.setColor(Color.white);
-            g2d.setFont(title);
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g2d.drawString("JCAppStore logger", 18, 11);
         }
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.setColor(Color.white);
+        g2d.setFont(title);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.drawString("JCAppStore logger", 18, 11);
     }
 };
 

@@ -35,8 +35,6 @@ public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
         rootLoggerConfig.addAppender(appender, Level.ALL, null);
     }
 
-
-
     @Override
     public int getLineCount() {
         return console.getLineCount();
