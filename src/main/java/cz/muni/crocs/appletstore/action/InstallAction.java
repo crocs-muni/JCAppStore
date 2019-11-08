@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.card.action;
+package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
@@ -6,7 +6,7 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +17,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -30,10 +28,8 @@ import static pro.javacard.gp.GPRegistryEntry.Kind;
  * @author Jiří Horák
  * @version 1.0
  */
-public class InstallAction extends CardAction {
+public class InstallAction extends CardAbstractAction {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-
 
     private InstallBundle data;
     private boolean installed;
@@ -68,8 +64,8 @@ public class InstallAction extends CardAction {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (!CardManagerFactory.getManager().isCard()) {
-            InformerFactory.getInformer().showWarning(textSrc.getString("missing_card"),
-                    Warning.Importance.SEVERE, Warning.CallBackIcon.CLOSE, null, 7000);
+            InformerFactory.getInformer().showInfo(textSrc.getString("missing_card"),
+                    Notice.Importance.SEVERE, Notice.CallBackIcon.CLOSE, null, 7000);
             return;
         }
 
@@ -165,7 +161,7 @@ public class InstallAction extends CardAction {
         switch (selectedValue) {
             case JOptionPane.YES_OPTION:
                 if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
-                    InformerFactory.getInformer().showInfo(textSrc.getString("E_install_invalid_data"));
+                    InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
                     return showInstallDialog(verifyResult, imgIcon, buildCustomInstall);
                 }
                 break;
@@ -241,7 +237,7 @@ public class InstallAction extends CardAction {
                 }
                 return null;
             }
-        }).mouseClicked(null);
+        }).start();
     }
 
     private void doInstall(final InstallOpts opts, final CardManager manager) {
@@ -269,8 +265,8 @@ public class InstallAction extends CardAction {
             else
                 manager.install(code, opts);
             SwingUtilities.invokeLater(() ->
-                    InformerFactory.getInformer().showWarning(textSrc.getString("installed"),
-                            Warning.Importance.INFO, Warning.CallBackIcon.CLOSE, null, 4000));
+                    InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
+                            Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));
             data.setCapfile(null);
         }, "Failed to install applet.", textSrc.getString("install_failed"));
     }

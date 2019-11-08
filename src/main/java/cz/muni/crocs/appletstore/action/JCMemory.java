@@ -1,8 +1,7 @@
-package cz.muni.crocs.appletstore.card.action;
+package cz.muni.crocs.appletstore.action;
 
 import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.Refreshable;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -89,7 +88,7 @@ public class JCMemory {
         return fromArray(response, 16, 1);
     }
 
-    public static byte[] getSystemInfo() throws LocalizedCardException {
+    public static byte[] getSystemInfo() throws LocalizedCardException, UnknownKeyException {
         byte[] result;
         final CardManager manager = CardManagerFactory.getManager();
 
@@ -145,7 +144,7 @@ public class JCMemory {
         return null;
     }
 
-    private static void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException {
+    private static void uninstallIfNotKeep(CardManager manager, boolean refresh) throws LocalizedCardException, UnknownKeyException {
         if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
             manager.uninstall(JCMemory.getPackageInfo(), true);
         } else if (refresh) {

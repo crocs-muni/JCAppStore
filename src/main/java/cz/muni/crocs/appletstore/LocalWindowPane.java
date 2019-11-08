@@ -1,8 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.card.action.InstallAction;
-import cz.muni.crocs.appletstore.card.action.ReloadAction;
+import cz.muni.crocs.appletstore.action.InstallAction;
+import cz.muni.crocs.appletstore.action.ReloadAction;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.ui.DisablePanel;
@@ -65,7 +65,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         submenu.setOnReload(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ReloadAction(callback).mouseClicked(null);
+                new ReloadAction(callback).start();
             }
         });
 
@@ -142,6 +142,13 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             infoLayout.setBackground(Color.WHITE);
             revalidate();
         }
+    }
+
+    @Override
+    public void showError(JPanel pane) {
+        removeAll();
+        add(pane);
+        revalidate();
     }
 
     @Override

@@ -237,7 +237,7 @@ public class Settings extends JPanel {
                 context.updateBackground(ImageIO.read(new File(DEFAULT_BG_PATH)));
             } catch (IOException e) {
                 e.printStackTrace();
-                InformerFactory.getInformer().showInfo(textSrc.getString("E_background"));
+                InformerFactory.getInformer().showMessage(textSrc.getString("E_background"));
             }
         } else {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());

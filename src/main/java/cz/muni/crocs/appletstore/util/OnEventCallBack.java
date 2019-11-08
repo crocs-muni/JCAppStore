@@ -29,4 +29,32 @@ public interface OnEventCallBack<Finish, FinArg> {
      * @return otuput based on arg
      */
     Finish onFinish(FinArg arg);
+
+    /**
+     * Empty event to pass
+     * @return empty callback event
+     */
+    static OnEventCallBack<Void, Void> empty() {
+        return new OnEventCallBack<Void, Void>() {
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFail() {
+
+            }
+
+            @Override
+            public Void onFinish() {
+                return null;
+            }
+
+            @Override
+            public Void onFinish(Void aVoid) {
+                return null;
+            }
+        };
+    }
 }

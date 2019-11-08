@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.card.action;
+package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.DeleteDialogWindow;
@@ -16,8 +16,6 @@ import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -25,9 +23,8 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class DeleteAction extends CardAction {
+public class DeleteAction extends CardAbstractAction {
     private static final Logger logger = LoggerFactory.getLogger(DeleteAction.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private AppletInfo info;
 

@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.KeysPresence;
-import cz.muni.crocs.appletstore.card.action.InstallAction;
-import cz.muni.crocs.appletstore.card.action.InstallBundle;
+import cz.muni.crocs.appletstore.action.InstallAction;
+import cz.muni.crocs.appletstore.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -187,7 +187,7 @@ public class StoreItemInfo extends HintPanel {
                         int versionIdx = getComboBoxSelected(versionComboBox, "E_invalid_version");
                         int compilerIdx = getComboBoxSelected(compilerVersionComboBox, "E_invalid_compiler");
                         if (versionIdx < 0 || compilerIdx < 0) {
-                            InformerFactory.getInformer().showInfo(textSrc.getString("E_invalid_custom_install"));
+                            InformerFactory.getInformer().showMessage(textSrc.getString("E_invalid_custom_install"));
                             return;
                         }
 
@@ -258,7 +258,7 @@ public class StoreItemInfo extends HintPanel {
     private static int getComboBoxSelected(JComboBox box, String errorKey) {
         int selected = box.getSelectedIndex();
         if (selected < 0) {
-            InformerFactory.getInformer().showWarningToClose(textSrc.getString(errorKey), Warning.Importance.INFO);
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString(errorKey), Notice.Importance.INFO);
         }
         return selected;
     }
@@ -299,8 +299,8 @@ public class StoreItemInfo extends HintPanel {
 
         if (!file.exists()) {
             logger.warn("Applet file not found.");
-            InformerFactory.getInformer().showWarningToClose(textSrc.getString("E_install_not_found"),
-                    Warning.Importance.INFO);
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_install_not_found"),
+                    Notice.Importance.INFO);
             return;
         }
 

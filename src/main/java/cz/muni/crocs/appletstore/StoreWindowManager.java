@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.CallBack;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
 
 import javax.swing.*;
@@ -119,8 +119,8 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                         "error.png", this), false);
                 return;
             case NO_CONNECTION:
-                InformerFactory.getInformer().showWarning(textSrc.getString("W_internet"),
-                        Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this, Informer.INFINITY);
+                InformerFactory.getInformer().showInfo(textSrc.getString("W_internet"),
+                        Notice.Importance.SEVERE, Notice.CallBackIcon.RETRY, this, Informer.INFINITY);
                 setupWindow();
                 return;
             default:

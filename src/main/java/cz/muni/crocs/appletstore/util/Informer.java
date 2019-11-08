@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
+
+import javax.swing.*;
 
 /**
  * Informer that uses Informable instance inside to display the messages.
@@ -14,7 +16,13 @@ public interface Informer {
      * Show ingo to the user
      * @param info string text to show
      */
-    void showInfo(String info);
+    void showMessage(String info);
+
+    /**
+     * Show info that replaces the screen
+     * @param panel to show
+     */
+    void showFullScreenInfo(JPanel panel);
 
     /**
      * Show warning to the user with custom callback to perform on icon click
@@ -23,14 +31,14 @@ public interface Informer {
      * @param icon icon to show
      * @param callable action to perform on click
      */
-    void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable);
+    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable);
 
     /**
      * Show warning to the user with close option
      * @param msg message to show
      * @param status status level of the Warning.Importance enum, e.g. SEVERE, INFO ...
      */
-    void showWarningToClose(String msg, Warning.Importance status);
+    void showInfoToClose(String msg, Notice.Importance status);
 
     /**
      * Show warning to the user with custom callback to perform on icon click
@@ -40,7 +48,7 @@ public interface Informer {
      * @param callable action to perform on click
      * @param milis duration after which the message is closed, null if do not close
      */
-    void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis);
+    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable, Integer milis);
 
     /**
      * Show warning to the user with close option
@@ -48,10 +56,10 @@ public interface Informer {
      * @param status status level of the Warning.Importance enum, e.g. SEVERE, INFO ...
      * @param milis duration after which the message is closed
      */
-    void showWarningToClose(String msg, Warning.Importance status, Integer milis);
+    void showInfoToClose(String msg, Notice.Importance status, Integer milis);
 
     /**
      * Close current displayed warning or do nothing if no warn displayed
      */
-    void closeWarning();
+    void closeInfo();
 }

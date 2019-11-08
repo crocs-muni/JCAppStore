@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
-import cz.muni.crocs.appletstore.card.action.JCMemory;
+import cz.muni.crocs.appletstore.action.FreeMemoryAction;
+import cz.muni.crocs.appletstore.action.JCMemory;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import net.miginfocom.swing.MigLayout;
@@ -53,7 +53,7 @@ public class CardInfoPanel extends JPanel {
                     refreshable.refresh();
                     return null;
                 }
-            }).mouseClicked(null);
+            }).start();
         } else {
             add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "no-card-black.png")), "align center, wrap");
             add(new Text(textSrc.getString("no_card")));

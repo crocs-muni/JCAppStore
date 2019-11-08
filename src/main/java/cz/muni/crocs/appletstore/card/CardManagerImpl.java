@@ -37,12 +37,12 @@ public class CardManagerImpl implements CardManager {
     private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private Terminals terminals = new Terminals();
-
-    private CardInstance card;
-    private String lastCardId = textSrc.getString("no_last_card");
-    private AID selectedAID = null;
-    private AID lastInstalled = null;
+    private volatile Terminals terminals = new Terminals();
+    private volatile CardInstance card;
+    private volatile String lastCardId = textSrc.getString("no_last_card");
+    private volatile AID selectedAID = null;
+    private volatile AID lastInstalled = null;
+    private volatile boolean tryGeneric = false;
     private volatile boolean busy = false;
 
     @Override
@@ -150,7 +150,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void loadCard() throws LocalizedCardException {
+    public synchronized void loadCard() throws LocalizedCardException, UnknownKeyException {
         while (busy) {
             try {
                 wait();
@@ -166,17 +166,19 @@ public class CardManagerImpl implements CardManager {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
                 lastCardId = CardDetails.getId(details);
-                card = new CardInstance(details, terminals.getTerminal());
+                card = new CardInstance(details, terminals.getTerminal(), tryGeneric);
             } else {
                 card = null;
             }
-        } catch (LocalizedCardException ex) {
+            
+        } catch (UnknownKeyException | LocalizedCardException ex) {
             card = null;
             throw ex;
         } catch (Exception e) {
             card = null;
             throw new LocalizedCardException(e.getMessage(), "E_default", e);
         } finally {
+            tryGeneric = false;
             busy = false;
             notifyAll();
         }
@@ -211,12 +213,23 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
+    public void setReloadCard() {
+        this.terminals.setNeedsRefresh();
+    }
+
+    @Override
+    public void setTryGenericTestKey() {
+        this.tryGeneric = true;
+        setReloadCard();
+    }
+
+    @Override
+    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException {
         install(toCapFile(file), data);
     }
 
     @Override
-    public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
+    public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
         try {
             installImpl(file, data, false);
         } catch (CardException e) {
@@ -230,12 +243,12 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, IOException {
+    public synchronized void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException {
         installAndSelectAsDefault(toCapFile(file), data);
     }
 
     @Override
-    public synchronized void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException {
+    public synchronized void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
         try {
             installImpl(file, data, true);
         } catch (CardException e) {
@@ -249,7 +262,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
+    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -287,7 +300,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
+    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }

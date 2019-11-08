@@ -1,13 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.*;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -125,7 +120,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     }
 
     @Override
-    public void showInfo(String info) {
+    public void showMessage(String info) {
         if (info == null || info.isEmpty())
             return;
         JOptionPane.showMessageDialog(this,
@@ -136,14 +131,19 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     }
 
     @Override
-    public void showWarning(JComponent component) {
+    public void showFullScreenInfo(JPanel pane) {
+        localPanel.showError(pane);
+    }
+
+    @Override
+    public void showInfo(JComponent component) {
         current = component;
         content.add(current, BorderLayout.NORTH);
         content.revalidate();
     }
 
     @Override
-    public void hideWarning() {
+    public void hideInfo() {
         if (current == null) return;
         content.remove(current);
         content.revalidate();

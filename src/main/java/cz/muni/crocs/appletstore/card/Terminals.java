@@ -72,7 +72,7 @@ public class Terminals {
      * Forces the terminal app to reload
      * package-private: can be used through manager only
      */
-    void refresh() {
+    void setNeedsRefresh() {
         this.needsRefresh = true;
     }
 
@@ -84,6 +84,11 @@ public class Terminals {
      * package-private: can be used through manager only
      */
     int checkTerminals() {
+        if (needsRefresh) {
+            needsRefresh = false;
+            return 2;
+        }
+
         int oldHash = cardReaderMap.keySet().hashCode();
         cardReaderMap.clear();
 
@@ -106,14 +111,13 @@ public class Terminals {
                 return (old != state) ? 2 : 0;
             }
 
-            needToRefresh = needsRefresh || toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
+            needToRefresh = toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
                     !cardReaderMap.containsKey(selectedReader);
             if (needToRefresh) {
                 selectedReader = (toSelectReader != null && cardReaderMap.containsKey(toSelectReader))
                         ? toSelectReader : cardReaderMap.firstKey();
                 logger.info("Selected reader: " + selectedReader);
                 toSelectReader = null;
-                needsRefresh = false;
             }
 
             if (!checkCardPresence(selectedReader)) {

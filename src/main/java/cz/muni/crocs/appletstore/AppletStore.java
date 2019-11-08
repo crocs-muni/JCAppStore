@@ -1,15 +1,13 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.card.Terminals;
+import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
-import jnasmartcardio.Smartcardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.*;
@@ -66,6 +64,14 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 //                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
     }
 
+    public synchronized boolean isWindowOpened() {
+        return windowOpened;
+    }
+
+    public Menu getMenu() {
+        return menu;
+    }
+
     /**
      * Environment and style settings
      */
@@ -101,77 +107,11 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         setJMenuBar(menu);
         setGlassPane(blocker);
 
-        //start routine
-        checkTerminalsRoutine();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        new CardDetectionRoutine(this, OnEventCallBack.empty()).start();
         setVisible(true);
-    }
-
-    /**
-     * Looking for terminals present once a 2 sec
-     */
-    private void checkTerminalsRoutine() {
-        CardManager manager = CardManagerFactory.getManager();
-
-        new Thread(() -> {
-            int counter = 0;
-            logger.info("------- Routine started -------");
-            while (windowOpened) {
-                try {
-                    int result = manager.needsCardRefresh();
-
-                    if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
-                        SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(
-                                textSrc.getString("H_service"), Warning.Importance.FATAL, 20000));
-                        logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
-                        window.getRefreshablePane().refresh();
-                        break;
-                    }
-
-                    if (result > 0) {
-                        if (result == 2) {
-                            try {
-                                SwingUtilities.invokeLater(() -> switchEnabled(false));
-                                manager.loadCard();
-                            } catch (LocalizedCardException e) {
-                                e.printStackTrace();
-                                window.getRefreshablePane().showError("E_loading_failed",
-                                        "CARD: " + manager.getLastCardDescriptor() + "<br>",
-                                        "announcement_white.png", e);
-                                continue;
-                            } finally {
-                                SwingUtilities.invokeLater(() -> switchEnabled(true));
-                            }
-                        }
-
-                        SwingUtilities.invokeLater(() -> {
-                            if (result == 2) {
-                                window.getRefreshablePane().refresh();
-                                menu.setCard(manager.getCardDescriptor());
-                            }
-
-                            menu.resetTerminalButtonGroup();
-                        });
-                    }
-                    counter = 0;
-                    Thread.sleep(2000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    counter++;
-                    window.getRefreshablePane().refresh();
-                    if (counter > 10) {
-                        logger.info("[ROUTINE] Terminal routine killed after 10 failures.", e);
-                        SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showWarningToClose(
-                                textSrc.getString("H_routine"), Warning.Importance.FATAL, 20000));
-                        break;
-                    } else {
-                        logger.info("[ROUTINE] Terminal routine caught an error: " + e.getMessage() +
-                                ". The routine continues for: " + counter, e);
-                    }
-                }
-            }
-        }).start();
     }
 
     @Override

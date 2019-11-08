@@ -1,14 +1,10 @@
-package cz.muni.crocs.appletstore.card.action;
+package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.awt.event.MouseEvent;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Class to add to button as listener target to perform applet installation
@@ -16,9 +12,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class ReloadAction extends CardAction {
-    private static final Logger logger = LoggerFactory.getLogger(ReloadAction.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+public class ReloadAction extends CardAbstractAction {
 
     public ReloadAction(OnEventCallBack<Void, Void> call) {
         super(call);

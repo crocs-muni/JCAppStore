@@ -13,12 +13,15 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class BackgroundImageLoader {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static final Logger logger = LogManager.getLogger(BackgroundImageLoader.class);
 
     private BufferedImage background = null;
@@ -41,7 +44,7 @@ public class BackgroundImageLoader {
         } catch (InterruptedException e) {
             e.printStackTrace();
             logger.warn("Image loading interrupted. " + Config.IMAGE_DIR + imgName, e);
-            InformerFactory.getInformer().showInfo("E_image");
+            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
             defaultBg();
         }
     }
@@ -71,7 +74,7 @@ public class BackgroundImageLoader {
         try {
             background = ImageIO.read(new File(name));
         } catch (IOException e) {
-            InformerFactory.getInformer().showInfo("E_image");
+            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
             defaultBg();
         }
     }

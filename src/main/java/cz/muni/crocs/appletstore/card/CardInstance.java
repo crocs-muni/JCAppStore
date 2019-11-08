@@ -7,7 +7,6 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
-import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import org.slf4j.Logger;
@@ -20,16 +19,13 @@ import pro.javacard.gp.PlaintextKeys.Diversification;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
+
 
 /**
  * Card instance of card inserted in selected terminal
@@ -60,7 +56,13 @@ public class CardInstance {
      *
      * @param newDetails of the card: ATR is a must, other optional
      */
-    CardInstance(CardDetails newDetails, CardTerminal terminal) throws LocalizedCardException, CardException {
+    CardInstance(CardDetails newDetails, CardTerminal terminal)
+            throws LocalizedCardException, CardException, UnknownKeyException {
+        this(newDetails, terminal, false);
+    }
+
+    CardInstance(CardDetails newDetails, CardTerminal terminal, boolean defaultTestKey)
+            throws LocalizedCardException, CardException, UnknownKeyException {
         if (newDetails == null || terminal == null) {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
             throw new LocalizedCardException("Invalid arguments.", "E_load_card");
@@ -71,10 +73,19 @@ public class CardInstance {
         id = CardDetails.getId(newDetails);
         logger.info("Card plugged in:" + id);
 
-        if (saveDetailsAndCheckMasterKey())
+        reload(defaultTestKey);
+    }
+
+    void reload(boolean useDefaultTestKey)
+            throws LocalizedCardException, CardException, UnknownKeyException {
+        if (useDefaultTestKey) {
+            setTestPassword404f();
+        }
+
+        if (!useDefaultTestKey && saveDetailsAndCheckMasterKey())
             getCardListWithSavedPassword();
         else
-            getCardListWithDefaultPassword();
+            getCardListWithDefaultPassword(useDefaultTestKey);
 
         updateCardAuth(true);
     }
@@ -102,16 +113,7 @@ public class CardInstance {
         this.applets = applets;
     }
 
-    void removeAppletInfo(AppletInfo info) {
-        for (AppletInfo appletInfo : applets) {
-            if (appletInfo.getAid().equals(info.getAid())) {
-                applets.remove(appletInfo);
-                return;
-            }
-        }
-    }
-
-    public AID getDefaultSelected() {
+    AID getDefaultSelected() {
         return defaultSelected;
     }
 
@@ -181,35 +183,35 @@ public class CardInstance {
     /**
      * Open card types INI and searches by ATR for default password
      * extract functionality into one connection process
+     *
+     * @param useGeneric true if 40..4F key should be used
      */
-    private void getCardListWithDefaultPassword() throws LocalizedCardException, CardException {
+    private void getCardListWithDefaultPassword(boolean useGeneric) throws LocalizedCardException, UnknownKeyException, CardException {
         if (!(new File(Config.CARD_TYPES_FILE).exists())) {
             throw new LocalizedCardException("No types present.", "E_missing_types");
         }
 
-        try {
-            IniParserImpl parser = new IniParserImpl(Config.CARD_TYPES_FILE,
-                    CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
-            if (parser.isHeaderPresent()) {
-                name = parser.getValue(IniParser.TAG_NAME);
-                masterKey = parser.getValue(IniParser.TAG_KEY);
-                kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
-                diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
-            } else {
-                if (!askDefault()) {
-                    logger.warn("Card type not found: " + CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
-                    throw new LocalizedCardException("Could not auto-detect the card master key.", "E_master_key_not_found");
+        if (!useGeneric) {
+            try {
+                IniParserImpl parser = new IniParserImpl(Config.CARD_TYPES_FILE,
+                        CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
+                if (parser.isHeaderPresent()) {
+                    name = parser.getValue(IniParser.TAG_NAME);
+                    masterKey = parser.getValue(IniParser.TAG_KEY);
+                    kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
+                    diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
+                } else {
+                    throw new UnknownKeyException(CardDetails.getId(details));
                 }
-                setTestPassword404f();
-            }
-            if (masterKey == null || masterKey.isEmpty()) {
-                setTestPassword404f();
-            }
-            getCardListWithSavedPassword();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+                if (masterKey == null || masterKey.isEmpty()) {
+                    throw new UnknownKeyException(CardDetails.getId(details));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        getCardListWithSavedPassword();
     }
 
     /**
@@ -317,24 +319,24 @@ public class CardInstance {
         }
     }
 
-    private boolean askDefault() {
-        RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
-                null,
-                new HtmlText(textSrc.getString("I_use_default_keys_1") +
-                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
-                        textSrc.getString("I_use_default_keys_2")),
-                textSrc.getString("key_not_found"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon(Config.IMAGE_DIR + "")) == JOptionPane.YES_OPTION);
-        SwingUtilities.invokeLater(task);
-        try {
-            return task.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            ex.printStackTrace();
-            return false;
-        }
-    }
+//    private boolean askDefault() {
+//        RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
+//                null,
+//                new HtmlText(textSrc.getString("I_use_default_keys_1") +
+//                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
+//                        textSrc.getString("I_use_default_keys_2")),
+//                textSrc.getString("key_not_found"),
+//                JOptionPane.OK_CANCEL_OPTION,
+//                JOptionPane.INFORMATION_MESSAGE,
+//                new ImageIcon(Config.IMAGE_DIR + "")) == JOptionPane.YES_OPTION);
+//        SwingUtilities.invokeLater(task);
+//        try {
+//            return task.get();
+//        } catch (InterruptedException | ExecutionException ex) {
+//            ex.printStackTrace();
+//            return false;
+//        }
+//    }
 
     @Override
     public int hashCode() {

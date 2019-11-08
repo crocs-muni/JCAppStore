@@ -1,12 +1,10 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Informable;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 
 import javax.swing.*;
-import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -18,7 +16,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
     private static final Integer DELAY = 8000;
 
     private Informable context;
-    private volatile Deque<Tuple<Warning, Integer>> queue = new LinkedBlockingDeque<>();
+    private volatile Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
     public InformerImpl(Informable context) {
@@ -26,44 +24,49 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     @Override
-    public void showInfo(String info) {
-        context.showInfo(info);
+    public void showMessage(String info) {
+        context.showMessage(info);
     }
 
     @Override
-    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable) {
-        showWarning(msg, status, icon, callable, DELAY);
+    public void showFullScreenInfo(JPanel panel) {
+        context.showFullScreenInfo(panel);
     }
 
     @Override
-    public void showWarningToClose(String msg, Warning.Importance status) {
-        showWarningToClose(msg, status, DELAY);
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable) {
+        showInfo(msg, status, icon, callable, DELAY);
     }
 
     @Override
-    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis) {
+    public void showInfoToClose(String msg, Notice.Importance status) {
+        showInfoToClose(msg, status, DELAY);
+    }
+
+    @Override
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable, Integer milis) {
         if (callable == null) {
-            showWarningToClose(msg, status, milis);
+            showInfoToClose(msg, status, milis);
         } else {
-            queue.add(new Tuple<>(new Warning(msg, status, icon, callable, this), milis));
-            fireWarning();
+            queue.add(new Tuple<>(new Notice(msg, status, icon, callable, this), milis));
+            fireInfo();
         }
     }
 
     @Override
-    public void showWarningToClose(String msg, Warning.Importance status, Integer milis) {
-        queue.add(new Tuple<>(new Warning(msg, status, Warning.CallBackIcon.CLOSE, this), milis));
-        fireWarning();
+    public void showInfoToClose(String msg, Notice.Importance status, Integer milis) {
+        queue.add(new Tuple<>(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis));
+        fireInfo();
     }
 
     @Override
-    public void closeWarning() {
-        context.hideWarning();
+    public void closeInfo() {
+        context.hideInfo();
     }
 
     @Override
     public Void callBack() {
-        closeWarning();
+        closeInfo();
         current.interrupt();
         return null;
     }
@@ -76,9 +79,9 @@ public class InformerImpl implements Informer, CallBack<Void> {
                     busy = false;
                     return;
                 }
-                final Tuple<Warning, Integer> next = queue.pop();
+                final Tuple<Notice, Integer> next = queue.pop();
                 SwingUtilities.invokeLater(() -> {
-                    context.showWarning(next.first);
+                    context.showInfo(next.first);
                 });
 
                 if (next.second != null) {
@@ -87,7 +90,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
                     } catch (InterruptedException e) {
                         continue;
                     }
-                    SwingUtilities.invokeLater(this::closeWarning);
+                    SwingUtilities.invokeLater(this::closeInfo);
                 } else {
                     try {
                         Thread.currentThread().wait();
@@ -99,7 +102,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
         });
     }
 
-    private synchronized void fireWarning() {
+    private synchronized void fireInfo() {
         if (busy)
             return;
         busy = true;

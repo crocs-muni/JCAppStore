@@ -95,7 +95,7 @@ public interface CardManager {
      *
      * @link Terminals::checkTerminals()
      */
-    void loadCard() throws LocalizedCardException;
+    void loadCard() throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Get life cycle of the card
@@ -117,13 +117,24 @@ public interface CardManager {
     AID getDefaultSelected();
 
     /**
+     * Set whether
+     */
+    void setReloadCard();
+
+    /**
+     * Set whether the app should try default test key
+     * next time the card is attempted to authenticate to
+     */
+    void setTryGenericTestKey();
+
+    /**
      * Install new applet onto current card
      * @param file file with the applet
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      * @throws IOException when the file is incorrect or missing
      */
-    void install(File file, InstallOpts data) throws LocalizedCardException, IOException;
+    void install(File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
 
     /**
      * Install new applet onto current card
@@ -131,7 +142,7 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
+    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
@@ -139,7 +150,7 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, IOException;
+    void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
 
     /**
      * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
@@ -147,7 +158,7 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException;
+    void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Uninstall applet from the card
@@ -155,7 +166,7 @@ public interface CardManager {
      * @param force whether the uninstall is forced
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException;
+    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Send command to applet
@@ -164,5 +175,5 @@ public interface CardManager {
      * @return response, or null if failed
      * @throws LocalizedCardException when failed to execute the command transfer
      */
-    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException;
+    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException;
 }

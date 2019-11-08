@@ -1,5 +1,9 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.ErrorPane;
+
+import javax.swing.*;
+
 /**
  * Class enables to rebuild the panel
  */
@@ -12,11 +16,8 @@ public interface Refreshable {
 
     /**
      * Show error with title and error
-     * @param keyTitle key to find in internacionalized bundle
-     * @param keyText key to find in internacionalized bundle
-     * @param imgNamec custom image to display
      */
+    void showError(JPanel pane);
     void showError(String keyTitle, String keyText, String imgNamec);
-
     void showError(String keyTitle, String text, String imgName, LocalizedException cause);
 }

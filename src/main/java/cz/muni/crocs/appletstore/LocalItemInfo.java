@@ -1,9 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.action.DeleteAction;
-import cz.muni.crocs.appletstore.card.action.FreeMemoryAction;
-import cz.muni.crocs.appletstore.card.action.SendApduAction;
+import cz.muni.crocs.appletstore.action.DeleteAction;
+import cz.muni.crocs.appletstore.action.SendApduAction;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;

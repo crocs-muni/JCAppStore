@@ -1,7 +1,6 @@
-package cz.muni.crocs.appletstore.card.action;
+package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
-import pro.javacard.CAPFile;
 
 import java.io.File;
 

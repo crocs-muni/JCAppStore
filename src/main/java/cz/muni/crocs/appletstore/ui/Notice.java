@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Warning extends JPanel {
+public class Notice extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     public enum Importance {
@@ -28,7 +28,7 @@ public class Warning extends JPanel {
         RETRY, CLOSE, NO_ICON
     }
 
-    public Warning(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
+    public Notice(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
         setLayout(new MigLayout("center, gapy 20, insets 0 20 0 20"));
         MouseAdapter call = new MouseAdapter() {
             @Override
