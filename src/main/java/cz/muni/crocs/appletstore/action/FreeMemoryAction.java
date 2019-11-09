@@ -12,7 +12,7 @@ public class FreeMemoryAction extends CardAbstractAction {
     private OnEventCallBack<Void, byte[]> customCall;
 
     public FreeMemoryAction(OnEventCallBack<Void, byte[]> call) {
-        super(null);
+        super(OnEventCallBack.empty());
         customCall = call;
     }
 

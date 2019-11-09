@@ -218,9 +218,9 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void setTryGenericTestKey() {
+    public void setTryGenericTestKey(/*boolean reloadOnRefresh*/) {
         this.tryGeneric = true;
-        setReloadCard();
+//        setReloadCard();
     }
 
     @Override

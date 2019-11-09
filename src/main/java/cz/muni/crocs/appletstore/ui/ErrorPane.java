@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
 
 
 /**
+ * todo worth creating interface
  * @author Jiří Horák
  * @version 1.0
  */

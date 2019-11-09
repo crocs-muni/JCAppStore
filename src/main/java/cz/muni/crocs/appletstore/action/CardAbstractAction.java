@@ -10,6 +10,7 @@ import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
@@ -52,9 +53,10 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
     /**
      * Routine wrapper for the card action execution providing error handling and
      * unknown key management
-     * @param toExecute CardExecutable implementation that is to be executed
+     *
+     * @param toExecute     CardExecutable implementation that is to be executed
      * @param loggerMessage message to write into logger on a failure
-     * @param title title (must be translated!) for the user dialog on failure
+     * @param title         title (must be translated!) for the user dialog on failure
      */
     protected void execute(CardExecutable toExecute, String loggerMessage, String title) {
         call.onStart();
@@ -63,14 +65,17 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                 toExecute.execute();
             } catch (UnknownKeyException e) {
                 try {
+                    InformerFactory.getInformer().showFullScreenInfo(
+                            new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
                     new UnknownKeyHandler(toExecute, e).handle();
                 } catch (LocalizedCardException ex) {
                     caught(title, loggerMessage, ex);
                     return;
                 } catch (UnknownKeyException ex) {
                     logger.error("UnknownKeyException after key was set. Should not even get here.");
-                    //todo dont show failed but show all covering pane
-                    showFailed(textSrc.getString("E_authentication"), textSrc.getString("E_master_key_not_found"));
+                    InformerFactory.getInformer().showFullScreenInfo(
+                            new ErrorPane(textSrc.getString("E_authentication"),
+                                    textSrc.getString("E_master_key_not_found"), "lock.png"));
                     return;
                 }
             } catch (LocalizedCardException ex) {
@@ -124,9 +129,8 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                 failed.execute();
             } else {
                 logger.warn(e.getMessage());
-                //todo image of unknown key
                 InformerFactory.getInformer().showFullScreenInfo(new ErrorPane(textSrc.getString("E_authentication"),
-                        textSrc.getString("E_master_key_not_found"), ""));
+                        textSrc.getString("E_master_key_not_found"), "lock.png"));
             }
         }
 

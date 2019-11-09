@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.util.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
 import org.apache.commons.lang.SystemUtils;
@@ -11,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 
 /**
@@ -25,15 +27,40 @@ public class SplashScreen extends JWindow {
     private Timer timer;
     private int progress = 0;
     private Random r = new Random();
-    private ProcessTrackable loader = new LoaderWorker();
+    private ProcessTrackable loader;
     private Font font = new Font("Courier", Font.PLAIN, 14);
     private boolean update;
     private String numbers = "";
 
     private SplashScreen() {
+        try {
+            if (SystemUtils.IS_OS_LINUX) {
+                //UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+                //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                if (SystemUtils.IS_OS_MAC) {
+                    System.setProperty("com.apple.mrj.application.apple.menu.about.name", "JCAppStore");
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         Container container = getContentPane();
         container.setLayout(null);
-        JLabel bg = new JLabel(new ImageIcon("src/main/resources/img/splash.png")) {
+        loader = new LoaderWorker() {
+            @Override
+            protected void done() {
+                try {
+                    runMainApp(get());
+                } catch (InterruptedException | ExecutionException e) {
+                    runMainApp(e);
+                }
+            }
+        };
+
+        JLabel bg = new JLabel(new ImageIcon(Config.IMAGE_DIR + "splash.png")) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -41,11 +68,12 @@ public class SplashScreen extends JWindow {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setColor(Color.BLACK);
                 if (progress > 2) {
-                    numbers = numbers.substring(0, progress - 2);
+                    numbers = numbers.substring(0, Math.min(progress - 2, numbers.length()));
                 } else {
                     numbers = "";
                 }
-                numbers += String.valueOf(r.nextInt(10)) + String.valueOf(r.nextInt(10));
+                numbers += r.nextInt(10) + String.valueOf(r.nextInt(10));
+                //todo throws on quick load
                 numbers = numbers.substring(0, progress);
 
                 g2d.setFont(font.deriveFont(20f));
@@ -61,7 +89,7 @@ public class SplashScreen extends JWindow {
         setSize(370, 215);
         setLocationRelativeTo(null);
         setVisible(true);
-        new Thread(loader).start();
+        ((SwingWorker)loader).execute();
     }
 
     /**
@@ -79,8 +107,6 @@ public class SplashScreen extends JWindow {
             repaint();
             if (loader.getProgress() > 15) {
                 timer.stop();
-                runMainApp();
-
                 progress = 16;
                 repaint();
             }
@@ -98,22 +124,9 @@ public class SplashScreen extends JWindow {
         return builder.toString();
     }
 
-    private void runMainApp() {
+    private void runMainApp(Exception fromLoad) {
         try {
-            if (SystemUtils.IS_OS_LINUX) {
-                //UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-                //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } else {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                if (SystemUtils.IS_OS_MAC) {
-                    System.setProperty("com.apple.mrj.application.apple.menu.about.name", "JCAppStore");
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-        try {
-            new AppletStore();
+            new AppletStore(fromLoad);
         } catch (Exception e) {
             e.printStackTrace();
             new FeedbackFatalError(textSrc.getString("reporter"), e.getMessage(), true,

@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
+ * todo run on swing util thread
  * @author Jiří Horák
  * @version 1.0
  */

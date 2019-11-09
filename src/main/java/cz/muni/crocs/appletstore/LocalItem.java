@@ -44,7 +44,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     public LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
         this.info = info;
-        this.name = title;
+        this.name = title; //todo somehow break lines on long AIDs (more than 14 chars long)
         this.manager = CardManagerFactory.getManager();
 
         try {
@@ -112,12 +112,28 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     public LocalItem(AppletInfo info) {
         this(
-                (info.getName() == null) ? info.getAid().toString() : info.getName(),
+                breakIfTooLong(getName(info)),
                 (info.getImage() == null) ? "wrong-image-name" : info.getImage(),
                 (info.getAuthor() == null) ? textSrc.getString("unknown") : info.getAuthor(),
                 (info.getVersion() == null) ? "" : info.getVersion(),
                 info
         );
+    }
+
+    private static String getName(AppletInfo info) {
+        String name = (info.getKind() == Kind.ExecutableLoadFile ? textSrc.getString("package_for") : "");
+        if (info.getName() == null) {
+            return name + info.getAid().toString();
+        }
+        return name + info.getName();
+    }
+
+    private static String breakIfTooLong(String name) {
+        int index = name.indexOf(' ');
+        if ((index < 0 || index > 14) && name.length() > 14) {
+            return name.substring(0, 14) + " " + name.substring(14);
+        }
+        return name;
     }
 
     @Override

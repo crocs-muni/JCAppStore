@@ -41,7 +41,6 @@ public class CardInfoPanel extends JPanel {
                 public Void onFinish(byte[] apduData) {
                     changeable.switchEnabled(true);
                     if (apduData == null) {
-                        System.out.println("HEYY");
                         self.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "announcement.png")), "align center, wrap");
                         self.add(new Text(textSrc.getString("memory_could_not_obtain")));
                     } else {

@@ -112,7 +112,7 @@ public class AppletInfo implements Serializable {
                     HexUtils.bin2hex(registry.getAID().getBytes()));
             if (parser.isHeaderPresent()) {
                 name = parser.getValue("name");
-                name = (name.isEmpty()) ? getDefaultName(registry) : name;
+                name = ((name.isEmpty()) ? getDefaultName(registry) : name);
                 author = parser.getValue("author");
                 author = (author.isEmpty()) ? getAuthorByRid(registry) : author;
             } else {
@@ -139,8 +139,7 @@ public class AppletInfo implements Serializable {
     }
 
     private String getDefaultName(GPRegistryEntry registry) {
-        return ((registry.getType() == GPRegistryEntry.Kind.ExecutableLoadFile) ?
-                "Package" : "Applet") + " ID: " + aid.toString();
+        return registry.getAID().toString();
     }
 
     private void setDefaultValues(GPRegistryEntry registry) {

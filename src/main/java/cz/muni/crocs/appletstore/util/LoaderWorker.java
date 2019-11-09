@@ -1,9 +1,13 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.LocalizedException;
 import cz.muni.crocs.appletstore.action.CardDetectionAction;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.UnknownKeyException;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import jnasmartcardio.Smartcardio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,60 +25,56 @@ import static java.lang.Thread.sleep;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrackable {
+public abstract class LoaderWorker extends SwingWorker<Exception, Void> implements ProcessTrackable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
 
     private String info = textSrc.getString("loading_opts");
 
     @Override
-    public Void doInBackground() {
-        //todo maybe return the exception and start the app with it (e.g. do not manager.setReloadCard() but just get the exception so the message can be displayed
-        //! now the card is reloaded 2x and the screen flickers
+    public Exception doInBackground() {
         setProgress(0);
         //first get options will force to initialize
+        final CardManager manager = CardManagerFactory.getManager();
+
         try {
             OptionsFactory.getOptions();
-            CardManager manager = CardManagerFactory.getManager();
+
+            info = textSrc.getString("detect_cards");
             manager.needsCardRefresh();
-            new CardDetectionAction(new OnEventCallBack<Void, Void>() {
-                @Override
-                public void onStart() {
-                    info = textSrc.getString("detect_cards");
-                }
-
-                @Override
-                public void onFail() {
-                    info = textSrc.getString("failed_detect");
-                    manager.setReloadCard();
-                    waitWhile(300);
-                    setProgress(getMaximum());
-                }
-
-                @Override
-                public Void onFinish() {
-                    info = textSrc.getString("launch");
-                    waitWhile(100);
-                    setProgress(getMaximum());
+            manager.loadCard();
+            update("launch", 100, getMaximum());
+            return null;
+        } catch (UnknownKeyException e) {
+            info = textSrc.getString("E_unknown_key");
+            if (useDefaultTestKey() == JOptionPane.YES_OPTION) {
+                try {
+                    manager.setTryGenericTestKey();
+                    manager.loadCard();
+                    update("launch", 100, getMaximum());
                     return null;
+                } catch (LocalizedCardException ex) {
+                    update("failed_detect", 200, getMaximum());
+                    return ex;
+                } catch (UnknownKeyException ex) {
+                    update("failed_detect", 200, getMaximum());
+                    return new LocalizedCardException("WARNING: Card loading failed, should've not happened!",
+                            "E_master_key_not_found");
                 }
-
-                @Override
-                public Void onFinish(Void aVoid) {
-                    return onFinish();
-                }
-            }).start();
+            } else {
+                update("E_unknown_key", 200, getMaximum());
+                return new LocalizedCardException("Card auth failed: user refused to use default test key.",
+                        "E_master_key_not_found");
+            }
+        } catch (LocalizedException e) {
+            update("failed_detect", 200, getMaximum());
+            return e;
         } catch (Exception e) {
-            info = textSrc.getString("failed: " + e.getMessage());
-            waitWhile(2000);
-            setProgress(getMaximum());
+            e.printStackTrace();
+            logger.warn("Store initialization failed: generic error.", e);
+            update("load_failed", 1000, getMaximum());
+            return null;
         }
-        return null;
-    }
-
-    @Override
-    protected void done() {
-        //  do nothing
     }
 
     @Override
@@ -104,6 +104,24 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
         } catch (InterruptedException ex) {
             //do nothing
         }
+    }
+
+    private void update(String key, int delay, int progress) {
+        info = textSrc.getString(key);
+        waitWhile(delay);
+        setProgress(progress);
+    }
+
+    private int useDefaultTestKey() {
+        return JOptionPane.showConfirmDialog(
+                null,
+                new HtmlText(textSrc.getString("I_use_default_keys_1") +
+                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
+                        textSrc.getString("I_use_default_keys_2")),
+                textSrc.getString("key_not_found"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + ""));
     }
 }
 

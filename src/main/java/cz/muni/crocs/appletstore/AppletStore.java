@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -38,6 +39,10 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private GlassPaneBlocker blocker = new GlassPaneBlocker();
 
     public AppletStore() {
+        this(null);
+    }
+
+    public AppletStore(Exception fromLoading) {
         logger.info("------- App started --------");
 
         setup();
@@ -49,7 +54,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
             }
         });
         setBar();
-        initComponents();
+        initComponents(fromLoading);
     }
 
     public MainPanel getWindow() {
@@ -97,10 +102,17 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     /**
      * Build Swing components and start routine
      */
-    private void initComponents() {
+    private void initComponents(Exception fromLoading) {
         setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
         window = new MainPanel(this);
         setContentPane(window);
+
+        if (fromLoading != null) {
+            fromLoading.printStackTrace();
+            logger.error("Store initialization failed: " + fromLoading.getMessage(), fromLoading);
+            window.getRefreshablePane().showError(new ErrorPane(textSrc.getString("load_failed"),
+                    fromLoading.getLocalizedMessage(), "error_white.png"));
+        }
 
         menu = new Menu(this);
         menu.setCard(CardManagerFactory.getManager().getCardDescriptor());
