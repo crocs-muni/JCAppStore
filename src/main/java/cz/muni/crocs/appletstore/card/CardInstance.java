@@ -76,7 +76,7 @@ public class CardInstance {
         reload(defaultTestKey);
     }
 
-    void reload(boolean useDefaultTestKey)
+    private void reload(boolean useDefaultTestKey)
             throws LocalizedCardException, CardException, UnknownKeyException {
         if (useDefaultTestKey) {
             setTestPassword404f();
@@ -155,7 +155,7 @@ public class CardInstance {
                 kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
                 diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
                 doAuth = parser.getValue(IniParser.TAG_AUTHENTICATED).toLowerCase().equals("true");
-                return !(masterKey == null || masterKey.isEmpty());
+                return validMasterKey(masterKey);
             }
 
             logger.info("Card " + id + " saved into card list database.");
@@ -178,6 +178,10 @@ public class CardInstance {
         } catch (IOException e) {
             throw new LocalizedCardException("Unable to save new card details.", "E_card_details_failed");
         }
+    }
+
+    public static boolean validMasterKey(String key) {
+        return key != null && !key.isEmpty() && key.length()% 2 == 0 && key.length() > 15; //todo get key boundaries, should be 32 length for 16 B
     }
 
     /**

@@ -79,16 +79,6 @@ public class Install extends GPCommand<Void> {
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
         if (defaultSelected) privs.add(GPRegistryEntry.Privilege.CardReset);
 
-        if (data.isForce() && (registry.getDefaultSelectedAID().isPresent() && privs.has(GPRegistryEntry.Privilege.CardReset))) {
-            try {
-                //todo do not delete default selected !!!
-                //ask about it
-                context.deleteAID(registry.getDefaultSelectedAID().get(), false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         logger.info("Installing applet: pkg " + file.getPackageAID() + ", aid " + appletAID + ", custom aid " + customAID);
         try {
             context.installAndMakeSelectable(
@@ -102,5 +92,4 @@ public class Install extends GPCommand<Void> {
         }
         return true;
     }
-
 }

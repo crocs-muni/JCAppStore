@@ -12,13 +12,32 @@ public class FreeMemoryAction extends CardAbstractAction {
     private OnEventCallBack<Void, byte[]> customCall;
 
     public FreeMemoryAction(OnEventCallBack<Void, byte[]> call) {
-        super(OnEventCallBack.empty());
+        super(new OnEventCallBack<Void, Void>() {
+            @Override
+            public void onStart() {
+                call.onStart(); //delegated to the wrapper
+            }
+
+            @Override
+            public void onFail() {
+                call.onFail(); //delegated to the wrapper
+            }
+
+            @Override
+            public Void onFinish() {
+                return null; //handled by call
+            }
+
+            @Override
+            public Void onFinish(Void aVoid) {
+                return null; //handled by call
+            }
+        });
         customCall = call;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        customCall.onStart();
         execute(() -> customCall.onFinish(JCMemory.getSystemInfo()),
                 "JCMemory.getSystemInfo() failed", textSrc.getString("E_could_not_get_memory"));
     }

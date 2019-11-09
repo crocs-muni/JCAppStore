@@ -73,6 +73,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                     return;
                 } catch (UnknownKeyException ex) {
                     logger.error("UnknownKeyException after key was set. Should not even get here.");
+                    SwingUtilities.invokeLater(call::onFail);
                     InformerFactory.getInformer().showFullScreenInfo(
                             new ErrorPane(textSrc.getString("E_authentication"),
                                     textSrc.getString("E_master_key_not_found"), "lock.png"));
@@ -126,6 +127,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
 
             if (useDefaultTestKey() == JOptionPane.YES_OPTION) {
                 manager.setTryGenericTestKey();
+                manager.setReloadCard();
                 failed.execute();
             } else {
                 logger.warn(e.getMessage());
