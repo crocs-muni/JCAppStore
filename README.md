@@ -24,10 +24,10 @@ intuitive software to install. You will always find the usage guide in the store
 Also, in the right upper corner, browse help for more detailed description. 
 Full documentation is accessible in [TODO]
 
-####Basic terms (not exact, but a lot easier to understand to)####
+#### Basic terms (not exact, but a lot easier to understand to) ####
 <details>
    <summary>Applet</summary>
-   <p>Applet is the software running on your card. You can think of it as a synonym for application.</p>
+   <p>Applet is the software running on your card. You can think of it as a synonym for application. Applet identifier is often called AID.</p>
 </details>
 
 <details>
@@ -69,32 +69,94 @@ Full documentation is accessible in [TODO]
    SDK instead.</p>
 </details>
 
-#### Installing ####
-
-#### Deleting ####
-
-#### Authentication ####
-
+Authentication
+-----
 The card authentication is executed as follows:
 1) If the card is present in **cards.ini** file, the authentication is performed, if **auth = true** is set and the key value is not in an invalid format
 2) If the card is not present in the file, or the key is invalid, a default test key is searched.
     1) If the test key is found the card is authenticated **immediately** with it as **we suppose user did not change the test key**.
     2) If no test key found the user is asked whether to use the common test key 4041..4E4F.
 
-![Authentication activity diagram](readme-res/auth-activity-diagram.png)
+<details>
+   <summary>Class diagram</summary>
+   ![Authentication activity diagram](readme-res/auth-activity-diagram.png)
+</details>
 
 
-#### Custom master key
+
+#### Custom master key ####
 
 We do not recommend to change default master key if you don't have a reason to do so 
 (e.g. you know you have to). However, if you've already changed it (or the application doesn't know the default test key for your card), 
 then you need to modify the **cards.ini** file.
 
-1) Locate the file in your default documents folder/JCAppStore/data/
+1) Locate the file in \[your default documents folder\]/JCAppStore/data/
 2) Search for your card block, beginning with \[card id value here\]. The card id can be obtained from the store (just plug in the card, the error message will show you the card id).
 3) Modify the key field - set the correct master key value (in hex string, we don't support the 3-piece keys yet).
 4) Modify the auth field - set value to true if not set, for the store to actually try to authenticate to the card.
 
-This store is a GUI layer for GlobalPlatformPro basic functionality. It's purpose is not 
-to mimic GPPro, but to ease the basic card management. Also, the store holds chosen applets 
-that are fully fu .
+
+Installing
+-----
+To install an applet, simply select any product from the store or click on the "install from this PC" icon. The files are _verified_
+using PGP signatures - that means, the store makes sure no one maliciously modified the software you are going to install on your card.
+
+<details>
+   <summary>Advanced instalation settings</summary>
+   <p>
+   **You do not need this feature if you are not an advanced user.**
+   The values that are used in the advanced settings are hexadecimal numbers. That is, valid characters are **123456789ABCDEFabcdef** only.
+   
+   _Radio button applet IDs_: select the applet to install if more available. Also, custom AID is supported.
+   
+   _Installation parameters_: is a value passed to the application when installing. The target applet use info section in store provides necessary information.
+   
+   _Force installation_: will install the applet using force. That is, any applet that would block the installation is removed first (keep this checked for reinstall). 
+   
+   _Custom signature file_: available when custom-installing. You can attach detached signature file to auto-verify the signature. The process requires you
+   to have GPGnu installed and necessary key imported. We do not support auto-importing as we will not touch anyone's keyring.
+   </p>
+</details> 
+
+When installing from the store, the verification is performed _before_ the dialog window is shown. When installing from your PC, the signing happens _after_.
+
+<details>
+   <summary>FAQ: The verification fails</summary>
+   <p>
+   
+   **The verification is not performed**: you need to have GnuPG installed and the store needs to be able to launch it (rights restrictions).
+   
+   **Missing file**: something or somebody probably modified your local copy of the store. Re-download the store before proceeding.
+   
+   **Signature failed**: make sure you have the required key in your GnuPG keyring.
+
+   </p>
+</details> 
+
+After submitting the installation dialog window, the free persistent memory is evaluated first. To do so, we install **JCMemory** applet onto
+your card and obtain the free space size. If there is possibility that the installation fails due to low memory, you are notified. However,
+this method is not 100% accurate as we cannot possibly know the space occupied by the installed instance; and the memory size detection is limited
+to 32,767 bytes.
+
+If you have checked the **keep JCMemory** in store settings, the JCMemory remains on your card. The application itself is minimalistic; we recommend
+you to keep it in order to speed up installations.
+
+Deleting
+-----
+The deletion is very simple; there are only two things you need to know:
+1) We track whether the applet stores sensitive data. If so, you are asked **twice** before the delete action proceeds.
+2) When not in verbose mode (default state, see settings), the store **force** uninstalls package, its applets implicitly (and vice versa). 
+
+ (advanced) _force_ option will uninstall any applet instances when deleting a package
+
+
+Store content
+-----
+You can browse the store using search bar in the left menu. You can search either by application name or developer. Follow these steps:
+
+1) Read the applet use info field before installing. It states any necessary steps that has to be taken in order to use the applet.
+2) Install the newest applet version. If installation fails check if you:
+    3) have enough install memory space
+    4) know whether the sdk installed is supported by your card (see SDK version field in the install dialog window)
+    5) modified advanced install section with incorrect values
+6) Enjoy!    
