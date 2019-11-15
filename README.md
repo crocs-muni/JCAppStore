@@ -79,6 +79,7 @@ The card authentication is executed as follows:
 
 <details>
    <summary>Class diagram</summary>
+   
    ![Authentication activity diagram](readme-res/auth-activity-diagram.png)
 </details>
 
@@ -104,6 +105,7 @@ using PGP signatures - that means, the store makes sure no one maliciously modif
 <details>
    <summary>Advanced instalation settings</summary>
    <p>
+   
    **You do not need this feature if you are not an advanced user.**
    The values that are used in the advanced settings are hexadecimal numbers. That is, valid characters are **123456789ABCDEFabcdef** only.
    
