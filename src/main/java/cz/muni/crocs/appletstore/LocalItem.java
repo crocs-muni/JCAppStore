@@ -41,12 +41,12 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     public LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
         this.info = info;
-        this.name = title; //todo somehow break lines on long AIDs (more than 14 chars long)
+        this.name = title;
         this.manager = CardManagerFactory.getManager();
 
         try {
             newItem = ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
-            superSelected = ImageIO.read(new File(Config.IMAGE_DIR + "super.png"));
+            superSelected = ImageIO.read(new File(Config.IMAGE_DIR + "main.png"));
         } catch (IOException e) {
             newItem = null;
             superSelected = null;
@@ -176,7 +176,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
             }
             if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
                 g2d.drawImage(newItem, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
-            } else if (info.getAid() != null && info.getAid().equals(card.getDefaultSelected()) && superSelected != null) {
+            } else if (info.getAid() != null && card != null && info.getAid().equals(card.getDefaultSelected()) && superSelected != null) {
                 g2d.drawImage(superSelected, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
             }
         }

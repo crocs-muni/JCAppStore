@@ -200,6 +200,8 @@ public class CardInstanceImpl implements CardInstance {
                     GPCardKeys key = PlaintextKeys.derivedFromMasterKey(HexUtils.hex2bin(masterKey), HexUtils.hex2bin(kcv), getDiversifier(diversifier));
                     context.openSecureChannel(key, null, null, GPSession.defaultMode.clone());
                     logger.info("Secure channel established.");
+                } catch (IllegalArgumentException e) {
+                    throw new LocalizedCardException(e.getMessage(), textSrc.getString("wrong_kcv"), e);
                 } catch (GPException e) {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
@@ -323,7 +325,9 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     private static boolean validMasterKey(String key) {
-        return key != null && !key.isEmpty() && key.length()% 2 == 0 && key.length() > 15; //todo get key boundaries, should be 32 length for 16 B
+        //key is either 3DES or AES with the length of 128/256 bit = 8/16 bytes = 16/32 chars
+        //todo find out which key version the gppro uses eas or 3des
+        return key != null && !key.isEmpty() && key.length()% 2 == 0 && (key.length() == 32 || key.length() == 16);
     }
 
     /**

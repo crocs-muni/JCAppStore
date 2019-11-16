@@ -233,6 +233,8 @@ public class AppletInfo implements Serializable {
     }
 
     private String type(GPRegistryEntry.Kind kind) {
+        if (kind == null) return "unknown";
+
         switch (kind) {
             case ExecutableLoadFile: return "Package";
             case SecurityDomain: return "Security domain";

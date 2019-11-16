@@ -48,6 +48,9 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
         } else {
             saved = Collections.emptySet();
         }
+        System.out.println(saved.toArray().length);
+
+        System.out.println(Arrays.toString(saved.toArray()));
 
         for (GPRegistryEntry entry : registry) {
             //global platform lists all packages two times skip the one with no modules in it

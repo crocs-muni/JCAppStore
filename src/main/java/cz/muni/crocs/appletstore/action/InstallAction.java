@@ -255,11 +255,12 @@ public class InstallAction extends CardAbstractAction {
             AppletInfo info = manager.getCard().getInfoOf(selected);
             if (info != null && info.getKind() != Kind.IssuerSecurityDomain && info.getKind() != Kind.SecurityDomain) {
                 int result = JOptionPane.showOptionDialog(null,
-                        textSrc.getString("default_selected_ask1") + info.getName() +
-                                textSrc.getString("default_selected_ask2") + opts.getName(),
+                        "<html><div width=\"600\">" + textSrc.getString("default_selected_ask1") +
+                                info.getName() + "<br>" + textSrc.getString("default_selected_ask2") +
+                                opts.getName() + "</div></html>",
                         textSrc.getString("default_selected_ask_title"),
                         YES_NO_OPTION, PLAIN_MESSAGE,
-                        new ImageIcon("src/main/resources/img/bug.png"),
+                        new ImageIcon("src/main/resources/img/info.png"),
                         new String[]{textSrc.getString("default_selected_yes"),
                                 textSrc.getString("default_selected_no")},
                         textSrc.getString("default_selected_yes"));
