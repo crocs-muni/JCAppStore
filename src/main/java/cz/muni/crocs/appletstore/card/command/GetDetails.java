@@ -31,4 +31,9 @@ public class GetDetails extends GPCommand<CardDetails> {
         result.setKeyInfo(fetchKeyInfoTemplate(channel));
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "Getting card detail information before authentication.";
+    }
 }

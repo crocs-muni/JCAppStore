@@ -220,4 +220,25 @@ public class AppletInfo implements Serializable {
     public int hashCode() {
         return Objects.hash(kind, aid);
     }
+
+    @Override
+    public String toString() {
+        return type(kind) + ": " + (valid(name) ? name : "unkown") + ", " + aid + ", author " +
+                (valid(author) ? author : "unkown") + ", version " +  (valid(version) ? version : "unkown") +
+                ", with sdk " + (valid(sdk) ? sdk : "unkown") ;
+    }
+
+    private boolean valid(String value) {
+        return value != null && !value.isEmpty();
+    }
+
+    private String type(GPRegistryEntry.Kind kind) {
+        switch (kind) {
+            case ExecutableLoadFile: return "Package";
+            case SecurityDomain: return "Security domain";
+            case IssuerSecurityDomain: return "Issuer security domain";
+            case Application: return "Applet";
+        }
+        return "unknown";
+    }
 }

@@ -78,7 +78,7 @@ The card authentication is executed as follows:
     2) If no test key found the user is asked whether to use the common test key 4041..4E4F.
 
 <details>
-   <summary>Class diagram</summary>
+   <summary>Activity diagram: authentication</summary>
    
    ![Authentication activity diagram](readme-res/auth-activity-diagram.png)
 </details>

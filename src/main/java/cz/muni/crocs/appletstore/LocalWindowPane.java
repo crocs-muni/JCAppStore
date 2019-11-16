@@ -112,17 +112,23 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         infoLayout.set(null);
 
         CardManager manager = CardManagerFactory.getManager();
+        CardInstance card = manager.getCard();
         logger.debug("Local pane updated: " + manager.getTerminalState().toString());
-        if (verifyTerminalState(manager.getTerminalState())
-                && verifyCardLifeState(manager.getCardLifeCycle())) {
 
-            Set<AppletInfo> cardApplets = manager.getInstalledApplets();
+        if (!verifyTerminalState(manager.getTerminalState()))  return;
+        if (card == null) {
+            showError("no_card", "H_no_card", "plug-in-out.png");
+            return;
+        }
+
+        if (verifyCardLifeState(card.getLifeCycle())) {
+            Set<AppletInfo> cardApplets = card.getInstalledApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null as applet array returned.");
                 return;
             } else {
-                loadApplets(manager.getInstalledApplets(), manager);
+                loadApplets(card.getInstalledApplets(), manager);
             }
 
             constraints.fill = GridBagConstraints.BOTH;
@@ -247,7 +253,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             item.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    manager.switchApplet(item.info.getAid());
+                    manager.switchAppletStoreSelected(item.info.getAid());
                     if (manager.isAppletStoreSelected())
                         infoLayout.set(item.info);
                     else

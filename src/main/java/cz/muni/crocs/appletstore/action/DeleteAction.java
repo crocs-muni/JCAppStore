@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.DeleteDialogWindow;
 import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -64,7 +65,8 @@ public class DeleteAction extends CardAbstractAction {
         //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
         if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && info.getKind() == Kind.ExecutableLoadFile) {
             for (AID mod : info.getModules()) {
-                if (manager.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+                CardInstance card = manager.getCard();
+                if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
                     willForce = true;
                     break;
                 }
@@ -103,7 +105,9 @@ public class DeleteAction extends CardAbstractAction {
     }
 
     private AppletInfo getPackageOf(AppletInfo applet) {
-        for (AppletInfo info : CardManagerFactory.getManager().getInstalledApplets()) {
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        if (card == null) return null;
+        for (AppletInfo info : card.getInstalledApplets()) {
             if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
                 for (AID instance : info.getModules()) {
                     if (instance.equals(applet.getAid())) {

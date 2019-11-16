@@ -92,4 +92,9 @@ public class Install extends GPCommand<Void> {
         }
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "Install method.";
+    }
 }

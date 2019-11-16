@@ -55,7 +55,7 @@ public class LocalItemInfo extends HintPanel {
         close.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                CardManagerFactory.getManager().switchApplet(null);
+                CardManagerFactory.getManager().switchAppletStoreSelected(null);
                 unset();
             }
         });

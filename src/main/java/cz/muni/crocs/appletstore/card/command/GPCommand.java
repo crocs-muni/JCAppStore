@@ -24,4 +24,5 @@ public abstract class GPCommand<T> implements CardCommand {
     public void setChannel(APDUBIBO channel) {
         this.channel = channel;
     }
+    public abstract String getDescription();
 }

@@ -1,9 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
@@ -162,6 +159,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
 
     @Override
     protected void paintComponent(Graphics g) {
+        CardInstance card = manager.getCard();
         boolean isSelected = info != null && manager.isAppletStoreSelected(info.getAid());
 
         if (info != null) {
@@ -178,7 +176,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
             }
             if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
                 g2d.drawImage(newItem, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
-            } else if (info.getAid() != null && info.getAid().equals(manager.getDefaultSelected()) && superSelected != null) {
+            } else if (info.getAid() != null && info.getAid().equals(card.getDefaultSelected()) && superSelected != null) {
                 g2d.drawImage(superSelected, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
             }
         }

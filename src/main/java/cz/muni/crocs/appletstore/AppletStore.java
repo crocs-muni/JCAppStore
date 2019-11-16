@@ -115,7 +115,9 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         }
 
         menu = new Menu(this);
-        menu.setCard(CardManagerFactory.getManager().getCardDescriptor());
+        CardInstance card = CardManagerFactory.getManager().getCard();
+
+        menu.setCard(card == null ? null : card.getDescriptor());
         setJMenuBar(menu);
         setGlassPane(blocker);
 

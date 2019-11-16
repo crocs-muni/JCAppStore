@@ -35,4 +35,9 @@ public class GetDefaultSelected extends GPCommand<Optional<AID>> {
         }
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "Get default selected method.";
+    }
 }

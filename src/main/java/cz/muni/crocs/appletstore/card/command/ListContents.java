@@ -57,4 +57,9 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
         }
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "List contents method for: " + cardId;
+    }
 }

@@ -54,4 +54,9 @@ public class Delete extends GPCommand<Void> {
         }
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "Delete method: delete applet " + toDelete + ", using force: " + force;
+    }
 }

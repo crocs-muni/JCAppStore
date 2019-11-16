@@ -43,4 +43,9 @@ public class Transmit extends GPCommand<ResponseAPDU> {
         result = response;
         return true;
     }
+
+    @Override
+    public String getDescription() {
+        return "Transmit method with command of " + APDU + ", sent to AID: " + targetAid;
+    }
 }

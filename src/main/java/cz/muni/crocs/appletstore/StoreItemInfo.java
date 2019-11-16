@@ -2,9 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.KeysPresence;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.action.InstallAction;
 import cz.muni.crocs.appletstore.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
@@ -17,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
+import javax.smartcardio.Card;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -49,7 +48,8 @@ public class StoreItemInfo extends HintPanel {
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
         setOpaque(false);
-        Set<AppletInfo> appletInfos = CardManagerFactory.getManager().getInstalledApplets();
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();

@@ -173,16 +173,20 @@ public class InstallAction extends CardAbstractAction {
     }
 
     private void fireInstall(final InstallOpts opts) {
+        final CardManager manager = CardManagerFactory.getManager();
+        if (!manager.isCard()) {
+            return;
+        }
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
         logger.info("Install AID: " + opts.getAID());
 
-        final CardManager manager = CardManagerFactory.getManager();
         //if easy mode && package already present
         if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE)) {
             //if applet present dont change anything
-            if (manager.getInstalledApplets().stream().noneMatch(a ->
+
+            if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
                     a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
-                if (manager.getInstalledApplets().stream().anyMatch(a ->
+                if (manager.getCard().getInstalledApplets().stream().anyMatch(a ->
                         a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
                     opts.setForce(true);
                 }
@@ -241,10 +245,14 @@ public class InstallAction extends CardAbstractAction {
     }
 
     private void doInstall(final InstallOpts opts, final CardManager manager) {
+        if (!manager.isCard()) {
+            return;
+        }
+
         if (defaultSelected) {
             //custom applet never reaches this section
-            AID selected = manager.getDefaultSelected();
-            AppletInfo info = manager.getInfoOf(selected);
+            AID selected = manager.getCard().getDefaultSelected();
+            AppletInfo info = manager.getCard().getInfoOf(selected);
             if (info != null && info.getKind() != Kind.IssuerSecurityDomain && info.getKind() != Kind.SecurityDomain) {
                 int result = JOptionPane.showOptionDialog(null,
                         textSrc.getString("default_selected_ask1") + info.getName() +

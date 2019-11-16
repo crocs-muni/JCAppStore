@@ -18,11 +18,23 @@ public interface CardManager {
     boolean isCard();
 
     /**
-     * Switches to the new aid as selected applet
+     * Get current card
+     * @return card instance if present, null otherwise
+     */
+    CardInstance getCard();
+
+    /**
+     * Set whether the app should try default test key
+     * next time the card is attempted to authenticate to
+     */
+    void setTryGenericTestKey();
+
+    /**
+     * Switches to the new aid as store selected applet (not default selected)
      * should not select if card not plugged
      * @param aid AID to select
      */
-    void switchApplet(AID aid);
+    void switchAppletStoreSelected(AID aid);
 
     /**
      * Check if any applet selected by store (not by card)
@@ -47,41 +59,38 @@ public interface CardManager {
      * @return set of all terminals
      */
     Set<String> getTerminals();
+
+    /**
+     * Get selected terminal
+     * @return currently used CardTerminal instance
+     */
     CardTerminal getSelectedTerminal();
+
+    /**
+     * Get selected terminal name
+     * @return currently used card terminal name
+     */
     String getSelectedTerminalName();
 
+    /**
+     * Set terminal as used
+     * @param name name of the terminal to select
+     */
     void setSelectedTerminal(String name);
-
-    /**
-     * Get applets on card
-     * @return applets info list
-     */
-    Set<AppletInfo> getInstalledApplets();
-
-    /**
-     * Return applet info associated with AID given
-     * @param aid aid to search for
-     * @return AppletInfo or null
-     */
-    AppletInfo getInfoOf(AID aid);
-
-    /**
-     * Get card identifier
-     * @return card id
-     */
-    String getCardId();
-
-    /**
-     * Get card name and id
-     * @return card descriptor
-     */
-    String getCardDescriptor();
 
     /**
      * Get last inserted card descriptor
      * @return card descriptor
      */
     String getLastCardDescriptor();
+
+    /**
+     * Get the last installed applet aid
+     * @return AID of the last installed applet
+     */
+    AID getLastAppletInstalledAid();
+
+
 
     /**
      * Evaluates the necessity of card refreshing
@@ -98,34 +107,9 @@ public interface CardManager {
     void loadCard() throws LocalizedCardException, UnknownKeyException;
 
     /**
-     * Get life cycle of the card
-     * @return int, where value determines card state - OP_READY, LOCKED...
-     * as designed by GlobalPlatform specification
-     */
-    Integer getCardLifeCycle();
-
-    /**
-     * Get the last installed applet aid
-     * @return AID of the last installed applet
-     */
-    AID getLastAppletInstalledAid();
-
-    /**
-     * Get the default selected applet AID
-     * @return null if not default selected applet, AID otherwise
-     */
-    AID getDefaultSelected();
-
-    /**
-     * Set whether
+     * Invalidates the card instance data
      */
     void setReloadCard();
-
-    /**
-     * Set whether the app should try default test key
-     * next time the card is attempted to authenticate to
-     */
-    void setTryGenericTestKey();
 
     /**
      * Install new applet onto current card
