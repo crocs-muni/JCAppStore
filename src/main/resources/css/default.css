@@ -19,3 +19,7 @@ body {
     display: block;
     word-wrap: break-word;
 }
+
+ol, ul {
+    margin: 6px 0 6px 15px;
+}

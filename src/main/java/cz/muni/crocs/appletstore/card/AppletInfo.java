@@ -2,7 +2,10 @@ package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 
@@ -17,8 +20,14 @@ import java.util.*;
  * @version 1.0
  */
 public class AppletInfo implements Serializable {
+    public static final int RID_SUBSTRING_LENGTH = 10;
+
     private static final long serialVersionUID = 458932548615025100L;
+    private static final Logger logger = LoggerFactory.getLogger(AppletInfo.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+
+    private static IniParser knownAids;
+    private static IniParser knownRids;
 
     private transient int lifecycle;
     private transient GPRegistryEntry.Kind kind;
@@ -33,7 +42,27 @@ public class AppletInfo implements Serializable {
     private String sdk;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
+    private static IniParser loadSource(String path, String error) {
+        try {
+            return new IniParserImpl(path, "");
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(error, e);
+            return null;
+        }
+    }
+
+    public AppletInfo() {
+        if (knownAids == null) {
+            knownAids = loadSource(Config.DATA_DIR + "well_known_aids.ini", "Failed to get known aids.");
+        }
+        if (knownRids == null) {
+            knownRids = loadSource(Config.DATA_DIR + "well_known_rids.ini", "Failed to get known rids.");
+        }
+    }
+
     public AppletInfo(String name, String image, String version, String author, String sdk) {
+        this();
         this.name = name;
         this.image = image;
         this.version = version;
@@ -65,6 +94,7 @@ public class AppletInfo implements Serializable {
      * @param registry GP info from a card
      */
     public AppletInfo(GPRegistryEntry registry) {
+        this();
         if (registry != null) {
             aid = registry.getAID().toString();
             lifecycle = registry.getLifeCycle();
@@ -76,6 +106,7 @@ public class AppletInfo implements Serializable {
     }
 
     public AppletInfo(GPRegistryEntry registry, Set<AppletInfo> savedApplets) {
+        this();
         if (registry != null) {
             aid = registry.getAID().toString();
             lifecycle = registry.getLifeCycle();
@@ -107,33 +138,25 @@ public class AppletInfo implements Serializable {
     }
 
     private void deduceData(GPRegistryEntry registry) {
-        try {
-            IniParserImpl parser = new IniParserImpl(Config.DATA_DIR + "well_known_aids.ini",
-                    HexUtils.bin2hex(registry.getAID().getBytes()));
-            if (parser.isHeaderPresent()) {
-                name = parser.getValue("name");
+        if (knownAids != null) {
+            knownAids.header(HexUtils.bin2hex(registry.getAID().getBytes()));
+            if (knownAids.isHeaderPresent()) {
+                name = knownAids.getValue("name");
                 name = ((name.isEmpty()) ? getDefaultName(registry) : name);
-                author = parser.getValue("author");
+                author = knownAids.getValue("author");
                 author = (author.isEmpty()) ? getAuthorByRid(registry) : author;
-            } else {
-                setDefaultValues(registry);
+                return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            setDefaultValues(registry);
         }
+        setDefaultValues(registry);
     }
 
     private String getAuthorByRid(GPRegistryEntry registry) {
-        try {
-            IniParserImpl parser = new IniParserImpl(Config.DATA_DIR + "well_known_rids.ini",
-                    registry.getAID().toString().toUpperCase().substring(0, 10));
-            if (parser.isHeaderPresent()) {
-                return parser.getValue("author");
+        if (knownRids != null) {
+            knownRids.header(registry.getAID().toString().trim().toUpperCase().substring(0, RID_SUBSTRING_LENGTH));
+            if (knownRids.isHeaderPresent()) {
+                return knownRids.getValue("author");
             }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
         }
         return textSrc.getString("unknown");
     }

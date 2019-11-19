@@ -81,6 +81,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                 }
             } catch (LocalizedCardException ex) {
                 caught(title, loggerMessage, ex);
+                //todo show
                 return;
             }
             SwingUtilities.invokeLater(call::onFinish);

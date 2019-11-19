@@ -64,4 +64,11 @@ public interface IniParser {
      * @return set of keys
      */
     Set<String> keySet();
+
+    /**
+     * Change header
+     * @param newHeader header to use
+     * @return this instance for builder pattern
+     */
+    IniParser header(String newHeader);
 }

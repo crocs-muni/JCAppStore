@@ -32,7 +32,7 @@ Full documentation is accessible in [TODO]
 
 <details>
    <summary>Main applet</summary>
-   <p>Main applet is the default application running. Some applets require to be main in order to work.</p>
+   <p>Main applet is the default application running. Rarely, some applets require to be main in order to work. Most likely you will not have any applet as a main.</p>
 </details>
 
 <details>
@@ -48,18 +48,18 @@ Full documentation is accessible in [TODO]
 <details>
    <summary>Master key</summary>
    <p>Master key is the key that is required from you by a card manager (security domain). Without the key, you 
-   can't **modify** (e.g. install, delete..) the card contents. **The master key is not a PIN or a card password you are used to.** The key may be one single long sequence, or it can consist
-   of three parts. [Detailed key information here](https://github.com/martinpaljak/GlobalPlatformPro/wiki/Keys). You need not to change the master key.</p>
+   can't modify (e.g. install, delete..) the card contents. The master key is not a PIN or a card password you are used to. The key may be one single long sequence, or it can consist
+   of three parts. See https://github.com/martinpaljak/GlobalPlatformPro/wiki/Keys. You need not to change the master key.</p>
 </details>
 
 <details>
    <summary>Host application</summary>
-   <p>The applet on a card needs to communicate with your computer. Most applets do not have
-   these hosts and are very hard to use. The store does not display such software.
+   <p>The applet on a card needs to communicate with something on your computer. Most applets do not have
+   these hosts and thus are very difficult to use. The store does not offer such software.
    
-   The host application can be accessible through command line only. The command line guide can
-   be found in the app help section. At best, the host application has a GUI host twin and 
-   should be intuitive.</p>
+   There are two types of host applications - with GUI and without.
+   For host applications that can be used through command line only (without GUI) see guide 'Command line'
+   in the app help section (right upper corner). GUI host should be intuitive.</p>
 </details>
 
 <details>

@@ -25,7 +25,9 @@ public class IniParserImpl implements IniParser {
      */
     public IniParserImpl(File file, String header, String comment) throws IOException {
         if (!file.exists()) {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                throw new IOException("Failed to create missing ini file.");
+            }
         }
         this.ini = new Ini(file);
         this.header = header;
@@ -93,5 +95,10 @@ public class IniParserImpl implements IniParser {
         Profile.Section section = ini.get(header);
         if (section == null) return null;
         return section.keySet();
+    }
+
+    public IniParser header(String newHeader) {
+        this.header = newHeader;
+        return this;
     }
 }

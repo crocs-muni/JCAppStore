@@ -232,7 +232,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
 
         removeAll();
         defaultConstraints();
-        constraints.weighty = 0.05;
+        constraints.weighty = 0.001;
         constraints.gridx = 0;
         constraints.gridy = 0;
         add(submenu, constraints);

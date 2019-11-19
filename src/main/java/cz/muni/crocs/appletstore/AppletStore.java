@@ -111,7 +111,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
             fromLoading.printStackTrace();
             logger.error("Store initialization failed: " + fromLoading.getMessage(), fromLoading);
             window.getRefreshablePane().showError(new ErrorPane(textSrc.getString("load_failed"),
-                    fromLoading.getLocalizedMessage(), "error_white.png"));
+                    fromLoading.getLocalizedMessage(), "plug-in-out.png"));
         }
 
         menu = new Menu(this);
