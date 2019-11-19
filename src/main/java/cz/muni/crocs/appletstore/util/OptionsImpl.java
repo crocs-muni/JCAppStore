@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.crypto.PGP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,9 @@ import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.io.*;
 import java.util.HashMap;
+import java.util.Set;
+
+import static cz.muni.crocs.appletstore.Config.S;
 
 public class OptionsImpl implements Options<String> {
     private static final Logger logger = LoggerFactory.getLogger(OptionsImpl.class);
@@ -16,6 +20,7 @@ public class OptionsImpl implements Options<String> {
     private StyleSheet sheet;
     private Font text;
     private Font title;
+    private final String HEADER = "JCAppStore";
 
     public OptionsImpl() {
         getFileOptions();
@@ -38,13 +43,17 @@ public class OptionsImpl implements Options<String> {
     @Override
     public void setDefaults() {
         options.clear();
-        options.put(Options.KEY_LANGUAGE, "en");
-        options.put(Options.KEY_BACKGROUND, "bg.jpg");
+        options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
+        options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");
-        options.put(Options.KEY_STYLESHEET, "src/main/resources/css/default.css");
-        options.put(Options.KEY_FONT, null);
-        options.put(Options.KEY_TITLE_FONT, "src/main/resources/fonts/title.ttf");
+        options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
+        options.put(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
+        options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
+        options.put(Options.KEY_PGP_LOCATION, "");
+        options.put(Options.KEY_VERBOSE_MODE, "false");
+        options.put(Options.KEY_KEEP_JCMEMORY, "true");
+        options.put(Options.KEY_DELETE_IMPLICIT, "true");
     }
 
     @Override
@@ -74,7 +83,7 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public Font getTitleFont(int style, float size) {
-        return  getTitleFont().deriveFont(style, size);
+        return getTitleFont().deriveFont(style, size);
     }
 
     @Override
@@ -83,8 +92,16 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
+    public boolean is(String key) {
+        return getOption(key).trim().toLowerCase().equals("true");
+    }
+
+
+    @Override
     public String getOption(String name) {
-        return options.get(name);
+        if (options.containsKey(name))
+            return options.get(name);
+        return "";
     }
 
     @Override
@@ -94,30 +111,29 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void save() {
-        File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
+        File file = new File(Config.OPTIONS_FILE);
         try {
-            if (!file.createNewFile()) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                    options.forEach((key, value) -> safeWriter(writer, key, value));
-                }
-            }
+            if (!file.exists()) file.createNewFile();
+            IniParser parser = new IniParserImpl(file, HEADER, "");
+            options.forEach(parser::addValue);
+            parser.store();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void getFileOptions(){
+    private void getFileOptions() {
         options = new HashMap<>();
-        File file = new File(Config.APP_DATA_DIR + Config.SEP + "jcappstore.options");
+        File file = new File(Config.OPTIONS_FILE);
 
         try {
             if (!file.createNewFile()) {
-                try (BufferedReader r = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        String[] content = line.split("=");
-                        options.put(content[0], content[1]);
-                    }
+                IniParser parser = new IniParserImpl(file, HEADER, "");
+                Set<String> keyset = parser.keySet();
+                if (keyset == null)
+                    return;
+                for (String key : keyset) {
+                    options.put(key, parser.getValue(key));
                 }
                 if (options.size() == 0) {
                     setDefaults();
@@ -125,19 +141,10 @@ public class OptionsImpl implements Options<String> {
             } else {
                 setDefaults();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             setDefaults();
             logger.warn("Failed to read app options.");
-        }
-    }
-
-    private void safeWriter(BufferedWriter writer, String key, String value) {
-        try {
-            writer.write(key + "=" + value + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.warn("Failed to save options.");
         }
     }
 
@@ -188,8 +195,9 @@ public class OptionsImpl implements Options<String> {
     }
 
     private Font getCustomFont(File fontFile) {
+        if (fontFile == null || !fontFile.exists()) return getDefaultFont();
         try {
-            return Font.createFont(Font.TRUETYPE_FONT, fontFile);
+            return Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
             return getDefaultFont();
@@ -242,7 +250,7 @@ public class OptionsImpl implements Options<String> {
 //                    populateOptions("eng");
 //                }
 //                //context.dispose();
-//                //todo problem cannot get language while fetching options
+//                //problem cannot get language while fetching options
 //                JOptionPane.showMessageDialog(null, "Changes will apply after an restart.");
 //
 //            }

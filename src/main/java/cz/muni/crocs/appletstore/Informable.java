@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.ui.ErrorPane;
+
 import javax.swing.*;
 
 /**
@@ -10,20 +12,25 @@ import javax.swing.*;
 public interface Informable {
 
     /**
+     * Show info covering the full screen, used when not possible to load the contents
+     * @param pane panel to show
+     */
+    void showFullScreenInfo(JPanel pane);
+
+    /**
      * Show supplied component to user
      * @param component component to show
      */
-    void showWarning(JComponent component);
+    void showInfo(JComponent component);
 
     /**
      * Hide supplied component if shown
-     * @param component component component to hide
      */
-    void hideWarning(JComponent component);
+    void hideInfo();
 
     /**
      * Show info to user
      * @param info information text
      */
-    void showInfo(String info);
+    void showMessage(String info);
 }

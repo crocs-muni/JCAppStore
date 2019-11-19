@@ -8,7 +8,7 @@
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="[%highlight{%-5level}] %d{DEFAULT} %c{1}.%M() - %msg%n%throwable{short.lineNumber}" />
         </Console>
-        <RollingFile name="rollingFile" fileName="${logPath}/${rollingFileName}.log" filePattern="${logPath}/${rollingFileName}_%d{yyyy-MM-dd-HH:mm}.log">
+        <RollingFile name="rollingFile" fileName="${logPath}/${rollingFileName}.log" filePattern="${logPath}/${rollingFileName}_%d{yyyy-MM-dd-HH.mm}.log">
             <PatternLayout pattern="[%highlight{%-5level}] %d{DEFAULT} %c{1}.%M() - %msg%n%throwable{short.lineNumber}" />
             <Policies>
                 <!-- Causes a rollover if the log file is older than the current JVM's start time -->
@@ -17,8 +17,16 @@
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
             </Policies>
         </RollingFile>
+        <JTextAreaAppender name="JCAppStore_logger" maxLines="250">
+            <PatternLayout>
+                <pattern>[%-5level] %d{HH:mm ss} %msg</pattern>
+            </PatternLayout>
+        </JTextAreaAppender>
     </Appenders>
     <Loggers>
+        <Logger name="cz.muni.crocs.appletstore.util.LoggerConsole" level="ALL" additivity="false">
+            <AppenderRef ref="JCAppStore_logger" level="debug"/>
+        </Logger>
         <Root level="ALL" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="rollingFile" />

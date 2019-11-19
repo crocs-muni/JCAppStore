@@ -19,6 +19,10 @@ public interface Options<ValueType> {
     String KEY_STYLESHEET = "stylesheet";
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
+    String KEY_PGP_LOCATION = "gpg";
+    String KEY_VERBOSE_MODE = "verbose";
+    String KEY_KEEP_JCMEMORY = "jcmemory_keep";
+    String KEY_DELETE_IMPLICIT = "delete_pkg";
 
     /**
      * Get option for app
@@ -91,4 +95,10 @@ public interface Options<ValueType> {
      * @return default styleSheet for app
      */
     StyleSheet getDefaultStyleSheet();
+
+    /**
+     * Check for boolean condition
+     * @return true if key evaluated to true
+     */
+    boolean is(String key);
 }

@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.TerminalManager;
+import jnasmartcardio.Smartcardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class Terminals {
     private static final Logger logger = LoggerFactory.getLogger(Terminals.class);
 
     public enum TerminalState {
-        NO_READER, NO_CARD, LOADING, OK
+        NO_READER, NO_CARD, LOADING, OK, NO_SERVICE
     }
 
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
@@ -71,7 +72,7 @@ public class Terminals {
      * Forces the terminal app to reload
      * package-private: can be used through manager only
      */
-    void refresh() {
+    void setNeedsRefresh() {
         this.needsRefresh = true;
     }
 
@@ -83,6 +84,11 @@ public class Terminals {
      * package-private: can be used through manager only
      */
     int checkTerminals() {
+        if (needsRefresh) {
+            needsRefresh = false;
+            return 2;
+        }
+
         int oldHash = cardReaderMap.keySet().hashCode();
         cardReaderMap.clear();
 
@@ -91,7 +97,6 @@ public class Terminals {
 
         try {
             final TerminalFactory tf;
-            //todo find out which SPEC
             tf = TerminalManager.getTerminalFactory(null);
             CardTerminals terminals = tf.terminals();
 
@@ -106,23 +111,24 @@ public class Terminals {
                 return (old != state) ? 2 : 0;
             }
 
-            needToRefresh = needsRefresh || toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
+            needToRefresh = toSelectReader != null || selectedReader == null || selectedReader.isEmpty() ||
                     !cardReaderMap.containsKey(selectedReader);
             if (needToRefresh) {
                 selectedReader = (toSelectReader != null && cardReaderMap.containsKey(toSelectReader))
                         ? toSelectReader : cardReaderMap.firstKey();
                 logger.info("Selected reader: " + selectedReader);
                 toSelectReader = null;
-                needsRefresh = false;
             }
 
             if (!checkCardPresence(selectedReader)) {
                 selectedReader = checkAnyCardPresence();
             }
+
+        } catch (Smartcardio.EstablishContextException | Smartcardio.JnaPCSCException | Smartcardio.JnaCardException e) {
+            state = TerminalState.NO_SERVICE;
+            return (old != state) ? 2 : 0;
         } catch (CardException | NoSuchAlgorithmException e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
-                    null, e.getMessage(), "Start", JOptionPane.INFORMATION_MESSAGE));
             logger.warn("Failed to check terminal.", e);
             state = TerminalState.NO_READER;
             return (old != state) ? 2 : 0;

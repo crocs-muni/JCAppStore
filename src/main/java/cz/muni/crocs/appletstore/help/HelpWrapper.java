@@ -8,6 +8,7 @@ public class HelpWrapper extends JDialog {
    public HelpWrapper(String title, Container component) {
        setTitle(title);
        setModal(true);
+       component.setBackground(Color.WHITE);
        setPreferredSize(new Dimension(850, 550));
 
        setContentPane(new JScrollPane(component));

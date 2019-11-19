@@ -5,28 +5,33 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import javax.swing.*;
 import java.awt.*;
 
+
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class CustomJmenu extends JMenu {
 
+    public CustomJmenu(String title) {
+        super("<html><p style='margin: 3 8'>" + title + "</p></html>");
+        uiSettings();
+    }
+
+    public CustomJmenu(AbstractAction action) {
+        super(action);
+        uiSettings();
+    }
+
     public CustomJmenu(String title, String description, int mnemonic) {
         super("<html><p style='margin: 3 8'>" + title + "</p></html>");
+        uiSettings();
         defaultSettings(description, mnemonic);
     }
 
     public CustomJmenu(AbstractAction action, String description, int mnemonic) {
         super(action);
+        uiSettings();
         defaultSettings(description, mnemonic);
-    }
-
-    private void defaultSettings(String description, int mnemonic) {
-        setMnemonic(mnemonic);
-        getAccessibleContext().setAccessibleDescription(description);
-        setFont(OptionsFactory.getOptions().getFont(12f));
-        setForeground(Color.WHITE);
-        setMargin(new Insets(0,0 ,0 ,0 ));
     }
 
     //remove popumenu border
@@ -37,26 +42,24 @@ public class CustomJmenu extends JMenu {
         return menu;
     }
 
-    //deletes button border
+    //deletes border
     @Override
-    protected void paintBorder(Graphics g){
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        if (getModel().isPressed()) {
-            g.setColor(Color.WHITE);
-            //setForeground(Color.BLACK);
-        } else if (getModel().isRollover()) {
-            g.setColor(Color.BLACK);
-        } else {
-            g.setColor(Color.BLACK);
-        }
-        g.fillRect(0, 0, getWidth(), getHeight());
-        super.paintComponent(g);
+    protected void paintBorder(Graphics g) {
     }
 
     @Override
     public void setContentAreaFilled(boolean b) {
+    }
+
+    private void uiSettings() {
+        setOpaque(false); //todo uncomment for mac
+        setFocusPainted(false);
+        setFont(OptionsFactory.getOptions().getFont(12f));
+        setForeground(Color.WHITE);
+    }
+
+    private void defaultSettings(String description, int mnemonic) {
+        setMnemonic(mnemonic);
+        getAccessibleContext().setAccessibleDescription(description);
     }
 }

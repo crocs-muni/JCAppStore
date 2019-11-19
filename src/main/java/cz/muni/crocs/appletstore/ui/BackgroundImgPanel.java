@@ -17,16 +17,34 @@ import java.io.IOException;
  * @author Jiří Horák
  * @version 1.0
  */
-public class BackgroundImgPanel extends JPanel {
+public class BackgroundImgPanel extends JSplitPane {
 
     private BufferedImage bg;
     private int width = -1, height = -1;
 
     public BackgroundImgPanel() {
-        String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-        File f = new File(Config.APP_DATA_DIR + Config.SEP + bgImagname);
+        super(JSplitPane.VERTICAL_SPLIT);
+        setup();
+    }
 
-        if (bgImagname == null || bgImagname.isEmpty() || !f.exists()) {
+    public BackgroundImgPanel(int direction) {
+        super(direction);
+        setup();
+    }
+
+    public void setNewBackground(BufferedImage newBackground) {
+        bg = newBackground;
+    }
+
+    private void setup() {
+        setContinuousLayout(true);
+        setUI(new CustomSplitPaneUI());
+        setBorder(null);
+
+        String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
+        File f = new File(bgImagname);
+
+        if (bgImagname.isEmpty() || !f.exists()) {
             loadDefault();
         } else {
             try {
@@ -36,10 +54,6 @@ public class BackgroundImgPanel extends JPanel {
                 loadDefault();
             }
         }
-    }
-
-    public void setNewBackground(BufferedImage newBackground) {
-        bg = newBackground;
     }
 
     private void loadDefault() {

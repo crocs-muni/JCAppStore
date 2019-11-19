@@ -1,8 +1,8 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.HintPanel;
+import cz.muni.crocs.appletstore.crypto.PGP;
+import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.*;
-import cz.muni.crocs.appletstore.ui.CustomComboBoxItem;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -11,7 +11,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,10 +35,14 @@ public class Settings extends JPanel {
             new Tuple<>("cz", "Česky")
     };
 
+    private JTextField pgp;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
     private JCheckBox hintEnabled = new JCheckBox();
+    private JCheckBox verboseEnabled = new JCheckBox();
+    private JCheckBox jcMemoryKept = new JCheckBox();
+    private JCheckBox implicitDelete = new JCheckBox();
     private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
@@ -47,15 +50,58 @@ public class Settings extends JPanel {
 
     public Settings(BackgroundChangeable context) {
         this.context = context;
-        setPreferredSize(new Dimension(350, context.getHeight() / 2));
         setLayout(new MigLayout("fillx, gap 5px 5px"));
-        addBackground();
-        addLanguage();
-        addHint();
+        buildPGP();
+        buildJCKeep();
+        buildImplicitDelete();
+        //buildErrorMode();
+        buildLanguage();
+        buildHint();
+        buildBackground();
     }
 
-    private void addBackground() {
-        addTitleLabel(textSrc.getString("background"), "span 3, wrap");
+    public void apply() {
+        saveBackgroundImage();
+        saveLanguage();
+        saveHint();
+        //saveErrorMode();
+        saveJCKeep();
+        savePGP();
+        saveImplicitDelete();
+    }
+
+    private void buildPGP() {
+        add(new Text(textSrc.getString("pgp_loc")), "");
+
+        JButton specify = new JButton(new AbstractAction(textSrc.getString("pgp_specify_loc")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = getPGPFileChooser();
+                int r = fileChooser.showOpenDialog(null);
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    pgp.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    pgp.setForeground(Color.BLACK);
+                    ((InputHintTextField)pgp).setShowHint(false);
+                }
+            }
+        });
+        add(specify, "span 2, align right, wrap");
+
+        String path = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
+        if (path == null) path = "";
+
+        pgp = new InputHintTextField(path, textSrc.getString("H_pgp_loc"));
+        pgp.setFont(OptionsFactory.getOptions().getFont(12f));
+        pgp.setBorder(frame);
+        add(pgp, "span 3, growx, wrap");
+    }
+
+    private JFileChooser getPGPFileChooser() {
+        return getShaderFileChoser(new File(System.getProperty("user.home")));
+    }
+
+    private void buildBackground() {
+        add(new Text(textSrc.getString("background")), "");
 
         String path = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
         if (path.equals(DEFAULT_BG_PATH)) {
@@ -63,15 +109,9 @@ public class Settings extends JPanel {
             slider.setEnabled(false);
         }
         cutString(path);
-
-        JLabel bgValue = new HtmlLabel(path);
+        JLabel bgValue = new HtmlText(path);
         bgValue.setFont(OptionsFactory.getOptions().getFont(12f));
         bgValue.setBorder(frame);
-        bgValue.setBackground(Color.WHITE);
-        bgValue.setOpaque(true);
-        add(bgValue, "span 3, growx, wrap");
-
-        add(new JLabel()); //empty space
 
         JButton defaultBg = new JButton(new AbstractAction(textSrc.getString("reset_default")) {
             @Override
@@ -98,22 +138,62 @@ public class Settings extends JPanel {
         });
         add(getNewBg, "align right, wrap");
 
+        add(bgValue, "span 3, growx, wrap");
+
         //blur option
-        addTitleLabel(textSrc.getString("blur"), "");
+        add(new Text(textSrc.getString("blur")), "");
         slider.setEnabled(false);
         add(slider, "w 180, align right, span 2, wrap");
     }
 
-    public void apply() {
-        saveBackgroundImage();
-        saveLanguage();
-        saveHint();
+    private void buildLanguage() {
+        add(new Text(textSrc.getString("language")), "");
+
+        languageBox = new JComboBox<>(LANGUAGES);
+        CustomComboBoxItem listItems = new CustomComboBoxItem();
+        languageBox.setMaximumRowCount(4);
+        languageBox.setRenderer(listItems);
+        String lang = OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE);
+        if (lang != null && !lang.isEmpty()) {
+            languageBox.setSelectedItem(lang);
+        }
+        add(languageBox, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildImplicitDelete() {
+        add(new Text(textSrc.getString("implicit_delete")), "");
+        implicitDelete.setSelected(OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT));
+        add(implicitDelete, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildErrorMode() {
+        add(new Text(textSrc.getString("enable_verbose")), "");
+        verboseEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
+        add(verboseEnabled, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildJCKeep() {
+        add(new Text(textSrc.getString("enable_jcmemory")), "");
+        jcMemoryKept.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
+        add(jcMemoryKept, "align right, span 2, w 180, wrap");
+    }
+
+    private void buildHint() {
+        add(new Text(textSrc.getString("enable_hints")),"");
+        hintEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
+        add(hintEnabled, "align right, span 2, w 180, wrap");
+    }
+
+    private JFileChooser getShaderFileChoser(File defaultFolder) {
+        JFileChooser fileChooser = new JFileChooser(defaultFolder);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        return fileChooser;
     }
 
     private JFileChooser getBGImageFileChooser() {
-        JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setMultiSelectionEnabled(false);
+        JFileChooser fileChooser = getShaderFileChoser(FileSystemView.getFileSystemView().getDefaultDirectory());
         fileChooser.addChoosableFileFilter(new FileFilter() {
 
             @Override
@@ -129,41 +209,22 @@ public class Settings extends JPanel {
 
             @Override
             public String getDescription() {
-                return "Images (png, jpeg/jpg, bmp) less than 1.5 MB";
+                return textSrc.getString("image_limit");
             }
         });
-        fileChooser.setAcceptAllFileFilterUsed(false);
         return fileChooser;
     }
 
-    private void addLanguage() {
-        addTitleLabel(textSrc.getString("language"), "");
-
-        languageBox = new JComboBox<>(LANGUAGES);
-        CustomComboBoxItem listItems = new CustomComboBoxItem();
-        languageBox.setMaximumRowCount(4);
-        languageBox.setRenderer(listItems);
-        add(languageBox, "align right, span 2, w 180, wrap");
-    }
-
-    private void addHint() {
-        addTitleLabel(textSrc.getString("enable_hints"), "");
-        hintEnabled.setSelected(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
-        add(hintEnabled, "align right, span 2, w 180, wrap");
-    }
-
-    private void addTitleLabel(String titleText, String constraints) {
-        JLabel title = new JLabel(titleText);
-        title.setFont(OptionsFactory.getOptions().getTitleFont());
-        add(title, constraints);
+    private String cutString(String value, int length) {
+        if (value.length() > length) {
+            int len = value.length();
+            value = "..." + value.substring(len - length + 3, len);
+        }
+        return value;
     }
 
     private String cutString(String value) {
-        if (value.length() > 45) {
-            int len = value.length();
-            value = "..." + value.substring(len - 42, len);
-        }
-        return value;
+        return cutString(value, 45);
     }
 
     private void saveBackgroundImage() {
@@ -176,7 +237,7 @@ public class Settings extends JPanel {
                 context.updateBackground(ImageIO.read(new File(DEFAULT_BG_PATH)));
             } catch (IOException e) {
                 e.printStackTrace();
-                InformerFactory.getInformer().showInfo(textSrc.getString("E_background"));
+                InformerFactory.getInformer().showMessage(textSrc.getString("E_background"));
             }
         } else {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());
@@ -184,16 +245,33 @@ public class Settings extends JPanel {
         }
     }
 
+    private void savePGP() {
+        OptionsFactory.getOptions().addOption(Options.KEY_PGP_LOCATION, pgp.getText());
+        PGP.invalidate();
+    }
+
     private void saveLanguage() {
         if (LANGUAGES[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
         OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)LANGUAGES[languageBox.getSelectedIndex()].first);
         showAlertChange();
-        //Config.translation = new Translation(Config.options.get(Options.KEY_LANGUAGE));
+        //Locale.setDefault(new Locale());
+    }
+
+    private void saveImplicitDelete() {
+        OptionsFactory.getOptions().addOption(Options.KEY_DELETE_IMPLICIT, implicitDelete.isSelected() ? "true" : "false");
     }
 
     private void saveHint() {
         OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
         HintPanel.enableHint(hintEnabled.isSelected());
+    }
+
+    private void saveErrorMode() {
+        OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE, verboseEnabled.isSelected() ? "true" : "false");
+    }
+
+    private void saveJCKeep() {
+        OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY, jcMemoryKept.isSelected() ? "true" : "false");
     }
 
     /**

@@ -1,8 +1,16 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.LocalizedException;
+import cz.muni.crocs.appletstore.action.CardDetectionAction;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.UnknownKeyException;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import jnasmartcardio.Smartcardio;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 
@@ -17,36 +25,56 @@ import static java.lang.Thread.sleep;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrackable {
+public abstract class LoaderWorker extends SwingWorker<Exception, Void> implements ProcessTrackable {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
 
     private String info = textSrc.getString("loading_opts");
 
     @Override
-    public Void doInBackground() {
+    public Exception doInBackground() {
         setProgress(0);
         //first get options will force to initialize
-        OptionsFactory.getOptions();
+        final CardManager manager = CardManagerFactory.getManager();
 
-        info = textSrc.getString("detect_cards");
-        CardManager manager = CardManagerFactory.getManager();
-        manager.needsCardRefresh();
         try {
+            OptionsFactory.getOptions();
+
+            info = textSrc.getString("detect_cards");
+            manager.needsCardRefresh();
             manager.loadCard();
-        } catch (LocalizedCardException e) {
-            info = textSrc.getString("failed_detect");
-            waitWhile(500);
+            update("launch", 100, getMaximum());
+            return null;
+        } catch (UnknownKeyException e) {
+            info = textSrc.getString("E_unknown_key");
+            if (useDefaultTestKey() == JOptionPane.YES_OPTION) {
+                try {
+                    manager.setTryGenericTestKey();
+                    manager.loadCard();
+                    update("launch", 100, getMaximum());
+                    return null;
+                } catch (LocalizedCardException ex) {
+                    update("failed_detect", 200, getMaximum());
+                    return ex;
+                } catch (UnknownKeyException ex) {
+                    update("failed_detect", 200, getMaximum());
+                    return new LocalizedCardException("WARNING: Card loading failed, should've not happened!",
+                            "E_master_key_not_found");
+                }
+            } else {
+                update("E_unknown_key", 200, getMaximum());
+                return new LocalizedCardException("Card auth failed: user refused to use default test key.",
+                        "E_master_key_not_found");
+            }
+        } catch (LocalizedException e) {
+            update("failed_detect", 200, getMaximum());
+            return e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Store initialization failed: generic error.", e);
+            update("load_failed", 1000, getMaximum());
+            return null;
         }
-
-        info = textSrc.getString("lanuch");
-        waitWhile(500);
-        setProgress(getMaximum());
-        return null;
-    }
-
-    @Override
-    protected void done() {
-      //  do nothing
     }
 
     @Override
@@ -76,6 +104,24 @@ public class LoaderWorker extends SwingWorker<Void, Void> implements ProcessTrac
         } catch (InterruptedException ex) {
             //do nothing
         }
+    }
+
+    private void update(String key, int delay, int progress) {
+        info = textSrc.getString(key);
+        waitWhile(delay);
+        setProgress(progress);
+    }
+
+    private int useDefaultTestKey() {
+        return JOptionPane.showConfirmDialog(
+                null,
+                new HtmlText(textSrc.getString("I_use_default_keys_1") +
+                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
+                        textSrc.getString("I_use_default_keys_2")),
+                textSrc.getString("key_not_found"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                new ImageIcon(Config.IMAGE_DIR + ""));
     }
 }
 

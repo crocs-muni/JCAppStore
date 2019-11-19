@@ -2,30 +2,39 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 
-public class WorkCallback implements OnEventCallBack<Void, Void, Void> {
+import javax.swing.*;
 
-    private BackgroundChangeable context;
+public class WorkCallback implements OnEventCallBack<Void, Void> {
 
-    public WorkCallback(BackgroundChangeable context) {
-        this.context = context;
+    private AbstractAction onStart;
+    private AbstractAction onFail;
+    private AbstractAction onFinish;
+
+
+    public WorkCallback(AbstractAction onStart, AbstractAction onFail, AbstractAction onFinish) {
+        this.onStart = onStart;
+        this.onFail = onFail;
+        this.onFinish = onFinish;
     }
 
     @Override
-    public Void onStart() {
-        context.switchEnabled(false);
-        return null;
+    public void onStart() {
+        onStart.actionPerformed(null);
     }
 
     @Override
-    public Void onFail() {
-        context.switchEnabled(true);
-        return null;
+    public void onFail() {
+        onFail.actionPerformed(null);
     }
 
     @Override
     public Void onFinish() {
-        //todo show user the OK notice
-        context.switchEnabled(true);
+        onFinish.actionPerformed(null);
+        return null;
+    }
+
+    @Override
+    public Void onFinish(Void aVoid) {
         return null;
     }
 }

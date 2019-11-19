@@ -1,28 +1,52 @@
 package cz.muni.crocs.appletstore.card;
 
+import apdu4j.ResponseAPDU;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 public interface CardManager {
 
     /**
-     * Switches to the new aid as selected applet
+     * Check if card present
+     * @return true if card inserted
+     */
+    boolean isCard();
+
+    /**
+     * Get current card
+     * @return card instance if present, null otherwise
+     */
+    CardInstance getCard();
+
+    /**
+     * Set whether the app should try default test key
+     * next time the card is attempted to authenticate to
+     */
+    void setTryGenericTestKey();
+
+    /**
+     * Switches to the new aid as store selected applet (not default selected)
      * should not select if card not plugged
      * @param aid AID to select
      */
-    void switchApplet(AID aid);
+    void switchAppletStoreSelected(AID aid);
 
     /**
-     * Check if any applet selected
+     * Check if any applet selected by store (not by card)
      * @return true if any card applet selected
      */
-    boolean isAppletSelected();
+    boolean isAppletStoreSelected();
+
+    /**
+     * Check if applet selected by store (not by card)
+     * @return true if applet with AID provided selected
+     */
+    boolean isAppletStoreSelected(AID applet);
 
     /**
      * Get state of the terminal instance
@@ -32,37 +56,41 @@ public interface CardManager {
 
     /**
      * Return set of connected terminal names
-     * @return
+     * @return set of all terminals
      */
     Set<String> getTerminals();
+
+    /**
+     * Get selected terminal
+     * @return currently used CardTerminal instance
+     */
     CardTerminal getSelectedTerminal();
+
+    /**
+     * Get selected terminal name
+     * @return currently used card terminal name
+     */
     String getSelectedTerminalName();
 
+    /**
+     * Set terminal as used
+     * @param name name of the terminal to select
+     */
     void setSelectedTerminal(String name);
-
-    /**
-     * Get applets on card
-     * @return applets info list
-     */
-    List<AppletInfo> getInstalledApplets();
-
-    /**
-     * Get card identifier
-     * @return card id
-     */
-    String getCardId();
-
-    /**
-     * Get card name and id
-     * @return card descriptor
-     */
-    String getCardDescriptor();
 
     /**
      * Get last inserted card descriptor
      * @return card descriptor
      */
     String getLastCardDescriptor();
+
+    /**
+     * Get the last installed applet aid
+     * @return AID of the last installed applet
+     */
+    AID getLastAppletInstalledAid();
+
+
 
     /**
      * Evaluates the necessity of card refreshing
@@ -74,28 +102,14 @@ public interface CardManager {
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessary steps to be ready to work with
      *
-     * @return @link Terminals::checkTerminals()
+     * @link Terminals::checkTerminals()
      */
-    void loadCard() throws LocalizedCardException;
+    void loadCard() throws LocalizedCardException, UnknownKeyException;
 
     /**
-     * Get life cycle of the card
-     * @return int, where value determines card state - OP_READY, LOCKED...
-     * as designed by GlobalPlatform specification
+     * Invalidates the card instance data
      */
-    Integer getCardLifeCycle();
-
-    /**
-     * Set the last applet AID installed
-     * @param aid that was installed, null to delete
-     */
-    void setLastAppletInstalled(AID aid);
-
-    /**
-     * Get the last installed applet aid
-     * @return AID of the last installed applet
-     */
-    AID getLastAppletInstalledAid();
+    void setReloadCard();
 
     /**
      * Install new applet onto current card
@@ -104,7 +118,7 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      * @throws IOException when the file is incorrect or missing
      */
-    void install(File file, InstallOpts data) throws LocalizedCardException, IOException;
+    void install(File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
 
     /**
      * Install new applet onto current card
@@ -112,16 +126,23 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException;
+    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
 
     /**
-     * Install new applet onto current card
-     * @param file file with the applet (already parsed)
+     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
+     * @param file file with the applet
      * @param data data from install user, namely 3 items: install params, force install and custom AID
-     * @param info additional applet data from store
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException;
+    void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
+
+    /**
+     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
+     * @param file file with the applet (already parsed)
+     * @param data data from install user, namely 3 items: install params, force install and custom AID
+     * @throws LocalizedCardException exception with localized text on failure
+     */
+    void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Uninstall applet from the card
@@ -129,11 +150,14 @@ public interface CardManager {
      * @param force whether the uninstall is forced
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException;
+    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException;
 
     /**
-     * Unsupported yet.
-     * @throws LocalizedCardException exception with localized text on failure
+     * Send command to applet
+     * @param AID target applet AID to send the command to
+     * @param APDU commandAPDU to send
+     * @return response, or null if failed
+     * @throws LocalizedCardException when failed to execute the command transfer
      */
-    void sendApdu(String AID) throws LocalizedCardException;
+    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException;
 }

@@ -22,16 +22,17 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private OnEventCallBack<Void, Void, Void> callback;
+    private OnEventCallBack<Void, Void> callback;
     private JPanel storeLayout = new JPanel();
     private ArrayList<StoreItem> items = new ArrayList<>();
     private List<JsonObject> data;
+    private JsonObject currentlyShown;
 
-    public StoreWindowPane(List<JsonObject> data, BackgroundChangeable context) {
+    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
         this.data = data;
-        this.callback = new WorkCallback(context);
-
+        this.callback = callback;
         setOpaque(false);
+        setViewportBorder(null);
         getViewport().setOpaque(false);
         storeLayout.setOpaque(false);
 
@@ -43,7 +44,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         getVerticalScrollBar().setOpaque(false);
 
         storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
-        storeLayout.setBorder(new EmptyBorder(50, 50, 50, 50));
+        storeLayout.setBorder(new EmptyBorder(0, 50, 50, 50));
         loadStore();
     }
 
@@ -64,22 +65,30 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         showPanel(items);
     }
 
+    @Override
+    public void refresh() {
+        if (currentlyShown == null)
+            showItems(null);
+        else
+            showInfo(currentlyShown);
+    }
+
     private void showInfo(JsonObject dataSet) {
-        StoreItemInfo info = new StoreItemInfo(dataSet, this, callback);
-        setViewportView(info);
+        currentlyShown = dataSet;
+        setViewportView(new StoreItemInfo(dataSet, this, callback));
     }
 
     private void showPanel(Collection<StoreItem> sortedItems) {
         storeLayout.removeAll();
         if (sortedItems.size() == 0) {
-            storeLayout.add(new StoreItem(textSrc.getString("no_results"),
-                    "no_results.png", "", ""));
+            storeLayout.add(new NotFoundItem());
         } else {
             for (StoreItem item : sortedItems) {
                 storeLayout.add(item);
             }
         }
         storeLayout.revalidate();
+        currentlyShown = null;
         setViewportView(storeLayout);
     }
 

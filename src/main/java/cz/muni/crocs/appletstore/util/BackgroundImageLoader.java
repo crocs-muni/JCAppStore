@@ -13,12 +13,15 @@ import java.awt.image.Kernel;
 import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Jiří Horák
  * @version 1.0
  */
 public class BackgroundImageLoader {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static final Logger logger = LogManager.getLogger(BackgroundImageLoader.class);
 
     private BufferedImage background = null;
@@ -28,7 +31,6 @@ public class BackgroundImageLoader {
     private int size;
 
     public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
-        System.out.println(blurAmount);
         radius = (blurAmount == 0) ? 0 : 2 + blurAmount * 2;
         size = radius * 2 + 1;
 
@@ -42,7 +44,7 @@ public class BackgroundImageLoader {
         } catch (InterruptedException e) {
             e.printStackTrace();
             logger.warn("Image loading interrupted. " + Config.IMAGE_DIR + imgName, e);
-            InformerFactory.getInformer().showInfo("E_image");
+            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
             defaultBg();
         }
     }
@@ -51,7 +53,7 @@ public class BackgroundImageLoader {
         try {
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
             ImageIO.write(background, "jpg", outputfile);
-            OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.SEP + imgName);
+            OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.APP_DATA_DIR + Config.S + imgName);
         } catch (IOException e) {
             e.printStackTrace();
             defaultBg();
@@ -72,7 +74,7 @@ public class BackgroundImageLoader {
         try {
             background = ImageIO.read(new File(name));
         } catch (IOException e) {
-            InformerFactory.getInformer().showInfo("E_image");
+            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
             defaultBg();
         }
     }
@@ -115,7 +117,7 @@ public class BackgroundImageLoader {
         int width = background.getWidth() - size * 2;
         int height = background.getHeight() - size * 2;
 
-        BufferedImage cut = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage cut = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics2D = cut.createGraphics();
         graphics2D.drawImage(background, 0, 0, width, height, size, size, width, height, null);
         graphics2D.dispose();

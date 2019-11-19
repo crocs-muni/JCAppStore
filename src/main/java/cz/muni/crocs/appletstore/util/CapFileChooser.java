@@ -22,17 +22,18 @@ public class CapFileChooser {
 
     public static CAPFile getCapFile(File from) {
         CAPFile instcap = null;
+        if (from == null) return null;
         try (FileInputStream fin = new FileInputStream(from)) {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {
             e.printStackTrace();
-            InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") +
+            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_no_file_1") +
                     from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
         }
         return instcap;
     }
 
-    public static CAPFile chooseCapFile(File dir) {
+    public static File chooseCapFile(File dir) {
         JFileChooser fileChooser = new JFileChooser(dir);
         fileChooser.setFileView(new CapFileView());
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -43,10 +44,11 @@ public class CapFileChooser {
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File cap = fileChooser.getSelectedFile();
             if (!cap.exists()) {
-                InformerFactory.getInformer().showInfo(textSrc.getString("E_install_no_file_1") + cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+                InformerFactory.getInformer().showMessage(textSrc.getString("E_install_no_file_1") +
+                        cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
                 return null;
             }
-            return getCapFile(cap);
+            return cap;
         }
         return null;
     }

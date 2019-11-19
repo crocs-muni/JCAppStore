@@ -1,10 +1,12 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
-import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.ui.ErrorPane;
+import cz.muni.crocs.appletstore.util.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -18,36 +20,73 @@ import java.util.ResourceBundle;
 public class MainPanel extends BackgroundImgPanel implements Informable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private JPanel content;
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
-
+    private Component current = null;
+    private LoggerConsole console;
 
     public MainPanel(BackgroundChangeable context) {
-        localPanel = new LocalWindowPane(context);
-        storePanel = new StoreWindowManager(context);
+        setOneTouchExpandable(true);
+        setDividerLocation(150);
 
-        createHierarchy();
+        OnEventCallBack<Void, Void> callback = new WorkCallback(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(false);
+            }
+        }, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(true);
+            }
+        }, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                context.switchEnabled(true);
+                localPanel.refresh();
+            }
+        });
+
+        localPanel = new LocalWindowPane(callback);
+        storePanel = new StoreWindowManager(callback);
+
+        buildStoreContents();
+        buildLogger();
         InformerFactory.setInformer(this);
     }
 
-    /**
-     * Build Swing components
-     */
-    private void createHierarchy() {
-        setLayout(new BorderLayout());
+    public void toggleLogger() {
+        setDividerSize(getBottomComponent() == null ? 15 : 0);
+        setBottomComponent(getBottomComponent() == null ? (LoggerConsoleImpl)console : null);
+    }
 
-        JPanel content = new JPanel();
-        content.setLayout(new OverlayLayout(content));
+    /**
+     * Build store, upper part of the split pane
+     */
+    private void buildStoreContents() {
+        content = new JPanel(new BorderLayout());
         content.setOpaque(false);
-        content.add(localPanel);
-        content.add(storePanel);
+        JPanel pages = new JPanel();
+        pages.setLayout(new OverlayLayout(pages));
+        pages.setOpaque(false);
+        pages.add(localPanel);
+        pages.add(storePanel);
         LeftMenu leftMenu = new LeftMenu(this);
 
         setOpaque(false);
-        add(leftMenu, BorderLayout.WEST);
-        add(content, BorderLayout.CENTER);
+        content.add(leftMenu, BorderLayout.WEST);
+        content.add(pages, BorderLayout.CENTER);
+        content.setMinimumSize(new Dimension(content.getMinimumSize().width, 250));
 
         setLocalPanelVisible();
+        setLeftComponent(content);
+    }
+
+    void buildLogger() {
+        console = new LoggerConsoleImpl();
+        setDividerSize(0);
+        setBottomComponent(null);
     }
 
     /**
@@ -76,32 +115,40 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
         return (storePanel.isVisible()) ? storePanel : localPanel;
     }
 
-    public LocalWindowPane getLocalPanel() {
+    public LocalWindowPane getRefreshablePane() {
         return localPanel;
     }
 
     @Override
-    public void showInfo(String info) {
+    public void showMessage(String info) {
         if (info == null || info.isEmpty())
             return;
         JOptionPane.showMessageDialog(this,
-                info,
+                "<html><div width=\"350\">" + info + "</div></html>",
                 textSrc.getString("info"),
                 JOptionPane.QUESTION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + "info.png"));
     }
 
     @Override
-    public void showWarning(JComponent component) {
-        add(component, BorderLayout.NORTH);
-        revalidate();
-//        JOptionPane.showConfirmDialog(this, component);
+    public void showFullScreenInfo(JPanel pane) {
+        localPanel.showError(pane);
     }
 
     @Override
-    public void hideWarning(JComponent component) {
-        remove(component);
-        revalidate();
-        repaint();
+    public void showInfo(JComponent component) {
+        current = component;
+        content.add(current, BorderLayout.NORTH);
+        content.revalidate();
+    }
+
+    @Override
+    public void hideInfo() {
+        if (current == null) return;
+        content.remove(current);
+        content.revalidate();
+        content.repaint();
+
+        current = null;
     }
 }

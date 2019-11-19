@@ -1,8 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.util.HtmlLabel;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.HtmlTitle;
+import cz.muni.crocs.appletstore.util.JsonParser;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,18 +70,18 @@ public class StoreItem extends JPanel implements Item {
     }
 
     public StoreItem(JsonObject dataSet) {
-        this(dataSet.get(Config.JSON_TAG_TITLE).getAsString(),
-                dataSet.get(Config.JSON_TAG_AUTHOR).getAsString(),
-                dataSet.get(Config.JSON_TAG_LATEST).getAsString(),
-                dataSet.get(Config.JSON_TAG_ICON).getAsString()
+        this(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
+                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
+                dataSet.get(JsonParser.TAG_LATEST).getAsString(),
+                dataSet.get(JsonParser.TAG_ICON).getAsString()
                 );
     }
 
     private JLabel getLabel(String text, String css, Float fontSize, boolean title) {
-        JLabel label = new HtmlLabel("<div style=\"" + css + "\">" + text + "</div>");
-        label.setFont(title ?
-                OptionsFactory.getOptions().getTitleFont(fontSize) : OptionsFactory.getOptions().getFont(fontSize));
-        return label;
+        return (title) ?
+                new HtmlTitle("<div style=\"" + css + "\">" + text + "</div>", fontSize)
+                :
+                new HtmlText("<div style=\"" + css + "\">" + text + "</div>", fontSize);
     }
 
     private String getImgAddress(String imgName) {

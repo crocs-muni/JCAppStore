@@ -1,25 +1,23 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Informable;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 
 import javax.swing.*;
-import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
+ * todo run on swing util thread
  * @author Jiří Horák
  * @version 1.0
  */
 public class InformerImpl implements Informer, CallBack<Void> {
-
-    public static final Integer DELAY = 8000;
+    private Thread current;
+    private static final Integer DELAY = 8000;
 
     private Informable context;
-    private volatile Deque<Tuple<Warning, Integer>> queue = new LinkedBlockingDeque<>();
-    private volatile Deque<Warning> toClose = new LinkedBlockingDeque<>();
+    private volatile Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
     public InformerImpl(Informable context) {
@@ -27,74 +25,89 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     @Override
-    public void showInfo(String info) {
-        context.showInfo(info);
+    public void showMessage(String info) {
+        context.showMessage(info);
     }
 
     @Override
-    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable) {
-        showWarning(msg, status, icon, callable, DELAY);
+    public void showFullScreenInfo(JPanel panel) {
+        context.showFullScreenInfo(panel);
     }
 
     @Override
-    public void showWarningToClose(String msg, Warning.Importance status) {
-        showWarningToClose(msg, status, DELAY);
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable) {
+        showInfo(msg, status, icon, callable, DELAY);
     }
 
     @Override
-    public void showWarning(String msg, Warning.Importance status, Warning.CallBackIcon icon, CallBack callable, Integer milis) {
-        queue.add(new Tuple<>(new Warning(msg, status, icon, callable == null ? this : callable), milis));
-        fireWarning();
+    public void showInfoToClose(String msg, Notice.Importance status) {
+        showInfoToClose(msg, status, DELAY);
     }
 
     @Override
-    public void showWarningToClose(String msg, Warning.Importance status, Integer milis) {
-        queue.add(new Tuple<>(new Warning(msg, status, Warning.CallBackIcon.CLOSE, this), milis));
-        fireWarning();
-    }
-
-
-    @Override
-    public void closeWarning() {
-        if (!toClose.isEmpty()) {
-            context.hideWarning(toClose.pop());
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable, Integer milis) {
+        if (callable == null) {
+            showInfoToClose(msg, status, milis);
+        } else {
+            queue.add(new Tuple<>(new Notice(msg, status, icon, callable, this), milis));
+            fireInfo();
         }
     }
 
     @Override
+    public void showInfoToClose(String msg, Notice.Importance status, Integer milis) {
+        queue.add(new Tuple<>(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis));
+        fireInfo();
+    }
+
+    @Override
+    public void closeInfo() {
+        context.hideInfo();
+    }
+
+    @Override
     public Void callBack() {
-        closeWarning();
+        closeInfo();
+        current.interrupt();
         return null;
     }
 
-    private synchronized void fireWarning() {
-        if (busy)
-            return;
-
-        busy = true;
-        System.out.println("Running");
-        new Thread(() -> {
+    private Thread getNewNoticeSwitcherThread() {
+        return new Thread(() -> {
             while (true) {
-                System.out.println(queue.toString());
-
                 if (queue.isEmpty()) {
+                    current = null;
                     busy = false;
                     return;
                 }
-                final Tuple<Warning, Integer> next = queue.pop();
-                toClose.add(next.first);
-
-                System.out.println(next.first.getBackground());
+                final Tuple<Notice, Integer> next = queue.pop();
                 SwingUtilities.invokeLater(() -> {
-                    context.showWarning(next.first);
+                    context.showInfo(next.first);
                 });
-                try {
-                    Thread.sleep(next.second);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+
+                if (next.second != null) {
+                    try {
+                        Thread.sleep(next.second);
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
+                    SwingUtilities.invokeLater(this::closeInfo);
+                } else {
+                    try {
+                        Thread.currentThread().wait();
+                    } catch (InterruptedException e) {
+                        //do nothing
+                    }
                 }
-                SwingUtilities.invokeLater(this::closeWarning);
             }
-        }).start();
+        });
+    }
+
+    private synchronized void fireInfo() {
+        if (busy)
+            return;
+        busy = true;
+        current = getNewNoticeSwitcherThread();
+        current.start();
     }
 }

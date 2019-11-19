@@ -4,12 +4,12 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.CallBack;
-import cz.muni.crocs.appletstore.ui.Warning;
+import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Locale;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Applet store logic implementation
- *
+ * <p>
  * CallBack >> allows the store to be reloaded in call() method
  * Searchable >> allows the store to act like searchable object
  * ProcessModifiable >> allows the store loading process to give status & result information
@@ -28,37 +28,36 @@ import java.util.concurrent.TimeoutException;
  * @author Jiří Horák
  * @version 1.0
  */
-public class StoreWindowManager extends JPanel implements
-        CallBack<Void>, Searchable, ProcessModifiable<StoreWindowManager.StoreState> {
+public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable, Store {
 
-    private static final Logger logger = LogManager.getLogger(StoreWindowManager.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private BackgroundChangeable context;
+    private OnEventCallBack<Void, Void> callbackOnAction;
     private Component currentComponent = null;
     private Searchable store;
-    private volatile StoreState state = StoreState.UNINITIALIZED;
+    private volatile State state = State.UNINITIALIZED;
     private GridBagConstraints constraints;
+    private StoreSubMenu submenu;
 
-    public StoreWindowManager(BackgroundChangeable context) {
-        this.context = context;
+    public StoreWindowManager(OnEventCallBack<Void, Void> callbackOnAction) {
+        this.callbackOnAction = callbackOnAction;
+
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
 
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridwidth = 1;
-        constraints.gridheight = 1;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
+        submenu = new StoreSubMenu();
+        submenu.setOnReload(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, "");
+                setState(State.UNINITIALIZED);
+                updateGUI();
+            }
+        });
     }
 
-    public enum StoreState {
-        UNINITIALIZED, NO_CONNECTION, WORKING, OK, INSTALLING, REBUILD, FAILED, TIMEOUT
-    }
-
-    public synchronized void setState(StoreState state) {
+    public synchronized void setState(State state) {
         this.state = state;
     }
 
@@ -69,15 +68,22 @@ public class StoreWindowManager extends JPanel implements
 
     @Override
     public Void callBack() {
-        setState(StoreState.UNINITIALIZED);
+        setState(State.UNINITIALIZED);
         updateGUI();
         return null;
     }
 
     @Override
     public void showItems(String query) {
-        if (state == StoreState.OK) {
+        if (state == State.OK) {
             store.showItems(query);
+        }
+    }
+
+    @Override
+    public void refresh() {
+        if (state == State.OK) {
+            store.refresh();
         }
     }
 
@@ -99,26 +105,26 @@ public class StoreWindowManager extends JPanel implements
             case INSTALLING: //if OK or WORKING, do nothing
                 return;
             case REBUILD:
-                setState(StoreState.OK);
+                setState(State.OK);
                 setupWindow();
                 return;
             case TIMEOUT:
-                setState(StoreState.UNINITIALIZED);
+                setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_timeout"),
                         "error.png", this), false);
                 return;
             case FAILED:
-                setState(StoreState.UNINITIALIZED);
+                setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_generic"),
                         "error.png", this), false);
                 return;
             case NO_CONNECTION:
-                InformerFactory.getInformer().showWarning(textSrc.getString("W_internet"),
-                        Warning.Importance.SEVERE, Warning.CallBackIcon.RETRY, this);
+                InformerFactory.getInformer().showInfo(textSrc.getString("W_internet"),
+                        Notice.Importance.SEVERE, Notice.CallBackIcon.RETRY, this, Informer.INFINITY);
                 setupWindow();
                 return;
             default:
-                setState(StoreState.WORKING);
+                setState(State.WORKING);
                 init();
         }
     }
@@ -129,19 +135,23 @@ public class StoreWindowManager extends JPanel implements
      * runs the window setup
      */
     private void init() {
-        DownloaderWorker workerThread = new DownloaderWorker(this);
-        addLoading(workerThread);
+        StoreWorker workerThread = new StoreWorker(this);
+
+        addLoading(workerThread, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                workerThread.cancel(true);
+                setState(State.NO_CONNECTION);
+            }
+        });
         workerThread.execute();
 
         new Thread(() -> {
             try {
-                String result = workerThread.get(200, TimeUnit.SECONDS);
-                if (!result.equals("done")) {
-                    OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, result);
-                }
+                setState(workerThread.get(200, TimeUnit.SECONDS));
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
-                setState(StoreState.TIMEOUT);
+                setState(State.TIMEOUT);
             } finally {
                 updateGUI();
             }
@@ -157,23 +167,40 @@ public class StoreWindowManager extends JPanel implements
         if (fill) constraints.fill = GridBagConstraints.BOTH;
         else constraints.fill = GridBagConstraints.NONE;
         removeAll();
+        defaultConstraints();
         currentComponent = component;
         add(currentComponent, constraints, 0);
         revalidate();
         repaint();
     }
 
+    private void defaultConstraints() {
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+    }
+
     /**
      * Add loading and start a new thread with 0,5 sec progress update
      */
-    private void addLoading(DownloaderWorker downloader) {
+    private void addLoading(StoreWorker downloader, AbstractAction abortAction) {
         final LoadingPane loadingPane =
                 new LoadingPane(textSrc.getString("waiting_internet"));
         putNewPane(loadingPane, true);
         new Thread(() -> {
+            int i = 0;
+
             try {
                 while (loadingPane.update(downloader.getProgress())) {
-                    Thread.sleep(200);
+                    Thread.sleep(300);
+
+                    if (i == 15) {
+                        System.out.println("Abort show");
+                        loadingPane.showAbort(abortAction);
+                    }
+                    i++;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -200,9 +227,22 @@ public class StoreWindowManager extends JPanel implements
             setFailed();
             return;
         }
-        StoreWindowPane store = new StoreWindowPane(data, context);
+        StoreWindowPane store = new StoreWindowPane(data, callbackOnAction);
         this.store = store;
-        putNewPane(store, true);
+
+        removeAll();
+        defaultConstraints();
+        constraints.weighty = 0.001;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        add(submenu, constraints);
+        constraints.gridy = 1;
+        constraints.weighty = 1.0;
+
+        currentComponent = store;
+        add(store, constraints);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -211,7 +251,7 @@ public class StoreWindowManager extends JPanel implements
     private void setFailed() {
         putNewPane(new ErrorPane(textSrc.getString("W_store_loading"),
                 "error.png", this), false);
-        setState(StoreState.UNINITIALIZED);
+        setState(State.UNINITIALIZED);
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
     }
 }

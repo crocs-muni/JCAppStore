@@ -3,6 +3,9 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.APDUBIBO;
 import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
+import apdu4j.ResponseAPDU;
+
+import cz.muni.crocs.appletstore.CardInfoPanel;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
@@ -21,7 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Manager providing all functionality over card
@@ -35,39 +38,49 @@ public class CardManagerImpl implements CardManager {
     private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
-    private Terminals terminals = new Terminals();
-
-    private CardInstance card;
-    private String lastCardId = textSrc.getString("no_last_card");
-    private AID selectedAID = null;
-    private AID lastInstalled = null;
+    private volatile Terminals terminals = new Terminals();
+    private volatile CardInstanceImpl card;
+    private volatile String lastCardId = textSrc.getString("no_last_card");
+    private volatile AID selectedAID = null;
+    private volatile AID lastInstalled = null;
+    private volatile boolean tryGeneric = false;
     private volatile boolean busy = false;
 
     @Override
-    public void switchApplet(AID aid) {
+    public boolean isCard() {
+        return terminals.getState() == Terminals.TerminalState.OK && card != null;
+    }
+
+    @Override
+    public CardInstance getCard() {
+        return isCard() ? card : null;
+    }
+
+    @Override
+    public void switchAppletStoreSelected(AID aid) {
         if (card == null) {
             selectedAID = null;
-            lastInstalled = null;
             return;
         }
 
-        if (card.getApplets() == null || aid == selectedAID) {
+        if (aid == null || aid.equals(selectedAID)) {
             selectedAID = null;
             aid = null;
         }
 
         if (card.getApplets() == null)
             return;
-
-        for (AppletInfo info : card.getApplets()) {
-            info.setSelected(info.getAid() == aid);
-        }
         this.selectedAID = aid;
     }
 
     @Override
-    public boolean isAppletSelected() {
+    public boolean isAppletStoreSelected() {
         return selectedAID != null;
+    }
+
+    @Override
+    public boolean isAppletStoreSelected(AID applet) {
+        return applet != null && applet.equals(selectedAID);
     }
 
     @Override
@@ -96,21 +109,6 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public List<AppletInfo> getInstalledApplets() {
-        return card == null ? null : Collections.unmodifiableList(card.getApplets());
-    }
-
-    @Override
-    public String getCardId() {
-        return card == null ? "" : card.getId();
-    }
-
-    @Override
-    public String getCardDescriptor() {
-        return card == null ? "" : card.getName() + "  " + card.getId();
-    }
-
-    @Override
     public String getLastCardDescriptor() {
         return lastCardId;
     }
@@ -121,7 +119,7 @@ public class CardManagerImpl implements CardManager {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.info("The card was busy when needsCardRefresh() called, waiting interrupted.");
+                logger.warn("The card was busy when needsCardRefresh() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -136,57 +134,39 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void loadCard() throws LocalizedCardException {
+    public synchronized void loadCard() throws LocalizedCardException, UnknownKeyException {
         while (busy) {
             try {
                 wait();
             } catch (InterruptedException e) {
-                logger.info("The card was busy when refreshCard() called, waiting interrupted.");
+                logger.warn("The card was busy when loadCard() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
         busy = true;
+        lastInstalled = null;
+        selectedAID = null;
         try {
             if (terminals.getState() == Terminals.TerminalState.OK) {
                 CardDetails details = getCardDetails(terminals.getTerminal());
                 lastCardId = CardDetails.getId(details);
-                card = new CardInstance(details, terminals.getTerminal());
+                card = new CardInstanceImpl(details, terminals.getTerminal(), tryGeneric);
             } else {
                 card = null;
             }
-        } catch (LocalizedCardException ex) {
+            
+        } catch (UnknownKeyException | LocalizedCardException ex) {
             card = null;
             throw ex;
         } catch (Exception e) {
             card = null;
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            throw new LocalizedCardException(e.getMessage(), "E_default", e);
         } finally {
+            tryGeneric = false;
             busy = false;
             notifyAll();
-            //todo delete next line
-            lastInstalled = AID.fromString("4a43416C675465737431");
         }
-    }
-
-    @Override
-    public Integer getCardLifeCycle() {
-        if (card == null)
-            return 0;
-        java.util.List<AppletInfo> infoList = card.getApplets();
-        if (infoList == null)
-            return 0;
-
-        for (AppletInfo info : infoList) {
-            if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
-                return info.getLifecycle();
-            }
-        }
-        throw new Error("Should not end here.");
-    }
-
-    @Override
-    public void setLastAppletInstalled(AID aid) {
-        lastInstalled = aid;
+        logger.info("Card successfully refreshed.");
     }
 
     @Override
@@ -195,57 +175,55 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException {
-        if (!file.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
-                file.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+    public void setReloadCard() {
+        this.terminals.setNeedsRefresh();
+    }
 
-        CAPFile capFile;
-        try (FileInputStream fin = new FileInputStream(file)) {
-            capFile = CAPFile.fromStream(fin);
-        }
+    @Override
+    public void setTryGenericTestKey() {
+        this.tryGeneric = true;
+    }
 
+    @Override
+    public synchronized void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException {
+        install(toCapFile(file), data);
+    }
+
+    @Override
+    public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
         try {
-            installImpl(capFile, data);
+            installImpl(file, data, false);
         } catch (CardException e) {
             e.printStackTrace();
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            refreshCard();
+        } catch (LocalizedCardException e) {
+            loadCard();
+            throw e;
         }
     }
 
     @Override
-    public synchronized void install(final CAPFile file, InstallOpts data) throws LocalizedCardException {
+    public synchronized void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException {
+        installAndSelectAsDefault(toCapFile(file), data);
+    }
+
+    @Override
+    public synchronized void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
         try {
-            installImpl(file, data);
+            installImpl(file, data, true);
         } catch (CardException e) {
             e.printStackTrace();
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            refreshCard();
+        } catch (LocalizedCardException e) {
+            loadCard();
+            throw e;
         }
     }
 
     @Override
-    public synchronized void install(final CAPFile file, InstallOpts data, AppletInfo info) throws LocalizedCardException {
-        try {
-            String aid = installImpl(file, data);
-            info.setAID(aid);
-
-            java.util.List<AppletInfo> appletInfoList = card.getApplets();
-            appletInfoList.add(info);
-            AppletSerializer<java.util.List<AppletInfo>> toSave = new AppletSerializerImpl();
-            toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.SEP + card.getId()));
-        } catch (CardException e) {
-            e.printStackTrace();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
-        } finally {
-            refreshCard();
-        }
-    }
-
-    @Override
-    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException {
+    public synchronized void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -255,33 +233,133 @@ public class CardManagerImpl implements CardManager {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                logger.info("The card was busy when uninstall() called, waiting interrupted.");
+                logger.warn("The card was busy when uninstall() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
         busy = true;
 
         try {
-            GPCommand<Void> delete = new Delete(nfo, force);
-            card.executeCommand(delete);
-            card.removeAppletInfo(nfo);
+            GPCommand delete = new Delete(nfo, force);
+            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
+            card.secureExecuteCommands(delete, new GPCommand() {
+                @Override
+                public String getDescription() {
+                    return "Delete applet metadata inside secure loop.";
+                }
 
+                @Override
+                public boolean execute() throws LocalizedCardException {
+                    deleteData(nfo, force);
+                    return true;
+                }
+            }, contents);
+            card.setApplets(contents.getResult());
+            selectedAID = null;
         } catch (CardException e) {
+            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
             notifyAll();
-            refreshCard();
         }
     }
 
     @Override
-    public synchronized void sendApdu(String AID) throws LocalizedCardException {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException {
+        if (card == null) {
+            throw new LocalizedCardException("No card recognized.", "no_card");
+        }
+
+        while (busy) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                logger.warn("The card was busy when sendApdu() called, waiting interrupted.");
+                Thread.currentThread().interrupt();
+            }
+        }
+        busy = true;
+
+        GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
+        try {
+            card.executeCommands(send);
+        } catch (CardException e) {
+            loadCard();
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+        } finally {
+            busy = false;
+            notifyAll();
+        }
+        return send.getResult();
+    }
+
+    private CAPFile toCapFile(File f) throws IOException, LocalizedCardException {
+        if (!f.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
+                f.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"));
+
+        try (FileInputStream fin = new FileInputStream(f)) {
+            return CAPFile.fromStream(fin);
+        }
+    }
+
+    private void saveData(final CAPFile file, final InstallOpts data) throws LocalizedCardException {
+        AppletInfo applet = data.getInfo();
+        //now rewrite the default aid as custom aid that was used
+        applet.setAID(data.getCustomAID());
+        //save only applets that have some meaningful information, e.g. re-install in store will override previous info
+        Set<AppletInfo> appletInfoList = getAppletsToSave(card.getApplets());
+
+        AppletInfo pkg = new AppletInfo(applet.getName(), null, applet.getVersion(), applet.getAuthor(),
+                applet.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile);
+        insertOrRewrite(applet, appletInfoList);
+        insertOrRewrite(pkg, appletInfoList);
+
+        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
+    }
+
+    private void insertOrRewrite(AppletInfo item, Set<AppletInfo> to) {
+        if(!to.add(item)) {
+            to.remove(item);
+            to.add(item);
+        }
+    }
+
+    private Set<AppletInfo> getAppletsToSave(Set<AppletInfo> all) {
+        return all.stream().filter(a -> a.getAuthor() != null ||
+                        a.getVersion() != null ||
+                        a.getSdk() != null ||
+                        a.getName() != null)
+                .collect(Collectors.toSet());
+    }
+
+    private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+        Set<AppletInfo> appletInfoList = card.getApplets();
+        deleteInfo(appletInfoList, applet.getAid());
+        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
+            for (AID aid : applet.getModules()) {
+                deleteInfo(appletInfoList, aid);
+            }
+        }
+        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
+        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
+    }
+
+    private void deleteInfo(Set<AppletInfo> list, AID toDelete) {
+        Iterator<AppletInfo> info = list.iterator();
+        while(info.hasNext()) {
+            AppletInfo nfo = info.next();
+            if (toDelete.equals(nfo.getAid())) {
+                info.remove();
+                return;
+            }
+        }
     }
 
     /**
-     * Performs the only card insecure-channel use (e.g. GET)
+     * Performs card insecure-channel use (e.g. GET)
      * to get data from inserted card
      */
     private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
@@ -298,17 +376,19 @@ public class CardManagerImpl implements CardManager {
                     TerminalManager.getExceptionMessage(e), "E_connect_fail");
         }
 
-        GetDetails command = new GetDetails(channel);
+        GPCommand<CardDetails> command = new GetDetails(channel);
+        command.setChannel(channel);
         command.execute();
         card.endExclusive();
         card.disconnect(false);
 
-        CardDetails details = command.getOuput();
+        CardDetails details = command.getResult();
         details.setAtr(card.getATR());
         return details;
     }
 
-    private synchronized String installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
+    private synchronized void installImpl(final CAPFile file, InstallOpts data,
+                                          boolean defaultSelected) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -318,7 +398,7 @@ public class CardManagerImpl implements CardManager {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                logger.info("The card was busy when install() called, waiting interrupted.");
+                logger.warn("The card was busy when install() called, waiting interrupted.");
                 Thread.currentThread().interrupt();
             }
         }
@@ -326,23 +406,29 @@ public class CardManagerImpl implements CardManager {
 
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
-            Install install = new Install(file, data);
-            card.executeCommand(install);
-            return install.getAppletAID().toString();
+            GPCommand install = new Install(file, data, defaultSelected);
+            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
+
+            card.secureExecuteCommands(install, new GPCommand() {
+                @Override
+                public String getDescription() {
+                    return "Saving installed applet metadata inside secure loop.";
+                }
+
+                @Override
+                public boolean execute() throws LocalizedCardException {
+                    saveData(file, data);
+                    return true;
+                }
+            }, contents);
+            selectedAID = null;
+            card.setApplets(contents.getResult());
+            lastInstalled = data.getAID();
+            //not necessary
+            //if (defaultSelected) card.setDefaultSelected(lastInstalled);
         } finally {
             busy = false;
             notifyAll();
         }
-    }
-
-    private void refreshCard() throws LocalizedCardException {
-        logger.info("Card was about to refresh.");
-        card = null;
-        selectedAID = null;
-        lastInstalled = null;
-        terminals.refresh();
-        loadCard();
-        System.out.println(lastInstalled == null? "" : lastInstalled.toString());
-        logger.info("Card successfully refreshed.");
     }
 }

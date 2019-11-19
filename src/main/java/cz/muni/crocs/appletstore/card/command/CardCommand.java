@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author Jiří Horák
  * @version 1.0
  */
-public interface CardCommand<T> {
+public interface CardCommand {
 
     /**
      * Executes the command on a card

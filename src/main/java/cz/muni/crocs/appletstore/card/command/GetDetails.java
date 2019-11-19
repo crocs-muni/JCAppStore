@@ -14,27 +14,26 @@ import static pro.javacard.gp.GPData.getData;
 /**
  * @author Jiří Horák
  */
-public class GetDetails implements CardCommand {
-    private APDUBIBO channel;
-    private CardDetails details;
+public class GetDetails extends GPCommand<CardDetails> {
 
     public GetDetails(APDUBIBO channel) {
         this.channel = channel;
     }
 
-    public CardDetails getOuput() {
-        return details;
+    @Override
+    public boolean execute() throws CardException, IOException {
+        result = new CardDetails();
+        result.setCplc(fetchCPLC(channel));
+        result.setIin(getData(channel, 0x00, 0x42, "IIN", false));
+        result.setCin(getData(channel, 0x00, 0x45, "CIN", false));
+        result.setCardData(getData(channel, 0x00, 0x66, "Card Data", false));
+        result.setCardCapabilities(getData(channel, 0x00, 0x67, "Card Capabilities", false));
+        result.setKeyInfo(fetchKeyInfoTemplate(channel));
+        return true;
     }
 
     @Override
-    public boolean execute() throws CardException, IOException {
-        details = new CardDetails();
-        details.setCplc(fetchCPLC(channel));
-        details.setIin(getData(channel, 0x00, 0x42, "IIN", false));
-        details.setCin(getData(channel, 0x00, 0x45, "CIN", false));
-        details.setCardData(getData(channel, 0x00, 0x66, "Card Data", false));
-        details.setCardCapabilities(getData(channel, 0x00, 0x67, "Card Capabilities", false));
-        details.setKeyInfo(fetchKeyInfoTemplate(channel));
-        return true;
+    public String getDescription() {
+        return "Getting card detail information before authentication.";
     }
 }

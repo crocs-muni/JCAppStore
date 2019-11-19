@@ -3,7 +3,11 @@ package cz.muni.crocs.appletstore.ui;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 
 /**
@@ -11,6 +15,7 @@ import java.awt.*;
  * @version 1.0
  */
 public class LoadingPane extends JPanel {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private final int width = 300;
     private final int height = 5;
@@ -18,9 +23,14 @@ public class LoadingPane extends JPanel {
     private String message;
     private Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
 
+    private GridBagConstraints constraints;
+
     public LoadingPane(String initialMsg) {
+        setLayout(new GridBagLayout());
         setOpaque(false);
         this.message = initialMsg;
+        this.constraints = new GridBagConstraints();
+        this.constraints.insets = new Insets(80, 0, 0, 0);
     }
 
     public void setMessage(String msg) {
@@ -52,19 +62,20 @@ public class LoadingPane extends JPanel {
         return progress <= 100;
     }
 
-//    private static Shape createRingShape(int progress, int widthHeight) {
-//
-//        Arc2D.Float outer = new Arc2D.Float(Arc2D.OPEN);
-//        outer.setFrameFromCenter(new Point(0, 0), new Point(widthHeight, widthHeight));
-//        outer.setAngleStart(1);
-//        outer.setAngleExtent(-progress * 3.6);
-//
-//        Ellipse2D inner = new Ellipse2D.Float();
-//        inner.setFrameFromCenter(new Point(0, 0), new Point(widthHeight - 4, widthHeight - 4));
-//
-//        Area area = new Area(outer);
-//        area.subtract(new Area(inner));
-//        return area;
-//    }
+    public void showAbort(AbstractAction abstractAction) {
+        removeAll();
+        JButton abort = new JButton(abstractAction);
+        abort.setText(textSrc.getString("abort"));
+        abort.setForeground(Color.WHITE);
+        abort.setBorder(new CompoundBorder(new LineBorder(Color.WHITE, 1),
+                BorderFactory.createEmptyBorder(3, 15, 3, 15)));
+        abort.setFont(OptionsFactory.getOptions().getFont(13f));
+        abort.setUI(new CustomButtonUI());
+        abort.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        abort.setOpaque(false);
+        add(abort, constraints);
+        revalidate();
+        repaint();
+    }
 }
 
