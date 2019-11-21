@@ -90,6 +90,12 @@ jar {
     manifest {
         attributes 'Main-Class': 'cz.muni.crocs.appletstore.SplashScreen'
     }
+
+    doLast {
+        project.exec {
+            commandLine('chmod', '+x', "build/deploy/JCAppStore-${version}-installer.jar")
+        }
+    }
 }
 
 

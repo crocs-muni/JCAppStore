@@ -46,7 +46,7 @@
             </guiprefs>
 
     <resources>
-        <res id="InfoPanel.info" src="readme.md" parse="yes"/>
+        <res id="InfoPanel.info" src="README.md" parse="yes"/>
         <res src="scripts/shortcutSpec.xml" id="shortcutSpec.xml"/>
         <res src="scripts/unixShortcutSpec.xml" id="Unix_shortcutSpec.xml"/>
     </resources>
@@ -82,6 +82,7 @@
             <description>The core files needed for the application</description>
             <fileset dir="out" targetdir="${INSTALL_PATH}" override="true"/>
             <fileset dir="scripts" targetdir="${INSTALL_PATH}/scripts" override="true"/>
+            <executable targetfile="${INSTALL_PATH}/JCAppStore-1.0.jar" type="bin" stage="never" failure="warn" keep="true" />
             <os family="unix"/>
         </pack>
     </packs>
