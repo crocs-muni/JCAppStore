@@ -1,0 +1,30 @@
+<!--
+//https://stackoverflow.com/questions/7295544/izpack-create-shortcut-on-windows
+
+This is the shortcut specification for windows. Its considered default so on
+Systems that are not shortcut compatible the information is taken from here.
+-->
+
+<izpack:shortcuts version="5.0"
+                  xmlns:izpack="http://izpack.org/schema/shortcuts"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://izpack.org/schema/shortcuts http://izpack.org/schema/5.0/izpack-shortcuts-5.0.xsd">
+
+    <lateShortcutInstall />
+
+    <shortcut
+            name="JCAppStore"
+            target="$INSTALL_PATH/JCAppStore-1.0.jar"
+            description="JCAppStore"
+            workingDirectory="$INSTALL_PATH"
+            iconFile="$INSTALL_PATH/scripts/jcappstore.ico"
+            initialState="normal"
+            programGroup="yes"
+            desktop="yes"
+            applications="yes"
+            startMenu="yes"
+            startup="no">
+
+        <createForPack name="JC Core"/>
+    </shortcut>
+</izpack:shortcuts>
