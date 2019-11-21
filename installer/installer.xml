@@ -24,7 +24,7 @@
         </authors>
         <url>https://github.com/JavaCardSpot-dev/JCAppStore</url>
         <uninstaller />
-        <run-privileged />
+        <run-privileged uninstaller="yes"/>
     </info>
 
     <locale>
@@ -43,10 +43,23 @@
             <param name="variant" value="mist-aqua" />
         </laf>
         <modifier key="useHeadingPanel" value="yes" />
+
+
+        <modifier key="useButtonIcons" value="yes"/>
+        <modifier key="useLabelIcons" value="no"/>
+        <modifier key="labelGap" value="2"/>
+        <modifier key="layoutAnchor" value="NORTHWEST"/>
+        <modifier key="useHeadingPanel" value="no"/>
+        <modifier key="headingImageOnLeft" value="yes"/>
+        <modifier key="headingLineCount" value="1"/>
+        <modifier key="headingFontSize" value="1.5"/>
+        <modifier key="headingBackgroundColor" value="0x00ffffff"/>
+        <modifier key="headingPanelCounter" value="progressbar"/>
+        <modifier key="headingPanelCounterPos" value="inNavigationPanel"/>
     </guiprefs>
 
     <resources>
-        <res id="InfoPanel.info" src="README.md" parse="yes"/>
+        <res id="InfoPanel.info" src="readme.md" parse="yes"/>
         <res src="scripts/shortcutSpec.xml" id="shortcutSpec.xml"/>
         <res src="scripts/unixShortcutSpec.xml" id="Unix_shortcutSpec.xml"/>
     </resources>
@@ -58,6 +71,7 @@
         <listener classname="RegistryUninstallerListener" stage="uninstall" >
             <os family="windows"/>
         </listener>
+
     </listeners>
 
     <panels>
@@ -69,6 +83,10 @@
         <panel classname="FinishPanel"/>
     </panels>
 
+    <variables>
+        <variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+    </variables>
+
     <packs>
         <pack name="JC Core" required="yes">
             <description>The core files needed for the application</description>
@@ -77,13 +95,12 @@
             <os family="windows"/>
         </pack>
 
-        <!--        <pack name="JC Core" required="yes">-->
-        <!--            <description>The core files needed for the application</description>-->
-        <!--            <fileset dir="out" targetdir="${INSTALL_PATH}" override="true"/>-->
-        <!--            <fileset dir="scripts" targetdir="${INSTALL_PATH}/scripts" override="true"/>-->
-        <!--            <executable targetfile="${INSTALL_PATH}/JCAppStore-1.0.jar" type="bin" stage="never" failure="warn" keep="true" os="unix" />-->
-        <!--            <os family="unix"/>-->
-        <!--        </pack>-->
+<!--        <pack name="JC Core" required="yes">-->
+<!--            <description>The core files needed for the application</description>-->
+<!--            <fileset dir="out" targetdir="${INSTALL_PATH}" override="true"/>-->
+<!--            <fileset dir="scripts" targetdir="${INSTALL_PATH}/scripts" override="true"/>-->
+<!--            <os family="unix"/>-->
+<!--        </pack>-->
     </packs>
 
 </izpack:installation>
