@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="iso-8859-1"  ?>
+<izpack:shortcuts version="5.0"
+                  xmlns:izpack="http://izpack.org/schema/shortcuts"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://izpack.org/schema/shortcuts http://izpack.org/schema/5.0/izpack-shortcuts-5.0.xsd">
+
+    <shortcut
+            name="JCAppStore"
+            target="$INSTALL_PATH\JCAppStore-1.0.jar"
+            description="JCAppStore"
+            workingDirectory="$INSTALL_PATH"
+            iconFile="$INSTALL_PATH\scripts\jcappstore.ico"
+            initialState="normal"
+            programGroup="yes"
+            desktop="yes"
+            applications="yes"
+            startMenu="yes"
+            startup="no">
+
+        <createForPack name="JC Core"/>
+    </shortcut>
+</izpack:shortcuts>
