@@ -31,7 +31,7 @@
         <langpack iso3="eng"/>
     </locale>
 
-    <guiprefs width="800" height="600" resizable="no">
+    <guiprefs width="800" height="400" resizable="no">
         <splash>images/peas_load.gif</splash>
         <laf name="substance">
             <os family="windows" />
@@ -48,7 +48,6 @@
         <modifier key="useButtonIcons" value="yes"/>
         <modifier key="useLabelIcons" value="no"/>
         <modifier key="labelGap" value="2"/>
-        <modifier key="layoutAnchor" value="NORTHWEST"/>
         <modifier key="useHeadingPanel" value="no"/>
         <modifier key="headingImageOnLeft" value="yes"/>
         <modifier key="headingLineCount" value="1"/>
@@ -60,6 +59,7 @@
 
     <resources>
         <res id="InfoPanel.info" src="readme.md" parse="yes"/>
+        <res src="scripts/ProcessPanel.Spec.xml" id="ProcessPanel.Spec.xml"/>
         <res src="scripts/shortcutSpec.xml" id="shortcutSpec.xml"/>
         <res src="scripts/unixShortcutSpec.xml" id="Unix_shortcutSpec.xml"/>
     </resources>
@@ -79,6 +79,8 @@
         <panel classname="ShortcutPanel" id="my_shortcutpanel"/>
         <panel classname="PacksPanel"/>
         <panel classname="InstallPanel"/>
+        <panel classname="ProcessPanel"/>
+
         <panel classname="InfoPanel" />
         <panel classname="FinishPanel"/>
     </panels>
