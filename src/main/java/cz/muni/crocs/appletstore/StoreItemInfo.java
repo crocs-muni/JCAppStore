@@ -136,6 +136,13 @@ public class StoreItemInfo extends HintPanel {
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 40, wrap");
 
+        addSubTitle("use", "H_use");
+        add(TextField.getTextField(
+                dataSet.get(JsonParser.TAG_USAGE).getAsString(),
+                "margin: 10px; width:600px",
+                new Color(255, 255, 255, 80)
+        ), "span 4, gap 20, gaptop 20, wrap");
+
         final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
         if (!urlAddress.isEmpty()) {
             addSubTitle("website", "H_website");
@@ -147,12 +154,6 @@ public class StoreItemInfo extends HintPanel {
             add(url, "span 4, gaptop 10, gapleft 20, wrap");
         }
 
-        addSubTitle("use", "H_use");
-        add(TextField.getTextField(
-                dataSet.get(JsonParser.TAG_USAGE).getAsString(),
-                "margin: 10px; width:600px",
-                new Color(255, 255, 255, 80)
-        ), "span 4, gap 20, gaptop 20, wrap");
     }
 
     private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void> call) {

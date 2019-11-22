@@ -1,9 +1,12 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.ui.Title;
+import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
+import javafx.collections.transformation.SortedList;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,12 +22,9 @@ import java.util.List;
  * @version 1.0
  */
 public class StoreWindowPane extends JScrollPane implements Searchable {
-
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
-
     private OnEventCallBack<Void, Void> callback;
     private JPanel storeLayout = new JPanel();
-    private ArrayList<StoreItem> items = new ArrayList<>();
+    private TreeSet<Item> items = new TreeSet<>();
     private List<JsonObject> data;
     private JsonObject currentlyShown;
 
@@ -32,6 +32,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         this.data = data;
         this.callback = callback;
         setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder());
         setViewportBorder(null);
         getViewport().setOpaque(false);
         storeLayout.setOpaque(false);
@@ -43,7 +44,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         getVerticalScrollBar().setUnitIncrement(16);
         getVerticalScrollBar().setOpaque(false);
 
-        storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
+        storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 11, 11));
         storeLayout.setBorder(new EmptyBorder(0, 50, 50, 50));
         loadStore();
     }
@@ -51,16 +52,23 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private void loadStore()  {
         items.clear();
 
+        int position = 0;
+        String category = "";
         for (JsonObject dataSet : data) {
-            StoreItem item = new StoreItem(dataSet);
-            item.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            item.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    showInfo(dataSet);
-                }
-            });
-            items.add(item);
+            if (dataSet.get(JsonParser.TAG_TYPE).getAsString().equals("category")) {
+                category = dataSet.get(JsonParser.TAG_TITLE).getAsString();
+                items.add(new StoreTitle(category, position++));
+            } else {
+                StoreItem item = new StoreItem(dataSet, category, position++);
+                item.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                item.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        showInfo(dataSet);
+                    }
+                });
+                items.add(item);
+            }
         }
         showPanel(items);
     }
@@ -78,13 +86,14 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         setViewportView(new StoreItemInfo(dataSet, this, callback));
     }
 
-    private void showPanel(Collection<StoreItem> sortedItems) {
+    private void showPanel(SortedSet<Item> sortedItems) {
         storeLayout.removeAll();
+
         if (sortedItems.size() == 0) {
             storeLayout.add(new NotFoundItem());
         } else {
-            for (StoreItem item : sortedItems) {
-                storeLayout.add(item);
+            for (Item item : sortedItems) {
+                storeLayout.add((JComponent)item);
             }
         }
         storeLayout.revalidate();
@@ -97,8 +106,8 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         if (query == null || query.isEmpty()) {
             showPanel(items);
         } else {
-            ArrayList<StoreItem> sortedIems = new ArrayList<>();
-            for (StoreItem item : items) {
+            TreeSet<Item> sortedIems = new TreeSet<>();
+            for (Item item : items) {
                 if (item.getSearchQuery().toLowerCase().contains(query.toLowerCase())) {
                     sortedIems.add(item);
                 }

@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
-import cz.muni.crocs.appletstore.ui.ErrorPane;
+import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.util.*;
 
 import javax.swing.*;
@@ -17,7 +16,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class MainPanel extends BackgroundImgPanel implements Informable {
+public class MainPanel extends BackgroundImgSplitPanel implements Informable {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private JPanel content;
@@ -27,6 +26,7 @@ public class MainPanel extends BackgroundImgPanel implements Informable {
     private LoggerConsole console;
 
     public MainPanel(BackgroundChangeable context) {
+        requestFocusInWindow(); //todo check if works and disables the problem with search query
         setOneTouchExpandable(true);
         setDividerLocation(150);
 

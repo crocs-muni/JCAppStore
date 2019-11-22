@@ -40,7 +40,7 @@ public class Settings extends JPanel {
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Tuple<String, String>> languageBox;
     private JCheckBox hintEnabled = new JCheckBox();
-    private JCheckBox verboseEnabled = new JCheckBox();
+    private JCheckBox simple = new JCheckBox();
     private JCheckBox jcMemoryKept = new JCheckBox();
     private JCheckBox implicitDelete = new JCheckBox();
     private BackgroundChangeable context;
@@ -54,7 +54,7 @@ public class Settings extends JPanel {
         buildPGP();
         buildJCKeep();
         buildImplicitDelete();
-        //buildErrorMode();
+        buildSimpleMode();
         buildLanguage();
         buildHint();
         buildBackground();
@@ -64,7 +64,7 @@ public class Settings extends JPanel {
         saveBackgroundImage();
         saveLanguage();
         saveHint();
-        //saveErrorMode();
+        saveSimpleMode();
         saveJCKeep();
         savePGP();
         saveImplicitDelete();
@@ -166,10 +166,10 @@ public class Settings extends JPanel {
         add(implicitDelete, "align right, span 2, w 180, wrap");
     }
 
-    private void buildErrorMode() {
-        add(new Text(textSrc.getString("enable_verbose")), "");
-        verboseEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
-        add(verboseEnabled, "align right, span 2, w 180, wrap");
+    private void buildSimpleMode() {
+        add(new Text(textSrc.getString("enable_simple")), "");
+        simple.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
+        add(simple, "align right, span 2, w 180, wrap");
     }
 
     private void buildJCKeep() {
@@ -266,8 +266,8 @@ public class Settings extends JPanel {
         HintPanel.enableHint(hintEnabled.isSelected());
     }
 
-    private void saveErrorMode() {
-        OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE, verboseEnabled.isSelected() ? "true" : "false");
+    private void saveSimpleMode() {
+        OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE, simple.isSelected() ? "true" : "false");
     }
 
     private void saveJCKeep() {

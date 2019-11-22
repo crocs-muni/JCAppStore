@@ -24,7 +24,7 @@
         </authors>
         <url>https://github.com/JavaCardSpot-dev/JCAppStore</url>
         <uninstaller />
-        <run-privileged uninstaller="yes"/>
+        <run-privileged />
     </info>
 
     <locale>

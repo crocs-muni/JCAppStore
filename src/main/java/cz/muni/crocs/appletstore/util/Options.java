@@ -12,6 +12,7 @@ public interface Options<ValueType> {
     /**
      * Key names for options
      */
+    String KEY_SHOW_WELCOME = "welcome_screen";
     String KEY_LANGUAGE = "lang";
     String KEY_GITHUB_LATEST_VERSION = "github.latest.version";
     String KEY_BACKGROUND = "background";
@@ -21,6 +22,7 @@ public interface Options<ValueType> {
     String KEY_TITLE_FONT = "title";
     String KEY_PGP_LOCATION = "gpg";
     String KEY_VERBOSE_MODE = "verbose";
+    String KEY_SIMPLE_USE = "simple_usage";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_DELETE_IMPLICIT = "delete_pkg";
 

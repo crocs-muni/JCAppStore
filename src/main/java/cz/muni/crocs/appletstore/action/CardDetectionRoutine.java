@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.AppletStore;
 import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
@@ -73,7 +74,9 @@ public class CardDetectionRoutine extends CardAbstractAction {
                     counter = 0;
                     Thread.sleep(DELAY);
                 } catch (UnknownKeyException ex) {
-                    throw ex; //we want to throw only this exception so the unknown key is handled by wrapper
+                    handleUnknownKey(CardExecutableIdle.get(),
+                            "ERROR: failed to authenticate card. The routine should be error prone!",
+                            "lock.png", textSrc.getString("E_routine"), ex);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     counter++;

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -11,8 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
     //logger xml-file defined
@@ -67,6 +71,15 @@ public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
             setWrapStyleWord(false);
             setEditable(false);
             setFont(getFont().deriveFont(11f));
+
+            JPopupMenu menu = new JPopupMenu();
+
+            JMenuItem item = new JMenuItem(new DefaultEditorKit.CopyAction());
+            item.setIcon(new ImageIcon(Config.IMAGE_DIR + "copy.png"));
+            item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+            item.setText("Copy");
+            menu.add(item);
+            setComponentPopupMenu(menu);
         }
     }
 }

@@ -5,7 +5,7 @@ package cz.muni.crocs.appletstore;
  * @author Jiří Horák
  * @version 1.0
  */
-public interface Item {
+public interface Item extends Comparable<Item> {
 
     /**
      * Method to get the item's description query to compare to user search query

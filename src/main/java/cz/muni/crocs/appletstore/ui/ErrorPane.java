@@ -6,9 +6,9 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -24,14 +24,30 @@ public class ErrorPane extends JPanel {
     public ErrorPane (String title, String imgName) {
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        requestFocusInWindow();
         JLabel error = new JLabel(new ImageIcon(Config.IMAGE_DIR + imgName));
         error.setAlignmentX(Component.CENTER_ALIGNMENT);
         error.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        JPopupMenu menu = new JPopupMenu();
+
+        JMenuItem item = new JMenuItem(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                error.getText() + //todo
+            }
+        });
+        item.setIcon(new ImageIcon(Config.IMAGE_DIR + "copy.png"));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+        item.setText(textSrc.getString("copy"));
+        menu.add(item);
+        error.setComponentPopupMenu(menu);
         add(error);
         JLabel errorMsg = new JLabel(title);
         errorMsg.setFont(OptionsFactory.getOptions().getTitleFont(20f));
         errorMsg.setForeground(Color.WHITE);
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
+        errorMsg.setComponentPopupMenu(menu);
         add(errorMsg);
     }
 

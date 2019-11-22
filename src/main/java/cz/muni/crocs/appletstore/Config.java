@@ -23,7 +23,6 @@ public class Config {
     //app internal dirs
     public static final String RESOURCES_DIR = "src"+S+"main"+S+"resources"+S;
     public static final String IMAGE_DIR = RESOURCES_DIR +"img"+S;
-    public static final String LANG_DIR = RESOURCES_DIR +"lang"+S;
     public static final String DATA_DIR = RESOURCES_DIR +"data"+S;
 
     //config files related constants

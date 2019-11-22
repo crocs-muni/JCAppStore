@@ -63,7 +63,7 @@ public class DeleteAction extends CardAbstractAction {
         final CardManager manager = CardManagerFactory.getManager();
         boolean willForce = opts.willForce() || OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
         //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
-        if (!OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && info.getKind() == Kind.ExecutableLoadFile) {
+        if (!OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && info.getKind() == Kind.ExecutableLoadFile) {
             for (AID mod : info.getModules()) {
                 CardInstance card = manager.getCard();
                 if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {

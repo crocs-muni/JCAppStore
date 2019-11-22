@@ -64,21 +64,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
             try {
                 toExecute.execute();
             } catch (UnknownKeyException e) {
-                try {
-                    InformerFactory.getInformer().showFullScreenInfo(
-                            new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
-                    new UnknownKeyHandler(toExecute, e).handle();
-                } catch (LocalizedCardException ex) {
-                    caught(title, loggerMessage, ex);
-                    return;
-                } catch (UnknownKeyException ex) {
-                    logger.error("UnknownKeyException after key was set. Should not even get here.");
-                    SwingUtilities.invokeLater(call::onFail);
-                    InformerFactory.getInformer().showFullScreenInfo(
-                            new ErrorPane(textSrc.getString("E_authentication"),
-                                    textSrc.getString("E_master_key_not_found"), "lock.png"));
-                    return;
-                }
+                if (!handleUnknownKey(toExecute, loggerMessage, title, e)) return;
             } catch (LocalizedCardException ex) {
                 caught(title, loggerMessage, ex);
                 //todo show
@@ -86,6 +72,31 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
             }
             SwingUtilities.invokeLater(call::onFinish);
         }).start();
+    }
+
+    protected boolean handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, UnknownKeyException e) {
+        return handleUnknownKey(toExecute, loggerMessage, title, null, e);
+    }
+
+    protected boolean handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, String image, UnknownKeyException e) {
+        try {
+            InformerFactory.getInformer().showFullScreenInfo(
+                    new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
+            new UnknownKeyHandler(toExecute, e).handle();
+        } catch (LocalizedCardException ex) {
+            if (image != null) caught(title, loggerMessage, image, ex);
+            else caught(title, loggerMessage, ex);
+            return false;
+        } catch (UnknownKeyException ex) {
+            ex.printStackTrace();
+            logger.error("UnknownKeyException after key was set. Should not even get here.");
+            SwingUtilities.invokeLater(call::onFail);
+            InformerFactory.getInformer().showFullScreenInfo(
+                    new ErrorPane(textSrc.getString("E_authentication"),
+                            textSrc.getString("E_master_key_not_found"), "lock.png"));
+            return false;
+        }
+        return true;
     }
 
     protected static void showFailed(String title, String message) {
@@ -97,7 +108,18 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
     private void caught(String title, String loggerMessage, LocalizedCardException e) {
         e.printStackTrace();
         logger.warn(loggerMessage + e.getMessage());
-        if (title != null) SwingUtilities.invokeLater(() -> showFailed(title, e.getLocalizedMessage()));
+        if (title != null) {
+            SwingUtilities.invokeLater(() -> showFailed(title, e.getLocalizedMessage()));
+        }
+        SwingUtilities.invokeLater(call::onFail);
+    }
+
+    private void caught(String title, String loggerMessage, String image, LocalizedCardException e) {
+        e.printStackTrace();
+        logger.warn(loggerMessage + e.getMessage());
+        if (title != null) {
+            InformerFactory.getInformer().showFullScreenInfo(new ErrorPane(textSrc.getString(title), e.getLocalizedMessage(), image));
+        }
         SwingUtilities.invokeLater(call::onFail);
     }
 
@@ -110,11 +132,25 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
     }
 
     /**
+     * Idle task for card executable
+     */
+    public static class CardExecutableIdle implements CardExecutable {
+        private static CardExecutable self = new CardExecutableIdle();
+        private CardExecutableIdle() {}
+
+        public static CardExecutable get() {
+            return self;
+        }
+        @Override
+        public void execute() {}
+    }
+
+    /**
      * Handler for the unknown key event
      * tries to use 4041...4E4F default test key for authentication
      * if user agrees or fails while showing the failure cause.
      */
-    private class UnknownKeyHandler {
+    class UnknownKeyHandler {
         private UnknownKeyException e;
         private CardExecutable failed;
 
@@ -137,7 +173,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
             }
         }
 
-        private int useDefaultTestKey() {
+        int useDefaultTestKey() {
             return JOptionPane.showConfirmDialog(
                     null,
                     new HtmlText(textSrc.getString("I_use_default_keys_1") +

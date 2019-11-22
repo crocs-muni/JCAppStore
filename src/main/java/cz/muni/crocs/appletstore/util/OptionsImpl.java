@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.crypto.PGP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +42,7 @@ public class OptionsImpl implements Options<String> {
     @Override
     public void setDefaults() {
         options.clear();
+        options.put(Options.KEY_SHOW_WELCOME, "true");
         options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
         options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
@@ -51,6 +51,7 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
         options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
         options.put(Options.KEY_PGP_LOCATION, "");
+        options.put(Options.KEY_SIMPLE_USE, "true");
         options.put(Options.KEY_VERBOSE_MODE, "false");
         options.put(Options.KEY_KEEP_JCMEMORY, "true");
         options.put(Options.KEY_DELETE_IMPLICIT, "true");
