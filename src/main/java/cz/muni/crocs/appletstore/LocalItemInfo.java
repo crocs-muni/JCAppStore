@@ -59,6 +59,7 @@ public class LocalItemInfo extends HintPanel {
                 unset();
             }
         });
+        close.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(close, "pos 90% 3%");
 
         name.setFont(OptionsFactory.getOptions().getTitleFont(18f));
