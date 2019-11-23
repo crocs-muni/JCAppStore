@@ -14,16 +14,20 @@ public class BackgroundImgPanel extends JPanel {
     private BufferedImage bg;
 
     public void load(String image) {
-        try {
-            bg = ImageIO.read(new File(Config.IMAGE_DIR + image));
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            File f = new File(Config.IMAGE_DIR + image);
+//            assert (f.exists());
+//            assert (f.canRead()); //second method in ImageIO.read() asserts the same and fails...?
+//
+//            bg = ImageIO.read(f);
+//        } catch (IOException e) {
+//            e.printStackTrace();
             bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
             Graphics g = bg.createGraphics();
             g.setColor(Color.WHITE);
             g.fillRect(0, 0, bg.getWidth(), bg.getHeight());
             g.dispose();
-        }
+//        }
     }
 
     @Override

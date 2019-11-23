@@ -99,6 +99,8 @@ public class Menu extends JMenuBar {
 
         menu.add(buildWindowSettingsSubMenu());
 
+        menu.add(buildModesMenu());
+
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,7 +152,21 @@ public class Menu extends JMenuBar {
             }
         }, "", KeyEvent.VK_L, InputEvent.ALT_MASK));
 
-        submenu.add(new JSeparator());
+        JMenuItem hints = selectableMenuItem(new AbstractAction(textSrc.getString("enable_hints")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_HINT,
+                        OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_H, InputEvent.ALT_MASK);
+        hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
+        submenu.add(hints);
+        return submenu;
+    }
+
+    private JMenuItem buildModesMenu() {
+        JMenu submenu = jmenuWithBackground(textSrc.getString("modes"));
+        setItemLook(submenu, textSrc.getString("modes_desc"));
 
         JMenuItem verbose = selectableMenuItem(new AbstractAction(textSrc.getString("enable_verbose")) {
             @Override
@@ -161,6 +177,37 @@ public class Menu extends JMenuBar {
         }, "", KeyEvent.VK_V, InputEvent.ALT_MASK);
         verbose.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
         submenu.add(verbose);
+
+        JMenuItem intuitive = selectableMenuItem(new AbstractAction(textSrc.getString("enable_simple")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE,
+                        OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        intuitive.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
+        submenu.add(intuitive);
+
+        JMenuItem autodelete = selectableMenuItem(new AbstractAction(textSrc.getString("implicit_delete")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_DELETE_IMPLICIT,
+                        OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
+        autodelete.setSelected(OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT));
+        submenu.add(autodelete);
+
+        JMenuItem jcmemory = selectableMenuItem(new AbstractAction(textSrc.getString("enable_jcmemory")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY,
+                        OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_J, InputEvent.ALT_MASK);
+        jcmemory.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
+        submenu.add(jcmemory);
+
         return submenu;
     }
 

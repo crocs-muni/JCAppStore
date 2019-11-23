@@ -52,22 +52,22 @@ public class Settings extends JPanel {
         this.context = context;
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildPGP();
-        buildJCKeep();
-        buildImplicitDelete();
-        buildSimpleMode();
+//        buildJCKeep();
+//        buildImplicitDelete();
+//        buildSimpleMode();
         buildLanguage();
-        buildHint();
+//        buildHint();
         buildBackground();
     }
 
     public void apply() {
         saveBackgroundImage();
         saveLanguage();
-        saveHint();
-        saveSimpleMode();
-        saveJCKeep();
+//        saveHint();
+//        saveSimpleMode();
+//        saveJCKeep();
         savePGP();
-        saveImplicitDelete();
+//        saveImplicitDelete();
     }
 
     private void buildPGP() {

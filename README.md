@@ -18,8 +18,8 @@ screen, charger and so on. Smart cards have their own terms too.
 How the store works?
 ------
 
-This application is only a tool for card management. It will not allow you to use the card 
-applications themselves. That's why we try to include a pool (store), that contains safe, and
+**This application is only a tool for card management. It will not allow you to use the card 
+applications themselves.** That's why we try to include a pool (store), that contains safe, and
 intuitive software to install. You will always find the usage guide in the store item details. 
 Also, in the right upper corner, browse help for more detailed description. 
 Full documentation is accessible in [TODO]
@@ -32,7 +32,11 @@ Full documentation is accessible in [TODO]
 
 <details>
    <summary>Main applet</summary>
-   <p>Main applet is the default application running. Rarely, some applets require to be main in order to work. Most likely you will not have any applet as a main.</p>
+   <p>Main applet is the default application running. Rarely, some applets require to be main in order to work. Most likely you will not have any applet as a main.
+   <br>
+   <br>Why main applet (you can skip this): if an applet isn't main, the card manager has to select the applet first before sending any applet-specific commands. 
+   Some host applications may implicitly suppose that
+   their applet is the main and skip the selection part. Fortunately, most hosts do selecting.</p>
 </details>
 
 <details>
@@ -47,9 +51,12 @@ Full documentation is accessible in [TODO]
 
 <details>
    <summary>Master key</summary>
-   <p>Master key is the key that is required from you by a card manager (security domain). Without the key, you 
-   can't modify (e.g. install, delete..) the card contents. The master key is not a PIN or a card password you are used to. The key may be one single long sequence, or it can consist
-   of three parts. See https://github.com/martinpaljak/GlobalPlatformPro/wiki/Keys. You need not to change the master key.</p>
+   <p>The master key is not a PIN or a card password you are used to. 
+   The key may be one single long sequence (minimum of 16 characters), or it can consist
+   of three parts. **You need not to change the deafult master key.** The store supports one-valued keys only (which can be derived from the tree parts too).
+   Master key is the key that is required from you by a card manager (security domain). Without the key, you 
+   can't modify (e.g. install, delete..) the card contents. 
+   More on https://github.com/martinpaljak/GlobalPlatformPro/wiki/Keys. </p>
 </details>
 
 <details>
@@ -66,8 +73,16 @@ Full documentation is accessible in [TODO]
    <summary>SDK</summary>
    <p>Setup development kit; a library for card software. If install fails, the cause
    may be that your card does not support the newest SDK: you can try to install with older
-   SDK instead.</p>
+   SDK instead. All versions in 2.x.x form are usually supported.</p>
 </details>
+
+How to get the store
+-----
+Simply download the zip installation package from the latest release for your system. The installation
+should be os-specific (tar for linux, installation wizard for windows). 
+
+**The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
+(also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 
 Authentication
 -----
@@ -97,7 +112,7 @@ then you need to modify the **cards.ini** file.
 4) Modify the auth field - set value to true if not set, for the store to actually try to authenticate to the card.
 
 
-Installing
+Installing Applets
 -----
 To install an applet, simply select any product from the store or click on the "install from this PC" icon. The files are _verified_
 using PGP signatures - that means, the store makes sure no one maliciously modified the software you are going to install on your card.
@@ -143,7 +158,7 @@ to 32,767 bytes.
 If you have checked the **keep JCMemory** in store settings, the JCMemory remains on your card. The application itself is minimalistic; we recommend
 you to keep it in order to speed up installations.
 
-Deleting
+Deleting Applets
 -----
 The deletion is very simple; there are only two things you need to know:
 1) We track whether the applet stores sensitive data. If so, you are asked **twice** before the delete action proceeds.

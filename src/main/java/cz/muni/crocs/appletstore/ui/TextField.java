@@ -33,17 +33,28 @@ public class TextField {
         return field;
     }
 
-    private static JTextPane getTextFieldCore() {
-        JTextPane field = new JTextPane();
-
+    public static JPopupMenu getCopyMenu() {
         JPopupMenu menu = new JPopupMenu();
-
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CopyAction());
         item.setIcon(new ImageIcon(Config.IMAGE_DIR + "copy.png"));
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
         item.setText(textSrc.getString("copy"));
         menu.add(item);
-        field.setComponentPopupMenu(menu);
+        return menu;
+    }
+
+    private static JTextPane getTextFieldCore() {
+        JTextPane field = new JTextPane();
+        field.setComponentPopupMenu(getCopyMenu());
+
+//        //consider
+//        StyledDocument doc = f.getStyledDocument();
+//        SimpleAttributeSet style = new SimpleAttributeSet();
+//        StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
+//        StyleConstants.setFontFamily(style, OptionsFactory.getOptions().getFont().getFamily());
+//        StyleConstants.setForeground(style, Color.WHITE);
+//        StyleConstants.setFontSize(style, 16);
+//        doc.setParagraphAttributes(0, doc.getLength(), style, false);
 
         DefaultCaret caret = (DefaultCaret) field.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);

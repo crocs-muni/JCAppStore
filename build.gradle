@@ -41,6 +41,10 @@ dependencies {
     izpack 'org.codehaus.izpack:izpack-dist:5.1.3'
 }
 
+///////////////////////////
+//windows installer section
+///////////////////////////
+
 izpack {
     //generate folders deploy, out, res, main
     def folder = file("$buildDir/deploy/out/src/main/resources")
@@ -51,11 +55,6 @@ izpack {
     def scripts = file("$buildDir/deploy/scripts")
     if( !scripts.exists() ) {
         scripts.mkdirs()
-    }
-
-    copy {
-        from file("README.md")
-        into file("$buildDir/deploy")
     }
 
     copy {
@@ -92,15 +91,6 @@ jar {
     manifest {
         attributes 'Main-Class': 'cz.muni.crocs.appletstore.SplashScreen'
     }
-
-//    if (OperatingSystem.current().isLinux()) {
-//
-//        doLast {
-//            project.exec {
-//                commandLine('chmod', '+x', "build/deploy/JCAppStore-${version}-installer.jar")
-//            }
-//        }
-//    }
 }
 
 

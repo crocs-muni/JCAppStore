@@ -126,11 +126,11 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         new CardDetectionRoutine(this, OnEventCallBack.empty()).start();
         setVisible(true);
 
-        if (OptionsFactory.getOptions().is(Options.KEY_SHOW_WELCOME)) {
-            //OptionsFactory.getOptions().addOption(Options.KEY_SHOW_WELCOME, "false");
-            //todo throws
-            new WelcomeScreen().setVisible(true);
-        }
+//        if (OptionsFactory.getOptions().is(Options.KEY_SHOW_WELCOME)) {
+//            //OptionsFactory.getOptions().addOption(Options.KEY_SHOW_WELCOME, "false");
+//            //todo throws
+//            new WelcomeScreen().setVisible(true);
+//        }
     }
 
     @Override
