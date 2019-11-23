@@ -28,7 +28,7 @@ public class LeftMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
 
     private JPanel container = new JPanel(new GridBagLayout());
-    ;
+
     private InputHintTextField searchInput;
     private JLabel searchIcon;
     private boolean close = false;
@@ -36,16 +36,16 @@ public class LeftMenu extends JPanel {
     private ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
     private ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
 
-    private LeftMenuButton local = new LeftMenuButton("creditcard.png", false);
-    private LeftMenuButton remote = new LeftMenuButton("shop.png", false);
+    private LeftMenuButton local;
+    private LeftMenuButton remote;
     private boolean isLocal = true;
 
-    private Color choosedButtonBG = new Color(255, 255, 255, 60);
     private MainPanel parent;
 
     public LeftMenu(MainPanel parent) {
         this.parent = parent;
 
+        setOpaque(false);
         setBackground(new Color(255, 255, 255, 65));
         container.setOpaque(false);
 
@@ -64,17 +64,11 @@ public class LeftMenu extends JPanel {
 
         container.add(buildSearchPane(), gbc);
 
-        //init button for local storage
-        setButton(local, textSrc.getString("my_card"), true);
-        local.setBackground(choosedButtonBG);
-        local.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        local = new LeftMenuButton("creditcard.png", textSrc.getString("my_card"), false);
+        remote = new LeftMenuButton("shop.png", textSrc.getString("app_store"), false);
         container.add(local, gbc);
-
-        setButton(remote, textSrc.getString("app_store"), false);
-        remote.setOpaque(false);
-        remote.setBackground(choosedButtonBG);
-        remote.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         container.add(remote, gbc);
+        setChoosed();
 
         add(container, BorderLayout.NORTH);
     }
@@ -106,22 +100,10 @@ public class LeftMenu extends JPanel {
      * Sets the "choosed button" border
      */
     private void setChoosed() {
-        local.setBorder(isLocal);
-        remote.setBorder(!isLocal);
-        local.setOpaque(isLocal);
-        remote.setOpaque(!isLocal);
-    }
-
-    /**
-     * Set button properties
-     *
-     * @param button         CustomButton instance
-     * @param text           button title
-     * @param defaultChoosed whether the button is choosed by default
-     */
-    private void setButton(LeftMenuButton button, String text, boolean defaultChoosed) {
-        button.setText(text);
-        button.setBorder(defaultChoosed);
+        local.setSelectedBorder(isLocal);
+        remote.setSelectedBorder(!isLocal);
+        local.setSelectedBackground(isLocal);
+        remote.setSelectedBackground(!isLocal);
     }
 
     private void resetSearch() {
@@ -201,6 +183,14 @@ public class LeftMenu extends JPanel {
 
             }
         });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+        g.setColor( getBackground() );
+        g.fillRect(0, 0, getWidth(), getHeight());
+        super.paintComponent(g);
     }
 }
 

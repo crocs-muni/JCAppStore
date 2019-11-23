@@ -14,6 +14,9 @@ import java.awt.*;
  */
 public class LeftMenuButton extends JButton {
 
+    private Color choosedButtonBG = new Color(255, 255, 255, 60);
+    private Color emptyBG = new Color(0, 0, 0 ,0);
+
     private CompoundBorder innerChoosed = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(0, 5,0 , 0), Color.BLACK),
             new EmptyBorder(new Insets(4, 8,4 , 4)));
@@ -22,31 +25,31 @@ public class LeftMenuButton extends JButton {
             new EmptyBorder(new Insets(8, 8,8, 8)));
     private EmptyBorder defaultBorder = new EmptyBorder(new Insets(12, 21,12, 12));
 
-    public LeftMenuButton(String imgName, boolean isTitle) {
-        super();
+    public LeftMenuButton(String imgName, String text, boolean isTitle) {
+        super(text, new ImageIcon("src/main/resources/img/" + imgName));
+        setOpaque(false);
         setUI(new CustomButtonUI());
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         setFont(isTitle ? OptionsFactory.getOptions().getTitleFont() : OptionsFactory.getOptions().getFont());
         setHorizontalAlignment(SwingConstants.LEFT);
         setMinimumSize(new Dimension(Integer.MAX_VALUE, 35));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-        //setOpaque(false);
-        //setContentAreaFilled(false);
-        setIcon(new ImageIcon("src/main/resources/img/" + imgName));
     }
 
-    public void setBorder(boolean isDefaultChoosed) {
-        setBorder((isDefaultChoosed) ? choosedBorder : defaultBorder);
+    public void setSelectedBorder(boolean isSelected) {
+        setBorder(isSelected ? choosedBorder : defaultBorder);
     }
 
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        if (getModel().isPressed()) {
-//            //on click
-//        } else if (getModel().isRollover()) {
-//            //g.setColor(hoverBackgroundColor);
-//        } else {
-//            //when not clicked
-//        }
-//    }
+    public void setSelectedBackground(boolean isSelected) {
+        setBackground(isSelected ? choosedButtonBG : emptyBG);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g)
+    {
+        g.setColor( getBackground() );
+        g.fillRect(0, 0, getWidth(), getHeight());
+        super.paintComponent(g);
+    }
 
 }

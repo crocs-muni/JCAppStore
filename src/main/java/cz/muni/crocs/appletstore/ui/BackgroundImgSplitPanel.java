@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class BackgroundImgSplitPanel extends JSplitPane {
 
-    private BufferedImage bg;
+    private Image bg;
     private int width = -1, height = -1;
 
     public BackgroundImgSplitPanel() {
@@ -33,7 +33,11 @@ public class BackgroundImgSplitPanel extends JSplitPane {
     }
 
     public void setNewBackground(BufferedImage newBackground) {
-        bg = newBackground;
+        width = getWidth();
+        height = getHeight();
+        bg = newBackground.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        revalidate();
+        repaint();
     }
 
     private void setup() {
@@ -68,12 +72,14 @@ public class BackgroundImgSplitPanel extends JSplitPane {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-//        if (width == getWidth() && height == getHeight()) {
-//            g.drawImage(bg, 0, 0, this);
-//        } else {
-//            width = getWidth();
-//            height = getHeight();
-            g.drawImage(bg.getScaledInstance(getWidth(),getHeight(),Image.SCALE_SMOOTH), 0, 0, this);
-//        }
+        int w = getWidth();
+        int h = getHeight();
+
+        if (width != w && height != h) {
+            bg = bg.getScaledInstance(w,h,Image.SCALE_SMOOTH);
+            width = w;
+            height = h;
+        }
+        g.drawImage(bg, 0, 0, this);
     }
 }
