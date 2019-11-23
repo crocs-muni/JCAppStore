@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LocalItem extends JPanel implements Item, Comparable<Item> {
+public class LocalItem extends JPanel implements Item {
 
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
     private static BufferedImage issuer = getIssuerImg();
@@ -43,6 +43,7 @@ public class LocalItem extends JPanel implements Item, Comparable<Item> {
         this.info = info;
         this.name = title;
         this.manager = CardManagerFactory.getManager();
+        setAlignmentX(LEFT_ALIGNMENT);
 
         try {
             newItem = ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));

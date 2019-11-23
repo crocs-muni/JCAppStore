@@ -18,11 +18,13 @@ import java.io.File;
 public class StoreItem extends JPanel implements Item {
 
     private String searchQuery;
+    private int position;
 
-    public StoreItem(String title, String author, String version, String image) {
-        searchQuery = title + author;
+    private StoreItem(String title, String author, String category, String version, String image) {
+        searchQuery = title + author + category;
         setLayout(new GridBagLayout());
-        setOpaque(false);
+        setBackground(new Color(255, 255, 255, 60));
+        setAlignmentX(LEFT_ALIGNMENT);
 
         JPanel container = new JPanel();
         container.setLayout(new GridBagLayout());
@@ -69,12 +71,14 @@ public class StoreItem extends JPanel implements Item {
         add(container, gbc);
     }
 
-    public StoreItem(JsonObject dataSet) {
+    public StoreItem(JsonObject dataSet, String category, int position) {
         this(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
                 dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
+                category,
                 dataSet.get(JsonParser.TAG_LATEST).getAsString(),
                 dataSet.get(JsonParser.TAG_ICON).getAsString()
                 );
+        this.position = position;
     }
 
     private JLabel getLabel(String text, String css, Float fontSize, boolean title) {
@@ -93,5 +97,27 @@ public class StoreItem extends JPanel implements Item {
     @Override
     public String getSearchQuery() {
         return searchQuery;
+    }
+
+    @Override
+    public int hashCode() {
+        return position;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Item)) return false;
+        return obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public int compareTo(Item o) {
+        int thisCode = hashCode();
+        int otherCode = o.hashCode();
+
+        if (thisCode == otherCode) {
+            return 0;
+        }
+        return thisCode > otherCode ? 1 : -1;
     }
 }

@@ -3,9 +3,9 @@ package cz.muni.crocs.appletstore.help;
 import javax.swing.*;
 import java.awt.*;
 
-public class HelpWrapper extends JDialog {
+public class HelpWindow extends JDialog {
 
-   public HelpWrapper(String title, Container component) {
+   public HelpWindow(String title, Container component) {
        setTitle(title);
        setModal(true);
        component.setBackground(Color.WHITE);

@@ -24,7 +24,7 @@
         </authors>
         <url>https://github.com/JavaCardSpot-dev/JCAppStore</url>
         <uninstaller />
-        <run-privileged uninstaller="yes"/>
+        <run-privileged />
     </info>
 
     <locale>
@@ -58,7 +58,7 @@
     </guiprefs>
 
     <resources>
-        <res id="InfoPanel.info" src="readme.md" parse="yes"/>
+        <res id="HTMLHelloPanel.info" src="scripts/info_en.html" />
         <res src="scripts/ProcessPanel.Spec.xml" id="ProcessPanel.Spec.xml"/>
         <res src="scripts/shortcutSpec.xml" id="shortcutSpec.xml"/>
         <res src="scripts/unixShortcutSpec.xml" id="Unix_shortcutSpec.xml"/>
@@ -80,8 +80,7 @@
         <panel classname="PacksPanel"/>
         <panel classname="InstallPanel"/>
         <panel classname="ProcessPanel"/>
-
-        <panel classname="InfoPanel" />
+        <panel classname="HTMLHelloPanel" id="HTMLHelloPanel" />
         <panel classname="FinishPanel"/>
     </panels>
 

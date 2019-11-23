@@ -170,11 +170,10 @@ public class InstallDialogWindow extends JPanel {
         if (parent == null)
             return;
 
-        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "arrow_small.png")), "gaptop 11");
-        JLabel more = new JLabel(textSrc.getString("advanced_settings"));
+        JLabel more = new JLabel(textSrc.getString("advanced_settings"), new ImageIcon(Config.IMAGE_DIR + "arrow_small.png"), JLabel.LEFT);
         more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(more, "gaptop 11, span 4, wrap");
+        add(more, "gaptop 22, span 4, wrap");
 
         more.addMouseListener(new MouseAdapter() {
             @Override

@@ -2,11 +2,10 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.ui.BackgroundImgPanel;
+import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
-import cz.muni.crocs.appletstore.ui.Notice;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -126,11 +125,17 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
         new CardDetectionRoutine(this, OnEventCallBack.empty()).start();
         setVisible(true);
+
+//        if (OptionsFactory.getOptions().is(Options.KEY_SHOW_WELCOME)) {
+//            //OptionsFactory.getOptions().addOption(Options.KEY_SHOW_WELCOME, "false");
+//            //todo throws
+//            new WelcomeScreen().setVisible(true);
+//        }
     }
 
     @Override
     public void updateBackground(BufferedImage image) {
-        ((BackgroundImgPanel) getContentPane()).setNewBackground(image);
+        ((BackgroundImgSplitPanel) getContentPane()).setNewBackground(image);
     }
 
     @Override

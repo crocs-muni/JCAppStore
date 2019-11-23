@@ -11,6 +11,7 @@ import java.util.List;
  */
 public interface JsonParser {
 
+    String TAG_TYPE = "type";
     String TAG_NAME = "name";
     String TAG_TITLE = "title";
     String TAG_ICON = "icon";

@@ -6,9 +6,9 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
-public class HelpPanel extends JPanel {
+public class Help extends JPanel {
 
-    public HelpPanel() {
+    public Help() {
         setLayout(new MigLayout());
     }
 

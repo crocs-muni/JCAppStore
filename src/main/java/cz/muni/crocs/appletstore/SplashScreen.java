@@ -73,8 +73,7 @@ public class SplashScreen extends JWindow {
                     numbers = "";
                 }
                 numbers += r.nextInt(10) + String.valueOf(r.nextInt(10));
-                //todo throws on quick load
-                numbers = numbers.substring(0, progress);
+                numbers = numbers.substring(0, Math.min(progress, numbers.length()));
 
                 g2d.setFont(font.deriveFont(20f));
                 g2d.drawString(spaced(numbers), 30, 120);

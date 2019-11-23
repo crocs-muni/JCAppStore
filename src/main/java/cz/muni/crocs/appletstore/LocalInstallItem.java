@@ -23,13 +23,17 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
     public LocalInstallItem() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder(0, 35, 0, 0));
+
         add(Box.createRigidArea(new Dimension(50, 30)));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel icon = new HtmlText("<img src=\"file:///" +
                 new File(Config.IMAGE_DIR + "install_icon.png").getAbsolutePath() +
-                "\" width=\"83\" height=\"56\" />");
-        icon.setMaximumSize(new Dimension(83, 56));
+                "\" width=\"83\" height=\"83\" />");
+        icon.setMaximumSize(new Dimension(83, 83));
+        icon.setMinimumSize(new Dimension(83, 83));
+
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(icon);
 
