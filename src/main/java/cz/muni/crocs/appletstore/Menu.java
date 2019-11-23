@@ -232,21 +232,21 @@ public class Menu extends JMenuBar {
         help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("applet_usage")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HelpWrapper(textSrc.getString("applet_usage"), new AppletUsage()).showIt();
+                new HelpWindow(textSrc.getString("applet_usage"), HelpFactory.getAppletUsageHelp()).showIt();
             }
         }, textSrc.getString("H_applet_usage")));
 
         help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("cmd")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HelpWrapper(textSrc.getString("cmd"), new Cmd()).showIt();
+                new HelpWindow(textSrc.getString("cmd"), HelpFactory.getCmdHelp()).showIt();
             }
         }, textSrc.getString("H_cmd")));
 
         help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("auth")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HelpWrapper(textSrc.getString("auth"), new MasterKey()).showIt();
+                new HelpWindow(textSrc.getString("auth"), HelpFactory.getMasterKeyHelp()).showIt();
             }
         }, textSrc.getString("H_auth")));
 
@@ -256,6 +256,10 @@ public class Menu extends JMenuBar {
 //                new HelpWrapper(textSrc.getString("pgp"), new Keybase()).showIt();
 //            }
 //        }, textSrc.getString("H_pgp")));
+    }
+
+    private void addHelpMenuItem() {
+        //todo automatize do not show wrapper
     }
 
     /**
