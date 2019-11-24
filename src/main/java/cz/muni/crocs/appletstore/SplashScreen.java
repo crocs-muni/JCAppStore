@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.AppletInfo;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
 import org.apache.commons.lang.SystemUtils;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
@@ -22,7 +21,7 @@ import javax.swing.*;
 
 public class SplashScreen extends JWindow {
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private Timer timer;
     private int progress = 0;

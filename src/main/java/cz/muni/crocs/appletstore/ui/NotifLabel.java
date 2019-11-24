@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,7 +23,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class NotifLabel extends JLabel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private Shape close = new Rectangle(202, 6, 12, 12);
     private NotifLabel self = this;

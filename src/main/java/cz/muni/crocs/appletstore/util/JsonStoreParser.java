@@ -18,7 +18,7 @@ import java.util.*;
 public class JsonStoreParser implements JsonParser {
 
     private File info;
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public List<JsonObject> getValues() throws FileNotFoundException {
         File file = getFileInfo(); //safe

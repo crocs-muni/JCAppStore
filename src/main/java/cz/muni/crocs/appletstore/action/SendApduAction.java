@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class SendApduAction extends CardAbstractAction {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private AppletInfo info;
 

@@ -10,5 +10,5 @@ public interface Store {
      * Message to give from process to the parent class
      * @param msg message to pass
      */
-    public void setProcessMessage(String msg);
+    void setProcessMessage(String msg);
 }

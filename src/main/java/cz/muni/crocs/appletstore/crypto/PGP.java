@@ -18,7 +18,7 @@ sign file:      gpg --output file.sig --detach-sign file
 verify:         if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --verify file.sig file
  */
 public class PGP extends CmdTask {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static boolean verified = false;
     private static String location;

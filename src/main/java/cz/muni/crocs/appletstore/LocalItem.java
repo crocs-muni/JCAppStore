@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -25,7 +26,7 @@ import java.util.ResourceBundle;
  */
 public class LocalItem extends JPanel implements Item {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static BufferedImage issuer = getIssuerImg();
     private static final int LABELDIMEN = 40;
 

@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore.util;
 
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Options of the application
@@ -25,6 +27,7 @@ public interface Options<ValueType> {
     String KEY_SIMPLE_USE = "simple_usage";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_DELETE_IMPLICIT = "delete_pkg";
+
 
     /**
      * Get option for app
@@ -97,6 +100,28 @@ public interface Options<ValueType> {
      * @return default styleSheet for app
      */
     StyleSheet getDefaultStyleSheet();
+
+    /**
+     * Set language as default
+     */
+    void setLanguageLocale(Locale language);
+
+    /**
+     * Get default language
+     * @return default language
+     */
+    Locale getLanguageLocale();
+
+    /**
+     * Set language as default
+     */
+    void setLanguage(Language language);
+
+    /**
+     * Get default language
+     * @return default language
+     */
+    Language getLanguage();
 
     /**
      * Check for boolean condition

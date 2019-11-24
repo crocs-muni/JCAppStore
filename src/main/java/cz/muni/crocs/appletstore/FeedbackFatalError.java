@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
 import org.simplejavamail.mailer.config.TransportStrategy;
@@ -18,7 +19,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class FeedbackFatalError {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final String system =
             System.getProperty("os.name") + "_" +

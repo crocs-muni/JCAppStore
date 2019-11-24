@@ -25,7 +25,7 @@ import java.util.TimerTask;
 public abstract class CardAbstractAction extends MouseAdapter implements CardAction {
     private static final Logger logger = LoggerFactory.getLogger(CardAbstractAction.class);
 
-    protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     protected final OnEventCallBack<Void, Void> call;
 
     public CardAbstractAction(OnEventCallBack<Void, Void> call) {

@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
  */
 public class MainPanel extends BackgroundImgSplitPanel implements Informable {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private JPanel content;
     private LocalWindowPane localPanel;
     private StoreWindowManager storePanel;
@@ -26,7 +26,8 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
     private LoggerConsole console;
 
     public MainPanel(BackgroundChangeable context) {
-        requestFocusInWindow(); //todo check if works and disables the problem with search query
+        //there was a problem with focus when using search feature, request focus
+        requestFocusInWindow();
         setOneTouchExpandable(true);
         setDividerLocation(150);
 

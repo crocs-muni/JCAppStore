@@ -39,7 +39,7 @@ import java.util.Set;
 public class StoreItemInfo extends HintPanel {
 
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
@@ -47,6 +47,10 @@ public class StoreItemInfo extends HintPanel {
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
+
+        //there was a problem with focus when using search feature, request focus
+        requestFocusInWindow();
+
         setOpaque(false);
         CardInstance card = CardManagerFactory.getManager().getCard();
         Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();

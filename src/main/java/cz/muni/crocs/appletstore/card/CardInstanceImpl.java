@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -33,7 +34,7 @@ import java.util.*;
  */
 public class CardInstanceImpl implements CardInstance {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceImpl.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private String masterKey;
     private String kcv;
@@ -326,7 +327,7 @@ public class CardInstanceImpl implements CardInstance {
 
     private static boolean validMasterKey(String key) {
         //key is either 3DES or AES with the length of 128/256 bit = 8/16 bytes = 16/32 chars
-        //todo find out which key version the gppro uses eas or 3des
+        //todo find out which key version the gppro uses aes or 3des
         return key != null && !key.isEmpty() && key.length()% 2 == 0 && (key.length() == 32 || key.length() == 16);
     }
 

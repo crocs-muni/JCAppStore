@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Menu extends JMenuBar {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private AppletStore context;
     private CustomNotifiableJmenu readers;

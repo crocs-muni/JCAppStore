@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class BackgroundImageLoader {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LogManager.getLogger(BackgroundImageLoader.class);
 
     private BufferedImage background = null;

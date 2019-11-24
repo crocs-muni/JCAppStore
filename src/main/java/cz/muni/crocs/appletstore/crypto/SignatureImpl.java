@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SignatureImpl implements Signature {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     @Override
     public boolean verify(String author, String file, String fileSignature) throws LocalizedSignatureException {

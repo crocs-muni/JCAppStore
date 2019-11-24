@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -21,7 +22,7 @@ import java.util.ResourceBundle;
  */
 public class Delete extends GPCommand<Void> {
     private static final Logger logger = LoggerFactory.getLogger(Install.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean force;
     private AppletInfo toDelete;

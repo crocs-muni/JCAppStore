@@ -7,8 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 import static cz.muni.crocs.appletstore.Config.S;
 
@@ -17,6 +16,7 @@ public class OptionsImpl implements Options<String> {
 
     private HashMap<String, String> options;
     private StyleSheet sheet;
+    private Language language = LanguageImpl.CZECH; //todo problematic
     private Font text;
     private Font title;
     private final String HEADER = "JCAppStore";
@@ -35,6 +35,7 @@ public class OptionsImpl implements Options<String> {
         if (options.isEmpty())
             setDefaults();
 
+        loadLanguage();
         setStyles();
         loadFonts();
     }
@@ -43,7 +44,7 @@ public class OptionsImpl implements Options<String> {
     public void setDefaults() {
         options.clear();
         options.put(Options.KEY_SHOW_WELCOME, "true");
-        options.put(Options.KEY_LANGUAGE, "en"); // en cs todo really, not internacionalization?
+        options.put(Options.KEY_LANGUAGE, Locale.getDefault().toString());
         options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
         options.put(Options.KEY_HINT, "true");
@@ -93,10 +94,31 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
+    public void setLanguageLocale(Locale language) {
+        setLanguage(LanguageImpl.from(language));
+    }
+
+    @Override
+    public Locale getLanguageLocale() {
+        return language.get();
+    }
+
+    @Override
+    public void setLanguage(Language language) {
+        this.language = language;
+        addOption(KEY_LANGUAGE, this.language.getLocaleString());
+        ResourceBundle.clearCache();
+    }
+
+    @Override
+    public Language getLanguage() {
+        return language;
+    }
+
+    @Override
     public boolean is(String key) {
         return getOption(key).trim().toLowerCase().equals("true");
     }
-
 
     @Override
     public String getOption(String name) {
@@ -107,7 +129,9 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void addOption(String name, String value) {
-        options.put(name, value);
+        if (!name.equals(KEY_LANGUAGE)) { //do not allow raw change language
+            options.put(name, value);
+        }
     }
 
     @Override
@@ -121,6 +145,10 @@ public class OptionsImpl implements Options<String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadLanguage() {
+        language = LanguageImpl.from(getOption(KEY_LANGUAGE));
     }
 
     private void getFileOptions() {

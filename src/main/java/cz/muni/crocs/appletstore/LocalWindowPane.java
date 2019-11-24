@@ -32,7 +32,7 @@ import java.util.*;
 public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
     private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private LocalSubMenu submenu;
     private LocalItemInfo infoLayout;

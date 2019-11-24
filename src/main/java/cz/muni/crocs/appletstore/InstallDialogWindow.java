@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class InstallDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     //applet info and setting GUI components
     private JTextField name = new JTextField(50);
     private JTextField author = new JTextField(10);

@@ -20,10 +20,8 @@ import java.util.ResourceBundle;
  */
 public class StoreWorker extends SwingWorker<Store.State, Object> implements ProcessTrackable {
 
-    //todo interface
-
     private static final Logger logger = LogManager.getLogger(StoreWorker.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private Store parent;
 
