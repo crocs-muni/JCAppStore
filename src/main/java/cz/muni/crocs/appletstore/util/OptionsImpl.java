@@ -14,27 +14,29 @@ import static cz.muni.crocs.appletstore.Config.S;
 public class OptionsImpl implements Options<String> {
     private static final Logger logger = LoggerFactory.getLogger(OptionsImpl.class);
 
-    private HashMap<String, String> options;
-    private StyleSheet sheet;
-    private Language language = LanguageImpl.CZECH; //todo problematic
-    private Font text;
-    private Font title;
     private final String HEADER = "JCAppStore";
 
-    public OptionsImpl() {
+    private HashMap<String, String> options;
+    private StyleSheet sheet;
+    private Language language;
+    private Font text;
+    private Font title;
+
+    OptionsImpl() {
         getFileOptions();
         if (options.isEmpty())
             setDefaults();
-
-        setStyles();
-        loadFonts();
+        setup();
     }
 
     OptionsImpl(HashMap<String, String> options) {
         this.options = options;
         if (options.isEmpty())
             setDefaults();
+        setup();
+    }
 
+    private void setup() {
         loadLanguage();
         setStyles();
         loadFonts();

@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.action.JCMemory;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 

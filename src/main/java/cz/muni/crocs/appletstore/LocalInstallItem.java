@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.ui.Title;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;

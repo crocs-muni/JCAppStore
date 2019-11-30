@@ -38,10 +38,6 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
         final CardManager manager = CardManagerFactory.getManager();
 
         try {
-            OptionsFactory.getOptions();
-
-
-
             info = textSrc.getString("detect_cards");
             manager.needsCardRefresh();
             manager.loadCard();

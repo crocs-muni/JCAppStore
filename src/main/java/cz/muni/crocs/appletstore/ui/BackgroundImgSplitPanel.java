@@ -75,7 +75,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
         int w = getWidth();
         int h = getHeight();
 
-        if (width != w && height != h) {
+        if (width != w || height != h) {
             bg = bg.getScaledInstance(w,h,Image.SCALE_SMOOTH);
             width = w;
             height = h;

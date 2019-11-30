@@ -28,7 +28,6 @@ public interface Options<ValueType> {
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_DELETE_IMPLICIT = "delete_pkg";
 
-
     /**
      * Get option for app
      * @param name name of the option - enum specified in this interface

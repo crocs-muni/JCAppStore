@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;

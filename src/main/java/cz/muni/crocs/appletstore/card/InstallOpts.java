@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;

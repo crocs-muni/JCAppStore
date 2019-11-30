@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.help;
 
 import cz.muni.crocs.appletstore.ui.TextField;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import java.util.Locale;

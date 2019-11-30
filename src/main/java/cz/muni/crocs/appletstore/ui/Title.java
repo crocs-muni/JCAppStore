@@ -6,13 +6,13 @@ import javax.swing.*;
 
 public class Title extends JLabel {
 
-    public Title(String s, Icon icon, int i) {
-        super(s, icon, i);
+    public Title(String s, Icon icon, int horizontalAlignment) {
+        super(s, icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont());
     }
 
-    public Title(String s, int i) {
-        super(s, i);
+    public Title(String s, int horizontalAlignment) {
+        super(s, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont());
     }
 
@@ -21,8 +21,8 @@ public class Title extends JLabel {
         setFont(OptionsFactory.getOptions().getFont());
     }
 
-    public Title(Icon icon, int i) {
-        super(icon, i);
+    public Title(Icon icon, int horizontalAlignment) {
+        super(icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont());
     }
 
@@ -35,13 +35,13 @@ public class Title extends JLabel {
         setFont(OptionsFactory.getOptions().getFont());
     }
 
-    public Title(String s, Icon icon, float size, int i) {
-        super(s, icon, i);
+    public Title(String s, Icon icon, float size, int horizontalAlignment) {
+        super(s, icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(size));
     }
 
-    public Title(String s, float size, int i) {
-        super(s, i);
+    public Title(String s, float size, int horizontalAlignment) {
+        super(s, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(size));
     }
 
@@ -50,8 +50,8 @@ public class Title extends JLabel {
         setFont(OptionsFactory.getOptions().getFont(size));
     }
 
-    public Title(Icon icon, float size, int i) {
-        super(icon, i);
+    public Title(Icon icon, float size, int horizontalAlignment) {
+        super(icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(size));
     }
 
@@ -68,13 +68,13 @@ public class Title extends JLabel {
         setFont(OptionsFactory.getOptions().getFont(style));
     }
 
-    public Title(String s, Icon icon, int style, float size, int i) {
-        super(s, icon, i);
+    public Title(String s, Icon icon, int style, float size, int horizontalAlignment) {
+        super(s, icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(style, size));
     }
 
-    public Title(String s, int style, float size, int i) {
-        super(s, i);
+    public Title(String s, int style, float size, int horizontalAlignment) {
+        super(s, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(style, size));
     }
 
@@ -83,8 +83,8 @@ public class Title extends JLabel {
         setFont(OptionsFactory.getOptions().getFont(style, size));
     }
 
-    public Title(Icon icon, int style, float size, int i) {
-        super(icon, i);
+    public Title(Icon icon, int style, float size, int horizontalAlignment) {
+        super(icon, horizontalAlignment);
         setFont(OptionsFactory.getOptions().getFont(style, size));
     }
 

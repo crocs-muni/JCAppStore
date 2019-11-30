@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import javafx.collections.transformation.SortedList;
 
 import javax.swing.*;
@@ -22,6 +23,7 @@ import java.util.List;
  * @version 1.0
  */
 public class StoreWindowPane extends JScrollPane implements Searchable {
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private OnEventCallBack<Void, Void> callback;
     private JPanel storeLayout = new JPanel();
     private TreeSet<Item> items = new TreeSet<>();
@@ -35,7 +37,6 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         setBorder(BorderFactory.createEmptyBorder());
         setViewportBorder(null);
         getViewport().setOpaque(false);
-        storeLayout.setOpaque(false);
 
         setBorder(BorderFactory.createEmptyBorder());
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -44,6 +45,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         getVerticalScrollBar().setUnitIncrement(16);
         getVerticalScrollBar().setOpaque(false);
 
+        storeLayout.setOpaque(false);
         storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 11, 11));
         storeLayout.setBorder(new EmptyBorder(0, 50, 50, 50));
         loadStore();
@@ -92,6 +94,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         if (sortedItems.size() == 0) {
             storeLayout.add(new NotFoundItem());
         } else {
+
             for (Item item : sortedItems) {
                 storeLayout.add((JComponent)item);
             }

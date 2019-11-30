@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import java.util.Locale;
