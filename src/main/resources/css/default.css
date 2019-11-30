@@ -3,6 +3,33 @@ body {
     font-size: 11px;
 }
 
+h1 {
+    font-size: 18px;
+    font-weight: lighter;
+    margin: 25px 0 15px 15px;
+}
+
+h2 {
+    font-size: 14px;
+    font-weight: lighter;
+    margin: 20px 0 10px 15px;
+
+}
+
+h3 {
+    font-size: 13px;
+    font-weight: lighter;
+    margin: 15px 0 5px 15px;
+
+}
+
+h4 {
+    font-size: 12px;
+    font-weight: lighter;
+    margin: 13px 0 5px 15px;
+
+}
+
 .code {
     background: #F4F4F4;
     border-radius: 5px;
@@ -22,4 +49,8 @@ body {
 
 ol, ul {
     margin: 6px 0 6px 15px;
+}
+
+ul {
+    list-style-image: url('bullet.png');
 }

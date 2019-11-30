@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.action.InstallAction;
@@ -25,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -44,6 +46,7 @@ public class StoreItemInfo extends HintPanel {
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
+    private static final ImageIcon website = new ImageIcon(Config.IMAGE_DIR + "web.png");
 
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
@@ -68,6 +71,7 @@ public class StoreItemInfo extends HintPanel {
 
         buildHeader(dataSet, store, callBack);
         buildDescription(dataSet);
+        buildWebsites(dataSet);
         checkDefaultSelected(dataSet);
         buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
     }
@@ -146,16 +150,30 @@ public class StoreItemInfo extends HintPanel {
                 "margin: 10px; width:600px",
                 new Color(255, 255, 255, 80)
         ), "span 4, gap 20, gaptop 20, wrap");
+    }
 
-        final String urlAddress = dataSet.get(JsonParser.TAG_URL).getAsString();
-        if (!urlAddress.isEmpty()) {
-            addSubTitle("website", "H_website");
-            JLabel url = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlAddress + "</b></div>", 14f);
-            url.setOpaque(true);
-            url.setBackground(new Color(255, 255, 255, 80));
+    private void buildWebsites(JsonObject dataSet) {
+        JsonObject websites = dataSet.get(JsonParser.TAG_URL).getAsJsonObject();
+        if (websites == null) return;
+
+        addSubTitle("website", "H_website");
+
+        Set<Map.Entry<String, JsonElement>> entrySet = websites.entrySet();
+        for(Map.Entry<String,JsonElement> entry : entrySet) {
+            String urlName = entry.getKey();
+            String urlAddress = websites.get(urlName).getAsString();
+            JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName + "</b></div>", 14f);
+            name.setOpaque(false);
+            name.setForeground(Color.white);
+
+            add(name, "gaptop 10, gapleft 20");
+
+            JLabel url = new HtmlText("<div style=\"margin: 5px;\">" + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
+            url.setOpaque(false);
             url.setCursor(new Cursor(Cursor.HAND_CURSOR));
             url.addMouseListener(new URLAdapter(urlAddress));
-            add(url, "span 4, gaptop 10, gapleft 20, wrap");
+            url.setForeground(Color.white);
+            add(url, "span 3, gaptop 10, gapleft 5, wrap");
         }
 
     }

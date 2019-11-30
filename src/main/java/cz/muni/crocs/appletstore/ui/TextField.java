@@ -18,13 +18,13 @@ public class TextField {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public static JTextPane getTextField(String text) {
-        JTextPane field = getTextFieldCore();
+        JTextPane field = getTextFieldCore(false);
         field.setText("<html><div>" + text + "</div></html>");
         return field;
     }
 
     public static JTextPane getTextField(String text, String css, Color background) {
-        JTextPane field = getTextFieldCore();
+        JTextPane field = getTextFieldCore(background != null && background.getAlpha() < 255);
         field.setText("<html><div style=\"" + css + "\">" + text + "</div></html>");
         if (background == null) {
             field.setOpaque(false);
@@ -44,8 +44,16 @@ public class TextField {
         return menu;
     }
 
-    private static JTextPane getTextFieldCore() {
-        JTextPane field = new JTextPane();
+    private static JTextPane getTextFieldCore(boolean semiTransparent) {
+        JTextPane field = semiTransparent ? new JTextPane() {
+            @Override
+            protected void paintComponent(Graphics g)
+            {
+                g.setColor( getBackground() );
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paintComponent(g);
+            }
+        } : new JTextPane();
         field.setComponentPopupMenu(getCopyMenu());
 
 //        //consider
@@ -60,7 +68,7 @@ public class TextField {
         DefaultCaret caret = (DefaultCaret) field.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         field.setContentType("text/html");
-        field.setOpaque(true);
+        field.setOpaque(!semiTransparent);
         field.setEditable(false);
         field.setBorder(null);
         field.setFont(OptionsFactory.getOptions().getFont());
