@@ -158,7 +158,7 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_HINT,
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_H, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
         submenu.add(hints);
         return submenu;

@@ -254,8 +254,13 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private ImageIcon getIcon(String image) {
-        File img = new File(Config.RESOURCES + image);
-        img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
+        File img;
+        if (image == null || image.isEmpty()) {
+            img = new File(Config.IMAGE_DIR + "applet_plain.png");
+        } else {
+            img = new File(Config.RESOURCES + image);
+            img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
+        }
         BufferedImage newIcon = new BufferedImage(120, 120, BufferedImage.TYPE_INT_ARGB);
         //draw image with clip
         Graphics2D graphics2D = newIcon.createGraphics();
