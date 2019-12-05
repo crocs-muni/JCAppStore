@@ -1,13 +1,11 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.ui.Title;
 import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import javafx.collections.transformation.SortedList;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
