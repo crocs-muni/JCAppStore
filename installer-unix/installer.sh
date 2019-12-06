@@ -21,6 +21,7 @@ if ! mkdir -p ${FILE}/src/main/ > /dev/null  2>&1 ; then
 fi
 
 cp ../build/libs/${FILE}.jar ${FILE}/
+cp launcher.sh ${FILE}/
 chmod 0755 ${FILE}/${FILE}.jar
 cp ../LICENSE ${FILE}/
 cp -r ../src/main/resources/ ${FILE}/src/main/
