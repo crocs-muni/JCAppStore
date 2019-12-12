@@ -22,6 +22,7 @@ fi
 
 cp ../build/libs/${FILE}.jar ${FILE}/
 cp launcher.sh ${FILE}/
+cp store.asc ${FILE}/
 chmod 0755 ${FILE}/${FILE}.jar
 cp ../LICENSE ${FILE}/
 cp -r ../src/main/resources/ ${FILE}/src/main/
