@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.action.JCMemory;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -11,7 +13,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class CardInfoPanel extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
         setLayout(new MigLayout());

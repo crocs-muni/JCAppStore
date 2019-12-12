@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
@@ -10,7 +12,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class InstallOpts {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private String toInstall;
     private AppletInfo info;

@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Menu extends JMenuBar {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private AppletStore context;
     private CustomNotifiableJmenu readers;
@@ -158,7 +158,7 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_HINT,
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_H, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
         submenu.add(hints);
         return submenu;

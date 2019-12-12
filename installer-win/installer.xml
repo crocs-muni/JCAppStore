@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <izpack:installation version="5.0"
                      xmlns:izpack="http://izpack.org/schema/installation"
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -57,11 +58,14 @@
         <modifier key="headingPanelCounterPos" value="inNavigationPanel"/>
     </guiprefs>
 
-    <resources>
-        <res id="HTMLHelloPanel.info" src="scripts/info_en.html" />
-        <res src="scripts/ProcessPanel.Spec.xml" id="ProcessPanel.Spec.xml"/>
-        <res src="scripts/shortcutSpec.xml" id="shortcutSpec.xml"/>
-        <res src="scripts/unixShortcutSpec.xml" id="Unix_shortcutSpec.xml"/>
+    <resources >
+        <res src="scripts/ProcessPanel.Spec.xml" id="ProcessPanel.Spec.xml" />
+
+        <res id="HTMLInfoPanel.info" src="scripts/HTMLInfoPanel.info" />
+
+        <res id="shortcutSpec.xml" src="scripts/shortcutSpec.xml" />
+
+        <res id="userInputSpec.xml" src="scripts/userInputSpec.xml" parse="yes" type="xml"/>
     </resources>
 
     <listeners>
@@ -74,13 +78,20 @@
 
     </listeners>
 
+    <conditions>
+        <condition type="contains" id="import.gnupg.key">
+            <variable>gnupg.import_key</variable>
+            <value>import</value>
+        </condition>
+    </conditions>
+
     <panels>
         <panel classname="TargetPanel"/>
-        <panel classname="ShortcutPanel" id="my_shortcutpanel"/>
-        <panel classname="PacksPanel"/>
-        <panel classname="InstallPanel"/>
-        <panel classname="ProcessPanel"/>
-        <panel classname="HTMLHelloPanel" id="HTMLHelloPanel" />
+        <panel classname="ShortcutPanel" id="askForShortcuts"/>
+        <panel classname="UserInputPanel" id="askForGnuPGDetails"/>
+        <panel classname="InstallPanel" />
+        <panel classname="ProcessPanel" condition="import.gnupg.key"/>
+        <panel classname="HTMLInfoPanel" id="showShortReadme" />
         <panel classname="FinishPanel"/>
     </panels>
 
@@ -96,12 +107,6 @@
             <os family="windows"/>
         </pack>
 
-<!--        <pack name="JC Core" required="yes">-->
-<!--            <description>The core files needed for the application</description>-->
-<!--            <fileset dir="out" targetdir="${INSTALL_PATH}" override="true"/>-->
-<!--            <fileset dir="scripts" targetdir="${INSTALL_PATH}/scripts" override="true"/>-->
-<!--            <os family="unix"/>-->
-<!--        </pack>-->
     </packs>
 
 </izpack:installation>

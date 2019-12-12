@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
  */
 public class Settings extends JPanel {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
     private static final Tuple[] LANGUAGES = new Tuple[]{
@@ -38,7 +38,7 @@ public class Settings extends JPanel {
     private JTextField pgp;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
-    private JComboBox<Tuple<String, String>> languageBox;
+    private JComboBox<Language> languageBox;
     private JCheckBox hintEnabled = new JCheckBox();
     private JCheckBox simple = new JCheckBox();
     private JCheckBox jcMemoryKept = new JCheckBox();
@@ -149,14 +149,11 @@ public class Settings extends JPanel {
     private void buildLanguage() {
         add(new Text(textSrc.getString("language")), "");
 
-        languageBox = new JComboBox<>(LANGUAGES);
-        CustomComboBoxItem listItems = new CustomComboBoxItem();
+        languageBox = new JComboBox<>(LanguageImpl.values());
+        LanguageComboBoxItem listItems = new LanguageComboBoxItem();
         languageBox.setMaximumRowCount(4);
         languageBox.setRenderer(listItems);
-        String lang = OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE);
-        if (lang != null && !lang.isEmpty()) {
-            languageBox.setSelectedItem(lang);
-        }
+        languageBox.setSelectedItem(OptionsFactory.getOptions().getLanguage());
         add(languageBox, "align right, span 2, w 180, wrap");
     }
 
@@ -251,10 +248,15 @@ public class Settings extends JPanel {
     }
 
     private void saveLanguage() {
-        if (LANGUAGES[languageBox.getSelectedIndex()].first.equals(OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE))) return;
-        OptionsFactory.getOptions().addOption(Options.KEY_LANGUAGE, (String)LANGUAGES[languageBox.getSelectedIndex()].first);
+        Language lang = (Language)languageBox.getSelectedItem();
+        if (lang == null) {
+            lang = LanguageImpl.DEFAULT;
+        }
+
+        if (lang.equals(OptionsFactory.getOptions().getLanguage())) return;
+
+        OptionsFactory.getOptions().setLanguage(lang);
         showAlertChange();
-        //Locale.setDefault(new Locale());
     }
 
     private void saveImplicitDelete() {

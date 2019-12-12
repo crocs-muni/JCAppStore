@@ -24,6 +24,7 @@ public class HintPanel extends JPanel {
     protected Font hintFont = OptionsFactory.getOptions().getFont(12f);
 
     private Point p = null;
+    private boolean shown = false;
     private Dimension hintDimen;
 
     public HintPanel(boolean enable) {
@@ -32,13 +33,28 @@ public class HintPanel extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
+                if (!enabled) return;
+
                 Point at = e.getPoint();
                 Component c = getComponentAt(at);
                 if (c instanceof HintLabel) {
                     p = e.getPoint();
                     hint = ((HintLabel) c).hint;
-                    if (hint.isEmpty()) hint = null;
+                    if (hint.isEmpty()) {
+                        hint = null;
+                        shown = false;
+                    } else {
+                        shown = true;
+                    }
+
+                    revalidate();
+                    repaint();
                 } else {
+                    if (shown)  {
+                        shown = false;
+                        revalidate();
+                        repaint();
+                    }
                     hint = null;
                     hintDimen = null;
                 }

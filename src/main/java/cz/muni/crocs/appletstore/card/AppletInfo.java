@@ -4,6 +4,8 @@ import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -24,7 +26,7 @@ public class AppletInfo implements Serializable {
 
     private static final long serialVersionUID = 458932548615025100L;
     private static final Logger logger = LoggerFactory.getLogger(AppletInfo.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static IniParser knownAids;
     private static IniParser knownRids;

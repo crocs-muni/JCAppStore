@@ -8,7 +8,6 @@ import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * todo run on swing util thread
  * @author Jiří Horák
  * @version 1.0
  */
@@ -26,12 +25,13 @@ public class InformerImpl implements Informer, CallBack<Void> {
 
     @Override
     public void showMessage(String info) {
-        context.showMessage(info);
+        SwingUtilities.invokeLater(() -> context.showMessage(info));
     }
 
     @Override
     public void showFullScreenInfo(JPanel panel) {
-        context.showFullScreenInfo(panel);
+        SwingUtilities.invokeLater(() -> context.showFullScreenInfo(panel));
+
     }
 
     @Override

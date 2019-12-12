@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -25,7 +27,7 @@ import java.util.ResourceBundle;
  */
 public class LocalItem extends JPanel implements Item {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static BufferedImage issuer = getIssuerImg();
     private static final int LABELDIMEN = 40;
 
@@ -43,15 +45,8 @@ public class LocalItem extends JPanel implements Item {
         this.info = info;
         this.name = title;
         this.manager = CardManagerFactory.getManager();
+        loadLabels();
         setAlignmentX(LEFT_ALIGNMENT);
-
-        try {
-            newItem = ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
-            superSelected = ImageIO.read(new File(Config.IMAGE_DIR + "main.png"));
-        } catch (IOException e) {
-            newItem = null;
-            superSelected = null;
-        }
 
         searchQuery = title + author + ((info == null) ? "" : Arrays.toString(info.getAid().getBytes()));
         setLayout(new GridBagLayout());
@@ -108,6 +103,20 @@ public class LocalItem extends JPanel implements Item {
         add(container, gbc);
     }
 
+    private static void loadLabels() {
+        if (newItem == null) newItem = loadLabel( "newlabel.png");
+        if (superSelected == null)  superSelected = loadLabel("main.png");
+    }
+
+    private static BufferedImage loadLabel(String name) {
+            try {
+                return ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+            }
+    }
+
     public LocalItem(AppletInfo info) {
         this(
                 breakIfTooLong(getName(info)),
@@ -158,6 +167,11 @@ public class LocalItem extends JPanel implements Item {
         return 13 * name.compareTo(other.name) + info.getKind().compareTo(other.info.getKind());
     }
 
+    public void resetSelection() {
+        revalidate();
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         CardInstance card = manager.getCard();
@@ -204,7 +218,7 @@ public class LocalItem extends JPanel implements Item {
 
     private String getImgAddress(String imgName) {
         File img = new File(Config.RESOURCES + imgName);
-        if (info == null) {
+        if (info == null || imgName.isEmpty()) {
             img = new File(Config.IMAGE_DIR + "applet_plain.png");
         } else if (!img.exists()) {
             switch (info.getKind()) {

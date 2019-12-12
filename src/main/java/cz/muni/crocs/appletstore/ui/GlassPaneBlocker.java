@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
@@ -19,7 +20,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class GlassPaneBlocker extends JPanel implements MouseListener, FocusListener {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public GlassPaneBlocker() {
         setLayout(new MigLayout("align center center, gapy 15"));

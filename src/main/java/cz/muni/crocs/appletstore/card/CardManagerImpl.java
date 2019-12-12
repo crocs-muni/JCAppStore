@@ -9,6 +9,8 @@ import cz.muni.crocs.appletstore.CardInfoPanel;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.util.LogOutputStream;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -36,7 +38,7 @@ public class CardManagerImpl implements CardManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardManagerImpl.class);
     private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private volatile Terminals terminals = new Terminals();
     private volatile CardInstanceImpl card;

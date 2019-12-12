@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  */
 //public class KeyBase extends CmdTask {
-//    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+//    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 //
 //    private static boolean verified = false;
 //    private String keybase;

@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
  */
 public class StoreDownloader {
     private static final Logger logger = LogManager.getLogger(StoreDownloader.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private File zipFile = new File(Config.APP_STORE_DIR, "JCAppStoreContent.zip");
     private String address;

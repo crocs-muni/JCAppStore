@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LoadingPane extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final int width = 300;
     private final int height = 5;

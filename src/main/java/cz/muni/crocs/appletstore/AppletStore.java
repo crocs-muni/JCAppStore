@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
  */
 
 public class AppletStore extends JFrame implements BackgroundChangeable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
@@ -125,12 +125,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
         new CardDetectionRoutine(this, OnEventCallBack.empty()).start();
         setVisible(true);
-
-//        if (OptionsFactory.getOptions().is(Options.KEY_SHOW_WELCOME)) {
-//            //OptionsFactory.getOptions().addOption(Options.KEY_SHOW_WELCOME, "false");
-//            //todo throws
-//            new WelcomeScreen().setVisible(true);
-//        }
     }
 
     @Override

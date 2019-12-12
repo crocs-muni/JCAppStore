@@ -89,6 +89,9 @@ public class StoreItem extends JPanel implements Item {
     }
 
     private String getImgAddress(String imgName) {
+        if (imgName == null || imgName.isEmpty()) {
+            return new File(Config.IMAGE_DIR + "applet_plain.png").getAbsolutePath();
+        }
         File img = new File(Config.RESOURCES + imgName);
         img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
         return img.getAbsolutePath();

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.LeftMenuButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
@@ -25,7 +26,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LeftMenu extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private JPanel container = new JPanel(new GridBagLayout());
 

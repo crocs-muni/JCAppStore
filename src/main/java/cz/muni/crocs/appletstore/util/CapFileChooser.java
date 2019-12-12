@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class CapFileChooser {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public static CAPFile getCapFile(File from) {
         CAPFile instcap = null;

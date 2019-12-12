@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"  ?>
+<?xml version="1.0" encoding="UTF-8"  ?>
 <izpack:shortcuts version="5.0"
                   xmlns:izpack="http://izpack.org/schema/shortcuts"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6,10 +6,10 @@
 
     <shortcut
             name="JCAppStore"
-            target="$INSTALL_PATH/JCAppStore-1.0.jar"
+            target="$INSTALL_PATH\JCAppStore-1.0.jar"
             description="JCAppStore"
             workingDirectory="$INSTALL_PATH"
-            iconFile="$INSTALL_PATH/scripts/jcappstore.ico"
+            iconFile="$INSTALL_PATH\scripts\jcappstore.ico"
             initialState="normal"
             programGroup="yes"
             desktop="yes"

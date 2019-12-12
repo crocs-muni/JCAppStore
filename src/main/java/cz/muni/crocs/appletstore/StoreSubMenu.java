@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
+import cz.muni.crocs.appletstore.ui.Title;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
@@ -9,19 +11,28 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class StoreSubMenu extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private JButton reload;
 
     public StoreSubMenu() {
-        setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setOpaque(false);
+
+        Title t = new Title(textSrc.getString("jcappstore"), 30f, SwingConstants.LEFT);
+        t.setForeground(Color.white);
+        t.setBorder(BorderFactory.createEmptyBorder(10, 40, 5, 0));
+        add(t);
+
+        add(Box.createHorizontalGlue());
+
         reload = new JButton("<html>" + textSrc.getString("store_refresh") + "</div></html>");
         reload.setUI(new CustomButtonUI());
         reload.setFont(OptionsFactory.getOptions().getFont(Font.BOLD, 12f));
         reload.setForeground(Color.WHITE);
         reload.setCursor(new Cursor(Cursor.HAND_CURSOR));
         reload.setOpaque(false);
+        reload.setAlignmentY(Component.TOP_ALIGNMENT);
         add(reload);
     }
 

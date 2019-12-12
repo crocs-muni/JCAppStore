@@ -26,7 +26,7 @@ import static java.lang.Thread.sleep;
  * @version 1.0
  */
 public abstract class LoaderWorker extends SwingWorker<Exception, Void> implements ProcessTrackable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
 
     private String info = textSrc.getString("loading_opts");
@@ -38,8 +38,6 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
         final CardManager manager = CardManagerFactory.getManager();
 
         try {
-            OptionsFactory.getOptions();
-
             info = textSrc.getString("detect_cards");
             manager.needsCardRefresh();
             manager.loadCard();

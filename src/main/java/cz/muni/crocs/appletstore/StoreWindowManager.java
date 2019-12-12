@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable, Store {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private OnEventCallBack<Void, Void> callbackOnAction;
     private Component currentComponent = null;

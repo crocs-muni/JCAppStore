@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -8,7 +11,7 @@ import java.util.ResourceBundle;
  * indicates that user should've been asked for keys to provide
  */
 public class UnknownKeyException extends Exception {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private String cardId;
 
     public UnknownKeyException(String cardId) {

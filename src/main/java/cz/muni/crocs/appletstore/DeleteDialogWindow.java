@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class DeleteDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private JCheckBox forceUninstall = new JCheckBox();
     private KeysPresence keys;

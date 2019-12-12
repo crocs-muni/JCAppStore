@@ -2,6 +2,8 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -20,8 +22,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Delete extends GPCommand<Void> {
-    private static final Logger logger = LoggerFactory.getLogger(Install.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static final Logger logger = LoggerFactory.getLogger(Delete.class);
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean force;
     private AppletInfo toDelete;
@@ -39,11 +41,13 @@ public class Delete extends GPCommand<Void> {
         GPRegistry reg = context.getRegistry();
 
         if (!reg.allAIDs().contains(aid)) {
+            logger.warn("Applet not present when deletion requested.");
             throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
         }
 
         try {
             context.deleteAID(aid, force);
+            logger.info("Applet " + aid + " successfully deleted.");
 //            context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
         } catch (GPException e) {
             if (e.sw == 0x6985) {

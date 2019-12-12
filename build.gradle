@@ -47,36 +47,36 @@ dependencies {
 
 izpack {
     //generate folders deploy, out, res, main
-    def folder = file("$buildDir/deploy/out/src/main/resources")
+    def folder = file("$buildDir/deploy-win/out/src/main/resources")
     if( !folder.exists() ) {
         folder.mkdirs()
     }
 
-    def scripts = file("$buildDir/deploy/scripts")
+    def scripts = file("$buildDir/deploy-win/scripts")
     if( !scripts.exists() ) {
         scripts.mkdirs()
     }
 
     copy {
         from "src/main/resources"
-        into "$buildDir/deploy/out/src/main/resources"
+        into "$buildDir/deploy-win/out/src/main/resources"
     }
 
     copy {
-        from "installer/dependency"
-        into "$buildDir/deploy/scripts"
+        from "installer-win/dependency"
+        into "$buildDir/deploy-win/scripts"
     }
 
     //todo somehow the jar dependency does not generate it quickly enough so the code is working for the 2nd time :(
     //maybe add this into jar file
     copy {
         from file("build/libs/JCAppStore-${version}.jar")
-        into file("$buildDir/deploy/out")
+        into file("$buildDir/deploy-win/out")
     }
 
-    baseDir = file("$buildDir/deploy")
-    installFile = file('installer/installer.xml')
-    outputFile = file("$buildDir/deploy/JCAppStore-${version}-installer.jar")
+    baseDir = file("$buildDir/deploy-win")
+    installFile = file('installer-win/installer.xml')
+    outputFile = file("$buildDir/deploy-win/JCAppStore-${version}-win.jar")
     compression = 'deflate'
     compressionLevel = 9
     appProperties = ['app.group': 'CRoCS', 'app.name': 'jcAppStore', 'app.title': 'JCAppStore',
@@ -85,6 +85,20 @@ izpack {
 
 izPackCreateInstaller.dependsOn jar
 
+///////////////////////////
+//unix installer section
+///////////////////////////
+
+task unix(type: Exec) {
+    group 'installation'
+    executable "$projectDir/installer-unix/installer.sh"
+}
+
+unix.dependsOn jar
+
+///////////////////////////
+//binary section
+///////////////////////////
 jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'

@@ -3,6 +3,8 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.ui.Title;
+import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +20,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public LocalInstallItem() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

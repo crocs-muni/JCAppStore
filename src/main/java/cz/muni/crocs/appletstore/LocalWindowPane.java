@@ -32,7 +32,7 @@ import java.util.*;
 public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
     private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", Locale.getDefault());
+    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private LocalSubMenu submenu;
     private LocalItemInfo infoLayout;
@@ -245,6 +245,12 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
     }
 
+    private void resetAll() {
+        for (LocalItem item : items) {
+            item.resetSelection();
+        }
+    }
+
     private void loadApplets(Set<AppletInfo> applets, CardManager manager) {
         items.clear();
         for (AppletInfo appletInfo : applets) {
@@ -258,6 +264,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                         infoLayout.set(item.info);
                     else
                         infoLayout.unset();
+                    resetAll();
                 }
             });
             items.add(item);
