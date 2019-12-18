@@ -125,6 +125,7 @@ public class Terminals {
             }
 
         } catch (Smartcardio.EstablishContextException | Smartcardio.JnaPCSCException | Smartcardio.JnaCardException e) {
+            logger.error("Failed to reach the card reader", e);
             state = TerminalState.NO_SERVICE;
             return (old != state) ? 2 : 0;
         } catch (CardException | NoSuchAlgorithmException e) {

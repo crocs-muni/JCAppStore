@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.crypto.PGP;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,7 +28,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Settings extends JPanel {
-
+    private static Logger logger = LoggerFactory.getLogger(Settings.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
@@ -234,6 +236,7 @@ public class Settings extends JPanel {
                 context.updateBackground(ImageIO.read(new File(DEFAULT_BG_PATH)));
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.warn("Failed to load custom image " + bgImg, e);
                 InformerFactory.getInformer().showMessage(textSrc.getString("E_background"));
             }
         } else {

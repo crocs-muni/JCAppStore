@@ -89,7 +89,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
             return false;
         } catch (UnknownKeyException ex) {
             ex.printStackTrace();
-            logger.error("UnknownKeyException after key was set. Should not even get here.");
+            logger.error("UnknownKeyException after key was set. Should not even get here.", ex);
             SwingUtilities.invokeLater(call::onFail);
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_authentication"),
@@ -107,7 +107,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
 
     private void caught(String title, String loggerMessage, LocalizedCardException e) {
         e.printStackTrace();
-        logger.warn(loggerMessage + e.getMessage());
+        logger.warn(loggerMessage, e);
         if (title != null) {
             SwingUtilities.invokeLater(() -> showFailed(title, e.getLocalizedMessage()));
         }

@@ -45,6 +45,7 @@ public class SplashScreen extends JWindow {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            logger.error("Failed to setup environment feel", e);
             e.printStackTrace();
         }
 
@@ -129,9 +130,9 @@ public class SplashScreen extends JWindow {
             new AppletStore(fromLoad);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error("Fatal Error: ", e);
             new FeedbackFatalError(textSrc.getString("reporter"), e.getMessage(), true,
                     JOptionPane.QUESTION_MESSAGE, null);
-            logger.error("Fatal Error: ", e);
         }
 
         setVisible(false);

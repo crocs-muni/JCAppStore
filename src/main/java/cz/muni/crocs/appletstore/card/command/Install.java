@@ -44,7 +44,7 @@ public class Install extends GPCommand<Void> {
         try {
             registry = context.getRegistry();
         } catch (IOException e) {
-            e.printStackTrace();
+            //todo message?
             throw new LocalizedCardException("");
         }
 
@@ -54,6 +54,7 @@ public class Install extends GPCommand<Void> {
                 context.deleteAID(file.getPackageAID(), true);
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.warn("Failed to remove existing package before an install.", e);
             }
         }
 
@@ -67,7 +68,6 @@ public class Install extends GPCommand<Void> {
                 }
                 throw e;
             } catch (IOException e) {
-                e.printStackTrace();
                 throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e);
             }
         }
@@ -88,7 +88,8 @@ public class Install extends GPCommand<Void> {
                     privs,
                     data.getInstallParams());
         } catch (IOException e) {
-            e.printStackTrace();
+            //todo message
+            throw new LocalizedCardException("");
         }
         return true;
     }

@@ -362,6 +362,7 @@ public class CardInstanceImpl implements CardInstance {
                     throw new UnknownKeyException(CardDetails.getId(details));
                 }
             } catch (IOException e) {
+                logger.error("Could not open card types ini file", e);
                 e.printStackTrace();
             }
         }
