@@ -183,7 +183,7 @@ public class InstallAction extends CardAbstractAction {
         logger.info("Install AID: " + opts.getAID());
 
         //if easy mode && package already present
-        if (!OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
             //if applet present dont change anything
 
             if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->

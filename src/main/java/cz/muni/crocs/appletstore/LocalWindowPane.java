@@ -286,6 +286,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
         windowLayout.add(installCmd);
         windowLayout.revalidate();
-        windowScroll.revalidate();
+        windowLayout.repaint();
     }
 }
