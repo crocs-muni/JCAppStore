@@ -162,7 +162,7 @@ public class CardManagerImpl implements CardManager {
             throw ex;
         } catch (Exception e) {
             card = null;
-            throw new LocalizedCardException(e.getMessage(), "E_default", e);
+            throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
         } finally {
             tryGeneric = false;
             busy = false;
@@ -379,7 +379,7 @@ public class CardManagerImpl implements CardManager {
         GPCommand<CardDetails> command = new GetDetails(channel);
         command.setChannel(channel);
         command.execute();
-        card.endExclusive();
+//        card.endExclusive();
         card.disconnect(false);
 
         CardDetails details = command.getResult();
