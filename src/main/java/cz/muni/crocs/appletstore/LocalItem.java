@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -26,7 +28,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalItem extends JPanel implements Item {
-
+    private static Logger logger = LoggerFactory.getLogger(LocalItem.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static BufferedImage issuer = getIssuerImg();
     private static final int LABELDIMEN = 40;
@@ -113,6 +115,7 @@ public class LocalItem extends JPanel implements Item {
                 return ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.warn("Failed to load the \"new\" label for the local item", e);
                 return new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
             }
     }
@@ -211,6 +214,7 @@ public class LocalItem extends JPanel implements Item {
             img = ImageIO.read(new File(Config.IMAGE_DIR + "issuer.png"));
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Failed to load the \"issuer\" label for the local item", e);
             img = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
         }
         return img;

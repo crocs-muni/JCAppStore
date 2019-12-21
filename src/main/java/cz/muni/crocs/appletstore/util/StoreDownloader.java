@@ -82,9 +82,9 @@ public class StoreDownloader {
             if (size == -1) size = downloaded; //if unknown, update
             return true;
 
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error("Could not download release: " + ex.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Could not download release", e);
             return false;
         }
     }

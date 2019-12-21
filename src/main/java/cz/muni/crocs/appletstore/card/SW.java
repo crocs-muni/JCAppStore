@@ -38,6 +38,7 @@ public class SW extends ISO7816 {
             case NO_SPECIFIC_DIAGNOSIS:
             case SW_INS_NOT_SUPPORTED:
             case SW_CLA_NOT_SUPPORTED:
+            case SW_KEY_NOT_FOUND:
             case SW_WRONG_LENGTH: return "ES_generic";
             case SW_AUTHENTICATION_METHOD_BLOCKED: return "E_init_failed";
             case SW_WRONG_DATA:
@@ -47,7 +48,6 @@ public class SW extends ISO7816 {
             case SW_FUNC_NOT_SUPPORTED: return "ES_probably_locked";
             case SW_FILE_NOT_FOUND: return "E_pkg_not_found";
             case SW_OUT_OF_MEMORY: return "E_full_memory";
-            case SW_KEY_NOT_FOUND: return "E_key_not_found";
             case SW_CARD_TERMINATED: return "H_terminated";
             case SW_NO_ERROR: return "OK";
             case CARD_LOCKED: return "E_action_denied";
@@ -77,7 +77,7 @@ public class SW extends ISO7816 {
             case SW_OUT_OF_MEMORY: return "E_full_memory";
             case SW_WRONG_P1P2:
             case SW_INCORRECT_P1P2: return "E_invalid_P1P2";
-            case SW_KEY_NOT_FOUND: return "E_key_not_found";
+            case SW_KEY_NOT_FOUND: return "E_referenced_not_found";
             case SW_CORRECT_LENGTH_00: return "E_length_00";
             case SW_INS_NOT_SUPPORTED: return "E_invalid_INS";
             case SW_CLA_NOT_SUPPORTED: return "E_invalid_CLA";

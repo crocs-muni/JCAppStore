@@ -145,6 +145,7 @@ public class OptionsImpl implements Options<String> {
             options.forEach(parser::addValue);
             parser.store();
         } catch (IOException e) {
+            logger.error("Failed to save the file options.", e);
             e.printStackTrace();
         }
     }
@@ -174,8 +175,8 @@ public class OptionsImpl implements Options<String> {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            logger.warn("Failed to read app options.", e);
             setDefaults();
-            logger.warn("Failed to read app options.");
         }
     }
 
@@ -187,6 +188,7 @@ public class OptionsImpl implements Options<String> {
 
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Could not load css styles", e);
             sheet.addRule("body {\n" +
                     "    font-size: 11px;\n" +
                     "}\n" +
@@ -231,6 +233,7 @@ public class OptionsImpl implements Options<String> {
             return Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(14f);
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
+            logger.warn("Failed to create font from the presetns", e);
             return getDefaultFont();
         }
     }

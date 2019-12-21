@@ -5,6 +5,8 @@ import cz.muni.crocs.appletstore.util.Informer;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,7 +20,7 @@ import java.io.IOException;
  * @version 1.0
  */
 public class BackgroundImgSplitPanel extends JSplitPane {
-
+    private static Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
     private Image bg;
     private int width = -1, height = -1;
 
@@ -55,6 +57,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
                 bg = ImageIO.read(f);
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.warn("Could not open backround image file " + bg, e);
                 loadDefault();
             }
         }
@@ -65,6 +68,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
             bg = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Failed to load default background image, failsafe to plain color.", e);
             bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
         }
     }

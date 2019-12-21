@@ -1,7 +1,8 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.ui.CapFileView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
@@ -9,7 +10,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -18,6 +18,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class CapFileChooser {
+    private static Logger logger = LoggerFactory.getLogger(CapFileChooser.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public static CAPFile getCapFile(File from) {
@@ -27,6 +28,7 @@ public class CapFileChooser {
             instcap = CAPFile.fromStream(fin);
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Could not load CAP file " + from, e);
             InformerFactory.getInformer().showMessage(textSrc.getString("E_install_no_file_1") +
                     from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
         }

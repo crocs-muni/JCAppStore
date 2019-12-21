@@ -6,6 +6,8 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +31,7 @@ import java.util.concurrent.TimeoutException;
  * @version 1.0
  */
 public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable, Store {
-
+    private static Logger logger = LoggerFactory.getLogger(StoreWindowManager.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private OnEventCallBack<Void, Void> callbackOnAction;
@@ -219,6 +221,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             data = parser.getValues();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.warn("Failed to load store data, initialization failed", e);
             setFailed();
             return;
         }

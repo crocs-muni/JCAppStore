@@ -133,7 +133,7 @@ public class StoreItemInfo extends HintPanel {
         if (dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
             add(getNotice(textSrc.getString("W_default_app"), 14f, new Color(255, 220, 181),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
-            , "gap 20, span 4, gaptop 40, growx, wrap");
+                    , "gap 20, span 4, gaptop 40, growx, wrap");
         }
     }
 
@@ -159,23 +159,22 @@ public class StoreItemInfo extends HintPanel {
         addSubTitle("website", "H_website");
 
         Set<Map.Entry<String, JsonElement>> entrySet = websites.entrySet();
-        for(Map.Entry<String,JsonElement> entry : entrySet) {
+        for (Map.Entry<String, JsonElement> entry : entrySet) {
             String urlName = entry.getKey();
             String urlAddress = websites.get(urlName).getAsString();
             JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName + "</b></div>", 14f);
             name.setOpaque(false);
             name.setForeground(Color.white);
 
-            add(name, "gaptop 10, gapleft 20");
+            add(name, "span 2, gaptop 10, gapleft 20");
 
             JLabel url = new HtmlText("<div style=\"margin: 5px;\">" + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
             url.setOpaque(false);
             url.setCursor(new Cursor(Cursor.HAND_CURSOR));
             url.addMouseListener(new URLAdapter(urlAddress));
             url.setForeground(Color.white);
-            add(url, "span 3, gaptop 10, gapleft 5, wrap");
+            add(url, "span 2, gaptop 10, gapleft 5, wrap");
         }
-
     }
 
     private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void> call) {
@@ -232,7 +231,7 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void addSubTitle(String titleKey, String hintKey) {
-        HintLabel title = new HintTitle( textSrc.getString(titleKey), textSrc.getString(hintKey), 20f);
+        HintLabel title = new HintTitle(textSrc.getString(titleKey), textSrc.getString(hintKey), 20f);
         title.setFocusable(true);
         title.setForeground(Color.WHITE);
         title.setBorder(BorderFactory.createEmptyBorder(20, 20, 0, 20));
@@ -271,6 +270,7 @@ public class StoreItemInfo extends HintPanel {
             graphics2D.drawImage(ImageIO.read(img), 0, 0, 120, 120, null);
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Failed to attach label to the store item icon: " + img, e);
             return new ImageIcon(newIcon);
         }
         //remove clip

@@ -5,6 +5,8 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.AppletSerializer;
 import cz.muni.crocs.appletstore.card.AppletSerializerImpl;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
@@ -21,7 +23,7 @@ import java.util.*;
  * @version 1.0
  */
 public class ListContents extends GPCommand<Set<AppletInfo>> {
-
+    private static Logger logger = LoggerFactory.getLogger(ListContents.class);
     private String cardId;
 
     public ListContents(String cardId) {
@@ -43,6 +45,7 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
                 saved = savedData.deserialize(file);
             } catch (LocalizedCardException e) {
                 e.printStackTrace();
+                logger.warn("Failed to obtain card cache file", e);
                 saved = Collections.emptySet();
             }
         } else {

@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -24,6 +26,7 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class NotifLabel extends JLabel {
+    private static Logger logger = LoggerFactory.getLogger(NotifLabel.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private Shape close = new Rectangle(202, 6, 12, 12);
@@ -37,6 +40,7 @@ public class NotifLabel extends JLabel {
             this.closeIcon = ImageIO.read(new File(Config.IMAGE_DIR + "close_small.png"));
         } catch (IOException e) {
             e.printStackTrace();
+            logger.warn("Failed to load notification icon", e);
             this.closeIcon = new BufferedImage(0, 0, BufferedImage.TYPE_INT_ARGB);
         }
 

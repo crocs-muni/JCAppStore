@@ -94,6 +94,7 @@ public class InstallAction extends CardAbstractAction {
                     try {
                         result = signature.verifyPGPAndReturnMessage(null, data.getCapfile(), customSign);
                     } catch (LocalizedSignatureException e) {
+                        logger.warn("Signature verification failed", e);
                         result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
                     }
                 }
@@ -130,6 +131,7 @@ public class InstallAction extends CardAbstractAction {
                                 "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
                     }
                 } catch (LocalizedSignatureException e) {
+                    logger.warn("Signature verification failed", e);
                     result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
                 }
             }
@@ -181,7 +183,7 @@ public class InstallAction extends CardAbstractAction {
         logger.info("Install AID: " + opts.getAID());
 
         //if easy mode && package already present
-        if (!OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
             //if applet present dont change anything
 
             if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
@@ -220,8 +222,9 @@ public class InstallAction extends CardAbstractAction {
                 long size;
                 try {
                     size = data.getCapfile().length();
-                } catch (SecurityException sec) {
-                    sec.printStackTrace();
+                } catch (SecurityException e) {
+                    logger.warn("Failed to obtain the capfile size", e);
+                    e.printStackTrace();
                     size = 0; //pretend nothing happened
                 }
                 //if no reinstall and memory is not max and applet size + 1kB install space > remaining memory

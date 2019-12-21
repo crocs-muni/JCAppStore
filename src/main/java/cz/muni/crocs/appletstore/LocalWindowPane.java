@@ -12,8 +12,9 @@ import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -31,7 +32,7 @@ import java.util.*;
  */
 public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
-    private static final Logger logger = LogManager.getLogger(LocalWindowPane.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocalWindowPane.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private LocalSubMenu submenu;
@@ -285,5 +286,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
         windowLayout.add(installCmd);
         windowLayout.revalidate();
+        windowLayout.repaint();
     }
 }
