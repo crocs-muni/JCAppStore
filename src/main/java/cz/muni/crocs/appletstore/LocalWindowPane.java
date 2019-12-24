@@ -148,6 +148,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
             infoLayout.setBackground(Color.WHITE);
             revalidate();
+            repaint();
         }
     }
 

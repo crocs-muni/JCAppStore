@@ -66,7 +66,7 @@ public class Install extends GPCommand<Void> {
                 if (e.sw == 0x00) {
                     throw new LocalizedCardException("Package already present", "E_pkg_present", e);
                 }
-                throw e;
+                throw new LocalizedCardException("Package load failed", "E_load_failed", e);
             } catch (IOException e) {
                 throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e);
             }
