@@ -139,32 +139,33 @@ public class CustomFlowLayout extends FlowLayout {
             boolean newLine = true;
             for (Component c : target.getComponents()) {
                 if (c.isVisible()) {
-                    Dimension minimumSize = c.getPreferredSize();
+                    Dimension preferred = c.getPreferredSize();
                     if (c.getAlignmentX() == Component.CENTER_ALIGNMENT) {  //center component reserve all row
                         x = maxWidth;
                         if (!newLine) {
                             y += vgap + rowHeight;
                         }
-                        y += vgap + minimumSize.height;
-                        rowHeight = 0;
-                    } else if ((x == 0) || ((x + minimumSize.width) <= maxWidth)) { //inside row
+                        y += vgap + preferred.height;
+                        rowHeight = preferred.height;
+                        newLine = true;
+                    } else if ((x == 0) || ((x + preferred.width) <= maxWidth)) { //inside row
                         if (x > 0) {
                             x += hgap;
                         }
-                        x += minimumSize.width;
-                        rowHeight = Math.max(rowHeight, minimumSize.height);
+                        x += preferred.width;
+                        rowHeight = Math.max(rowHeight, preferred.height);
                         newLine = false;
                     } else { //begin new row
-                        x = minimumSize.width;
+                        x = preferred.width;
                         y += vgap + rowHeight;
-                        rowHeight = minimumSize.height;
+                        rowHeight = preferred.height;
                         newLine = true;
                     }
                     reqdWidth = Math.max(reqdWidth, x);
                 }
             }
             y += rowHeight;
-            return new Dimension(reqdWidth + insets.left + insets.right, y + insets.top + insets.bottom);
+            return new Dimension(reqdWidth + insets.left + insets.right, y + insets.bottom);
         }
     }
 }
