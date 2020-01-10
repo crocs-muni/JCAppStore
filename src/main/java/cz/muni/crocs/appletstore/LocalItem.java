@@ -112,7 +112,7 @@ public class LocalItem extends JPanel implements Item {
 
     private static BufferedImage loadLabel(String name) {
             try {
-                return ImageIO.read(new File(Config.IMAGE_DIR + "newlabel.png"));
+                return ImageIO.read(new File(Config.IMAGE_DIR + name));
             } catch (IOException e) {
                 e.printStackTrace();
                 logger.warn("Failed to load the \"new\" label for the local item", e);
