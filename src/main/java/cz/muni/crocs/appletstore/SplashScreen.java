@@ -127,7 +127,8 @@ public class SplashScreen extends JWindow {
 
     private void runMainApp(Exception fromLoad) {
         try {
-            new AppletStore(fromLoad);
+            throw new Exception();
+            //dsfsgdfnew AppletStore(fromLoad);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Fatal Error: ", e);
