@@ -15,6 +15,34 @@ automatically :thumbsup:.
 3. :abcd: Get yourself familiar with basic terms. You've learned words like software, touch 
 screen, charger and so on. Smart cards have their own terms too.
 
+How to get the store
+-----
+
+**The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
+(also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
+
+#### Windows
+In Releases, download the latest windows zip file. Extract contents of the zip and open it. Inside, double click 
+JCAppStore-[version]-win.jar file - it is an installer that will install the store for you: follow the instructions.
+
+#### Unix
+Unfortunately, there is no package yet. The store will be available both via RPM and DEB packaging system. For now, 
+you have to move the files manually.
+
+1. Download the tar ball for unix from the latest release and extract it.
+2. Decide on where to put the application data. We recommed to choose folder such as: **/usr/share/java**
+3. Inside your selected folder, create another folder called **JCAppStore** and move here all files from the package except launcher.sh file.
+4. Modify **launcher.sh** file: set DIRECTORY=path_to_the_sources. For example: DIRECTORY=/usr/share/java/JCAppStore
+5. Put the launcher script anywhere you like and launch the app with it. You can put it inside /usr/bin folder so that it is 
+visible from anywhere and rename it conveniently. You may have to set the executable rights to the launcher as follows: 
+**chmod u+x launcher.sh**. It is up to you where the script is located and how the application will be launched. 
+All you need to do is execute the shell script.
+
+#### Apple OS-x
+There are no specific sources available - the unix way will do.
+
+
+
 How the store works?
 ------
 
@@ -75,14 +103,6 @@ Full documentation is accessible in [TODO]
    may be that your card does not support the newest SDK: you can try to install with older
    SDK instead. All versions in 2.x.x form are usually supported.</p>
 </details>
-
-How to get the store
------
-Simply download the zip installation package from the latest release for your system. The installation
-should be os-specific (tar for linux, installation wizard for windows). 
-
-**The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
-(also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 
 Authentication
 -----

@@ -1,5 +1,6 @@
 #!/bin/bash
 VERSION=1.0
+DIRECTORY=./
 
 if ! cat jcappstore-do-not-ask.info ; then
 	if ! gpg --help > /dev/null 2&>1 ; then
@@ -19,7 +20,7 @@ if ! cat jcappstore-do-not-ask.info ; then
 		       read ANSWER
 		    done
 		    if [[ "$ANSWER" == "y" ]] ; then
-		       gpg --import store.asc
+		       gpg --import ${DIRECTORY}/store.asc
 		       (echo 5 && echo y)|gpg --command-fd 0 --expert --edit-key 7B9FE0F5 trust
 		       echo "The key has been imported."
 		    else
@@ -29,4 +30,4 @@ if ! cat jcappstore-do-not-ask.info ; then
 	fi
   touch jcappstore-do-not-ask.info
 fi
-java -jar JCAppStore-${VERSION}.jar
+java -jar ${DIRECTORY}/JCAppStore-${VERSION}.jar
