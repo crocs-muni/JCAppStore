@@ -65,6 +65,7 @@ public class FeedbackFatalError {
                     notifyUser(title, textSrc.getString("failed_send_report"), JOptionPane.ERROR_MESSAGE);
                 }
             } else {
+                notifyUser(title, textSrc.getString("failed_send_report"), JOptionPane.ERROR_MESSAGE);
                 System.exit(result);
             }
         } else {
@@ -73,7 +74,7 @@ public class FeedbackFatalError {
     }
 
     private void notifyUser(String title, String message, final int messageType) {
-        JOptionPane.showMessageDialog(null, "<html><div width=\"350\"" + message +
+        JOptionPane.showMessageDialog(null, "<html><div width=\"350\">" + message +
                 "</div></html>", title, messageType);
     }
 
