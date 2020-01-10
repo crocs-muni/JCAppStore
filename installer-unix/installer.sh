@@ -1,5 +1,9 @@
  #!/bin/bash
 
+#This is an old artefact to be replaced by RPM or DEB
+
+exit 1;
+
 VERSION=1.0
 FILE=JCAppStore-${VERSION}
 
