@@ -33,8 +33,8 @@ public class Settings extends JPanel {
 
     private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
     private static final Tuple[] LANGUAGES = new Tuple[]{
-            new Tuple<>("en", "English"),
-            new Tuple<>("cz", "Česky")
+            new Tuple<>("en", "English")/*,
+            new Tuple<>("cz", "Česky")*/
     };
 
     private JTextField pgp;

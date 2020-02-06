@@ -77,17 +77,6 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callback) {
-        JLabel back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "back.png"));
-        back.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        back.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        back.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                store.showItems("");
-            }
-        });
-        add(back, "pos 0 0");
-
         JLabel icon = new JLabel(getIcon(dataSet.get(JsonParser.TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 2 2, gapleft 50");

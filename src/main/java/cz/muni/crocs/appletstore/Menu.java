@@ -1,21 +1,16 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.Terminals;
-import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.help.*;
-import cz.muni.crocs.appletstore.ui.CustomNotifiableJmenu;
-import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.*;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -39,9 +34,18 @@ public class Menu extends JMenuBar {
         buildMenu();
     }
 
-    public void setCard(String card) {
-        if (card == null || card.isEmpty())
+    /**
+     * Set new name of the card inserted in the application bar
+     * @param card custom card name provided by user OR obtained from database when inserted
+     * @param identifier card identifier, null or empty string if no card present
+     */
+    public void setCard(String card, String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
             card = textSrc.getString("no_card");
+        } else {
+            card = (card != null && !card.isEmpty()) ?
+                    " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
+        }
         currentCard.setText(card);
         revalidate();
     }
@@ -219,8 +223,24 @@ public class Menu extends JMenuBar {
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
         midContainer.add(new Text(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
-        currentCard = new Text();
+        currentCard = new HtmlText();
         currentCard.setForeground(Color.white);
+        currentCard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                CardInstance card = CardManagerFactory.getManager().getCard();
+                if (card == null) return;
+                String newName = showFormForNewCardName();
+                if (newName != null) {
+                    try {
+                        card.setName(newName);
+                    } catch (LocalizedCardException ex) {
+                        InformerFactory.getInformer().showInfoToClose("E_save_card_name", Notice.Importance.SEVERE);
+                    }
+                    setCard(newName, card.getId());
+                }
+            }
+        });
         midContainer.add(currentCard);
         add(midContainer);
     }
@@ -352,5 +372,15 @@ public class Menu extends JMenuBar {
         setItemLook(rbMenuItem, description);
         rbMenuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
         return rbMenuItem;
+    }
+
+    private String showFormForNewCardName() {
+        JTextField field = new JTextField();
+        if (JOptionPane.showOptionDialog(this, field, textSrc.getString("ask_for_card_name"),
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "creditcard.png"),
+                new String[]{textSrc.getString("ok"), textSrc.getString("cancel")}, textSrc.getString("ok")) == JOptionPane.YES_OPTION) {
+            return field.getText();
+        }
+        return null;
     }
 }

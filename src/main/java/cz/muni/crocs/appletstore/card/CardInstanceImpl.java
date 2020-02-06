@@ -115,6 +115,16 @@ public class CardInstanceImpl implements CardInstance {
         return defaultSelected;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String newName) throws LocalizedCardException {
+        name = newName;
+        updateCardName(newName);
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
@@ -126,14 +136,6 @@ public class CardInstanceImpl implements CardInstance {
      */
     void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
-    }
-
-    /**
-     * Return name of the card (if known)
-     * @return card name
-     */
-    String getName() {
-        return name;
     }
 
     /**
@@ -276,6 +278,15 @@ public class CardInstanceImpl implements CardInstance {
                     .addValue(IniParser.TAG_DIVERSIFIER, diversifier)
                     .addValue(IniParser.TAG_AUTHENTICATED, authenticated ? "true" : "false")
                     .store();
+        } catch (IOException e) {
+            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
+        }
+    }
+
+    private void updateCardName(String name) throws LocalizedCardException {
+        try {
+            new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
+                    .addValue(IniParser.TAG_NAME, name).store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
         }

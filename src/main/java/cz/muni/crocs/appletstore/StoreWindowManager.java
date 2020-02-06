@@ -57,6 +57,12 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 updateGUI();
             }
         });
+        submenu.setOnBack(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                store.showItems(null);
+            }
+        });
     }
 
     public synchronized void setState(State state) {

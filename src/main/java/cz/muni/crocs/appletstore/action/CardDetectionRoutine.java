@@ -66,9 +66,12 @@ public class CardDetectionRoutine extends CardAbstractAction {
                                 main.getWindow().getRefreshablePane().refresh();
 
                                 CardInstance card = manager.getCard();
-                                main.getMenu().setCard(card == null ? null : card.getDescriptor());
+                                if (card == null) {
+                                    main.getMenu().setCard(null, null);
+                                } else {
+                                    main.getMenu().setCard(card.getName(), card.getId());
+                                }
                             }
-
                             main.getMenu().resetTerminalButtonGroup();
                         });
                     }

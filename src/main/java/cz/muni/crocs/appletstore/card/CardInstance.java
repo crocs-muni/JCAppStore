@@ -43,4 +43,14 @@ public interface CardInstance {
      * @return null if not default selected applet, AID otherwise
      */
     AID getDefaultSelected();
+
+    /**
+     * Get card name (found in card database or provided by user)
+     */
+    String getName();
+
+    /**
+     * Set custom card name
+     */
+    void setName(String name) throws LocalizedCardException;
 }
