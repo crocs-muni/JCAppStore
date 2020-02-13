@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
-import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Abstract card action wrapper providing failure management
@@ -35,19 +32,6 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
     @Override
     public void start() {
         mouseClicked(null);
-    }
-
-    @Override
-    public void start(int delay) {
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                start();
-                t.cancel();
-                t.purge();
-            }
-        }, delay);
     }
 
     /**

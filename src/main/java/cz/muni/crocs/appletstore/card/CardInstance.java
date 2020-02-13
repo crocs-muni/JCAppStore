@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
 import pro.javacard.AID;
-
 import java.util.Set;
 
 public interface CardInstance {

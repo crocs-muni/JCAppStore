@@ -43,11 +43,12 @@ public class Menu extends JMenuBar {
         if (identifier == null || identifier.isEmpty()) {
             card = textSrc.getString("no_card");
         } else {
-            card = (card != null && !card.isEmpty()) ?
+            card += (card != null && !card.isEmpty()) ?
                     " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
         }
         currentCard.setText(card);
         revalidate();
+        repaint();
     }
 
     public void resetTerminalButtonGroup() {

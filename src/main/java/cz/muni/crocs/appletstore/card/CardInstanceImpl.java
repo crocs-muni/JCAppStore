@@ -9,14 +9,12 @@ import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.gp.*;
 import pro.javacard.gp.PlaintextKeys.Diversification;
-
 
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
@@ -243,8 +241,6 @@ public class CardInstanceImpl implements CardInstance {
         this.applets = applets;
     }
 
-
-
     ////////////////////////////////////////////////////////////////////////////
     ///////////////////    PRIVATE ONLY (INTERNAL LOGIC)     ///////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -303,7 +299,7 @@ public class CardInstanceImpl implements CardInstance {
         try {
             parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
             if (parser.isHeaderPresent()) {
-                logger.info("Card " + id + "metadata found.");
+                logger.info("Card " + id + " metadata found.");
                 name = parser.getValue(IniParser.TAG_NAME);
                 masterKey = parser.getValue(IniParser.TAG_KEY);
                 kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
@@ -311,7 +307,7 @@ public class CardInstanceImpl implements CardInstance {
                 doAuth = parser.getValue(IniParser.TAG_AUTHENTICATED).toLowerCase().equals("true");
 
                 boolean valid = validMasterKey(masterKey);
-                logger.info("With valid master key:" + valid);
+                logger.info("With valid master key: " + valid);
                 return valid;
             }
 

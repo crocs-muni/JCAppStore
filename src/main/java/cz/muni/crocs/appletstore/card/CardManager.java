@@ -159,5 +159,5 @@ public interface CardManager {
      * @return response, or null if failed
      * @throws LocalizedCardException when failed to execute the command transfer
      */
-    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException;
+    ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException;
 }

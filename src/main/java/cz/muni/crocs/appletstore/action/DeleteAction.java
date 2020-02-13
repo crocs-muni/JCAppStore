@@ -87,9 +87,8 @@ public class DeleteAction extends CardAbstractAction {
         }
 
         final boolean finalWillForce = willForce;
-        execute(() -> {
-            manager.uninstall(info, finalWillForce);
-        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
+        execute(() -> manager.uninstall(info, finalWillForce),
+                "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
     }
 
     private static int showDialog(String title, Object msg, String imgname, String confirmBtnKey) {

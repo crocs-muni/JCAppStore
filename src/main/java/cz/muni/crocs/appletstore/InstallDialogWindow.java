@@ -7,6 +7,8 @@ import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
@@ -34,6 +36,7 @@ import java.util.regex.Pattern;
  */
 public class InstallDialogWindow extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
     //applet info and setting GUI components
     private JTextField name = new JTextField(50);
     private JTextField author = new JTextField(10);
@@ -53,7 +56,7 @@ public class InstallDialogWindow extends JPanel {
     private boolean initialized;
     private File customSignatureFile;
     private Color wrong = new Color(0xA3383D);
-    private static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
+    public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
     public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
         this.info = info;
@@ -117,7 +120,7 @@ public class InstallDialogWindow extends JPanel {
     }
 
     public File getCustomSignatureFile() {
-        System.out.println(customSignatureFile.getAbsolutePath());
+        logger.info("Custom signature file selected: " + customSignatureFile.getAbsolutePath());
         return customSignatureFile;
     }
 

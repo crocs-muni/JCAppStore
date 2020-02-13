@@ -266,7 +266,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException, UnknownKeyException {
+    public synchronized ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -286,7 +286,6 @@ public class CardManagerImpl implements CardManager {
         try {
             card.executeCommands(send);
         } catch (CardException e) {
-            loadCard();
             throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
         } finally {
             busy = false;
