@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +149,8 @@ public class CardInstanceImpl implements CardInstance {
 
         try {
             card = terminal.connect("*");
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.beginExclusive();
             logger.info("Connected to the terminal: " + terminal + ", card: " + card);
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
             logger.info("Card BIBO channel obtained: " + channel);
@@ -163,9 +166,15 @@ public class CardInstanceImpl implements CardInstance {
                 command.setChannel(channel);
                 command.execute();
             }
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.endExclusive();
         } catch (GPException e) {
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.endExclusive();
             throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
         } catch (IOException e) {
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.endExclusive();
             throw new LocalizedCardException(e.getMessage(), "E_unknown_error", e);
         } finally {
             card.disconnect(true);

@@ -367,7 +367,8 @@ public class CardManagerImpl implements CardManager {
 
         try {
             card = terminal.connect("*");
-            //card.beginExclusive();
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.beginExclusive();
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
         } catch (CardException e) {
             //if (card != null) card.endExclusive();
@@ -378,7 +379,8 @@ public class CardManagerImpl implements CardManager {
         GPCommand<CardDetails> command = new GetDetails(channel);
         command.setChannel(channel);
         command.execute();
-//        card.endExclusive();
+        if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+            card.endExclusive();
         card.disconnect(false);
 
         CardDetails details = command.getResult();

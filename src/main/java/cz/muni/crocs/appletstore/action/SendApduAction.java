@@ -149,6 +149,7 @@ public class SendApduAction extends MouseAdapter implements CardAction {
             if (apdu.getData() == null || apdu.getData().length == 0) {
                 return new HtmlText("<p width=\"300px\">" +  textSrc.getString("custom_command_no_data") + "</p>");
             }
+            //todo add some more data like panel with text Return data:
             return TextField.getTextField(Hex.toHexString(apdu.getData()));
         }
     }

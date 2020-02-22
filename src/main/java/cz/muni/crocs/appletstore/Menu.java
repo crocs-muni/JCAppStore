@@ -189,9 +189,19 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE,
                         OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_E, InputEvent.ALT_MASK);
         intuitive.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
         submenu.add(intuitive);
+
+        JMenuItem exclusive = selectableMenuItem(new AbstractAction(textSrc.getString("exclusive_mode")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_EXCLUSIVE_CARD_CONNECT,
+                        OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
+        submenu.add(exclusive);
 
         JMenuItem autodelete = selectableMenuItem(new AbstractAction(textSrc.getString("implicit_delete")) {
             @Override

@@ -20,6 +20,7 @@ public interface Options<ValueType> {
     String KEY_BACKGROUND = "background";
     String KEY_HINT = "hint";
     String KEY_STYLESHEET = "stylesheet";
+    String KEY_EXCLUSIVE_CARD_CONNECT = "exclusive_card";
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
     String KEY_PGP_LOCATION = "gpg";
