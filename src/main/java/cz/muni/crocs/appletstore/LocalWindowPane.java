@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
+import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -90,6 +91,11 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
         installCmd.addMouseListener(new InstallAction(callback));
         refresh();
+
+        CardManagerFactory.getManager().setCallbackOnFailure(() -> {
+            refresh();
+            return null;
+        });
     }
 
     @Override

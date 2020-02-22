@@ -166,17 +166,13 @@ public class CardInstanceImpl implements CardInstance {
                 command.setChannel(channel);
                 command.execute();
             }
-            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
-                card.endExclusive();
         } catch (GPException e) {
-            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
-                card.endExclusive();
             throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
         } catch (IOException e) {
-            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
-                card.endExclusive();
             throw new LocalizedCardException(e.getMessage(), "E_unknown_error", e);
         } finally {
+            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
+                card.endExclusive();
             card.disconnect(true);
         }
     }

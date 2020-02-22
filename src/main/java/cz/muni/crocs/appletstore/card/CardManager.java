@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.ResponseAPDU;
+import cz.muni.crocs.appletstore.util.CallBack;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
@@ -8,6 +9,7 @@ import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 public interface CardManager {
 
@@ -28,6 +30,14 @@ public interface CardManager {
      * next time the card is attempted to authenticate to
      */
     void setTryGenericTestKey();
+
+    /**
+     * Set callback
+     * @param call callback called every time an unusual event occurs
+     *             that requires the loadCard() call (but cannot be called from loadCard()
+     *             as this method is part of the interface itself
+     */
+    void setCallbackOnFailure(CallBack<Void> call);
 
     /**
      * Switches to the new aid as store selected applet (not default selected)
@@ -89,8 +99,6 @@ public interface CardManager {
      * @return AID of the last installed applet
      */
     AID getLastAppletInstalledAid();
-
-
 
     /**
      * Evaluates the necessity of card refreshing

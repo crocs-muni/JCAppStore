@@ -36,6 +36,7 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
+        logger.info("List contents of card: " + cardId);
         AppletSerializer<Set<AppletInfo>> savedData = new AppletSerializerImpl();
         File file = new File(Config.APP_DATA_DIR + Config.S + cardId);
 
@@ -53,9 +54,6 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
         }
 
         for (GPRegistryEntry entry : registry) {
-            //global platform lists all packages two times skip the one with no modules in it
-            if (entry.getType().equals(GPRegistryEntry.Kind.ExecutableLoadFile) && entry.getModules().size() == 0)
-                continue;
             result.add(new AppletInfo(entry, saved));
         }
         return true;

@@ -39,6 +39,7 @@ public class Delete extends GPCommand<Void> {
     public boolean execute() throws GPException, LocalizedCardException, IOException {
         AID aid = toDelete.getAid();
         GPRegistry reg = context.getRegistry();
+        logger.info("About to uninstall an instance: " + toDelete.getKind() + ", with id: " + aid);
 
         if (!reg.allAIDs().contains(aid)) {
             logger.warn("Applet not present when deletion requested.");

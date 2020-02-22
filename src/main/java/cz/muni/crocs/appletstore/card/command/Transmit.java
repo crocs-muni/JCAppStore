@@ -31,6 +31,7 @@ public class Transmit extends GPCommand<ResponseAPDU> {
 
     @Override
     public boolean execute() throws CardException, GPException, LocalizedCardException, IOException {
+        logger.info("Transmit command for applet: " + targetAid);
         logger.debug(">> 00A40400 " + HexUtils.bin2hex(targetAid.getBytes()));
         result = channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, targetAid.getBytes()));
         logger.debug("<< " + HexUtils.bin2hex(result.getBytes()));
@@ -39,8 +40,7 @@ public class Transmit extends GPCommand<ResponseAPDU> {
         CommandAPDU c = new CommandAPDU(HexUtils.stringToBin(APDU));
         result = channel.transmit(c);
         logger.debug("<< " + HexUtils.bin2hex(result.getBytes()));
-        if (result.getSW() != 0x9000) return false;
-        return true;
+        return result.getSW() == 0x9000;
     }
 
     @Override

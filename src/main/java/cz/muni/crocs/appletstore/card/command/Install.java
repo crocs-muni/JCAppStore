@@ -35,7 +35,7 @@ public class Install extends GPCommand<Void> {
     @Override
     public boolean execute() throws LocalizedCardException, GPException {
         if (data == null) {
-            logger.info("Installing params are missnig");
+            logger.info("Installing params are missing");
             throw new LocalizedCardException("No install data.", "E_notify_us");
         }
         logger.info("Installing params: " + data.toString());
@@ -88,8 +88,7 @@ public class Install extends GPCommand<Void> {
                     privs,
                     data.getInstallParams());
         } catch (IOException e) {
-            //todo message
-            throw new LocalizedCardException("");
+            throw new LocalizedCardException("IOException when install for install", "E_installforinstall", e);
         }
         return true;
     }
