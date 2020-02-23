@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -46,11 +47,17 @@ public class CardInfoPanel extends JPanel {
                         self.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "announcement.png")), "align center, wrap");
                         self.add(new Text(textSrc.getString("memory_could_not_obtain")));
                     } else {
-                        self.add(new Text(textSrc.getString("card_free_memory")), "");
-                        self.add(new Text(String.valueOf(JCMemory.getPersistentMemory(apduData))), "align right, wrap");
+                        int memory = JCMemory.getPersistentMemory(apduData);
+                        if (memory == 32767) {
+                            self.add(new Text(textSrc.getString("card_free_memory_over32kb")), "wrap");
+                        } else {
+                            self.add(new Text(textSrc.getString("card_free_memory")), "");
+                            self.add(new Text(memory + " bytes."), "align right, wrap");
+                        }
                     }
-                    self.revalidate();
-                    self.repaint();
+                    Window origin = SwingUtilities.getWindowAncestor(self);
+                    origin.pack();
+                    origin.setLocationRelativeTo(null);
                     refreshable.refresh();
                     return null;
                 }

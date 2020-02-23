@@ -58,32 +58,29 @@ public class InstallDialogWindow extends JPanel {
     private Color wrong = new Color(0xA3383D);
     public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
-    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
+    /**
+     * Create form for applet installation
+     *
+     * @param file        cap file to install
+     * @param info        info about the capfile (from store)
+     * @param isInstalled whether the applet is already installed on the card
+     * @param verifyMsg   message that is displayed when verified (differs on self-signatures)
+     * @param isCustom    whether the applet is installed form store or from custom source
+     */
+    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg, boolean isCustom) {
         this.info = info;
         this.src = file;
         this.isInstalled = isInstalled;
         build(verifyMsg);
-    }
-
-    /**
-     * Build advanced section of the dialog, if not called only metadata section shown
-     * @param parent parent window to resize on switch
-     */
-    public void buildAdvanced(Window parent) {
-        if (initialized) return;
-        initAdvanced(parent);
         buildAdvanced();
-    }
-
-    public void buildAdvancedAndCustomSigned(Window parent) {
-        if (initialized) return;
-        initAdvanced(parent);
-        buildAdvanced();
-        buildCustomSigned();
+        if (isCustom) {
+            buildCustomSigned();
+        }
     }
 
     /**
      * Get applet install information
+     *
      * @return null if basic installation,
      * array with [installation arguments, force install, selected applet to install] values
      */
@@ -170,15 +167,13 @@ public class InstallDialogWindow extends JPanel {
         return advanced.isVisible();
     }
 
-    private void initAdvanced(Window parent) {
-        if (parent == null)
-            return;
-
+    private void buildAdvanced() {
         JLabel more = new JLabel(textSrc.getString("advanced_settings"), new ImageIcon(Config.IMAGE_DIR + "arrow_small.png"), JLabel.LEFT);
         more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(more, "gaptop 22, span 4, wrap");
 
+        final InstallDialogWindow self = this;
         more.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -189,15 +184,14 @@ public class InstallDialogWindow extends JPanel {
                     advanced.setVisible(true);
                     add(advanced, "span 5, wrap");
                 }
-                parent.pack();
+                Window origin = SwingUtilities.getWindowAncestor(self);
+                origin.pack();
+                origin.setLocationRelativeTo(null);
             }
         });
         advanced.setLayout(new MigLayout());
         advanced.setVisible(false);
-        initialized = true;
-    }
 
-    private void buildAdvanced() {
         advanced.add(getHint("H_advanced_syntax", "300"), "span 5, wrap");
         advanced.add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
@@ -263,6 +257,7 @@ public class InstallDialogWindow extends JPanel {
 
     /**
      * List all applets to possibly install
+     *
      * @param applets list to install
      */
     private void addAllAppletCustomAIDSFields(JPanel to, List<AID> applets) {
@@ -315,7 +310,7 @@ public class InstallDialogWindow extends JPanel {
     private String getCustomAppletName(String defaultOpt) {
         Enumeration elements = selectedAID.getElements();
         while (elements.hasMoreElements()) {
-            AbstractButton button = (AbstractButton)elements.nextElement();
+            AbstractButton button = (AbstractButton) elements.nextElement();
             if (button.isSelected()) {
                 return valueOrDefault(button.getToolTipText(), defaultOpt);
             }

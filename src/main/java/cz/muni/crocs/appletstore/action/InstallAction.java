@@ -145,15 +145,13 @@ public class InstallAction extends CardAbstractAction {
         });
     }
 
-    private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean buildCustomInstall) {
-        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), installed, verifyResult);
+    private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean isCustom) {
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), installed, verifyResult, isCustom);
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
 
         JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
         JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
-        if (buildCustomInstall) dialog.buildAdvancedAndCustomSigned(window);
-        else dialog.buildAdvanced(window);
         window.pack();
         window.setVisible(true);
 
@@ -164,7 +162,7 @@ public class InstallAction extends CardAbstractAction {
             case JOptionPane.YES_OPTION:
                 if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
                     InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
-                    return showInstallDialog(verifyResult, imgIcon, buildCustomInstall);
+                    return showInstallDialog(verifyResult, imgIcon, isCustom);
                 }
                 break;
             case JOptionPane.NO_OPTION:
