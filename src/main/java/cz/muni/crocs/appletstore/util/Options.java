@@ -28,6 +28,7 @@ public interface Options<ValueType> {
     String KEY_SIMPLE_USE = "simple_usage";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_DELETE_IMPLICIT = "delete_pkg";
+    String KEY_WARN_FORCE_INSTALL = "warn_force_install";
 
     /**
      * Get option for app

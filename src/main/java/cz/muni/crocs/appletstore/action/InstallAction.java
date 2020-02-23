@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
+import cz.muni.crocs.appletstore.ReinstallWarnPanel;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
@@ -146,7 +147,9 @@ public class InstallAction extends CardAbstractAction {
     }
 
     private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean isCustom) {
-        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), installed, verifyResult, isCustom);
+        //simple usage will always do force install
+        boolean forceInstall = installed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom);
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
 
         JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
@@ -172,6 +175,10 @@ public class InstallAction extends CardAbstractAction {
         return dialog;
     }
 
+    /**
+     * Perform various pre-install checks (memory available, force installs, warns) and fire install
+     * @param opts install options from the install form
+     */
     private void fireInstall(final InstallOpts opts) {
         final CardManager manager = CardManagerFactory.getManager();
         if (!manager.isCard()) {
@@ -183,7 +190,6 @@ public class InstallAction extends CardAbstractAction {
         //if easy mode && package already present
         if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
             //if applet present dont change anything
-
             if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
                     a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
                 if (manager.getCard().getInstalledApplets().stream().anyMatch(a ->
@@ -191,6 +197,10 @@ public class InstallAction extends CardAbstractAction {
                     opts.setForce(true);
                 }
             }
+        }
+
+        if (opts.isForce() && !userAcceptsForceInstallWarn()) {
+            return;
         }
 
         new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
@@ -245,6 +255,31 @@ public class InstallAction extends CardAbstractAction {
         }).start();
     }
 
+    private boolean userAcceptsForceInstallWarn() {
+        if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
+            ReinstallWarnPanel warn = new ReinstallWarnPanel();
+            switch(JOptionPane.showOptionDialog(null, warn,
+                    textSrc.getString("reinstall_warn_title"), YES_NO_OPTION, QUESTION_MESSAGE,
+                    new ImageIcon(Config.IMAGE_DIR + "reinstall_warn_title"),
+                    new String[]{textSrc.getString("continue"), textSrc.getString("cancel")},
+                    "error")) {
+                case YES_OPTION:
+                    OptionsFactory.getOptions().addOption(Options.KEY_WARN_FORCE_INSTALL,
+                            "" + (!warn.userSelectedDontShowAgain()));
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Actual installation
+     * @param opts options from the install form modified by fireInstall() method
+     *             (e.g. simple use mode adds force install if package present)
+     * @param manager card manager instance
+     */
     private void doInstall(final InstallOpts opts, final CardManager manager) {
         if (!manager.isCard()) {
             return;
