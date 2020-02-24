@@ -281,6 +281,13 @@ public class Menu extends JMenuBar {
             }
         }, textSrc.getString("H_auth")));
 
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("ifaq_title")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWindow(textSrc.getString("ifaq_title"), HelpFactory.getInstallFailuresFAQ()).showIt();
+            }
+        }, textSrc.getString("ifaq_h")));
+
         help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("def_title")) {
             @Override
             public void actionPerformed(ActionEvent e) {

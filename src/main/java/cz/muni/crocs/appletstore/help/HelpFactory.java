@@ -43,4 +43,20 @@ public class HelpFactory {
                 .addSubTitle("def_why_main_title")
                 .addText("def_why_main");
     }
+
+    public static Help getInstallFailuresFAQ() {
+        return new HelpBuilder(35, 20, 600)
+                .addTitle("ifaq_cardstate_title")
+                .addText("ifaq_cardstate")
+                .addSubTitle("ifaq_low_memory_title")
+                .addText("ifaq_low_memory")
+                .addSubTitle("ifaq_wrong_sdk_title")
+                .addText("ifaq_wrong_sdk")
+                .addSubTitle("ifaq_ip_title")
+                .addText("ifaq_ip")
+                .addSubTitle("ifaq_tech_title")
+                .addText("ifaq_tech")
+                .addSubTitle("ifaq_general_title")
+                .addText("ifaq_general");
+    }
 }
