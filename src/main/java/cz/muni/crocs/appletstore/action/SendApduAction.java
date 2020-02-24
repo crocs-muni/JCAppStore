@@ -51,7 +51,7 @@ public class SendApduAction extends MouseAdapter implements CardAction {
 
         call.onStart();
         new Thread(() -> {
-            ResponseAPDU response = null;
+            ResponseAPDU response;
             try {
                 response = CardManagerFactory.getManager().sendApdu(info.getAid().toString(), apduCmd);
             } catch (Exception ex) {
@@ -75,8 +75,10 @@ public class SendApduAction extends MouseAdapter implements CardAction {
                 return null;
             case JOptionPane.YES_OPTION: //continue
         }
-        if (window.hasValidData()) return window.getCommand();
-        return getAPDU(window.getCommand(), textSrc.getString("E_custom_coomand_format"));
+        //todo validation does not work yet
+        return window.getCommand();
+        //if (window.hasValidData()) return window.getCommand();
+        //return getAPDU(window.getCommand(), textSrc.getString("E_custom_coomand_format"));
     }
 
     private static int showDialog(String title, Object msg) {

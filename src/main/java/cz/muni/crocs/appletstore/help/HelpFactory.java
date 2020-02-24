@@ -34,4 +34,13 @@ public class HelpFactory {
                 .addText("au_no_host");
     }
 
+    public static Help getMainAppletHelp() {
+        return new HelpBuilder(35, 20, 600)
+                .addTitle("def_title")
+                .addText("def_introduction")
+                .addSubTitle("def_why_title")
+                .addText("def_why")
+                .addSubTitle("def_why_main_title")
+                .addText("def_why_main");
+    }
 }

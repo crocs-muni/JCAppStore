@@ -17,6 +17,7 @@ import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -45,11 +46,6 @@ public class DeleteAction extends CardAbstractAction {
             return;
         }
 
-        if (OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT)) {
-            AppletInfo pkg = getPackageOf(info);
-            if (pkg != null) info = pkg;
-        }
-
         DeleteDialogWindow opts = new DeleteDialogWindow(info.getAid().toString(), info.getKind(), info.hasKeys());
         switch (showDialog(textSrc.getString("CAP_delete_applet"), opts, "delete.png", "delete")) {
             case JOptionPane.NO_OPTION:
@@ -62,18 +58,30 @@ public class DeleteAction extends CardAbstractAction {
 
         final CardManager manager = CardManagerFactory.getManager();
         boolean willForce = opts.willForce() || OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
-        //if easy mode, and uninstalling package, then uninstall applet too and show notice uninstalling applet
-        if (!OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && info.getKind() == Kind.ExecutableLoadFile) {
-            for (AID mod : info.getModules()) {
+
+        AppletInfo packageInfo = null;
+        if (info.getKind() == Kind.Application) {
+            //implicit mode deletes package too
+            if (OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT)) {
+                packageInfo = getPackageOf(info);
+                logger.info("Implicit delete package too: " +
+                        (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
+            }
+        } else { //executable because of the very first if clause
+            //simple use deletes applet when deleting package
+            //todo debug does force mode is enough for the package to uninstall its applets?
+            if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
                 CardInstance card = manager.getCard();
-                if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
-                    willForce = true;
-                    break;
+                for (AID mod : info.getModules()) {
+                    if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+                        willForce = true;
+                        break;
+                    }
                 }
             }
         }
 
-        if (willForce || info.getKind() != Kind.ExecutableLoadFile) {
+        if (willForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted
             String msg = opts.confirm();
             if (msg != null) {
                 switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
@@ -87,8 +95,13 @@ public class DeleteAction extends CardAbstractAction {
         }
 
         final boolean finalWillForce = willForce;
-        execute(() -> manager.uninstall(info, finalWillForce),
-                "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
+        final AppletInfo finalPackage = packageInfo;
+        execute(() -> {
+            manager.uninstall(info, finalWillForce);
+            if (finalPackage != null) { //todo force package delete should suffice..?
+                manager.uninstall(finalPackage, true);
+            }
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
     }
 
     private static int showDialog(String title, Object msg, String imgname, String confirmBtnKey) {

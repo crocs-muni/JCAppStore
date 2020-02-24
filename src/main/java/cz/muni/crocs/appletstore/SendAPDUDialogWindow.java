@@ -29,22 +29,23 @@ public class SendAPDUDialogWindow extends JPanel {
             add(new HtmlText("<p width=\"600px\">" + additionalMsg + "</p>"), "wrap");
         }
         apdu.setText(predefinedCommand);
-        apdu.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
-            }
-        });
+        //todo has too much overhead with long strings
+//        apdu.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                /*if (inHex.isSelected())*/ apdu.setForeground(hasValidData() ? Color.BLACK : wrong);
+//            }
+//        });
         add(apdu, "wrap");
         add(getHint("H_custom_command", "600"), "span 5, wrap");
 
