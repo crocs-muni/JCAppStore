@@ -46,7 +46,8 @@ public class HelpFactory {
 
     public static Help getInstallFailuresFAQ() {
         return new HelpBuilder(35, 20, 600)
-                .addTitle("ifaq_cardstate_title")
+                .addTitle("ifaq_title")
+                .addSubTitle("ifaq_cardstate_title")
                 .addText("ifaq_cardstate")
                 .addSubTitle("ifaq_low_memory_title")
                 .addText("ifaq_low_memory")

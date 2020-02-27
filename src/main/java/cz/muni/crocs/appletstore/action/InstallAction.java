@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Set;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -163,9 +164,22 @@ public class InstallAction extends CardAbstractAction {
 
         switch (selectedValue) {
             case JOptionPane.YES_OPTION:
+                //invalid data
                 if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
                     InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
                     return showInstallDialog(verifyResult, imgIcon, isCustom);
+                } else if (!dialog.getInstallOpts().isForce()) { //check if AID is not conflicting
+                    logger.info("No force install: check the applets");
+                    Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
+                    AID custom = AID.fromString(dialog.getInstallOpts().getCustomAID());
+                    for (AppletInfo applet : applets) {
+                        logger.info("applet: " + applet.getAid() + ", with " + custom.toString());
+
+                        if (applet.getAid().equals(custom)) {
+                            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
+                            return showInstallDialog(verifyResult, imgIcon, isCustom);
+                        }
+                    }
                 }
                 break;
             case JOptionPane.NO_OPTION:

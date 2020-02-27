@@ -13,6 +13,8 @@ import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pro.javacard.AID;
+import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
@@ -25,10 +27,8 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 /**
  * Item detail in store
@@ -55,17 +55,7 @@ public class StoreItemInfo extends HintPanel {
         requestFocusInWindow();
 
         setOpaque(false);
-        CardInstance card = CardManagerFactory.getManager().getCard();
-        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
-        if (appletInfos != null) {
-            for (AppletInfo applet : appletInfos) {
-                String name = applet.getName();
-                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
-                    installed = true;
-                    break;
-                }
-            }
-        }
+
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
@@ -94,12 +84,27 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void> callback) {
-        JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
+        //get latest version info
         final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
         final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
         final JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                 .get(latestV).getAsJsonArray();
-        String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
+
+        //check whether installed
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
+        if (appletInfos != null) {
+            for (AppletInfo applet : appletInfos) {
+                String name = applet.getName();
+                //installed from the store
+                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
+                    installed = true;
+                    break;
+                }
+            }
+        }
+
+        JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
 
         install.addMouseListener(
                 new MouseAdapter() {

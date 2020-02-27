@@ -1,10 +1,7 @@
 package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.AppletSerializer;
-import cz.muni.crocs.appletstore.card.AppletSerializerImpl;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPException;
@@ -32,7 +29,7 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
 
     @Override
     public boolean execute() throws CardException, GPException, IOException {
-        result = new HashSet<>();
+        result = new AppletSet();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 

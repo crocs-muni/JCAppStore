@@ -74,6 +74,7 @@ public class DeleteAction extends CardAbstractAction {
                 CardInstance card = manager.getCard();
                 for (AID mod : info.getModules()) {
                     if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+
                         willForce = true;
                         break;
                     }

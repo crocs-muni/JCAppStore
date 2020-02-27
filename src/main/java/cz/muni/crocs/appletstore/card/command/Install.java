@@ -57,6 +57,7 @@ public class Install extends GPCommand<Void> {
                 logger.warn("Failed to remove existing package before an install.", e);
             }
         }
+        //todo whether to uninstall even when package differs but applet AID is the same (e.g. PIV applet / open FIPS)
 
         if (file.getAppletAIDs().size() <= 1) {
             try {
