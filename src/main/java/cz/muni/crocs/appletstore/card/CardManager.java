@@ -95,10 +95,10 @@ public interface CardManager {
     String getLastCardDescriptor();
 
     /**
-     * Get the last installed applet aid
-     * @return AID of the last installed applet
+     * Get the last installed applet aids
+     * @return AIDs of the last installed applets
      */
-    AID getLastAppletInstalledAid();
+    String[] getLastAppletInstalledAids();
 
     /**
      * Evaluates the necessity of card refreshing
@@ -135,22 +135,6 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      */
     void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
-
-    /**
-     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
-     * @param file file with the applet
-     * @param data data from install user, namely 3 items: install params, force install and custom AID
-     * @throws LocalizedCardException exception with localized text on failure
-     */
-    void installAndSelectAsDefault(final File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
-
-    /**
-     * Install new applet onto current card, makes the applet default selected (e.g. adding Card Reset privilege)
-     * @param file file with the applet (already parsed)
-     * @param data data from install user, namely 3 items: install params, force install and custom AID
-     * @throws LocalizedCardException exception with localized text on failure
-     */
-    void installAndSelectAsDefault(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
 
     /**
      * Uninstall applet from the card

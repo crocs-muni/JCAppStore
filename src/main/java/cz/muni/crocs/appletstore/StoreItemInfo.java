@@ -116,7 +116,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 callback,
                                 installed,
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
                 });
@@ -124,7 +124,8 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void checkDefaultSelected(JsonObject dataSet) {
-        if (dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
+        String selected = dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString();
+        if (selected != null && !selected.isEmpty()) {
             add(getNotice(textSrc.getString("W_default_app"), 14f, new Color(255, 220, 181),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
                     , "gap 20, span 4, gaptop 40, growx, wrap");
@@ -217,7 +218,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 call,
                                 installed,
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
                 });
@@ -314,7 +315,7 @@ public class StoreItemInfo extends HintPanel {
 
     private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
                                     OnEventCallBack<Void, Void> call, boolean installed,
-                                    boolean defaultSelected, MouseEvent e) {
+                                    String defaultSelected, MouseEvent e) {
 
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());

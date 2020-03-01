@@ -38,7 +38,7 @@ public class InstallAction extends CardAbstractAction {
 
     private InstallBundle data;
     private boolean installed;
-    private boolean defaultSelected;
+    private String defaultSelected;
     private CAPFile code;
 
     private boolean fromCustomFile = false;
@@ -50,7 +50,7 @@ public class InstallAction extends CardAbstractAction {
      * @param installed  whether installed on the card already
      * @param call       callback that is called before action and after failure or after success
      */
-    public InstallAction(InstallBundle installData, boolean installed, boolean defaultSelected, OnEventCallBack<Void, Void> call) {
+    public InstallAction(InstallBundle installData, boolean installed, String defaultSelected, OnEventCallBack<Void, Void> call) {
         super(call);
         this.data = installData;
         this.installed = installed;
@@ -58,12 +58,12 @@ public class InstallAction extends CardAbstractAction {
     }
 
     public InstallAction(OnEventCallBack<Void, Void> call) {
-        this(InstallBundle.empty(), false, false, call);
+        this(InstallBundle.empty(), false, null, call);
         this.fromCustomFile = true;
     }
 
     public InstallAction(InstallBundle installData, OnEventCallBack<Void, Void> call) {
-        this(installData, false, false, call);
+        this(installData, false, null, call);
     }
 
     @Override
@@ -129,22 +129,16 @@ public class InstallAction extends CardAbstractAction {
             switch (selectedValue) {
                 case JOptionPane.YES_OPTION:
                     //invalid data
-                    if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
+                    if (!dialog.validCustomAIDs() || !dialog.validInstallParams()) {
                         InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
                         showInstallDialog(verifyResult, imgIcon, isCustom);
                         return null;
-                    } else if (!dialog.getInstallOpts().isForce()) { //check if AID is not conflicting
+                    } else if (!dialog.getInstallOpts().isForce()) { //check if custom AID is not conflicting
                         logger.info("No force install: check the applets");
-                        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
-                        AID custom = AID.fromString(dialog.getInstallOpts().getCustomAID());
-                        for (AppletInfo applet : applets) {
-                            logger.info("applet: " + applet.getAid() + ", with " + custom.toString());
-
-                            if (applet.getAid().equals(custom)) {
-                                InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
-                                showInstallDialog(verifyResult, imgIcon, isCustom);
-                                return null;
-                            }
+                        if (someCustomAppletAIDsConflicts(dialog.getInstallOpts().getCustomAIDs())) {
+                            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
+                            showInstallDialog(verifyResult, imgIcon, isCustom);
+                            return null;
                         }
                     }
                     break;
@@ -164,6 +158,19 @@ public class InstallAction extends CardAbstractAction {
         window.setModal(false);
         window.pack();
         window.setVisible(true);
+    }
+
+    private boolean someCustomAppletAIDsConflicts(String[] aids) {
+        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
+        for (AppletInfo applet : applets) {
+            for (String customAID : aids) {
+                if (applet.getAid().equals(AID.fromString(customAID))) {
+                    logger.info("applet: " + applet.getAid() + ", with " + customAID);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void verifyCustomInstallationAndInstall(final InstallDialogWindow resultDialog) {
@@ -210,13 +217,13 @@ public class InstallAction extends CardAbstractAction {
             return;
         }
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
-        logger.info("Install AID: " + opts.getAID());
+        logger.info("Install AID: " + opts.getAIDs());
 
         //if easy mode && package already present
         if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
             //if applet present dont change anything
             if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
-                    a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
+                    a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAnyAID()))) {
                 if (manager.getCard().getInstalledApplets().stream().anyMatch(a ->
                         a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
                     opts.setForce(true);
@@ -310,7 +317,7 @@ public class InstallAction extends CardAbstractAction {
             return;
         }
 
-        if (defaultSelected) {
+        if (defaultSelected != null && !defaultSelected.isEmpty()) {
             //custom applet never reaches this section
             AID selected = manager.getCard().getDefaultSelected();
             AppletInfo info = manager.getCard().getInfoOf(selected);
@@ -325,15 +332,12 @@ public class InstallAction extends CardAbstractAction {
                         new String[]{textSrc.getString("default_selected_yes"),
                                 textSrc.getString("default_selected_no")},
                         textSrc.getString("default_selected_yes"));
-
-                defaultSelected = result == YES_OPTION;
+                if (result != YES_OPTION) defaultSelected = null;
             } // else defaultSelected == true -> silently set as default selected
         }
+        opts.setDefalutSelected(defaultSelected);
         execute(() -> {
-            if (defaultSelected)
-                manager.installAndSelectAsDefault(code, opts);
-            else
-                manager.install(code, opts);
+            manager.install(code, opts);
             SwingUtilities.invokeLater(() ->
                     InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
                             Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));

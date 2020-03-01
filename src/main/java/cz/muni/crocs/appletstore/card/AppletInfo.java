@@ -21,7 +21,7 @@ import java.util.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class AppletInfo implements Serializable {
+public class AppletInfo implements Serializable, Cloneable {
     public static final int RID_SUBSTRING_LENGTH = 10;
 
     private static final long serialVersionUID = 458932548615025100L;
@@ -190,6 +190,7 @@ public class AppletInfo implements Serializable {
     }
 
     public AID getAid() {
+        if (aid == null || aid.isEmpty()) return null;
         return AID.fromString(aid);
     }
 
@@ -251,6 +252,11 @@ public class AppletInfo implements Serializable {
         return type(kind) + ": " + (valid(name) ? name : "unkown") + ", " + aid + ", author " +
                 (valid(author) ? author : "unkown") + ", version " +  (valid(version) ? version : "unkown") +
                 ", with sdk " + (valid(sdk) ? sdk : "unkown") ;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return (AppletInfo)super.clone();
     }
 
     private boolean valid(String value) {

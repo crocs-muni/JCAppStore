@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.imageio.ImageIO;
@@ -192,7 +193,7 @@ public class LocalItem extends JPanel implements Item {
                 container.setBackground(selected);
                 g2d.setComposite(old);
             }
-            if (info.getAid() != null && info.getAid().equals(manager.getLastAppletInstalledAid()) && newItem != null) {
+            if (info.getAid() != null && wasLastInstalled(manager) && newItem != null) {
                 g2d.drawImage(newItem, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
             } else if (info.getAid() != null && card != null && info.getAid().equals(card.getDefaultSelected()) && superSelected != null) {
                 g2d.drawImage(superSelected, getWidth() - LABELDIMEN, 0, LABELDIMEN, LABELDIMEN, null);
@@ -202,6 +203,16 @@ public class LocalItem extends JPanel implements Item {
             container.setBackground(Color.WHITE);
         }
         super.paintComponent(g);
+    }
+
+    private boolean wasLastInstalled(CardManager manager) {
+        if (manager.getLastAppletInstalledAids() == null) return false;
+        for(String installed : manager.getLastAppletInstalledAids()) {
+            if (AID.fromString(installed).equals(info.getAid())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private JLabel getLabel(String text, String css, float size) {

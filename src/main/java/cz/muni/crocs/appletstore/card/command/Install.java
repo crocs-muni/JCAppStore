@@ -16,69 +16,38 @@ import java.io.IOException;
 /**
  * Modified install process from GPPro
  *
- * @author Jiří Horák & Martin Paljak
+ * @author Jiří Horák
  * @version 1.0
  */
-public class Install extends GPCommand<Void> {
+public class Install extends GPCommand<AID> {
     private static final Logger logger = LoggerFactory.getLogger(Install.class);
 
     private final CAPFile file;
-    private InstallOpts data;
-    private boolean defaultSelected;
+    private final InstallOpts data;
+    private final int index;
+    private final boolean isDefaultSelected;
 
-    public Install(CAPFile f, InstallOpts data, boolean defaultSelected) {
+    public Install(CAPFile f, InstallOpts data, int index, boolean isDefaultSelected) {
         this.file = f;
         this.data = data;
-        this.defaultSelected = defaultSelected;
+        this.index = index;
+        this.isDefaultSelected = isDefaultSelected;
     }
 
     @Override
     public boolean execute() throws LocalizedCardException, GPException {
-        if (data == null) {
-            logger.info("Installing params are missing");
-            throw new LocalizedCardException("No install data.", "E_notify_us");
-        }
-        logger.info("Installing params: " + data.toString());
-
-        GPRegistry registry;
-        try {
-            registry = context.getRegistry();
-        } catch (IOException e) {
-            //todo message?
-            throw new LocalizedCardException("");
-        }
-
-        // Remove existing default app
-        if (data.isForce() && registry.allPackageAIDs().contains(file.getPackageAID())) {
-            try {
-                context.deleteAID(file.getPackageAID(), true);
-            } catch (IOException e) {
-                e.printStackTrace();
-                logger.warn("Failed to remove existing package before an install.", e);
-            }
-        }
-        //todo whether to uninstall even when package differs but applet AID is the same (e.g. PIV applet / open FIPS)
-
-        if (file.getAppletAIDs().size() <= 1) {
-            try {
-                context.loadCapFile(file, null);
-                logger.info("CAP file loaded.");
-            } catch (GPException e) {
-                if (e.sw == 0x00) {
-                    throw new LocalizedCardException("Package already present", "E_pkg_present", e);
-                }
-                throw new LocalizedCardException("Package load failed", "E_load_failed", e);
-            } catch (IOException e) {
-                throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e);
-            }
-        }
+        //todo maybe throw, user probably did not want to load only..?
         if (file.getAppletAIDs().size() == 0) return true;
 
-        AID appletAID = data.getAID();
-        AID customAID = data.getCustomAID() == null ? appletAID : AID.fromString(data.getCustomAID());
-
+        if (data.getOriginalAIDs() == null) return false;
         GPRegistryEntry.Privileges privs = new GPRegistryEntry.Privileges();
-        if (defaultSelected) privs.add(GPRegistryEntry.Privilege.CardReset);
+
+        AID appletAID = AID.fromString(data.getOriginalAIDs()[index]);
+        String userDefinedAID = data.getCustomAIDs() == null ? null : data.getCustomAIDs()[index];
+        AID customAID = userDefinedAID == null || userDefinedAID.isEmpty() ? appletAID
+                : AID.fromString(userDefinedAID);
+
+        if (isDefaultSelected) privs.add(GPRegistryEntry.Privilege.CardReset);
 
         logger.info("Installing applet: pkg " + file.getPackageAID() + ", aid " + appletAID + ", custom aid " + customAID);
         try {
@@ -89,13 +58,15 @@ public class Install extends GPCommand<Void> {
                     privs,
                     data.getInstallParams());
         } catch (IOException e) {
+            logger.error("Unable to finish Install for install.");
             throw new LocalizedCardException("IOException when install for install", "E_installforinstall", e);
         }
+        result = customAID;
         return true;
     }
 
     @Override
     public String getDescription() {
-        return "Install method.";
+        return "Install procedure [install for install].";
     }
 }

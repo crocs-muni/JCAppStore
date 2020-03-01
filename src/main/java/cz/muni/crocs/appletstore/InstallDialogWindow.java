@@ -45,9 +45,12 @@ public class InstallDialogWindow extends JPanel {
     private JTextField installParams = new JTextField(50);
     private JCheckBox forceInstall = new JCheckBox();
     private JCheckBox hasKeys = new JCheckBox();
-    private JTextField[] customAIDs;
     private JPanel advanced = new JPanel();
-    private ButtonGroup selectedAID = new ButtonGroup();
+    //private ButtonGroup selectedAID = new ButtonGroup();
+
+    private JTextField[] customAIDs;
+    private JCheckBox[] appletInstances;
+
     //applet install info variables
     private AppletInfo info;
     private CAPFile src;
@@ -85,35 +88,23 @@ public class InstallDialogWindow extends JPanel {
      * array with [installation arguments, force install, selected applet to install] values
      */
     public InstallOpts getInstallOpts() {
-        String aid = getSelectedAID();
+        String[] aids = getSelectedAIDs();
         AppletInfo details;
         if (info == null) {
             details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
-                    sdk.getText(), aid, KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
+                    sdk.getText(), "Error:unused field", KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
         } else {
             details = info;
-            info.setAID(aid);
         }
 
         if (isAdvanced())
-            return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), installParams.getText());
-        else return new InstallOpts(getCustomAppletName(aid), details, isInstalled, new byte[0]);
+            return new InstallOpts(getCustomAppletNames(), aids, details, forceInstall.isSelected(), installParams.getText());
+        else return new InstallOpts(getCustomAppletNames(),aids, details, isInstalled, new byte[0]);
     }
 
     public boolean validInstallParams() {
         String text = installParams.getText();
         return text == null || validHex(text);
-    }
-
-    public boolean validAID() {
-        String aid = getSelectedAID();
-        if (aid == null)
-            return false;
-        return validAID(aid);
-    }
-
-    public boolean validCustomAID() {
-        return validAID(getCustomAppletName(getSelectedAID()));
     }
 
     public File getCustomSignatureFile() {
@@ -262,44 +253,50 @@ public class InstallDialogWindow extends JPanel {
      */
     private void addAllAppletCustomAIDSFields(JPanel to, List<AID> applets) {
         customAIDs = new JTextField[applets.size()];
+        appletInstances = new JCheckBox[applets.size()];
+
         int i = 0;
         for (AID applet : applets) {
-            JRadioButton button = new JRadioButton();
-            button.setActionCommand(applet.toString());
-            selectedAID.add(button);
+            JCheckBox box = new JCheckBox();
+            box.setActionCommand(applet.toString());
 
             JTextField f = new JTextField(applet.toString(), 50);
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
             });
             to.add(f, "span 2");
-            to.add(button, "wrap");
+            to.add(box, "wrap");
             to.add(new JLabel(), "span 2"); //empty label to align
+
+            appletInstances[i] = box;
             customAIDs[i++] = f;
         }
         to.add(new JLabel(), "wrap"); //cut line
         //set first selected
-        Enumeration elements = selectedAID.getElements();
-        if (elements.hasMoreElements()) {
-            AbstractButton button = (AbstractButton) elements.nextElement();
-            button.setSelected(true);
+        if (appletInstances.length > 0) {
+            appletInstances[0].setSelected(true);
         }
+    }
+
+    private int numOfAppletsToInstall() {
+        int num = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) num++;
+        }
+        return num;
     }
 
     private String valueOrDefault(String data, String defaultValue) {
@@ -307,35 +304,41 @@ public class InstallDialogWindow extends JPanel {
         return data;
     }
 
-    private String getCustomAppletName(String defaultOpt) {
-        Enumeration elements = selectedAID.getElements();
-        while (elements.hasMoreElements()) {
-            AbstractButton button = (AbstractButton) elements.nextElement();
-            if (button.isSelected()) {
-                return valueOrDefault(button.getToolTipText(), defaultOpt);
+    private String[] getCustomAppletNames() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (int i = 0; i < appletInstances.length; i++) {
+            JCheckBox box = appletInstances[i];
+            if (box.isSelected()) {
+                result[j++] = valueOrDefault(customAIDs[i].getText(), box.getActionCommand());
             }
         }
-        return defaultOpt;
+        return result;
     }
 
-    private String getSelectedAID() {
-        if (selectedAID.getSelection() == null) {
-            List<AID> aids = src.getAppletAIDs();
-            return (aids.size() > 0) ? src.getAppletAIDs().get(0).toString() : null;
+    private String[] getSelectedAIDs() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) {
+                result[j++] = box.getActionCommand();
+            }
         }
-        return selectedAID.getSelection().getActionCommand();
-    }
-
-    private void enableAll(boolean enable) {
-        for (JTextField f : customAIDs) {
-            f.setEnabled(enable);
-        }
+        return result;
     }
 
     private JLabel getHint(String langKey, String width) {
         JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>", 10f);
         hint.setForeground(Color.DARK_GRAY);
         return hint;
+    }
+
+    public boolean validCustomAIDs() {
+        boolean valid = true;
+        for (JTextField f : customAIDs) {
+            valid = valid && validAID(f);
+        }
+        return valid;
     }
 
     private static boolean validAID(JTextField field) {
