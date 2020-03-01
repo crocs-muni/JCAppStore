@@ -17,6 +17,7 @@ public class InstallOpts {
 
     private String[] customAIDs;
     private String[] originalAIDs;
+    private String[] appletNames;
     private AppletInfo info;
     private boolean force;
     private byte[] installParams;
@@ -31,21 +32,25 @@ public class InstallOpts {
      * @param force if install by force
      * @param installParams installation parameters
      */
-    public InstallOpts(String[] customAIDs, @Nonnull String[] originalAIDs, AppletInfo nfo, boolean force, String installParams) {
+    public InstallOpts(String[] customAIDs, @Nonnull String[] originalAIDs, String[] appletNames, AppletInfo nfo, boolean force, String installParams) {
         if (installParams == null) installParams = "";
         if (installParams.length() % 2 != 0 || installParams.length() > 512)
             throw new InvalidParameterException(textSrc.getString("E_invalid_install_params"));
         this.customAIDs = customAIDs;
         this.originalAIDs = originalAIDs;
+        this.appletNames = appletNames;
         this.info = nfo;
         this.force = force;
         this.installParams = HexUtils.stringToBin(installParams);
         this.defalutSelected = null;
     }
 
-    public InstallOpts(String[] customAIDs, String[] originalAIDs, AppletInfo nfo, boolean force, byte[] installParams) {
+    public InstallOpts(String[] customAIDs, String[] originalAIDs, String[] appletNames, AppletInfo nfo, boolean force, byte[] installParams) {
+        if (installParams.length % 2 != 0 || installParams.length > 512)
+            throw new InvalidParameterException(textSrc.getString("E_invalid_install_params"));
         this.customAIDs = customAIDs;
         this.originalAIDs = originalAIDs;
+        this.appletNames = appletNames;
         this.info = nfo;
         this.force = force;
         this.installParams = installParams;
@@ -66,6 +71,10 @@ public class InstallOpts {
 
     public String[] getOriginalAIDs() {
         return originalAIDs;
+    }
+
+    public String[] getAppletNames() {
+        return appletNames;
     }
 
     public String getName() {

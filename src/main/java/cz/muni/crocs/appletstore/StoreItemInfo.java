@@ -114,6 +114,7 @@ public class StoreItemInfo extends HintPanel {
                                 sdks, sdks.size() - 1),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 callback,
                                 installed,
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
@@ -149,7 +150,7 @@ public class StoreItemInfo extends HintPanel {
 
     private void buildWebsites(JsonObject dataSet) {
         JsonObject websites = dataSet.get(JsonParser.TAG_URL).getAsJsonObject();
-        if (websites == null) return;
+        if (websites == null || websites.size() == 0) return;
 
         addSubTitle("website", "H_website");
 
@@ -216,6 +217,7 @@ public class StoreItemInfo extends HintPanel {
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 call,
                                 installed,
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
@@ -313,7 +315,7 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
+    private static void fireInstall(String name, AppletInfo info, String signer, String identifier, JsonElement appNames,
                                     OnEventCallBack<Void, Void> call, boolean installed,
                                     String defaultSelected, MouseEvent e) {
 
@@ -327,8 +329,17 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
+        ArrayList<String> appletNamesData = null;
+        if (appNames != null && appNames.isJsonArray()) {
+            JsonArray array = appNames.getAsJsonArray();
+            appletNamesData = new ArrayList<>();
+            for (int i = 0; i < array.size(); i++) {
+                appletNamesData.add(array.get(i).getAsString());
+            }
+        }
+
         new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, signer, identifier), installed, defaultSelected, call).mouseClicked(e);
+                info, file, signer, identifier, appletNamesData), installed, defaultSelected, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

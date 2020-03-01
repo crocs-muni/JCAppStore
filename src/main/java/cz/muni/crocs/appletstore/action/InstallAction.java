@@ -121,7 +121,7 @@ public class InstallAction extends CardAbstractAction {
     private void showInstallDialog(String verifyResult, String imgIcon, final boolean isCustom) {
         //simple usage will always do force install
         boolean forceInstall = installed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);
-        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom);
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom, data.getAppletNames());
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
         CustomJOptionPane pane = new CustomJOptionPane(dialog, new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
         pane.setOnClose(() -> {

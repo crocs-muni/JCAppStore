@@ -13,6 +13,7 @@ import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -22,10 +23,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 /**
@@ -37,6 +36,8 @@ import java.util.regex.Pattern;
 public class InstallDialogWindow extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
+
+    private final String DEFAULT_APP_NAME = "Applet";
     //applet info and setting GUI components
     private JTextField name = new JTextField(50);
     private JTextField author = new JTextField(10);
@@ -55,6 +56,7 @@ public class InstallDialogWindow extends JPanel {
     private AppletInfo info;
     private CAPFile src;
     private boolean isInstalled;
+    private ArrayList<String> appletNames;
 
     private boolean initialized;
     private File customSignatureFile;
@@ -69,11 +71,18 @@ public class InstallDialogWindow extends JPanel {
      * @param isInstalled whether the applet is already installed on the card
      * @param verifyMsg   message that is displayed when verified (differs on self-signatures)
      * @param isCustom    whether the applet is installed form store or from custom source
+     * @param appletNames applet names that are to be displayed, usable if cap file with multiple applets
      */
-    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg, boolean isCustom) {
+    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg,
+                               boolean isCustom, ArrayList<String> appletNames) {
         this.info = info;
         this.src = file;
         this.isInstalled = isInstalled;
+        if (appletNames != null && appletNames.size() != file.getAppletAIDs().size()) {
+            this.appletNames = null; //ignore the incomplete values
+        } else {
+            this.appletNames = appletNames;
+        }
         build(verifyMsg);
         buildAdvanced();
         if (isCustom) {
@@ -97,9 +106,10 @@ public class InstallDialogWindow extends JPanel {
             details = info;
         }
 
-        if (isAdvanced())
-            return new InstallOpts(getCustomAppletNames(), aids, details, forceInstall.isSelected(), installParams.getText());
-        else return new InstallOpts(getCustomAppletNames(),aids, details, isInstalled, new byte[0]);
+        if (isAdvanced()) return new InstallOpts(getCustomAppletNames(), aids, getSelectedAppletNames(), details,
+                forceInstall.isSelected(), installParams.getText());
+        else return new InstallOpts(getCustomAppletNames(),aids, getSelectedAppletNames(), details,
+                isInstalled, new byte[0]);
     }
 
     public boolean validInstallParams() {
@@ -184,7 +194,6 @@ public class InstallDialogWindow extends JPanel {
         advanced.setVisible(false);
 
         advanced.add(getHint("H_advanced_syntax", "300"), "span 5, wrap");
-        advanced.add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
         addAllAppletCustomAIDSFields(advanced, src.getAppletAIDs());
 
@@ -259,6 +268,7 @@ public class InstallDialogWindow extends JPanel {
         for (AID applet : applets) {
             JCheckBox box = new JCheckBox();
             box.setActionCommand(applet.toString());
+            box.setText(appletNames == null ? DEFAULT_APP_NAME : appletNames.get(i));
 
             JTextField f = new JTextField(applet.toString(), 50);
             f.getDocument().addDocumentListener(new DocumentListener() {
@@ -277,9 +287,8 @@ public class InstallDialogWindow extends JPanel {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
                 }
             });
-            to.add(f, "span 2");
-            to.add(box, "wrap");
-            to.add(new JLabel(), "span 2"); //empty label to align
+            to.add(box, "span 2");
+            to.add(f, "span 3, wrap");
 
             appletInstances[i] = box;
             customAIDs[i++] = f;
@@ -316,12 +325,23 @@ public class InstallDialogWindow extends JPanel {
         return result;
     }
 
+    private String[] getSelectedAppletNames() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) {
+                result[j++] = box.getText();
+            }
+        }
+        return result;
+    }
+
     private String[] getSelectedAIDs() {
         String[] result = new String[numOfAppletsToInstall()];
         int j = 0;
         for (JCheckBox box : appletInstances) {
             if (box.isSelected()) {
-                result[j++] = box.getActionCommand();
+                result[j++] = box.getActionCommand().equals(DEFAULT_APP_NAME) ? "" : box.getActionCommand();
             }
         }
         return result;

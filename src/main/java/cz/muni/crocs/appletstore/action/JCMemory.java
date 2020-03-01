@@ -28,7 +28,7 @@ public class JCMemory {
     }
 
     public static InstallOpts getInstallOptions() {
-        return new InstallOpts(new String[]{getAID()}, new String[]{getAID()}, getInfo(), true, new byte[0]);
+        return new InstallOpts(new String[]{getAID()}, new String[]{getAID()}, null, getInfo(), true, new byte[0]);
     }
 
     public static String getAID() {

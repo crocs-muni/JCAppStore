@@ -379,7 +379,7 @@ public class CardManagerImpl implements CardManager {
         toSave.clear();
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
-            GPCommand[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 3]; //load, save data, n * install and save data
+            GPCommand[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
             commands[0] = new Load(file, data);
             commands[1] = new GPCommand() {
                 @Override
@@ -399,8 +399,9 @@ public class CardManagerImpl implements CardManager {
             int appletIdx = 0;
             int i = 2;
             for ( ; i < data.getOriginalAIDs().length * 2 + 2; ) {
-                Install command = new Install(file, data, appletIdx,
-                        AID.fromString(data.getOriginalAIDs()[appletIdx]).equals(defaultSelected));
+                final int appidx = appletIdx;
+                Install command = new Install(file, data, appidx,
+                        AID.fromString(data.getOriginalAIDs()[appidx]).equals(defaultSelected));
                 commands[i++] = command;
                 commands[i++] = new GPCommand() {
                     @Override
@@ -410,21 +411,22 @@ public class CardManagerImpl implements CardManager {
 
                     @Override
                     public boolean execute() throws GPException {
-                        AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult());
+                        AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult(),
+                                data.getAppletNames() != null ? data.getAppletNames()[appidx] : "");
                         toSave.add(installed);
                         return false;
                     }
                 };
                 appletIdx++;
             }
-            commands[i] = new ListContents(card.getId());
-
             card.secureExecuteCommands(commands);
-            card.setApplets(((ListContents)commands[i]).getResult());
             lastInstalledAIDs = data.getAppletAIDsAsInstalled();
         } finally {
             try {
                 saveInfoData();
+                ListContents cmd = new ListContents(card.getId());
+                card.secureExecuteCommands(cmd);
+                card.setApplets(cmd.getResult());
             } finally {
                 selectedAID = null;
                 busy = false;
@@ -438,11 +440,12 @@ public class CardManagerImpl implements CardManager {
                 of.getSdk(), file.getPackageAID().toString(), KeysPresence.NO_KEYS, GPRegistryEntry.Kind.ExecutableLoadFile);
     }
 
-    private AppletInfo getAppletInfo(AppletInfo from, AID realInstalledAID) {
+    private AppletInfo getAppletInfo(AppletInfo from, AID realInstalledAID, String appletName) {
         AppletInfo clone = null;
         try {
             clone = (AppletInfo)from.clone();
             clone.setAID(realInstalledAID.toString());
+            if (!appletName.isEmpty()) clone.setAppletInstanceName(appletName);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             logger.warn("Unable to save applet info data: " + realInstalledAID, e);

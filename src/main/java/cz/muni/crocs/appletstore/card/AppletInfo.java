@@ -234,6 +234,11 @@ public class AppletInfo implements Serializable, Cloneable {
         this.aid = aid;
     }
 
+    public void setAppletInstanceName(String name) {
+        if (name != null && !name.isEmpty())
+            this.name = this.name + ": " + name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

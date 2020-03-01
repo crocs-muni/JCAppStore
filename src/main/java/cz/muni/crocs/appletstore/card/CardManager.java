@@ -8,6 +8,7 @@ import pro.javacard.CAPFile;
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -135,7 +136,7 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      */
     void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
-
+    
     /**
      * Uninstall applet from the card
      * @param nfo which applet to uninstall (only the AID is used though)
