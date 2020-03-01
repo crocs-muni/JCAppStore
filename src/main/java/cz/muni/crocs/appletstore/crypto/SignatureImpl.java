@@ -1,11 +1,9 @@
 package cz.muni.crocs.appletstore.crypto;
 
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class SignatureImpl implements Signature {

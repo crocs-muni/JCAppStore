@@ -39,7 +39,7 @@ public class CmdTask {
         try {
             logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
             Process result = new ProcessBuilder(process).redirectErrorStream(true).start();
-            result.waitFor();
+            result.waitFor(10, TimeUnit.SECONDS);
             return result;
         } catch (IOException | InterruptedException e) {
             throw new LocalizedSignatureException("Failed to fire cmd from line.", "signature_aborted", e);

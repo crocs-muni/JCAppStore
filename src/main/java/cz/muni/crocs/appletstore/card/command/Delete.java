@@ -49,8 +49,8 @@ public class Delete extends GPCommand<Void> {
         try {
             context.deleteAID(aid, force);
             logger.info("Applet " + aid + " successfully deleted.");
-//            context.deleteAID(aid, reg.allPackageAIDs().contains(aid) || force);
         } catch (GPException e) {
+            logger.error("Failed to uninstall applet: " + e.sw, e);
             if (e.sw == 0x6985) {
                 throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed", e);
             } else {
