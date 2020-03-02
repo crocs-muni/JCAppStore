@@ -115,7 +115,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     @Override
     public void refresh() {
-        removeAll();
         infoLayout.set(null);
 
         CardManager manager = CardManagerFactory.getManager();
@@ -134,9 +133,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null as applet array returned.");
                 return;
-            } else {
-                loadApplets(card.getInstalledApplets(), manager);
             }
+            removeAll();
+            loadApplets(card.getInstalledApplets(), manager);
 
             constraints.fill = GridBagConstraints.BOTH;
 
@@ -153,9 +152,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             add(infoLayout, constraints);
 
             infoLayout.setBackground(Color.WHITE);
-            revalidate();
-            repaint();
         }
+        revalidate();
+        repaint();
     }
 
     @Override
@@ -173,6 +172,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         else
             add(new ErrorPane(textSrc.getString(keyTitle), textSrc.getString(keyText), imgName));
         revalidate();
+        repaint();
     }
 
     @Override
@@ -183,6 +183,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         else
             add(new ErrorPane(textSrc.getString(keyTitle), text + cause.getLocalizedMessage(), imgName));
         revalidate();
+        repaint();
     }
 
     @Override

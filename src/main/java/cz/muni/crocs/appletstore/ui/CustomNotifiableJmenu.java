@@ -36,8 +36,10 @@ public class CustomNotifiableJmenu extends CustomJmenu {
 
     public void setNotify(boolean notify) {
         this.notify = notify;
-        if (this.notify) {
+        if (this.notify && !timer.isRunning()) {
             timer.start();
+        } else if (this.notify) {
+            notifyColor = new Color(212, 164, 86);
         } else {
             notifyColor = new Color(212, 164, 86);
             timer.stop();

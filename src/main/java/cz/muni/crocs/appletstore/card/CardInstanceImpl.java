@@ -367,10 +367,12 @@ public class CardInstanceImpl implements CardInstance {
                     diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
                     logger.info("Found test key by card type.");
                 } else {
+                    logger.info("No header present for card in card.ini file");
                     throw new UnknownKeyException(CardDetails.getId(details));
                 }
 
                 if (masterKey == null || masterKey.isEmpty()) {
+                    logger.info("Ini file contains empty master key.");
                     throw new UnknownKeyException(CardDetails.getId(details));
                 }
             } catch (IOException e) {

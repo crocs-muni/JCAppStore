@@ -44,6 +44,8 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
             update("launch", 100, getMaximum());
             return null;
         } catch (UnknownKeyException e) {
+            e.printStackTrace();
+            logger.warn("Unable to guess/obtain the card key for first time.", e);
             info = textSrc.getString("E_unknown_key");
             if (useDefaultTestKey() == JOptionPane.YES_OPTION) {
                 try {
@@ -116,7 +118,7 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
                 new HtmlText(textSrc.getString("I_use_default_keys_1") +
                         "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
                         textSrc.getString("I_use_default_keys_2")),
-                textSrc.getString("key_not_found"),
+                textSrc.getString("useDefaultTestKey"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 new ImageIcon(Config.IMAGE_DIR + ""));

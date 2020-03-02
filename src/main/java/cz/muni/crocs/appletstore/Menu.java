@@ -22,6 +22,7 @@ public class Menu extends JMenuBar {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private AppletStore context;
+    private int lastNumOfReadersConnected = 0;
     private CustomNotifiableJmenu readers;
     private JLabel currentCard;
 
@@ -54,8 +55,10 @@ public class Menu extends JMenuBar {
     public void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
+
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             ButtonGroup readersPresent = new ButtonGroup();
+            int readersFound = 0;
             for (String name : manager.getTerminals()) {
                 JRadioButtonMenuItem item = selectableMenuItem(name, textSrc.getString("reader_avail"));
                 if (name.equals(manager.getSelectedTerminalName())) {
@@ -64,12 +67,17 @@ public class Menu extends JMenuBar {
                 item.addActionListener(selectReaderListener());
                 readersPresent.add(item);
                 readers.add(item);
+                readersFound++;
             }
-            readers.setNotify(true);
+            if (lastNumOfReadersConnected < readersFound) {
+                readers.setNotify(true);
+            }
+            lastNumOfReadersConnected = readersFound;
         } else {
             JMenuItem item = menuItemDisabled(textSrc.getString("no_reader"), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
+            lastNumOfReadersConnected = 0;
             readers.add(item);
             readers.setNotify(false);
         }
