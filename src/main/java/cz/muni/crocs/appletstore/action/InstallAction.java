@@ -7,8 +7,10 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.*;
+import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -16,12 +18,21 @@ import pro.javacard.CAPFile;
 
 import javax.annotation.Nonnull;
 import javax.swing.*;
-import java.awt.*;
+import java.applet.Applet;
+import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.KeyboardFocusManager;
+import java.awt.Dialog;
+import java.awt.HeadlessException;
+import java.awt.Container;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.List;
+
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -47,8 +58,8 @@ public class InstallAction extends CardAbstractAction {
      * Create an install action
      *
      * @param installData data for install
-     * @param installed  whether installed on the card already
-     * @param call       callback that is called before action and after failure or after success
+     * @param installed   whether installed on the card already
+     * @param call        callback that is called before action and after failure or after success
      */
     public InstallAction(InstallBundle installData, boolean installed, String defaultSelected, OnEventCallBack<Void, Void> call) {
         super(call);
@@ -131,13 +142,13 @@ public class InstallAction extends CardAbstractAction {
                     //invalid data
                     if (!dialog.validCustomAIDs() || !dialog.validInstallParams()) {
                         InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
-                        showInstallDialog(verifyResult, imgIcon, isCustom);
+                        showInstallDialog(pane);
                         return null;
                     } else if (!dialog.getInstallOpts().isForce()) { //check if custom AID is not conflicting
                         logger.info("No force install: check the applets");
                         if (someCustomAppletAIDsConflicts(dialog.getInstallOpts().getCustomAIDs())) {
                             InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
-                            showInstallDialog(verifyResult, imgIcon, isCustom);
+                            showInstallDialog(pane);
                             return null;
                         }
                     }
@@ -154,6 +165,10 @@ public class InstallAction extends CardAbstractAction {
             }
             return null;
         });
+        showInstallDialog(pane);
+    }
+
+    private void showInstallDialog(JOptionPane pane) {
         JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
         window.setModal(false);
         window.pack();
@@ -209,6 +224,7 @@ public class InstallAction extends CardAbstractAction {
 
     /**
      * Perform various pre-install checks (memory available, force installs, warns) and fire install
+     *
      * @param opts install options from the install form
      */
     private void fireInstall(final InstallOpts opts) {
@@ -220,15 +236,14 @@ public class InstallAction extends CardAbstractAction {
         logger.info("Install AID: " + opts.getAIDs());
 
         //if easy mode && package already present
-        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
-            //if applet present dont change anything
-            if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
-                    a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAnyAID()))) {
-                if (manager.getCard().getInstalledApplets().stream().anyMatch(a ->
-                        a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
-                    opts.setForce(true);
-                }
-            }
+//        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
+//                !userAgreesOnCollisionDeletion(manager.getCard(), opts)) {
+//            return;
+//        }
+
+        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
+                !findCollisions(manager.getCard(), opts).isEmpty()) {
+            opts.setForce(true);
         }
 
         if (opts.isForce() && !userAcceptsForceInstallWarn()) {
@@ -287,29 +302,69 @@ public class InstallAction extends CardAbstractAction {
         }).start();
     }
 
+    private List<AppletInfo> findCollisions(CardInstance card, InstallOpts options) {
+        ArrayList<AppletInfo> result = new ArrayList<>();
+        String[] toInstall = options.getCustomAIDs();
+        AID pkgId = code.getPackageAID();
+        if (toInstall == null) {
+            toInstall = options.getOriginalAIDs();
+        }
+
+        for (AppletInfo info : card.getInstalledApplets()) {
+            if (info.getKind() == Kind.Application) {
+                AID aid = info.getAid();
+                for (int i = 0; i < options.getOriginalAIDs().length; i++) {
+                    String tmpAid = toInstall.length <= i ? options.getOriginalAIDs()[i] : toInstall[i];
+                    if (tmpAid == null || tmpAid.isEmpty()) tmpAid = options.getOriginalAIDs()[i];
+                    if (aid.equals(AID.fromString(tmpAid))) {
+                        result.add(info);
+                    }
+                }
+            } else if (info.getKind() == Kind.ExecutableLoadFile && info.getAid().equals(pkgId)) {
+                result.add(info);
+            }
+        }
+        return result;
+    }
+
+//    private boolean userAgreesOnCollisionDeletion(CardInstance card, InstallOpts options) {
+//        List<AppletInfo> collisions = findCollisions(card, options);
+//        if (collisions.isEmpty()) return true;
+//
+//        CollisionDeletionDialog dialog = new CollisionDeletionDialog(code.getPackageAID().toString(), options, collisions);
+//        if ( showOptionDialog(null, dialog,
+//                textSrc.getString("collisions_title"), YES_NO_OPTION, QUESTION_MESSAGE,
+//                new ImageIcon(Config.IMAGE_DIR + "error.png"),
+//                new String[]{textSrc.getString("delete_and_continue"), textSrc.getString("cancel")},
+//                "error") == YES_OPTION ) {
+//            options.setAppletsForDeletion(collisions);
+//            return true;
+//        }
+//        return false;
+//    }
+
     private boolean userAcceptsForceInstallWarn() {
         if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
             ReinstallWarnPanel warn = new ReinstallWarnPanel();
-            switch(JOptionPane.showOptionDialog(null, warn,
+            if (showOptionDialog(null, warn,
                     textSrc.getString("reinstall_warn_title"), YES_NO_OPTION, QUESTION_MESSAGE,
-                    new ImageIcon(Config.IMAGE_DIR + "reinstall_warn_title"),
+                    new ImageIcon(Config.IMAGE_DIR + "announcement.png"),
                     new String[]{textSrc.getString("continue"), textSrc.getString("cancel")},
-                    "error")) {
-                case YES_OPTION:
-                    OptionsFactory.getOptions().addOption(Options.KEY_WARN_FORCE_INSTALL,
-                            "" + (!warn.userSelectedDontShowAgain()));
-                    return true;
-                default:
-                    return false;
+                    "error") == YES_OPTION) {
+                OptionsFactory.getOptions().addOption(Options.KEY_WARN_FORCE_INSTALL,
+                        "" + (!warn.userSelectedDontShowAgain()));
+                return true;
             }
+            return false;
         }
         return true;
     }
 
     /**
      * Actual installation
-     * @param opts options from the install form modified by fireInstall() method
-     *             (e.g. simple use mode adds force install if package present)
+     *
+     * @param opts    options from the install form modified by fireInstall() method
+     *                (e.g. simple use mode adds force install if package present)
      * @param manager card manager instance
      */
     private void doInstall(final InstallOpts opts, final CardManager manager) {
@@ -372,7 +427,7 @@ public class InstallAction extends CardAbstractAction {
     }
 
 
-    private abstract class Executable {
+    private abstract static class Executable {
         Tuple<String, String> result;
 
         void setResult(Tuple<String, String> result) {
@@ -383,6 +438,45 @@ public class InstallAction extends CardAbstractAction {
 
         abstract void after();
     }
+
+//    private static class CollisionDeletionDialog extends JPanel {
+//        CollisionDeletionDialog(String pkgId, InstallOpts opts, List<AppletInfo> collisions) {
+//            super(new MigLayout());
+//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found") + "</div>"), "wrap");
+//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_pkgs") + "</div>"), "wrap");
+//            displayCollisionItem(opts.getInfo(), pkgId);
+//
+//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_applets") + "</div>"), "wrap");
+//            String[] toBeInstalledInstanceAids = opts.getAppletAIDsAsInstalled();
+//            for (String aid : toBeInstalledInstanceAids) {
+//                displayCollisionItem(opts.getInfo(), aid);
+//            }
+//
+//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_other_pkgs") + "</div>"), "wrap");
+//            for (AppletInfo item : collisions) {
+//                if (item.getKind() == Kind.ExecutableLoadFile) {
+//                    displayCollisionItem(item);
+//                }
+//            }
+//
+//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_other_applets") + "</div>"), "wrap");
+//            for (AppletInfo item : collisions) {
+//                if (item.getKind() == Kind.Application) {
+//                    displayCollisionItem(item);
+//                }
+//            }
+//        }
+//
+//        private void displayCollisionItem(AppletInfo info) {
+//            add(new HtmlText("<div width=\"600\">" + info.getAid().toString() + "</div>"), "wrap");
+//            add(new HtmlText("<div width=\"600\">" + info.getName() + ", " + info.getAuthor() + "</div>"), "wrap");
+//        }
+//
+//        private void displayCollisionItem(AppletInfo info, String toInstallAID) {
+//            add(new HtmlText("<div width=\"600\">" + toInstallAID + "</div>"), "wrap");
+//            add(new HtmlText("<div width=\"600\">" + info.getName() + ", " + info.getAuthor() + "</div>"), "wrap");
+//        }
+//    }
 
     //this class clontains copied-out code of JOptionPane, slightly modified because JOptionPane does not allow much
     //custom behaviour
@@ -464,6 +558,7 @@ public class InstallAction extends CardAbstractAction {
 
             WindowAdapter adapter = new WindowAdapter() {
                 private boolean gotFocus = false;
+
                 public void windowClosing(WindowEvent we) {
                     setValue(null);
                 }

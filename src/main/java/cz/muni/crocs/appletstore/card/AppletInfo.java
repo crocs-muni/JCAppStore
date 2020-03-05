@@ -260,7 +260,7 @@ public class AppletInfo implements Serializable, Cloneable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         return (AppletInfo)super.clone();
     }
 
@@ -278,5 +278,13 @@ public class AppletInfo implements Serializable, Cloneable {
             case Application: return "Applet";
         }
         return "unknown";
+    }
+
+    public static AppletInfo empty() {
+        return new AppletInfo("", "", "", "", "");
+    }
+
+    public static AppletInfo with(String aid) {
+        return new AppletInfo("", "", "", "", "", aid);
     }
 }

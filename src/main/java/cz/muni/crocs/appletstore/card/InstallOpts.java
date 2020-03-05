@@ -3,12 +3,14 @@ package cz.muni.crocs.appletstore.card;
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.Tuple;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.annotation.Nonnull;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -22,6 +24,7 @@ public class InstallOpts {
     private boolean force;
     private byte[] installParams;
     private String defalutSelected;
+//    private List<AppletInfo> toDelete;
 
     /**
      * Install options for applet
@@ -96,6 +99,14 @@ public class InstallOpts {
     public AppletInfo getInfo() {
         return info;
     }
+
+//    public void setAppletsForDeletion(List<AppletInfo> applets) {
+//        toDelete = applets;
+//    }
+//
+//    public List<AppletInfo> getAppletsForDeletion() {
+//        return toDelete;
+//    }
 
     private String verifyValue(String value) {
         if (value == null || value.isEmpty() || value.equals(textSrc.getString("unknown")))

@@ -4,7 +4,6 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
-import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -330,7 +328,7 @@ public class InstallDialogWindow extends JPanel {
         int j = 0;
         for (JCheckBox box : appletInstances) {
             if (box.isSelected()) {
-                result[j++] = box.getText();
+                result[j++] = box.getText().equals(DEFAULT_APP_NAME) ? "" : box.getText();
             }
         }
         return result;

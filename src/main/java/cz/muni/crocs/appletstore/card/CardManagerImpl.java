@@ -360,6 +360,50 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
+//    private void uninstallAppletsBeforeInstallation(InstallOpts data) throws CardException, LocalizedCardException {
+//        if (data.getAppletsForDeletion() == null) return;
+//        GPCommand[] commands = new GPCommand[data.getAppletsForDeletion().size() * 2];
+//        //delete first collision applets
+//        int i = 0;
+//        for (AppletInfo nfo : data.getAppletsForDeletion()) {
+//            if (nfo.getKind() == GPRegistryEntry.Kind.Application) {
+//                commands[i++] = new Delete(nfo, true);
+//                commands[i++] = new GPCommand() {
+//                    @Override
+//                    public String getDescription() {
+//                        return "Deletion for installation.";
+//                    }
+//
+//                    @Override
+//                    public boolean execute() throws LocalizedCardException {
+//                        deleteData(nfo, true);
+//                        return true;
+//                    }
+//                };
+//            }
+//        }
+//
+//        //delete packages
+//        for (AppletInfo nfo : data.getAppletsForDeletion()) {
+//            if (nfo.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
+//                commands[i++] = new Delete(nfo, true);
+//                commands[i++] = new GPCommand() {
+//                    @Override
+//                    public String getDescription() {
+//                        return "Deletion for installation.";
+//                    }
+//
+//                    @Override
+//                    public boolean execute() throws LocalizedCardException {
+//                        deleteData(nfo, true);
+//                        return true;
+//                    }
+//                };
+//            }
+//        }
+//        card.secureExecuteCommands(commands);
+//    }
+
     private synchronized void installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
@@ -379,6 +423,9 @@ public class CardManagerImpl implements CardManager {
         toSave.clear();
         try (PrintStream print = new PrintStream(loggerStream)) {
             file.dump(print);
+
+//            uninstallAppletsBeforeInstallation(data);
+
             GPCommand[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
             commands[0] = new Load(file, data);
             commands[1] = new GPCommand() {

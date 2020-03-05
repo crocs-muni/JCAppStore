@@ -4,14 +4,11 @@ import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
-import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.IOException;
-
 
 /**
  * Modified install process from GPPro
