@@ -116,7 +116,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 callback,
-                                installed,
+                                OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && installed,
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
@@ -219,7 +219,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 call,
-                                installed,
+                                OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && installed,
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
@@ -354,6 +354,31 @@ public class StoreItemInfo extends HintPanel {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;
     }
+//    private List<AppletInfo> findCollisions(CardInstance card, InstallOpts options) {
+//        ArrayList<AppletInfo> result = new ArrayList<>();
+//        String[] toInstall = options.getCustomAIDs();
+//        AID pkgId = code.getPackageAID();
+//        if (toInstall == null) {
+//            toInstall = options.getOriginalAIDs();
+//        }
+//
+//        for (AppletInfo info : card.getInstalledApplets()) {
+//            if (info.getKind() == GPRegistryEntry.Kind.Application) {
+//                AID aid = info.getAid();
+//                for (int i = 0; i < options.getOriginalAIDs().length; i++) {
+//                    String tmpAid = toInstall.length <= i ? options.getOriginalAIDs()[i] : toInstall[i];
+//                    if (tmpAid == null || tmpAid.isEmpty()) tmpAid = options.getOriginalAIDs()[i];
+//                    if (aid.equals(AID.fromString(tmpAid))) {
+//                        result.add(info);
+//                    }
+//                }
+//            } else if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile && info.getAid().equals(pkgId)) {
+//                result.add(info);
+//            }
+//        }
+//        return result;
+//    }
+
 
     private static JPanel getNotice(String text, float fontSize, Color background, ImageIcon icon, String css) {
         final int depth = 5;

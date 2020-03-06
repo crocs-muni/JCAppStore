@@ -76,7 +76,9 @@ public class InstallDialogWindow extends JPanel {
         this.info = info;
         this.src = file;
         this.isInstalled = isInstalled;
-        if (appletNames != null && appletNames.size() != file.getAppletAIDs().size()) {
+        //either applet names are defined for each applet, or in a form [0x, name, aid, name, aid...]
+        if (appletNames != null && appletNames.size() != file.getApplets().size() &&
+                appletNames.size() != file.getApplets().size() * 2 + 1) {
             this.appletNames = null; //ignore the incomplete values
         } else {
             this.appletNames = appletNames;
@@ -262,13 +264,15 @@ public class InstallDialogWindow extends JPanel {
         customAIDs = new JTextField[applets.size()];
         appletInstances = new JCheckBox[applets.size()];
 
-        int i = 0;
+        boolean changeAIDRequired = appletNames != null && !appletNames.isEmpty() && appletNames.get(0).equals("0x");
+        int i = changeAIDRequired ? 1 : 0;
+        int j = 0;
         for (AID applet : applets) {
             JCheckBox box = new JCheckBox();
             box.setActionCommand(applet.toString());
             box.setText(appletNames == null ? DEFAULT_APP_NAME : appletNames.get(i));
 
-            JTextField f = new JTextField(applet.toString(), 50);
+            JTextField f = new JTextField(changeAIDRequired ? appletNames.get(i + 1) : applet.toString(), 50);
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
@@ -288,8 +292,9 @@ public class InstallDialogWindow extends JPanel {
             to.add(box, "span 2");
             to.add(f, "span 3, wrap");
 
-            appletInstances[i] = box;
-            customAIDs[i++] = f;
+            appletInstances[j] = box;
+            customAIDs[j++] = f;
+            i += changeAIDRequired ? 2 : 1;
         }
         to.add(new JLabel(), "wrap"); //cut line
         //set first selected

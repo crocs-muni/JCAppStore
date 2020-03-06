@@ -192,12 +192,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         infoLayout.setVisible(CardManagerFactory.getManager().isAppletStoreSelected());
     }
 
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
-//        super.paintComponent(g);
-//    }
-
     /**
      * Verify whether the terminal is persent and card inserted
      * @param state state of the terminal
@@ -237,6 +231,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             case 0x1:
                 return true;
             case 0x7:
+                //todo possibly allow management
                 showError("E_initialized", "H_initialized", "announcement_white.png");
                 return false;
             case 0xF:

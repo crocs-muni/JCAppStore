@@ -299,13 +299,14 @@ public class CardManagerImpl implements CardManager {
      * to get data from inserted card
      */
     private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
+        //todo timeout
         Card card = null;
         APDUBIBO channel = null;
+        boolean exclusive = OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT);
 
         try {
             card = terminal.connect("*");
-            if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
-                card.beginExclusive();
+            if (exclusive) card.beginExclusive();
             channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
         } catch (CardException e) {
             //if (card != null) card.endExclusive();
@@ -316,8 +317,7 @@ public class CardManagerImpl implements CardManager {
         GPCommand<CardDetails> command = new GetDetails(channel);
         command.setChannel(channel);
         command.execute();
-        if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
-            card.endExclusive();
+        if (exclusive) card.endExclusive();
         card.disconnect(false);
 
         CardDetails details = command.getResult();

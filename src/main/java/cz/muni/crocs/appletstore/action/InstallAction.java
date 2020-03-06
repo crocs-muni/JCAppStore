@@ -18,7 +18,6 @@ import pro.javacard.CAPFile;
 
 import javax.annotation.Nonnull;
 import javax.swing.*;
-import java.applet.Applet;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.KeyboardFocusManager;
@@ -29,14 +28,10 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.List;
-
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
-
 
 /**
  * Class to add to button as listener target to perform applet installation
@@ -71,10 +66,6 @@ public class InstallAction extends CardAbstractAction {
     public InstallAction(OnEventCallBack<Void, Void> call) {
         this(InstallBundle.empty(), false, null, call);
         this.fromCustomFile = true;
-    }
-
-    public InstallAction(InstallBundle installData, OnEventCallBack<Void, Void> call) {
-        this(installData, false, null, call);
     }
 
     @Override
@@ -235,16 +226,11 @@ public class InstallAction extends CardAbstractAction {
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
         logger.info("Install AID: " + opts.getAIDs());
 
-        //if easy mode && package already present
+        //do not force install on simple use implicitly
 //        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
-//                !userAgreesOnCollisionDeletion(manager.getCard(), opts)) {
-//            return;
+//                !findCollisions(manager.getCard(), opts).isEmpty()) {
+//            opts.setForce(true);
 //        }
-
-        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
-                !findCollisions(manager.getCard(), opts).isEmpty()) {
-            opts.setForce(true);
-        }
 
         if (opts.isForce() && !userAcceptsForceInstallWarn()) {
             return;
@@ -301,47 +287,6 @@ public class InstallAction extends CardAbstractAction {
             }
         }).start();
     }
-
-    private List<AppletInfo> findCollisions(CardInstance card, InstallOpts options) {
-        ArrayList<AppletInfo> result = new ArrayList<>();
-        String[] toInstall = options.getCustomAIDs();
-        AID pkgId = code.getPackageAID();
-        if (toInstall == null) {
-            toInstall = options.getOriginalAIDs();
-        }
-
-        for (AppletInfo info : card.getInstalledApplets()) {
-            if (info.getKind() == Kind.Application) {
-                AID aid = info.getAid();
-                for (int i = 0; i < options.getOriginalAIDs().length; i++) {
-                    String tmpAid = toInstall.length <= i ? options.getOriginalAIDs()[i] : toInstall[i];
-                    if (tmpAid == null || tmpAid.isEmpty()) tmpAid = options.getOriginalAIDs()[i];
-                    if (aid.equals(AID.fromString(tmpAid))) {
-                        result.add(info);
-                    }
-                }
-            } else if (info.getKind() == Kind.ExecutableLoadFile && info.getAid().equals(pkgId)) {
-                result.add(info);
-            }
-        }
-        return result;
-    }
-
-//    private boolean userAgreesOnCollisionDeletion(CardInstance card, InstallOpts options) {
-//        List<AppletInfo> collisions = findCollisions(card, options);
-//        if (collisions.isEmpty()) return true;
-//
-//        CollisionDeletionDialog dialog = new CollisionDeletionDialog(code.getPackageAID().toString(), options, collisions);
-//        if ( showOptionDialog(null, dialog,
-//                textSrc.getString("collisions_title"), YES_NO_OPTION, QUESTION_MESSAGE,
-//                new ImageIcon(Config.IMAGE_DIR + "error.png"),
-//                new String[]{textSrc.getString("delete_and_continue"), textSrc.getString("cancel")},
-//                "error") == YES_OPTION ) {
-//            options.setAppletsForDeletion(collisions);
-//            return true;
-//        }
-//        return false;
-//    }
 
     private boolean userAcceptsForceInstallWarn() {
         if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
@@ -438,45 +383,6 @@ public class InstallAction extends CardAbstractAction {
 
         abstract void after();
     }
-
-//    private static class CollisionDeletionDialog extends JPanel {
-//        CollisionDeletionDialog(String pkgId, InstallOpts opts, List<AppletInfo> collisions) {
-//            super(new MigLayout());
-//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found") + "</div>"), "wrap");
-//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_pkgs") + "</div>"), "wrap");
-//            displayCollisionItem(opts.getInfo(), pkgId);
-//
-//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_applets") + "</div>"), "wrap");
-//            String[] toBeInstalledInstanceAids = opts.getAppletAIDsAsInstalled();
-//            for (String aid : toBeInstalledInstanceAids) {
-//                displayCollisionItem(opts.getInfo(), aid);
-//            }
-//
-//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_other_pkgs") + "</div>"), "wrap");
-//            for (AppletInfo item : collisions) {
-//                if (item.getKind() == Kind.ExecutableLoadFile) {
-//                    displayCollisionItem(item);
-//                }
-//            }
-//
-//            add(new HtmlText("<div width=\"600\">" + textSrc.getString("collision_found_other_applets") + "</div>"), "wrap");
-//            for (AppletInfo item : collisions) {
-//                if (item.getKind() == Kind.Application) {
-//                    displayCollisionItem(item);
-//                }
-//            }
-//        }
-//
-//        private void displayCollisionItem(AppletInfo info) {
-//            add(new HtmlText("<div width=\"600\">" + info.getAid().toString() + "</div>"), "wrap");
-//            add(new HtmlText("<div width=\"600\">" + info.getName() + ", " + info.getAuthor() + "</div>"), "wrap");
-//        }
-//
-//        private void displayCollisionItem(AppletInfo info, String toInstallAID) {
-//            add(new HtmlText("<div width=\"600\">" + toInstallAID + "</div>"), "wrap");
-//            add(new HtmlText("<div width=\"600\">" + info.getName() + ", " + info.getAuthor() + "</div>"), "wrap");
-//        }
-//    }
 
     //this class clontains copied-out code of JOptionPane, slightly modified because JOptionPane does not allow much
     //custom behaviour
