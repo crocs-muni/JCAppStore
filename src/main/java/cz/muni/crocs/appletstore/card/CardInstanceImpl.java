@@ -162,6 +162,9 @@ public class CardInstanceImpl implements CardInstance {
 
         try {
             for (GPCommand command : commands) {
+                if (Thread.interrupted()) {
+                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"));
+                }
                 logger.info("EXECUTING: " + command.getDescription());
                 command.setChannel(channel);
                 command.execute();
@@ -219,6 +222,9 @@ public class CardInstanceImpl implements CardInstance {
                 }
 
                 for (GPCommand command : commands) {
+                    if (Thread.interrupted()) {
+                        throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"));
+                    }
                     logger.info("SECURE EXECUTING: " + command.getDescription());
                     command.setGP(context);
                     command.setChannel(channel);

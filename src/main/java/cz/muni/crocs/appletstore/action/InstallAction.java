@@ -342,7 +342,7 @@ public class InstallAction extends CardAbstractAction {
                     InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
                             Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));
             data.setCapfile(null);
-        }, "Failed to install applet.", textSrc.getString("install_failed"));
+        }, "Failed to install applet.", textSrc.getString("install_failed"), 60000);
     }
 
     private static void verifySignatureRoutine(Executable task) {

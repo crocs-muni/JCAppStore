@@ -170,6 +170,7 @@ public class Menu extends JMenuBar {
             public void actionPerformed(ActionEvent e) {
                 OptionsFactory.getOptions().addOption(Options.KEY_HINT,
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
+                HintPanel.enableHint(OptionsFactory.getOptions().is(Options.KEY_HINT));
             }
         }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));

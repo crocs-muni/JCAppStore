@@ -102,7 +102,7 @@ public class DeleteAction extends CardAbstractAction {
             if (finalPackage != null) { //todo force package delete should suffice..?
                 manager.uninstall(finalPackage, true);
             }
-        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"));
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 150000);
     }
 
     private static int showDialog(String title, Object msg, String imgname, String confirmBtnKey) {

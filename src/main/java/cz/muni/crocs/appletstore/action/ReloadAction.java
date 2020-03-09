@@ -23,6 +23,6 @@ public class ReloadAction extends CardAbstractAction {
         execute(() -> {
             CardManager manager = CardManagerFactory.getManager();
             manager.loadCard();
-        }, "Failed to reload card.", textSrc.getString("failed_to_reload"));
+        }, "Failed to reload card.", textSrc.getString("failed_to_reload"), 10000);
     }
 }
