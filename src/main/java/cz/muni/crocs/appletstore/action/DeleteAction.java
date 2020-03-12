@@ -69,17 +69,17 @@ public class DeleteAction extends CardAbstractAction {
             }
         } else { //executable because of the very first if clause
             //simple use deletes applet when deleting package
-            //todo debug does force mode is enough for the package to uninstall its applets?
-            if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
-                CardInstance card = manager.getCard();
-                for (AID mod : info.getModules()) {
-                    if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
-
-                        willForce = true;
-                        break;
-                    }
-                }
-            }
+            //todo re-define uninstall policy
+//            if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+//                CardInstance card = manager.getCard();
+//                for (AID mod : info.getModules()) {
+//                    if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+//
+//                        willForce = true;
+//                        break;
+//                    }
+//                }
+//            }
         }
 
         if (willForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted

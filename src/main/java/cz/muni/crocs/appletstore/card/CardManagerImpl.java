@@ -299,9 +299,8 @@ public class CardManagerImpl implements CardManager {
      * to get data from inserted card
      */
     private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
-        //todo timeout
-        Card card = null;
-        APDUBIBO channel = null;
+        Card card;
+        APDUBIBO channel;
         boolean exclusive = OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT);
 
         try {

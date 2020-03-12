@@ -55,6 +55,7 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
                     return null;
                 } catch (LocalizedCardException ex) {
                     update("failed_detect", 200, getMaximum());
+                    ex.setImageName("plug-in-out.jpg");
                     return ex;
                 } catch (UnknownKeyException ex) {
                     update("failed_detect", 200, getMaximum());
@@ -64,7 +65,7 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
             } else {
                 update("E_unknown_key", 200, getMaximum());
                 return new LocalizedCardException("Card auth failed: user refused to use default test key.",
-                        "E_master_key_not_found");
+                        "E_master_key_not_found", "lock.png");
             }
         } catch (LocalizedException e) {
             update("failed_detect", 200, getMaximum());

@@ -312,10 +312,6 @@ public class Menu extends JMenuBar {
 //        }, textSrc.getString("H_pgp")));
     }
 
-    private void addHelpMenuItem() {
-        //todo automatize do not show wrapper
-    }
-
     /**
      * @param action         action to perform
      * @param keyEvent       KeyEvent key constant

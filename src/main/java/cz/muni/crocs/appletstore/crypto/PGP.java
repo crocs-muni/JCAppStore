@@ -32,6 +32,7 @@ public class PGP extends CmdTask {
                 if (fromSettings == null || fromSettings.isEmpty()) {
                     location = "gpg";
                     if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
+                        //todo add image gnupg not present
                         throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
                     }
                 } else {
@@ -88,25 +89,25 @@ public class PGP extends CmdTask {
     }
 
     //not tested
-    private boolean hasKeyInRing(String keyId, String signer) throws LocalizedSignatureException {
-        String[] result = new CmdTask().add(location).add("--list-keys")
-                .add("-d").processToString().split("\n");
-        for (int i = 0; i < result.length; i += 2) {
-            if (result[i].contains(keyId) && result[i + 1].contains(signer))
-                return true;
-        }
-        return false;
-    }
+//    private boolean hasKeyInRing(String keyId, String signer) throws LocalizedSignatureException {
+//        String[] result = new CmdTask().add(location).add("--list-keys")
+//                .add("-d").processToString().split("\n");
+//        for (int i = 0; i < result.length; i += 2) {
+//            if (result[i].contains(keyId) && result[i + 1].contains(signer))
+//                return true;
+//        }
+//        return false;
+//    }
 
-    public String getKeyID(File key) throws LocalizedSignatureException {
-        if (!key.exists()) return null;
-        String res = new CmdTask().add(location).add("--with-fingerprint")
-                .add(key.getAbsolutePath()).processToString();
-        Matcher m = pattern.matcher(res);
-        if (m.find()) {
-            //first group is that of all match string, second the () enclosed
-            return m.group(1);
-        }
-        throw new LocalizedSignatureException("Failed to obtain key id.", "");
-    }
+//    public String getKeyID(File key) throws LocalizedSignatureException {
+//        if (!key.exists()) return null;
+//        String res = new CmdTask().add(location).add("--with-fingerprint")
+//                .add(key.getAbsolutePath()).processToString();
+//        Matcher m = pattern.matcher(res);
+//        if (m.find()) {
+//            //first group is that of all match string, second the () enclosed
+//            return m.group(1);
+//        }
+//        throw new LocalizedSignatureException("Failed to obtain key id.", "");
+//    }
 }

@@ -36,12 +36,18 @@ public class CmdTask {
      * @throws LocalizedSignatureException on command failure
      */
     public Process process() throws LocalizedSignatureException {
+        return process(10);
+    }
+
+    public Process process(int timeoutSec) throws LocalizedSignatureException {
         try {
+            //todo for some reason gpg --help stucks
             logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
             Process result = new ProcessBuilder(process).redirectErrorStream(true).start();
-            result.waitFor(10, TimeUnit.SECONDS);
+            result.waitFor(timeoutSec, TimeUnit.SECONDS);
             return result;
         } catch (IOException | InterruptedException e) {
+            //todo add image pgp failure
             throw new LocalizedSignatureException("Failed to fire cmd from line.", "signature_aborted", e);
         }
     }

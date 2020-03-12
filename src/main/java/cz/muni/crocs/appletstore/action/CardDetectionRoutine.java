@@ -51,10 +51,9 @@ public class CardDetectionRoutine extends CardAbstractAction {
                             } catch (LocalizedCardException ex) {
                                 ex.printStackTrace();
                                 logger.warn("Failed to load card", ex);
-                                //todo some cases want to show image of plug out / in -> add to the exception image name option
                                 main.getWindow().getRefreshablePane().showError("E_loading_failed",
                                         "CARD: " + manager.getLastCardDescriptor() + "<br>",
-                                        "announcement_white.png", ex);
+                                        ex.getImageName(), ex);
                                 continue;
                             } finally {
                                 SwingUtilities.invokeLater(() -> main.switchEnabled(true));

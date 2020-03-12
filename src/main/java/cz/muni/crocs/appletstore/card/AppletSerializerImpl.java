@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
 import java.io.*;
-import java.util.List;
 import java.util.Set;
 
 public class AppletSerializerImpl implements AppletSerializer<Set<AppletInfo>> {

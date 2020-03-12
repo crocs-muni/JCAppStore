@@ -40,7 +40,7 @@ public class Load extends GPCommand<Void> {
             registry = context.getRegistry();
         } catch (IOException e) {
             //todo message?
-            throw new LocalizedCardException("", e);
+            throw new LocalizedCardException("Could not load cap.", "E_load_failed_io", e);
         }
 
         // Remove existing default app
@@ -52,13 +52,13 @@ public class Load extends GPCommand<Void> {
                 logger.warn("Failed to remove existing package before an install.", e);
             }
         }
-        //todo whether to uninstall even when package differs but applet AID is the same (e.g. PIV applet / open FIPS)
 
         try {
             context.loadCapFile(file, null);
             logger.info("CAP file loaded.");
         } catch (GPException e) {
             if (e.sw == 0x00) {
+                //todo collsiion image
                 throw new LocalizedCardException("Package already present", "E_pkg_present", e);
             }
             throw new LocalizedCardException("Package load failed", "E_load_failed", e);

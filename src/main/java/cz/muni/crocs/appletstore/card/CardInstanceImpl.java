@@ -63,7 +63,7 @@ public class CardInstanceImpl implements CardInstance {
             throws LocalizedCardException, CardException, UnknownKeyException {
         if (newDetails == null || terminal == null) {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
-            throw new LocalizedCardException("Invalid arguments.", "E_load_card");
+            throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg");
         }
 
         this.terminal = terminal;
@@ -163,7 +163,7 @@ public class CardInstanceImpl implements CardInstance {
         try {
             for (GPCommand command : commands) {
                 if (Thread.interrupted()) {
-                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"));
+                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
                 }
                 logger.info("EXECUTING: " + command.getDescription());
                 command.setChannel(channel);
@@ -172,7 +172,7 @@ public class CardInstanceImpl implements CardInstance {
         } catch (GPException e) {
             throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
         } catch (IOException e) {
-            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", e);
+            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e);
         } finally {
             if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
                 card.endExclusive();
@@ -198,11 +198,11 @@ public class CardInstanceImpl implements CardInstance {
                     logger.info("Discovering channel.");
                     context = GPSession.discover(channel);
                 } catch (IllegalArgumentException il) {
-                    throw new LocalizedCardException(il.getMessage(), "no_channel", il);
+                    throw new LocalizedCardException(il.getMessage(), "no_channel", "plug-in-out.jpg", il);
                 } catch (GPException ex) {
-                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), ex);
+                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), "plug-in-out.jpg", ex);
                 } catch (IOException e) {
-                    throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", e);
+                    throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", "plug-in-out.jpg", e);
                 }
 
                 try {
@@ -216,14 +216,14 @@ public class CardInstanceImpl implements CardInstance {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
-                        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "H_authentication"), e);
+                        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "H_authentication"), "warn.png", e);
                     }
                     throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
                 }
 
                 for (GPCommand command : commands) {
                     if (Thread.interrupted()) {
-                        throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"));
+                        throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
                     }
                     logger.info("SECURE EXECUTING: " + command.getDescription());
                     command.setGP(context);
@@ -359,6 +359,7 @@ public class CardInstanceImpl implements CardInstance {
     private void getCardListWithDefaultPassword(boolean useGeneric) throws LocalizedCardException, UnknownKeyException, CardException {
         if (!(new File(Config.CARD_TYPES_FILE).exists())) {
             logger.error("Cad types file not found");
+            //todo add image file not found
             throw new LocalizedCardException("No types present.", "E_missing_types");
         }
 
@@ -394,6 +395,7 @@ public class CardInstanceImpl implements CardInstance {
      * Open card types INI and searches by ATR for default password
      */
     private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
+        //todo image that represents not trying to auth
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
         GPCommand<Set<AppletInfo>> listContents = new ListContents(id);
