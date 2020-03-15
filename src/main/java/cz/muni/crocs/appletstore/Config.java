@@ -25,6 +25,9 @@ public class Config {
     public static final String IMAGE_DIR = RESOURCES_DIR +"img"+S;
     public static final String DATA_DIR = RESOURCES_DIR +"data"+S;
 
+    public static final String LOG_DIR = "log"+S;
+    public static final String LOG_FILE = LOG_DIR + "jcAppStore.log";
+
     //config files related constants
     public static final String CARD_LIST_FILE = Config.APP_DATA_DIR + Config.S + "cards.ini";
     public static final String CARD_TYPES_FILE = "src"+S+"main"+S+"resources"+S+"data"+S+"types.ini";

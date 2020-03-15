@@ -254,9 +254,10 @@ public class AppletInfo implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return type(kind) + ": " + (valid(name) ? name : "unkown") + ", " + aid + ", author " +
-                (valid(author) ? author : "unkown") + ", version " +  (valid(version) ? version : "unkown") +
-                ", with sdk " + (valid(sdk) ? sdk : "unkown") ;
+        String unknown = textSrc.getString("unknown");
+        return type(kind) + ": " + (valid(name) ? name : unknown) + ", " + aid + textSrc.getString("comma_author") +
+                (valid(author) ? author : unknown) + textSrc.getString("comma_version") +
+                (valid(version) ? version : unknown) + textSrc.getString("comma_sdk") + (valid(sdk) ? sdk : unknown);
     }
 
     @Override
@@ -269,15 +270,15 @@ public class AppletInfo implements Serializable, Cloneable {
     }
 
     private String type(GPRegistryEntry.Kind kind) {
-        if (kind == null) return "unknown";
+        if (kind == null) return textSrc.getString("unknown");
 
         switch (kind) {
-            case ExecutableLoadFile: return "Package";
-            case SecurityDomain: return "Security domain";
-            case IssuerSecurityDomain: return "Issuer security domain";
-            case Application: return "Applet";
+            case ExecutableLoadFile: return textSrc.getString("package");
+            case SecurityDomain: return textSrc.getString("sd");
+            case IssuerSecurityDomain: return textSrc.getString("isd");
+            case Application: return textSrc.getString("applet");
         }
-        return "unknown";
+        return textSrc.getString("unkown");
     }
 
     public static AppletInfo empty() {

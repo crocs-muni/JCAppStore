@@ -2,7 +2,6 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -44,7 +42,7 @@ public class LocalItem extends JPanel implements Item {
     private Color selected = new Color(207, 244, 210);
     private CardManager manager;
 
-    public LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
+    private LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
         this.info = info;
         this.name = title;
         this.manager = CardManagerFactory.getManager();
@@ -82,10 +80,14 @@ public class LocalItem extends JPanel implements Item {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        if (info != null && info.getName() == null)
-            title = adjustLength(title, 15);
-        else
-            title = adjustLength(title, 25);
+
+        int titleLength = 25;
+
+        if (info != null) {
+               title = (info.getKind() == Kind.ExecutableLoadFile ? textSrc.getString("package_for") : "") + title;
+            if (info.getName() == null) titleLength = 15;
+        }
+        title = adjustLength(title, titleLength);
         container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", 16f), gbc);
 
         gbc.fill = GridBagConstraints.RELATIVE;
@@ -132,11 +134,10 @@ public class LocalItem extends JPanel implements Item {
     }
 
     private static String getName(AppletInfo info) {
-        String name = (info.getKind() == Kind.ExecutableLoadFile ? textSrc.getString("package_for") : "");
         if (info.getName() == null) {
-            return name + info.getAid().toString();
+            return info.getAid().toString();
         }
-        return name + info.getName();
+        return info.getName();
     }
 
     private static String breakIfTooLong(String name) {

@@ -35,7 +35,6 @@ dependencies {
     compile group: 'com.github.martinpaljak', name: 'apdu4j-pcsc', version: '19.05.08'
     compile group: 'com.miglayout', name: 'miglayout', version: '3.7.4'
     compile group: 'org.ini4j', name: 'ini4j', version: '0.5.4'
-    compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '4.1.2'
     izpack 'org.codehaus.izpack:izpack-dist:5.1.3'
 }
 

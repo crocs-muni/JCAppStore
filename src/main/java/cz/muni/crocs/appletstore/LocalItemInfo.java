@@ -121,9 +121,9 @@ public class LocalItemInfo extends HintPanel {
         setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
         setLabel(domain, textSrc.getString("sd_assigned") +
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
-        uninstall.setEnabled(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
+        uninstall.setVisible(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
-        rawApdu.setEnabled(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
+        rawApdu.setVisible(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }
 
