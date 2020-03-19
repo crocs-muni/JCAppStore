@@ -32,10 +32,6 @@ public class Settings extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
-    private static final Tuple[] LANGUAGES = new Tuple[]{
-            new Tuple<>("en", "English")/*,
-            new Tuple<>("cz", "Česky")*/
-    };
 
     private JTextField pgp;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
@@ -54,22 +50,14 @@ public class Settings extends JPanel {
         this.context = context;
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildPGP();
-//        buildJCKeep();
-//        buildImplicitDelete();
-//        buildSimpleMode();
         buildLanguage();
-//        buildHint();
         buildBackground();
     }
 
     public void apply() {
         saveBackgroundImage();
         saveLanguage();
-//        saveHint();
-//        saveSimpleMode();
-//        saveJCKeep();
         savePGP();
-//        saveImplicitDelete();
     }
 
     private void buildPGP() {
@@ -159,30 +147,6 @@ public class Settings extends JPanel {
         add(languageBox, "align right, span 2, w 180, wrap");
     }
 
-    private void buildImplicitDelete() {
-        add(new Text(textSrc.getString("implicit_delete")), "");
-        implicitDelete.setSelected(OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT));
-        add(implicitDelete, "align right, span 2, w 180, wrap");
-    }
-
-    private void buildSimpleMode() {
-        add(new Text(textSrc.getString("enable_simple")), "");
-        simple.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
-        add(simple, "align right, span 2, w 180, wrap");
-    }
-
-    private void buildJCKeep() {
-        add(new Text(textSrc.getString("enable_jcmemory")), "");
-        jcMemoryKept.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
-        add(jcMemoryKept, "align right, span 2, w 180, wrap");
-    }
-
-    private void buildHint() {
-        add(new Text(textSrc.getString("enable_hints")),"");
-        hintEnabled.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
-        add(hintEnabled, "align right, span 2, w 180, wrap");
-    }
-
     private JFileChooser getShaderFileChoser(File defaultFolder) {
         JFileChooser fileChooser = new JFileChooser(defaultFolder);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -259,24 +223,8 @@ public class Settings extends JPanel {
         if (lang.equals(OptionsFactory.getOptions().getLanguage())) return;
 
         OptionsFactory.getOptions().setLanguage(lang);
+
         showAlertChange();
-    }
-
-    private void saveImplicitDelete() {
-        OptionsFactory.getOptions().addOption(Options.KEY_DELETE_IMPLICIT, implicitDelete.isSelected() ? "true" : "false");
-    }
-
-    private void saveHint() {
-        OptionsFactory.getOptions().addOption(Options.KEY_HINT, hintEnabled.isSelected() ? "true" : "false");
-        HintPanel.enableHint(hintEnabled.isSelected());
-    }
-
-    private void saveSimpleMode() {
-        OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE, simple.isSelected() ? "true" : "false");
-    }
-
-    private void saveJCKeep() {
-        OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY, jcMemoryKept.isSelected() ? "true" : "false");
     }
 
     /**

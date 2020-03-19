@@ -58,10 +58,10 @@ public class CmdTask {
      * @throws LocalizedSignatureException on command failure
      */
     public String processToString() throws LocalizedSignatureException {
-        return getStreamOutput(process());
+        return toString(process());
     }
 
-    private static String getStreamOutput(Process process) {
+    public static String toString(Process process) {
         String result = "";
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {

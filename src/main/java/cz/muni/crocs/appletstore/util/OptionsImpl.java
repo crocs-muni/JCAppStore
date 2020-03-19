@@ -60,6 +60,7 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_DELETE_IMPLICIT, "true");
         options.put(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
         options.put(Options.KEY_WARN_FORCE_INSTALL, "true");
+        options.put(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());
     }
 
     @Override
@@ -110,7 +111,7 @@ public class OptionsImpl implements Options<String> {
     @Override
     public void setLanguage(Language language) {
         this.language = language;
-        addOption(KEY_LANGUAGE, this.language.getLocaleString());
+        addOption(KEY_LANGUAGE, language.getLocaleString());
         ResourceBundle.clearCache();
     }
 
@@ -133,9 +134,7 @@ public class OptionsImpl implements Options<String> {
 
     @Override
     public void addOption(String name, String value) {
-        if (!name.equals(KEY_LANGUAGE)) { //do not allow raw change language
-            options.put(name, value);
-        }
+        options.put(name, value);
     }
 
     @Override

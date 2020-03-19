@@ -4,6 +4,7 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.KeysPresence;
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -101,7 +102,7 @@ public class InstallDialogWindow extends JPanel {
         AppletInfo details;
         if (info == null) {
             details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
-                    sdk.getText(), "Error:unused field", KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
+                    sdk.getText(), "", KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
         } else {
             details = info;
         }
@@ -118,7 +119,8 @@ public class InstallDialogWindow extends JPanel {
     }
 
     public File getCustomSignatureFile() {
-        logger.info("Custom signature file selected: " + customSignatureFile.getAbsolutePath());
+        logger.info("Custom signature file selected: " +
+                (customSignatureFile != null ? customSignatureFile.getAbsolutePath() : "none"));
         return customSignatureFile;
     }
 
@@ -235,7 +237,8 @@ public class InstallDialogWindow extends JPanel {
         specifyCustomSignature.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = getShaderFileChoser(FileSystemView.getFileSystemView().getDefaultDirectory());
+                JFileChooser fileChooser = getShaderFileChoser(
+                        new File(OptionsFactory.getOptions().getOption(Options.KEY_LAST_SELECTION_LOCATION)));
                 int r = fileChooser.showOpenDialog(null);
                 if (r == JFileChooser.APPROVE_OPTION) {
                     customSignatureFile = fileChooser.getSelectedFile();

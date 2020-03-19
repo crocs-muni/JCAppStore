@@ -20,6 +20,17 @@ public interface Signature {
         return new File(filename + "." + author + ".sig");
     }
 
+    static String getImageByErrorCode(int code) {
+        /*todo once can get details about key trust include verify-trust image*/
+        switch (code) {
+            case 0:
+                return "verify.png";
+            default:
+                return "not_verified.png";
+        }
+    }
+
+
     /**
      * Verify the file signature with auto author deduction
      * @param author author of the file
@@ -65,9 +76,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the signature, to verify that it was really signed by him, not by someone else
      * @param file path to the file to verify
-     * @return true if signature successful
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, String file) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyAndReturnMessage(String author, String file) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -76,9 +87,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the signature, to verify that it was really signed by him, not by someone else
      * @param file file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, File file) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyAndReturnMessage(String author, File file) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -86,9 +97,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the file
      * @param file path to the file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyPGPAndReturnMessage(String author, String file) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -96,9 +107,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the file
      * @param file file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyPGPAndReturnMessage(String author, File file) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -107,9 +118,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the signature, to verify that it was really signed by him, not by someone else
      * @param file path to the file to verify
-     * @return true if signature successful
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
 
     /**
      * Verify the file signature with auto author deduction
@@ -118,9 +129,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the signature, to verify that it was really signed by him, not by someone else
      * @param file file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -128,9 +139,9 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the file
      * @param file path to the file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException;
 
     /**
      * supposes that the signature is stored within the same directory as 'file' and its name is '[file].sig'
@@ -138,8 +149,8 @@ public interface Signature {
      * verifies the internet connection and returns error message if not accessible
      * @param author author of the file
      * @param file file to verify
-     * @return tuple with first = imagename, second = message
+     * @return tuple with first = exit code, second = message
      */
-    Tuple<String, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
+    Tuple<Integer, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException;
 
 }

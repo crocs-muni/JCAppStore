@@ -116,7 +116,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 callback,
-                                OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && installed,
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
@@ -219,7 +219,7 @@ public class StoreItemInfo extends HintPanel {
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 call,
-                                OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && installed,
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
                                 dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }

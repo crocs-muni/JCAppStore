@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
-import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.BorderLayout;
@@ -63,6 +62,10 @@ public class InstallAction extends CardAbstractAction {
         this.defaultSelected = defaultSelected;
     }
 
+    /**
+     * Create install action from custom source
+     * @param call callback on events start/fail/finish
+     */
     public InstallAction(OnEventCallBack<Void, Void> call) {
         this(InstallBundle.empty(), false, null, call);
         this.fromCustomFile = true;
@@ -76,7 +79,7 @@ public class InstallAction extends CardAbstractAction {
             return;
         }
 
-        if (fromCustomFile) data.setCapfile(CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR));
+        if (fromCustomFile) data.setCapfile(CapFileChooser.chooseCapFile());
         code = CapFileChooser.getCapFile(data.getCapfile());
         if (code == null) {
             return;
@@ -102,27 +105,27 @@ public class InstallAction extends CardAbstractAction {
                 try {
                     result = signature.verifyPGPAndReturnMessage("JCAppStore", data.getCapfile());
                     if (data.getSigner() != null && !data.getSigner().isEmpty()) {
-                        Tuple<String, String> another =
+                        Tuple<Integer, String> another =
                                 signature.verifyPGPAndReturnMessage(data.getSigner(), data.getCapfile());
                         result = new Tuple<>(another.first,
                                 "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
                     }
                 } catch (LocalizedSignatureException e) {
                     logger.warn("Signature verification failed", e);
-                    result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
+                    result = new Tuple<>(2, e.getLocalizedMessage());
                 }
             }
 
             @Override
             void after() {
-                showInstallDialog(result.second, result.first, false);
+                showInstallDialog(result.second, Signature.getImageByErrorCode(result.first), false);
             }
         });
     }
 
     private void showInstallDialog(String verifyResult, String imgIcon, final boolean isCustom) {
         //simple usage will always do force install
-        boolean forceInstall = installed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);
+        final boolean forceInstall = installed; /*todo removed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);*/
         InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom, data.getAppletNames());
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
         CustomJOptionPane pane = new CustomJOptionPane(dialog, new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
@@ -191,18 +194,20 @@ public class InstallAction extends CardAbstractAction {
                         result = signature.verifyPGPAndReturnMessage(null, data.getCapfile(), customSign);
                     } catch (LocalizedSignatureException e) {
                         logger.warn("Signature verification failed", e);
-                        result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
+                        result = new Tuple<>(2, e.getLocalizedMessage());
                     }
                 }
 
                 @Override
                 void after() {
-                    int choice = JOptionPane.showConfirmDialog(null,
+                    //confirm install only if signature failed
+                    int choice = (result.first == 0) ? YES_OPTION :
+                            JOptionPane.showConfirmDialog(null,
                             "<html><div width=\"350\">" + result.second + "<br>" +
                                     textSrc.getString("install_ask") + "</div></html>",
                             textSrc.getString("signature_title_dialog"),
                             JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                            new ImageIcon(Config.IMAGE_DIR + result.first));
+                            new ImageIcon(Config.IMAGE_DIR + Signature.getImageByErrorCode(result.first)));
                     if (choice == YES_OPTION) {
                         fireInstall(resultDialog.getInstallOpts());
                     }
@@ -373,9 +378,9 @@ public class InstallAction extends CardAbstractAction {
 
 
     private abstract static class Executable {
-        Tuple<String, String> result;
+        Tuple<Integer, String> result;
 
-        void setResult(Tuple<String, String> result) {
+        void setResult(Tuple<Integer, String> result) {
             this.result = result;
         }
 
@@ -394,7 +399,7 @@ public class InstallAction extends CardAbstractAction {
             super(message, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, icon, options, initialValue);
         }
 
-        void setOnClose(@Nonnull CallBack<Void> onClose) {
+        void setOnClose(CallBack<Void> onClose) {
             this.onClose = onClose;
         }
 

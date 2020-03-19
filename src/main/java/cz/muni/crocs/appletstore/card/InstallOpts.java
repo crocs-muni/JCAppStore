@@ -1,17 +1,11 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.util.Tuple;
 import pro.javacard.AID;
-import pro.javacard.CAPFile;
 
-import javax.annotation.Nonnull;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class InstallOpts {
@@ -24,7 +18,6 @@ public class InstallOpts {
     private boolean force;
     private byte[] installParams;
     private String defalutSelected;
-//    private List<AppletInfo> toDelete;
 
     /**
      * Install options for applet
@@ -35,8 +28,9 @@ public class InstallOpts {
      * @param force if install by force
      * @param installParams installation parameters
      */
-    public InstallOpts(String[] customAIDs, @Nonnull String[] originalAIDs, String[] appletNames, AppletInfo nfo, boolean force, String installParams) {
+    public InstallOpts(String[] customAIDs, String[] originalAIDs, String[] appletNames, AppletInfo nfo, boolean force, String installParams) {
         if (installParams == null) installParams = "";
+        if (originalAIDs == null) throw new InvalidParameterException("This method should not be called with null original AIDs.");
         if (installParams.length() % 2 != 0 || installParams.length() > 512)
             throw new InvalidParameterException(textSrc.getString("E_invalid_install_params"));
         this.customAIDs = customAIDs;
@@ -99,14 +93,6 @@ public class InstallOpts {
     public AppletInfo getInfo() {
         return info;
     }
-
-//    public void setAppletsForDeletion(List<AppletInfo> applets) {
-//        toDelete = applets;
-//    }
-//
-//    public List<AppletInfo> getAppletsForDeletion() {
-//        return toDelete;
-//    }
 
     private String verifyValue(String value) {
         if (value == null || value.isEmpty() || value.equals(textSrc.getString("unknown")))
