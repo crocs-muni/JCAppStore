@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
@@ -10,11 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Locale;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
+import javax.swing.Timer;
 
 /**
  * App loading - checks for card readers, initializes basic things
@@ -22,8 +20,9 @@ import javax.swing.*;
  */
 
 public class SplashScreen extends JWindow {
+    private static final boolean INITIALIZED = Config.setupLogger();
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private Timer timer;
     private int progress = 0;
@@ -34,6 +33,9 @@ public class SplashScreen extends JWindow {
     private String numbers = "";
 
     private SplashScreen() {
+        logger.info("Running on java " + System.getProperty("java.version") +
+                " by " +  System.getProperty("java.vendor") + " in " + System.getProperty("java.vm.info"));
+
         try {
             if (SystemUtils.IS_OS_LINUX) {
                 //UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -58,6 +60,8 @@ public class SplashScreen extends JWindow {
                     runMainApp(get());
                 } catch (InterruptedException | ExecutionException e) {
                     runMainApp(e);
+                } catch (Exception all) {
+                    showCrashReporter(all);
                 }
             }
         };
@@ -125,14 +129,19 @@ public class SplashScreen extends JWindow {
         return builder.toString();
     }
 
+    private void showCrashReporter(Exception e) {
+        e.printStackTrace();
+        logger.error("Fatal Error: " + e.getMessage(), e);
+        new CrashReporter(textSrc.getString("reporter"), e.getMessage(), null);
+    }
+
     private void runMainApp(Exception fromLoad) {
         try {
+            if (!INITIALIZED) throw new RuntimeException("Logging not initialized properly.");
+
             new AppletStore(fromLoad);
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("Fatal Error: ", e);
-            new FeedbackFatalError(textSrc.getString("reporter"), e.getMessage(), true,
-                    JOptionPane.QUESTION_MESSAGE, null);
+            showCrashReporter(e);
         }
 
         setVisible(false);

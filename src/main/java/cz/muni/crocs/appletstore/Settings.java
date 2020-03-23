@@ -37,10 +37,7 @@ public class Settings extends JPanel {
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
     private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Language> languageBox;
-    private JCheckBox hintEnabled = new JCheckBox();
-    private JCheckBox simple = new JCheckBox();
-    private JCheckBox jcMemoryKept = new JCheckBox();
-    private JCheckBox implicitDelete = new JCheckBox();
+    private final Settings self;
     private BackgroundChangeable context;
     private CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
@@ -52,6 +49,7 @@ public class Settings extends JPanel {
         buildPGP();
         buildLanguage();
         buildBackground();
+        self = this;
     }
 
     public void apply() {
@@ -110,6 +108,9 @@ public class Settings extends JPanel {
                 bgValue.setText(bgImg);
                 slider.setValue(1);
                 slider.setEnabled(false);
+
+                SwingUtilities.getWindowAncestor(self).pack();
+                SwingUtilities.getWindowAncestor(self).setLocationRelativeTo(null);
             }
         });
         add(defaultBg, "align right");
@@ -123,6 +124,9 @@ public class Settings extends JPanel {
                     bgImg = fileChooser.getSelectedFile().getAbsolutePath();
                     bgValue.setText(cutString(bgImg));
                     slider.setEnabled(true);
+
+                    SwingUtilities.getWindowAncestor(self).pack();
+                    SwingUtilities.getWindowAncestor(self).setLocationRelativeTo(null);
                 }
             }
         });

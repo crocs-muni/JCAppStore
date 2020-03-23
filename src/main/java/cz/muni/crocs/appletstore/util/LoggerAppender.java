@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.Config;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.*;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -16,7 +17,7 @@ public class LoggerAppender extends AbstractAppender {
         super("JCAppStore", null, PatternLayout.createDefaultLayout(), false);
 
         this.appender = console;
-        this.appender.setText("JCAppStore logger: for detailed logs see TODO output logs to accessible user folder\n");
+        this.appender.setText("JCAppStore logger: for detailed logs see '" + Config.APP_LOG_DIR + "'\n");
         start();
     }
 

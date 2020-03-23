@@ -63,36 +63,43 @@ public class DeleteAction extends CardAbstractAction {
 
         boolean willForce = opts.willForce();
         AppletInfo packageInfo = null;
-        if (info.getKind() == Kind.Application) {
+        if ((info.getKind() == Kind.Application) && (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE))) {
             //implicit mode deletes package too
-            if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
-                packageInfo = getPackageOf(info);
-                logger.info("Implicit delete package too: " +
-                        (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
-            }
-        } else {
-            //ask user whether to delete applet too
-            StringBuilder appletsToDelete = new StringBuilder();
+            packageInfo = getPackageOf(info);
+            logger.info("Implicit delete package too: " +
+                    (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
+        }
 
-            if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
-                for (AID mod : info.getModules()) {
-                    for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
-                        if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod)) {
-                            appletsToDelete.append("<br>").append(info.getName());
-                        }
+        //ask user whether to delete applet too
+        StringBuilder appletsToDelete = new StringBuilder();
+
+        if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+            for (AID mod : info.getModules()) {
+                for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
+                    if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
+                            //do not notify about the applet we are removing now
+                            !(info.getKind() == Kind.Application && info.getAid().equals(nfo.getAid()))) {
+                        appletsToDelete.append("<br>").append(info.getName());
                     }
                 }
             }
-            String applets = appletsToDelete.toString();
+        }
+        String applets = appletsToDelete.toString();
+        //if found dependencies and  we do not try to uninstall package as a dependency from simple mode
+        if (!applets.isEmpty() && packageInfo == null) {
+            logger.info("Found applet collisions: " + applets);
+            ConfirmDeletion confirm = new ConfirmDeletion(applets);
+            if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
+                    != JOptionPane.YES_OPTION)  return;
+            willForce = confirm.agreed();
+            if (!willForce)return; //did not agreed
+        } else {
+            //do not uninstall package dependency if more applets are still on the card
             if (!applets.isEmpty()) {
-                ConfirmDeletion confirm = new ConfirmDeletion(applets);
-                if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
-                        != JOptionPane.YES_OPTION)  return;
-                willForce = confirm.agreed();
-                if (!willForce)return; //did not agreed
-            } else {
-                willForce = false;
+                packageInfo = null;
+                logger.info("Package not implicitly deleted: other applets still active.");
             }
+            willForce = false;
         }
 
         if (willForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted

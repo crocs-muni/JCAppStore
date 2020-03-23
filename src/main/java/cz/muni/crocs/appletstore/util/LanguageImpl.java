@@ -5,8 +5,8 @@ import java.util.Locale;
 
 public enum LanguageImpl implements Language {
 
-    ENGLISH("en", "en.jpg","English"),
-    CZECH("cs", "cs.jpg", "Česky");
+    ENGLISH("en", "en.jpg","English");
+    //CZECH("cs", "cs.jpg", "Česky");
 
     private LanguageImpl(String locale, String image, String name) {
         this.locale = locale;

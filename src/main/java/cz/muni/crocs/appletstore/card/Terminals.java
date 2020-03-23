@@ -9,7 +9,6 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
-import javax.swing.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
