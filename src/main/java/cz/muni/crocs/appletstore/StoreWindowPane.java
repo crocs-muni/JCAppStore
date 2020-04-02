@@ -27,6 +27,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private TreeSet<Item> items = new TreeSet<>();
     private List<JsonObject> data;
     private JsonObject currentlyShown;
+    private SearchBar searchBar;
 
     public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
         this.data = data;
@@ -70,15 +71,20 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
                 items.add(item);
             }
         }
-        showPanel(items);
     }
 
     @Override
     public void refresh() {
         if (currentlyShown == null)
-            showItems(null);
+            showItems(searchBar.getQuery());
         else
             showInfo(currentlyShown);
+    }
+
+    @Override
+    public void registerSearchBar(SearchBar bar) {
+        this.searchBar = bar;
+        showItems(null);
     }
 
     private void showInfo(JsonObject dataSet) {
@@ -104,6 +110,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     @Override
     public void showItems(String query) {
+        if (query == null) query = searchBar.getQuery();
         if (query == null || query.isEmpty()) {
             showPanel(items);
         } else {

@@ -239,12 +239,16 @@ public class AppletInfo implements Serializable, Cloneable {
             this.name = this.name + ": " + name;
     }
 
+    public int compareAIDs(AppletInfo other) {
+        return aid.compareTo(other.aid);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppletInfo that = (AppletInfo) o;
-        return (kind == null || kind == that.kind) && Objects.equals(aid, that.aid);
+        return (kind != null || kind == that.kind) && Objects.equals(aid, that.aid);
     }
 
     @Override

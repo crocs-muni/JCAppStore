@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class LeftMenu extends JPanel {
+public class LeftMenu extends JPanel implements SearchBar {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private JPanel container = new JPanel(new GridBagLayout());
@@ -107,10 +107,14 @@ public class LeftMenu extends JPanel {
         remote.setSelectedBackground(!isLocal);
     }
 
-    private void resetSearch() {
+    public void resetSearch() {
         close = false;
         searchIcon.setIcon(searchImage);
         searchInput.setText("");
+    }
+
+    public String getQuery() {
+        return searchInput.getText();
     }
 
     private void checkIfSetClose() {
@@ -144,6 +148,7 @@ public class LeftMenu extends JPanel {
                     parent.setStorePaneVisible();
                     parent.getSearchablePane().refresh();
                 } else {
+                    //to re-load the store (clickg store closes details)
                     parent.getSearchablePane().showItems(null);
                 }
             }

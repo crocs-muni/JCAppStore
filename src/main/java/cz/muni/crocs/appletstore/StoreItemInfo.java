@@ -189,6 +189,7 @@ public class StoreItemInfo extends HintPanel {
                     )
             );
             compilerVersionComboBox.setModel(new JComboBox<>(compilerVersions).getModel());
+            compilerVersionComboBox.setSelectedIndex(0);
         });
         add(versionComboBox, "gapleft 50, gapleft 20");
 

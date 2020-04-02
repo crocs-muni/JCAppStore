@@ -161,7 +161,9 @@ public class LocalItem extends JPanel implements Item {
         LocalItem other = (LocalItem) o;
         if (info.getKind() == Kind.IssuerSecurityDomain || info.getKind() == Kind.SecurityDomain) {
             if (other.info.getKind() == Kind.IssuerSecurityDomain || other.info.getKind() == Kind.SecurityDomain) {
-                return name.compareTo(other.name);
+                int compare = name.compareTo(other.name);
+                if (compare == 0) return info.compareAIDs(other.info);
+                return compare;
             } else {
                 return -1;
             }
@@ -169,7 +171,9 @@ public class LocalItem extends JPanel implements Item {
             return 1;
         }
 
-        return 13 * name.compareTo(other.name) + info.getKind().compareTo(other.info.getKind());
+        int compare = 13 * name.compareTo(other.name) + info.getKind().compareTo(other.info.getKind());
+        if (compare == 0) return info.compareAIDs(other.info);
+        return compare;
     }
 
     public void resetSelection() {

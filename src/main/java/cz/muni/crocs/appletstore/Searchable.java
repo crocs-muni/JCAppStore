@@ -18,4 +18,10 @@ public interface Searchable {
      * Refreshes currently displayed page
      */
     void refresh();
+
+    /**
+     * Registers a search bar callback to work with
+     * @param bar search bar component
+     */
+    void registerSearchBar(SearchBar bar);
 }

@@ -4,6 +4,8 @@ import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
 import org.apache.commons.lang.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Locale;
@@ -19,6 +21,7 @@ verify:         if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --
  */
 public class PGP extends CmdTask {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static Logger logger = LoggerFactory.getLogger(CmdTask.class);
 
     private static boolean verified = false;
     private static String location;
@@ -62,12 +65,14 @@ public class PGP extends CmdTask {
             Process sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
                     + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
                     .process();
+            logger.info(CmdTask.toString(sig));
             return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
         } else if (SystemUtils.IS_OS_WINDOWS) {
             Process sig = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("\"" + file.getAbsolutePath() + "\"")
                     .process();
+            logger.info(CmdTask.toString(sig));
             return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
         } else return 2;
     }

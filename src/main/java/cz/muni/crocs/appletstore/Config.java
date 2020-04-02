@@ -51,7 +51,7 @@ public class Config {
      */
     public static String getDefaultAppRootFolder() {
         //from  https://stackoverflow.com/questions/8782797/creating-directory-in-application-support-or-appdata
-        String appFolder = FileSystemView.getFileSystemView().getDefaultDirectory() + S + "JCAppStore";
+        String appFolder = System.getProperty("user.home") + S + "JCAppStore";
         File directory = new File(appFolder);
         if (!directory.exists() && (!directory.mkdirs())) {
             throw new RuntimeException("The Application doesn't have the rights to store data into default folder.");

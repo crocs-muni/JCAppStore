@@ -41,10 +41,7 @@ public class StoreDownloader {
     }
 
     public boolean run() {
-        //todo remove
-        return true;
-        /*
-        parent.setLoaderMessage("downloading");
+        parent.setLoaderMessage(textSrc.getString("downloading"));
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);
         if (!downloadZip(address)) {
             logger.warn("failed to download store");
@@ -59,7 +56,6 @@ public class StoreDownloader {
         parent.setLoaderMessage(textSrc.getString("done"));
         zipFile.delete();
         return true;
-         */
     }
 
     private boolean downloadZip(String address) {

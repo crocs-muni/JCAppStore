@@ -40,6 +40,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private volatile State state = State.UNINITIALIZED;
     private GridBagConstraints constraints;
     private StoreSubMenu submenu;
+    private SearchBar searchBar;
 
     public StoreWindowManager(OnEventCallBack<Void, Void> callbackOnAction) {
         this.callbackOnAction = callbackOnAction;
@@ -95,14 +96,23 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         }
     }
 
+    @Override
+    public void registerSearchBar(SearchBar bar) {
+        searchBar = bar;
+    }
+
     /**
      * Force the store to update
      */
     public void updateGUI() {
-        if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(this::update);
-        } else {
-            update();
+        try {
+            if (!SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeLater(this::update);
+            } else {
+                update();
+            }
+        } catch (Exception e) {
+            logger.error("Failed to load the store: " + e.getMessage(), e);
         }
     }
 
@@ -233,6 +243,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             return;
         }
         StoreWindowPane store = new StoreWindowPane(data, callbackOnAction);
+        store.registerSearchBar(searchBar);
         this.store = store;
 
         removeAll();
