@@ -117,7 +117,7 @@ public class DeleteAction extends CardAbstractAction {
 
         final boolean finalWillForce = willForce;
         final AppletInfo finalPackage = packageInfo;
-        execute(() -> {
+         execute(() -> {
             manager.uninstall(info, finalWillForce);
             if (finalPackage != null) { //todo force package delete should suffice..?
                 manager.uninstall(finalPackage, true);

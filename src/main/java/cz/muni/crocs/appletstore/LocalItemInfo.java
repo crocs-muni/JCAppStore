@@ -92,13 +92,15 @@ public class LocalItemInfo extends HintPanel {
                 Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         uninstall.addMouseListener(delete);
-        add(uninstall);
+        uninstall.setToolTipText(uninstall.getText());
+        add(uninstall, "span2, wrap");
 
         rawApdu = new HintText(textSrc.getString("custom_command"),
                 textSrc.getString("H_custom_command"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         rawApdu.addMouseListener(send);
-        add(rawApdu, "wrap");
+        rawApdu.setToolTipText(rawApdu.getText());
+        add(rawApdu, "span2, wrap");
     }
 
     /**
@@ -121,9 +123,9 @@ public class LocalItemInfo extends HintPanel {
         setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
         setLabel(domain, textSrc.getString("sd_assigned") +
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
-        uninstall.setVisible(info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
+        setEnabled(uninstall, info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
                 || info.getKind() == GPRegistryEntry.Kind.Application);
-        rawApdu.setVisible(info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
+        setEnabled(rawApdu, info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }
 
@@ -152,6 +154,22 @@ public class LocalItemInfo extends HintPanel {
         domain.setText("", "");
         setVisible(false);
         revalidate();
+    }
+
+    private void setEnabled(JLabel component, boolean enabled) {
+        if (component.getToolTipText() == null || component.getToolTipText().isEmpty()) {
+            component.setToolTipText(component.getText());
+        }
+        if (enabled) {
+            component.setText(component.getToolTipText());
+            component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            component.setForeground(Color.BLACK);
+        } else {
+            component.setText(textSrc.getString("unavailbale"));
+            component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            component.setForeground(Color.DARK_GRAY);
+        }
+        component.setFocusable(enabled);
     }
 
     @Override

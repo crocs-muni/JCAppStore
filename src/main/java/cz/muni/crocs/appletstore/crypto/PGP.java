@@ -32,7 +32,7 @@ public class PGP extends CmdTask {
             try {
                 if (fromSettings == null || fromSettings.isEmpty()) {
                     location = "gpg";
-                    if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
+                    if (new CmdTask().add(location).add("--version").process().exitValue() != 0) {
                         //todo add image gnupg not present
                         throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
                     }
