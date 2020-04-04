@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,29 +24,17 @@ import java.util.TimerTask;
 public abstract class CardAbstractAction extends MouseAdapter implements CardAction {
     private static final Logger logger = LoggerFactory.getLogger(CardAbstractAction.class);
 
-    protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
+            OptionsFactory.getOptions().getLanguageLocale());
     protected final OnEventCallBack<Void, Void> call;
 
-    public CardAbstractAction(OnEventCallBack<Void, Void> call) {
+    protected CardAbstractAction(OnEventCallBack<Void, Void> call) {
         this.call = call;
     }
 
     @Override
     public void start() {
         mouseClicked(null);
-    }
-
-    @Override
-    public void start(int delay) {
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                start();
-                t.cancel();
-                t.purge();
-            }
-        }, delay);
     }
 
     /**
@@ -60,25 +47,36 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
      */
     protected void execute(CardExecutable toExecute, String loggerMessage, String title) {
         call.onStart();
-        new Thread(() -> {
-            try {
-                toExecute.execute();
-            } catch (UnknownKeyException e) {
-                if (!handleUnknownKey(toExecute, loggerMessage, title, e)) return;
-            } catch (LocalizedCardException ex) {
-                caught(title, loggerMessage, ex);
-                //todo show
-                return;
+        job(toExecute, loggerMessage, title, null).start();
+    }
+
+    protected void execute(CardExecutable toExecute, String loggerMessage, String title, int msTimeout) {
+        if (msTimeout < 1000) {
+            logger.warn("Execute called with timeout less than one second. Aborting...");
+            return;
+        }
+        //todo tasks should abort if thread flag interrupt = true
+        Timer t = new Timer();
+        Thread job = job(toExecute, loggerMessage, title, t);
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                job.interrupt();
+                t.cancel();
+                t.purge();
+                SwingUtilities.invokeLater(() -> {
+                    InformerFactory.getInformer().showMessage(textSrc.getString("E_timeout"));
+                });
             }
-            SwingUtilities.invokeLater(call::onFinish);
-        }).start();
+        }, msTimeout);
+        job.start();
     }
 
-    protected boolean handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, UnknownKeyException e) {
-        return handleUnknownKey(toExecute, loggerMessage, title, null, e);
+    private void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, UnknownKeyException e) {
+        handleUnknownKey(toExecute, loggerMessage, title, null, e);
     }
 
-    protected boolean handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, String image, UnknownKeyException e) {
+    protected void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, String image, UnknownKeyException e) {
         try {
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
@@ -86,7 +84,6 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         } catch (LocalizedCardException ex) {
             if (image != null) caught(title, loggerMessage, image, ex);
             else caught(title, loggerMessage, ex);
-            return false;
         } catch (UnknownKeyException ex) {
             ex.printStackTrace();
             logger.error("UnknownKeyException after key was set. Should not even get here.", ex);
@@ -94,12 +91,10 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_authentication"),
                             textSrc.getString("E_master_key_not_found"), "lock.png"));
-            return false;
         }
-        return true;
     }
 
-    protected static void showFailed(String title, String message) {
+    private static void showFailed(String title, String message) {
         JOptionPane.showMessageDialog(null,
                 "<html><div width=\"350\">" + message + "</div></html>",
                 title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
@@ -123,6 +118,30 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         SwingUtilities.invokeLater(call::onFail);
     }
 
+    private Thread job(CardExecutable toExecute, String loggerMessage, String title, Timer t) {
+        call.onStart();
+        return new Thread(() -> {
+            try {
+                toExecute.execute();
+            } catch (UnknownKeyException e) {
+                handleUnknownKey(toExecute, loggerMessage, title, e);
+            } catch (LocalizedCardException ex) {
+                caught(title, loggerMessage, ex);
+            } finally {
+                if (Thread.interrupted()) {
+                    SwingUtilities.invokeLater(call::onFail);
+                } else {
+                    SwingUtilities.invokeLater(call::onFinish);
+                }
+
+                if (t != null) {
+                    t.cancel();
+                    t.purge();
+                }
+            }
+        });
+    }
+
     /**
      * Callback for the action implementation
      */
@@ -136,13 +155,17 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
      */
     public static class CardExecutableIdle implements CardExecutable {
         private static CardExecutable self = new CardExecutableIdle();
-        private CardExecutableIdle() {}
+
+        private CardExecutableIdle() {
+        }
 
         public static CardExecutable get() {
             return self;
         }
+
         @Override
-        public void execute() {}
+        public void execute() {
+        }
     }
 
     /**
@@ -150,7 +173,7 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
      * tries to use 4041...4E4F default test key for authentication
      * if user agrees or fails while showing the failure cause.
      */
-    class UnknownKeyHandler {
+    static class UnknownKeyHandler {
         private UnknownKeyException e;
         private CardExecutable failed;
 

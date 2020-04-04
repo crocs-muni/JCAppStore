@@ -30,4 +30,16 @@ public class LocalizedCardException extends LocalizedException {
     public LocalizedCardException(String cause, String translated, Throwable ex) {
         super(cause, translated, ex);
     }
+
+    public LocalizedCardException(String cause, String translated, String image) {
+        super(cause, translated, image);
+    }
+
+    public LocalizedCardException(Throwable cause, String translated, String image) {
+        super(cause, translated, image);
+    }
+
+    public LocalizedCardException(String cause, String translated, String image, Throwable ex) {
+        super(cause, translated, image, ex);
+    }
 }

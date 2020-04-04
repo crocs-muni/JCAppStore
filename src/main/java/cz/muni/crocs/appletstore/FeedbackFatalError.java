@@ -1,21 +1,13 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.Mailer;
-import org.simplejavamail.mailer.config.TransportStrategy;
 
-import javax.activation.FileDataSource;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -97,7 +89,7 @@ public class FeedbackFatalError {
             sendParameter("mail", mail, writer);
             sendParameter("text", msg, writer);
             if (attachLog) {
-                File log = new File("log/jcAppStore.log");
+                File log = new File(Config.LOG_FILE);
                 if (log.exists()) sendFile("soubor", log, writer, ostream);
             }
             writer.append("--").append(boundary).append("--").append(CRLF).flush();

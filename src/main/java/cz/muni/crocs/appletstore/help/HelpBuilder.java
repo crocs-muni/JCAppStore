@@ -31,7 +31,7 @@ public class HelpBuilder extends Help {
     }
 
     public HelpBuilder addText(String textResourceKey) {
-        add(TextField.getTextField(textSrc.getString("cmd_introduction"), css, null), "gapleft 10, wrap");
+        add(TextField.getTextField(textSrc.getString(textResourceKey), css, null), "gapleft 10, wrap");
         return this;
     }
 }

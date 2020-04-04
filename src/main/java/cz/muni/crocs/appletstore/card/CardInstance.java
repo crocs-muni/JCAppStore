@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
 import pro.javacard.AID;
-
 import java.util.Set;
 
 public interface CardInstance {
@@ -43,4 +42,14 @@ public interface CardInstance {
      * @return null if not default selected applet, AID otherwise
      */
     AID getDefaultSelected();
+
+    /**
+     * Get card name (found in card database or provided by user)
+     */
+    String getName();
+
+    /**
+     * Set custom card name
+     */
+    void setName(String name) throws LocalizedCardException;
 }

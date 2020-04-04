@@ -21,7 +21,7 @@ import java.util.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class AppletInfo implements Serializable {
+public class AppletInfo implements Serializable, Cloneable {
     public static final int RID_SUBSTRING_LENGTH = 10;
 
     private static final long serialVersionUID = 458932548615025100L;
@@ -190,6 +190,7 @@ public class AppletInfo implements Serializable {
     }
 
     public AID getAid() {
+        if (aid == null || aid.isEmpty()) return null;
         return AID.fromString(aid);
     }
 
@@ -233,6 +234,11 @@ public class AppletInfo implements Serializable {
         this.aid = aid;
     }
 
+    public void setAppletInstanceName(String name) {
+        if (name != null && !name.isEmpty())
+            this.name = this.name + ": " + name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -248,9 +254,15 @@ public class AppletInfo implements Serializable {
 
     @Override
     public String toString() {
-        return type(kind) + ": " + (valid(name) ? name : "unkown") + ", " + aid + ", author " +
-                (valid(author) ? author : "unkown") + ", version " +  (valid(version) ? version : "unkown") +
-                ", with sdk " + (valid(sdk) ? sdk : "unkown") ;
+        String unknown = textSrc.getString("unknown");
+        return type(kind) + ": " + (valid(name) ? name : unknown) + ", " + aid + textSrc.getString("comma_author") +
+                (valid(author) ? author : unknown) + textSrc.getString("comma_version") +
+                (valid(version) ? version : unknown) + textSrc.getString("comma_sdk") + (valid(sdk) ? sdk : unknown);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return (AppletInfo)super.clone();
     }
 
     private boolean valid(String value) {
@@ -258,14 +270,22 @@ public class AppletInfo implements Serializable {
     }
 
     private String type(GPRegistryEntry.Kind kind) {
-        if (kind == null) return "unknown";
+        if (kind == null) return textSrc.getString("unknown");
 
         switch (kind) {
-            case ExecutableLoadFile: return "Package";
-            case SecurityDomain: return "Security domain";
-            case IssuerSecurityDomain: return "Issuer security domain";
-            case Application: return "Applet";
+            case ExecutableLoadFile: return textSrc.getString("package");
+            case SecurityDomain: return textSrc.getString("sd");
+            case IssuerSecurityDomain: return textSrc.getString("isd");
+            case Application: return textSrc.getString("applet");
         }
-        return "unknown";
+        return textSrc.getString("unkown");
+    }
+
+    public static AppletInfo empty() {
+        return new AppletInfo("", "", "", "", "");
+    }
+
+    public static AppletInfo with(String aid) {
+        return new AppletInfo("", "", "", "", "", aid);
     }
 }

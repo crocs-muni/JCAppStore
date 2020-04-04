@@ -7,6 +7,8 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.ResourceBundle;
 
 public class StoreSubMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private JLabel back;
     private BufferedImage storeTitle;
     private JButton reload;
 
@@ -30,9 +33,22 @@ public class StoreSubMenu extends JPanel {
         reload.addActionListener(a);
     }
 
+    void setOnBack(Action a) {
+        back.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                a.actionPerformed(null);
+            }
+        });
+    }
+
     private void setupWithoutImage() {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setOpaque(false);
+
+        back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "store_back.png"));
+        add(back);
+
         Title t = new Title(textSrc.getString("jcappstore"), 30f, SwingConstants.LEFT);
         t.setForeground(Color.white);
         t.setBorder(BorderFactory.createEmptyBorder(10, 40, 5, 0));
@@ -47,13 +63,19 @@ public class StoreSubMenu extends JPanel {
     }
 
     private void setup() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setOpaque(true);
+        setupBackLabelButton();
+        add(back);
         setBackground(Color.WHITE);
         setupReloadButton();
-        reload.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        reload.setBorder(BorderFactory.createEmptyBorder(15, 20, 13, 0));
         add(reload);
+    }
+
+    private void setupBackLabelButton() {
+        back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "store_back.png"));
+        back.setAlignmentX(Component.LEFT_ALIGNMENT);
+        back.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void setupReloadButton() {
@@ -61,6 +83,8 @@ public class StoreSubMenu extends JPanel {
         reload.setUI(new CustomButtonUI());
         reload.setFont(OptionsFactory.getOptions().getFont(Font.BOLD, 12f));
         reload.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        reload.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        reload.setBorder(BorderFactory.createEmptyBorder(15, 20, 13, 0));
         reload.setOpaque(false);
     }
 

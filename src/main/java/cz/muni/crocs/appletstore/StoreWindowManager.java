@@ -57,6 +57,12 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
                 updateGUI();
             }
         });
+        submenu.setOnBack(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                store.showItems(null);
+            }
+        });
     }
 
     public synchronized void setState(State state) {
@@ -197,11 +203,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             try {
                 while (loadingPane.update(downloader.getProgress())) {
                     Thread.sleep(300);
-
-                    if (i == 15) {
-                        System.out.println("Abort show");
-                        loadingPane.showAbort(abortAction);
-                    }
+                    if (i == 15) loadingPane.showAbort(abortAction);
                     i++;
                 }
             } catch (InterruptedException e) {

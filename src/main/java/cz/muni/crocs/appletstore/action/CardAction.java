@@ -1,5 +1,8 @@
 package cz.muni.crocs.appletstore.action;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public interface CardAction {
 
     /**
@@ -14,5 +17,15 @@ public interface CardAction {
      * Start with delay
      * @param delay time to delay the start
      */
-    void start(int delay);
+    default void start(int delay) {
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                start();
+                t.cancel();
+                t.purge();
+            }
+        }, delay);
+    }
 }

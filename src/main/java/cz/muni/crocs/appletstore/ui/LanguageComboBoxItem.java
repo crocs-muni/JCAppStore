@@ -17,10 +17,9 @@ public class LanguageComboBoxItem extends JLabel implements ListCellRenderer {
     @Override
     public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
-        Language val = (Language)value;
         setForeground(list.getForeground());
         setBackground((isSelected) ? list.getSelectionBackground() : list.getBackground());
-        setIcon(new ImageIcon(Config.IMAGE_DIR + ((Language) value).getLocaleString() + ".jpg"));
+        setIcon(new ImageIcon(Config.IMAGE_DIR + ((Language) value).getImageString()));
         setText(value.toString());
         setFont(OptionsFactory.getOptions().getFont());
         return this;

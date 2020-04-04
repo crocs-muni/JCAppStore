@@ -20,7 +20,7 @@ public class SW extends ISO7816 {
                getErrorVerbose(sw, msgKey) : getError(sw);
     }
 
-    private static String getError(int sw) {
+    public static String getError(int sw) {
         switch (sw) {
             case SW_BYTES_REMAINING_00: return "";
             case SW_END_OF_FILE: return "ES_eof";
@@ -55,7 +55,7 @@ public class SW extends ISO7816 {
         }
     }
 
-    private static String getErrorVerbose(int sw, String defaultKey) {
+    public static String getErrorVerbose(int sw, String defaultKey) {
         switch (sw) {
             case SW_BYTES_REMAINING_00: return "";
             case SW_END_OF_FILE: return "E_eof";

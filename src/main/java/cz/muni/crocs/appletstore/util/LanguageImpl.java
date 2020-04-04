@@ -5,21 +5,28 @@ import java.util.Locale;
 
 public enum LanguageImpl implements Language {
 
-    ENGLISH("en", "English"),
-    CZECH("cs", "Česky");
+    ENGLISH("en", "en.jpg","English"),
+    CZECH("cs", "cs.jpg", "Česky");
 
-    private LanguageImpl(String locale, String name) {
+    private LanguageImpl(String locale, String image, String name) {
         this.locale = locale;
         this.name = name;
+        this.image = image;
     }
 
     public static Language DEFAULT = ENGLISH;
     private String locale;
     private String name;
+    private String image;
 
     @Override
     public String getLocaleString() {
         return locale;
+    }
+
+    @Override
+    public String getImageString() {
+        return image;
     }
 
     @Override
@@ -33,7 +40,6 @@ public enum LanguageImpl implements Language {
 
     public static Language from(String locale) {
         if (locale == null || locale.length() < 2) return DEFAULT;
-        else if (locale.length() > 2) locale = locale.substring(0, 2);
         for (LanguageImpl l : LanguageImpl.values()) {
             if (l.locale.equals(locale)) {
                 return l;

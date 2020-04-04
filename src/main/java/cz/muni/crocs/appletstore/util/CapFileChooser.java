@@ -35,6 +35,19 @@ public class CapFileChooser {
         return instcap;
     }
 
+    /**
+     * Choose a cap file from system, get the latest directory used
+     * @return selected cap file or null if selection failed
+     */
+    public static File chooseCapFile() {
+        return chooseCapFile(new File(OptionsFactory.getOptions().getOption(Options.KEY_LAST_SELECTION_LOCATION)));
+    }
+
+    /**
+     * Choose a cap file from system
+     * @param dir directory to start to search in
+     * @return selected cap file or null if selection failed
+     */
     public static File chooseCapFile(File dir) {
         JFileChooser fileChooser = new JFileChooser(dir);
         fileChooser.setFileView(new CapFileView());
@@ -50,6 +63,7 @@ public class CapFileChooser {
                         cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
                 return null;
             }
+            OptionsFactory.getOptions().addOption(Options.KEY_LAST_SELECTION_LOCATION, dir.getAbsolutePath());
             return cap;
         }
         return null;

@@ -13,6 +13,8 @@ import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pro.javacard.AID;
+import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
@@ -25,10 +27,8 @@ import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 /**
  * Item detail in store
@@ -55,17 +55,7 @@ public class StoreItemInfo extends HintPanel {
         requestFocusInWindow();
 
         setOpaque(false);
-        CardInstance card = CardManagerFactory.getManager().getCard();
-        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
-        if (appletInfos != null) {
-            for (AppletInfo applet : appletInfos) {
-                String name = applet.getName();
-                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
-                    installed = true;
-                    break;
-                }
-            }
-        }
+
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
@@ -77,17 +67,6 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callback) {
-        JLabel back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "back.png"));
-        back.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        back.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        back.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                store.showItems("");
-            }
-        });
-        add(back, "pos 0 0");
-
         JLabel icon = new JLabel(getIcon(dataSet.get(JsonParser.TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 2 2, gapleft 50");
@@ -105,12 +84,27 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void> callback) {
-        JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
+        //get latest version info
         final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
         final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
         final JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                 .get(latestV).getAsJsonArray();
-        String latestFilename = getInstallFileName(appletName, latestV, sdks.get(sdks.size() - 1).getAsString());
+
+        //check whether installed
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
+        if (appletInfos != null) {
+            for (AppletInfo applet : appletInfos) {
+                String name = applet.getName();
+                //installed from the store
+                if (name != null && name.equals(dataSet.get(JsonParser.TAG_TITLE).getAsString())) {
+                    installed = true;
+                    break;
+                }
+            }
+        }
+
+        JButton install = getButton(installed ? "CAP_reinstall" : "CAP_install", new Color(140, 196, 128));
 
         install.addMouseListener(
                 new MouseAdapter() {
@@ -120,9 +114,10 @@ public class StoreItemInfo extends HintPanel {
                                 sdks, sdks.size() - 1),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 callback,
-                                installed,
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
                 });
@@ -130,7 +125,8 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void checkDefaultSelected(JsonObject dataSet) {
-        if (dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean()) {
+        String selected = dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString();
+        if (selected != null && !selected.isEmpty()) {
             add(getNotice(textSrc.getString("W_default_app"), 14f, new Color(255, 220, 181),
                     new ImageIcon(Config.IMAGE_DIR + "info.png"), "margin: 10px; width:500px")
                     , "gap 20, span 4, gaptop 40, growx, wrap");
@@ -154,7 +150,7 @@ public class StoreItemInfo extends HintPanel {
 
     private void buildWebsites(JsonObject dataSet) {
         JsonObject websites = dataSet.get(JsonParser.TAG_URL).getAsJsonObject();
-        if (websites == null) return;
+        if (websites == null || websites.size() == 0) return;
 
         addSubTitle("website", "H_website");
 
@@ -221,9 +217,10 @@ public class StoreItemInfo extends HintPanel {
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
                                 dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 call,
-                                installed,
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsBoolean(),
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
+                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
                                 e);
                     }
                 });
@@ -318,9 +315,9 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, String signer, String identifier,
+    private static void fireInstall(String name, AppletInfo info, String signer, String identifier, JsonElement appNames,
                                     OnEventCallBack<Void, Void> call, boolean installed,
-                                    boolean defaultSelected, MouseEvent e) {
+                                    String defaultSelected, MouseEvent e) {
 
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
@@ -332,8 +329,17 @@ public class StoreItemInfo extends HintPanel {
             return;
         }
 
+        ArrayList<String> appletNamesData = null;
+        if (appNames != null && appNames.isJsonArray()) {
+            JsonArray array = appNames.getAsJsonArray();
+            appletNamesData = new ArrayList<>();
+            for (int i = 0; i < array.size(); i++) {
+                appletNamesData.add(array.get(i).getAsString());
+            }
+        }
+
         new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, signer, identifier), installed, defaultSelected, call).mouseClicked(e);
+                info, file, signer, identifier, appletNamesData), installed, defaultSelected, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {
@@ -348,6 +354,31 @@ public class StoreItemInfo extends HintPanel {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;
     }
+//    private List<AppletInfo> findCollisions(CardInstance card, InstallOpts options) {
+//        ArrayList<AppletInfo> result = new ArrayList<>();
+//        String[] toInstall = options.getCustomAIDs();
+//        AID pkgId = code.getPackageAID();
+//        if (toInstall == null) {
+//            toInstall = options.getOriginalAIDs();
+//        }
+//
+//        for (AppletInfo info : card.getInstalledApplets()) {
+//            if (info.getKind() == GPRegistryEntry.Kind.Application) {
+//                AID aid = info.getAid();
+//                for (int i = 0; i < options.getOriginalAIDs().length; i++) {
+//                    String tmpAid = toInstall.length <= i ? options.getOriginalAIDs()[i] : toInstall[i];
+//                    if (tmpAid == null || tmpAid.isEmpty()) tmpAid = options.getOriginalAIDs()[i];
+//                    if (aid.equals(AID.fromString(tmpAid))) {
+//                        result.add(info);
+//                    }
+//                }
+//            } else if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile && info.getAid().equals(pkgId)) {
+//                result.add(info);
+//            }
+//        }
+//        return result;
+//    }
+
 
     private static JPanel getNotice(String text, float fontSize, Color background, ImageIcon icon, String css) {
         final int depth = 5;

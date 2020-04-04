@@ -1,21 +1,16 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.Terminals;
-import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.help.*;
-import cz.muni.crocs.appletstore.ui.CustomNotifiableJmenu;
-import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.*;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.ui.CustomJmenu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -27,6 +22,7 @@ public class Menu extends JMenuBar {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private AppletStore context;
+    private int lastNumOfReadersConnected = 0;
     private CustomNotifiableJmenu readers;
     private JLabel currentCard;
 
@@ -39,18 +35,30 @@ public class Menu extends JMenuBar {
         buildMenu();
     }
 
-    public void setCard(String card) {
-        if (card == null || card.isEmpty())
+    /**
+     * Set new name of the card inserted in the application bar
+     * @param card custom card name provided by user OR obtained from database when inserted
+     * @param identifier card identifier, null or empty string if no card present
+     */
+    public void setCard(String card, String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
             card = textSrc.getString("no_card");
+        } else {
+            card += (card != null && !card.isEmpty()) ?
+                    " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
+        }
         currentCard.setText(card);
         revalidate();
+        repaint();
     }
 
     public void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
+
         if (manager.getTerminalState() != Terminals.TerminalState.NO_READER) {
             ButtonGroup readersPresent = new ButtonGroup();
+            int readersFound = 0;
             for (String name : manager.getTerminals()) {
                 JRadioButtonMenuItem item = selectableMenuItem(name, textSrc.getString("reader_avail"));
                 if (name.equals(manager.getSelectedTerminalName())) {
@@ -59,12 +67,17 @@ public class Menu extends JMenuBar {
                 item.addActionListener(selectReaderListener());
                 readersPresent.add(item);
                 readers.add(item);
+                readersFound++;
             }
-            readers.setNotify(true);
+            if (lastNumOfReadersConnected < readersFound) {
+                readers.setNotify(true);
+            }
+            lastNumOfReadersConnected = readersFound;
         } else {
             JMenuItem item = menuItemDisabled(textSrc.getString("no_reader"), "");
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "no-reader-small.png"));
             item.setEnabled(false);
+            lastNumOfReadersConnected = 0;
             readers.add(item);
             readers.setNotify(false);
         }
@@ -157,6 +170,7 @@ public class Menu extends JMenuBar {
             public void actionPerformed(ActionEvent e) {
                 OptionsFactory.getOptions().addOption(Options.KEY_HINT,
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
+                HintPanel.enableHint(OptionsFactory.getOptions().is(Options.KEY_HINT));
             }
         }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
@@ -184,9 +198,19 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE,
                         OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_E, InputEvent.ALT_MASK);
         intuitive.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
         submenu.add(intuitive);
+
+        JMenuItem exclusive = selectableMenuItem(new AbstractAction(textSrc.getString("exclusive_mode")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OptionsFactory.getOptions().addOption(Options.KEY_EXCLUSIVE_CARD_CONNECT,
+                        OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT) ? "false" : "true");
+            }
+        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
+        submenu.add(exclusive);
 
         JMenuItem autodelete = selectableMenuItem(new AbstractAction(textSrc.getString("implicit_delete")) {
             @Override
@@ -219,8 +243,24 @@ public class Menu extends JMenuBar {
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
         midContainer.add(new Text(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
-        currentCard = new Text();
+        currentCard = new HtmlText();
         currentCard.setForeground(Color.white);
+        currentCard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                CardInstance card = CardManagerFactory.getManager().getCard();
+                if (card == null) return;
+                String newName = showFormForNewCardName();
+                if (newName != null) {
+                    try {
+                        card.setName(newName);
+                    } catch (LocalizedCardException ex) {
+                        InformerFactory.getInformer().showInfoToClose("E_save_card_name", Notice.Importance.SEVERE);
+                    }
+                    setCard(newName, card.getId());
+                }
+            }
+        });
         midContainer.add(currentCard);
         add(midContainer);
     }
@@ -250,16 +290,26 @@ public class Menu extends JMenuBar {
             }
         }, textSrc.getString("H_auth")));
 
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("ifaq_title")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWindow(textSrc.getString("ifaq_title"), HelpFactory.getInstallFailuresFAQ()).showIt();
+            }
+        }, textSrc.getString("ifaq_h")));
+
+        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("def_title")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new HelpWindow(textSrc.getString("def_title"), HelpFactory.getMainAppletHelp()).showIt();
+            }
+        }, textSrc.getString("def_h")));
+
 //        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("pgp")) {
 //            @Override
 //            public void actionPerformed(ActionEvent e) {
 //                new HelpWrapper(textSrc.getString("pgp"), new Keybase()).showIt();
 //            }
 //        }, textSrc.getString("H_pgp")));
-    }
-
-    private void addHelpMenuItem() {
-        //todo automatize do not show wrapper
     }
 
     /**
@@ -352,5 +402,15 @@ public class Menu extends JMenuBar {
         setItemLook(rbMenuItem, description);
         rbMenuItem.setAccelerator(KeyStroke.getKeyStroke(keyEvent, inputEventMask));
         return rbMenuItem;
+    }
+
+    private String showFormForNewCardName() {
+        JTextField field = new JTextField();
+        if (JOptionPane.showOptionDialog(this, field, textSrc.getString("ask_for_card_name"),
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "creditcard.png"),
+                new String[]{textSrc.getString("ok"), textSrc.getString("cancel")}, textSrc.getString("ok")) == JOptionPane.YES_OPTION) {
+            return field.getText();
+        }
+        return null;
     }
 }

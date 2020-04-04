@@ -38,7 +38,7 @@ public class FreeMemoryAction extends CardAbstractAction {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        execute(() -> customCall.onFinish(JCMemory.getSystemInfo()),
-                "JCMemory.getSystemInfo() failed", textSrc.getString("E_could_not_get_memory"));
+        execute(() -> customCall.onFinish(JCMemory.getSystemInfo()), "JCMemory.getSystemInfo() failed",
+                textSrc.getString("E_could_not_get_memory"), 10000);
     }
 }

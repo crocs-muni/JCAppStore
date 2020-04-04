@@ -22,8 +22,6 @@ public class PGP extends CmdTask {
 
     private static boolean verified = false;
     private static String location;
-    private boolean isWarn = false;
-    private static Pattern pattern = Pattern.compile("Key fingerprint = ([0-9A-F ]+)");
 
     public PGP() throws LocalizedSignatureException {
         String fromSettings = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
@@ -32,6 +30,7 @@ public class PGP extends CmdTask {
                 if (fromSettings == null || fromSettings.isEmpty()) {
                     location = "gpg";
                     if (!new CmdTask().add(location).add("--help").processToString().contains("Copyright")) {
+                        //todo add image gnupg not present
                         throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
                     }
                 } else {
@@ -51,62 +50,49 @@ public class PGP extends CmdTask {
         verified = false;
     }
 
-    boolean verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
+    /**
+     * Verify signature
+     * @param author author - signature key owner identifier as showin in PGP or null
+     * @param file file to verify
+     * @param signatureFile detached signature file
+     * @return 0 if ok, 1 if invalid, 2 if error occured
+     */
+    int verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            String result = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
+            Process sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
                     + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
-                    .processToString();
-            isWarn = result.contains("WARNING");
-            return result.contains("Good signature") && (author == null || result.contains(author));
+                    .process();
+            return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            String result = new CmdTask().add(location).add("--verify")
+            Process sig = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("\"" + file.getAbsolutePath() + "\"")
-                    .processToString();
-            isWarn = result.contains("WARNING");
-            return result.contains("Good signature") && (author == null || result.contains(author));
-        } else return false;
+                    .process();
+            return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
+        } else return 2;
     }
 
-    Tuple<String, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
+    Tuple<Integer, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
         if (!file.exists() || !signatureFile.exists())
-            return new Tuple<>("not_verified.png", textSrc.getString("H_no_file_pgp"));
-
-        if (verifySignature(author, file, signatureFile)) {
+            return new Tuple<>(3, textSrc.getString("H_no_file_pgp"));
+        int exitCode = verifySignature(author, file, signatureFile);
+        if (exitCode == 0) {
             if (author == null) {
-                return (isWarn) ? new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
-                        textSrc.getString("H_verified_not_trusted"))
-                        : new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author"));
+                return new Tuple<>(exitCode, textSrc.getString("H_verified_no_author"));
+                /*TODO cannot find out missing trust set on the key, so the message will be
+                   "succeeded" even though key not trusted*/
+                 /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
+                        textSrc.getString("H_verified_not_trusted"))*/
             } else {
-                return (isWarn) ? new Tuple<>("verify_trust.png", textSrc.getString("H_verified") + author +
-                        textSrc.getString("H_verified_not_trusted"))
-                        : new Tuple<>("verify.png", textSrc.getString("H_verified") + author);
+                return new Tuple<>(exitCode, textSrc.getString("H_verified") + author);
+                /*TODO cannot find out missing trust set on the key*/
+                /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified") + author +
+                        textSrc.getString("H_verified_not_trusted")) */
             }
+        } else if (exitCode == 1) {
+            return new Tuple<>(exitCode, textSrc.getString("H_not_verified"));
         } else {
-            return new Tuple<>("not_verified.png", textSrc.getString("H_not_verified"));
+            return new Tuple<>(exitCode, textSrc.getString("H_signature_failed"));
         }
-    }
-
-    //not tested
-    private boolean hasKeyInRing(String keyId, String signer) throws LocalizedSignatureException {
-        String[] result = new CmdTask().add(location).add("--list-keys")
-                .add("-d").processToString().split("\n");
-        for (int i = 0; i < result.length; i += 2) {
-            if (result[i].contains(keyId) && result[i + 1].contains(signer))
-                return true;
-        }
-        return false;
-    }
-
-    public String getKeyID(File key) throws LocalizedSignatureException {
-        if (!key.exists()) return null;
-        String res = new CmdTask().add(location).add("--with-fingerprint")
-                .add(key.getAbsolutePath()).processToString();
-        Matcher m = pattern.matcher(res);
-        if (m.find()) {
-            //first group is that of all match string, second the () enclosed
-            return m.group(1);
-        }
-        throw new LocalizedSignatureException("Failed to obtain key id.", "");
     }
 }

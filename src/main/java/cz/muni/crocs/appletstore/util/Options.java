@@ -20,6 +20,7 @@ public interface Options<ValueType> {
     String KEY_BACKGROUND = "background";
     String KEY_HINT = "hint";
     String KEY_STYLESHEET = "stylesheet";
+    String KEY_EXCLUSIVE_CARD_CONNECT = "exclusive_card";
     String KEY_FONT = "text";
     String KEY_TITLE_FONT = "title";
     String KEY_PGP_LOCATION = "gpg";
@@ -27,6 +28,8 @@ public interface Options<ValueType> {
     String KEY_SIMPLE_USE = "simple_usage";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_DELETE_IMPLICIT = "delete_pkg";
+    String KEY_WARN_FORCE_INSTALL = "warn_force_install";
+    String KEY_LAST_SELECTION_LOCATION = "custom_applet_folder";
 
     /**
      * Get option for app

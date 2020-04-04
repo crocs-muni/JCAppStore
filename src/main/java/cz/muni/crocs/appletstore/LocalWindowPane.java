@@ -9,6 +9,7 @@ import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
+import cz.muni.crocs.appletstore.util.CallBack;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -90,6 +91,11 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
         installCmd.addMouseListener(new InstallAction(callback));
         refresh();
+
+        CardManagerFactory.getManager().setCallbackOnFailure(() -> {
+            refresh();
+            return null;
+        });
     }
 
     @Override
@@ -109,7 +115,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     @Override
     public void refresh() {
-        removeAll();
         infoLayout.set(null);
 
         CardManager manager = CardManagerFactory.getManager();
@@ -128,9 +133,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null as applet array returned.");
                 return;
-            } else {
-                loadApplets(card.getInstalledApplets(), manager);
             }
+            removeAll();
+            loadApplets(card.getInstalledApplets(), manager);
 
             constraints.fill = GridBagConstraints.BOTH;
 
@@ -147,9 +152,9 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             add(infoLayout, constraints);
 
             infoLayout.setBackground(Color.WHITE);
-            revalidate();
-            repaint();
         }
+        revalidate();
+        repaint();
     }
 
     @Override
@@ -167,6 +172,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         else
             add(new ErrorPane(textSrc.getString(keyTitle), textSrc.getString(keyText), imgName));
         revalidate();
+        repaint();
     }
 
     @Override
@@ -177,6 +183,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         else
             add(new ErrorPane(textSrc.getString(keyTitle), text + cause.getLocalizedMessage(), imgName));
         revalidate();
+        repaint();
     }
 
     @Override
@@ -184,12 +191,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         super.setVisible(aFlag);
         infoLayout.setVisible(CardManagerFactory.getManager().isAppletStoreSelected());
     }
-
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        infoLayout.setVisible(CardManagerFactory.getManager().isAppletSelected());
-//        super.paintComponent(g);
-//    }
 
     /**
      * Verify whether the terminal is persent and card inserted
@@ -230,6 +231,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             case 0x1:
                 return true;
             case 0x7:
+                //todo possibly allow management
                 showError("E_initialized", "H_initialized", "announcement_white.png");
                 return false;
             case 0xF:

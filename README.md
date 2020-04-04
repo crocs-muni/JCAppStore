@@ -52,6 +52,8 @@ intuitive software to install. You will always find the usage guide in the store
 Also, in the right upper corner, browse help for more detailed description. 
 Full documentation is accessible in [TODO]
 
+Useful set of tutorials and how-tos can be found on (https://github.com/OpenSC/OpenSC/wiki/Using-smart-cards-with-applications)[OpenSC wiki] 
+
 #### Basic terms (not exact, but a lot easier to understand to) ####
 <details>
    <summary>Applet</summary>

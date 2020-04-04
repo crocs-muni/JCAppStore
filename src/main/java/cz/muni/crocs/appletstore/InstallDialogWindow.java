@@ -7,6 +7,8 @@ import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
@@ -20,10 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 /**
@@ -34,6 +34,9 @@ import java.util.regex.Pattern;
  */
 public class InstallDialogWindow extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
+
+    private final String DEFAULT_APP_NAME = "Applet";
     //applet info and setting GUI components
     private JTextField name = new JTextField(50);
     private JTextField author = new JTextField(10);
@@ -42,62 +45,72 @@ public class InstallDialogWindow extends JPanel {
     private JTextField installParams = new JTextField(50);
     private JCheckBox forceInstall = new JCheckBox();
     private JCheckBox hasKeys = new JCheckBox();
-    private JTextField[] customAIDs;
     private JPanel advanced = new JPanel();
-    private ButtonGroup selectedAID = new ButtonGroup();
+    //private ButtonGroup selectedAID = new ButtonGroup();
+
+    private JTextField[] customAIDs;
+    private JCheckBox[] appletInstances;
+
     //applet install info variables
     private AppletInfo info;
     private CAPFile src;
     private boolean isInstalled;
+    private ArrayList<String> appletNames;
 
     private boolean initialized;
     private File customSignatureFile;
     private Color wrong = new Color(0xA3383D);
-    private static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
+    public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
-    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg) {
+    /**
+     * Create form for applet installation
+     *
+     * @param file        cap file to install
+     * @param info        info about the capfile (from store)
+     * @param isInstalled whether the applet is already installed on the card
+     * @param verifyMsg   message that is displayed when verified (differs on self-signatures)
+     * @param isCustom    whether the applet is installed form store or from custom source
+     * @param appletNames applet names that are to be displayed, usable if cap file with multiple applets
+     */
+    public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg,
+                               boolean isCustom, ArrayList<String> appletNames) {
         this.info = info;
         this.src = file;
         this.isInstalled = isInstalled;
+        //either applet names are defined for each applet, or in a form [0x, name, aid, name, aid...]
+        if (appletNames != null && appletNames.size() != file.getApplets().size() &&
+                appletNames.size() != file.getApplets().size() * 2 + 1) {
+            this.appletNames = null; //ignore the incomplete values
+        } else {
+            this.appletNames = appletNames;
+        }
         build(verifyMsg);
-    }
-
-    /**
-     * Build advanced section of the dialog, if not called only metadata section shown
-     * @param parent parent window to resize on switch
-     */
-    public void buildAdvanced(Window parent) {
-        if (initialized) return;
-        initAdvanced(parent);
         buildAdvanced();
-    }
-
-    public void buildAdvancedAndCustomSigned(Window parent) {
-        if (initialized) return;
-        initAdvanced(parent);
-        buildAdvanced();
-        buildCustomSigned();
+        if (isCustom) {
+            buildCustomSigned();
+        }
     }
 
     /**
      * Get applet install information
+     *
      * @return null if basic installation,
      * array with [installation arguments, force install, selected applet to install] values
      */
     public InstallOpts getInstallOpts() {
-        String aid = getSelectedAID();
+        String[] aids = getSelectedAIDs();
         AppletInfo details;
         if (info == null) {
             details = new AppletInfo(name.getText(), null, author.getText(), version.getText(),
-                    sdk.getText(), aid, KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
+                    sdk.getText(), "", KeysPresence.UNKNOWN, GPRegistryEntry.Kind.Application);
         } else {
             details = info;
-            info.setAID(aid);
         }
 
-        if (isAdvanced())
-            return new InstallOpts(getCustomAppletName(aid), details, forceInstall.isSelected(), installParams.getText());
-        else return new InstallOpts(getCustomAppletName(aid), details, isInstalled, new byte[0]);
+        if (isAdvanced()) return new InstallOpts(getCustomAppletNames(), aids, getSelectedAppletNames(), details,
+                forceInstall.isSelected(), installParams.getText());
+        else return new InstallOpts(getCustomAppletNames(),aids, getSelectedAppletNames(), details,
+                isInstalled, new byte[0]);
     }
 
     public boolean validInstallParams() {
@@ -105,19 +118,9 @@ public class InstallDialogWindow extends JPanel {
         return text == null || validHex(text);
     }
 
-    public boolean validAID() {
-        String aid = getSelectedAID();
-        if (aid == null)
-            return false;
-        return validAID(aid);
-    }
-
-    public boolean validCustomAID() {
-        return validAID(getCustomAppletName(getSelectedAID()));
-    }
-
     public File getCustomSignatureFile() {
-        System.out.println(customSignatureFile.getAbsolutePath());
+        logger.info("Custom signature file selected: " +
+                (customSignatureFile != null ? customSignatureFile.getAbsolutePath() : "none"));
         return customSignatureFile;
     }
 
@@ -167,15 +170,13 @@ public class InstallDialogWindow extends JPanel {
         return advanced.isVisible();
     }
 
-    private void initAdvanced(Window parent) {
-        if (parent == null)
-            return;
-
+    private void buildAdvanced() {
         JLabel more = new JLabel(textSrc.getString("advanced_settings"), new ImageIcon(Config.IMAGE_DIR + "arrow_small.png"), JLabel.LEFT);
         more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(more, "gaptop 22, span 4, wrap");
 
+        final InstallDialogWindow self = this;
         more.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -186,17 +187,15 @@ public class InstallDialogWindow extends JPanel {
                     advanced.setVisible(true);
                     add(advanced, "span 5, wrap");
                 }
-                parent.pack();
+                Window origin = SwingUtilities.getWindowAncestor(self);
+                origin.pack();
+                origin.setLocationRelativeTo(null);
             }
         });
         advanced.setLayout(new MigLayout());
         advanced.setVisible(false);
-        initialized = true;
-    }
 
-    private void buildAdvanced() {
         advanced.add(getHint("H_advanced_syntax", "300"), "span 5, wrap");
-        advanced.add(new JLabel(textSrc.getString("applet_ids")), "span 2");
 
         addAllAppletCustomAIDSFields(advanced, src.getAppletAIDs());
 
@@ -238,7 +237,8 @@ public class InstallDialogWindow extends JPanel {
         specifyCustomSignature.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = getShaderFileChoser(FileSystemView.getFileSystemView().getDefaultDirectory());
+                JFileChooser fileChooser = getShaderFileChoser(
+                        new File(OptionsFactory.getOptions().getOption(Options.KEY_LAST_SELECTION_LOCATION)));
                 int r = fileChooser.showOpenDialog(null);
                 if (r == JFileChooser.APPROVE_OPTION) {
                     customSignatureFile = fileChooser.getSelectedFile();
@@ -260,48 +260,58 @@ public class InstallDialogWindow extends JPanel {
 
     /**
      * List all applets to possibly install
+     *
      * @param applets list to install
      */
     private void addAllAppletCustomAIDSFields(JPanel to, List<AID> applets) {
         customAIDs = new JTextField[applets.size()];
-        int i = 0;
-        for (AID applet : applets) {
-            JRadioButton button = new JRadioButton();
-            button.setActionCommand(applet.toString());
-            selectedAID.add(button);
+        appletInstances = new JCheckBox[applets.size()];
 
-            JTextField f = new JTextField(applet.toString(), 50);
+        boolean changeAIDRequired = appletNames != null && !appletNames.isEmpty() && appletNames.get(0).equals("0x");
+        int i = changeAIDRequired ? 1 : 0;
+        int j = 0;
+        for (AID applet : applets) {
+            JCheckBox box = new JCheckBox();
+            box.setActionCommand(applet.toString());
+            box.setText(appletNames == null ? DEFAULT_APP_NAME : appletNames.get(i));
+
+            JTextField f = new JTextField(changeAIDRequired ? appletNames.get(i + 1) : applet.toString(), 50);
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
                     f.setForeground(validAID(f) ? Color.BLACK : wrong);
-                    button.setToolTipText(f.getText());
                 }
             });
-            to.add(f, "span 2");
-            to.add(button, "wrap");
-            to.add(new JLabel(), "span 2"); //empty label to align
-            customAIDs[i++] = f;
+            to.add(box, "span 2");
+            to.add(f, "span 3, wrap");
+
+            appletInstances[j] = box;
+            customAIDs[j++] = f;
+            i += changeAIDRequired ? 2 : 1;
         }
         to.add(new JLabel(), "wrap"); //cut line
         //set first selected
-        Enumeration elements = selectedAID.getElements();
-        if (elements.hasMoreElements()) {
-            AbstractButton button = (AbstractButton) elements.nextElement();
-            button.setSelected(true);
+        if (appletInstances.length > 0) {
+            appletInstances[0].setSelected(true);
         }
+    }
+
+    private int numOfAppletsToInstall() {
+        int num = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) num++;
+        }
+        return num;
     }
 
     private String valueOrDefault(String data, String defaultValue) {
@@ -309,35 +319,52 @@ public class InstallDialogWindow extends JPanel {
         return data;
     }
 
-    private String getCustomAppletName(String defaultOpt) {
-        Enumeration elements = selectedAID.getElements();
-        while (elements.hasMoreElements()) {
-            AbstractButton button = (AbstractButton)elements.nextElement();
-            if (button.isSelected()) {
-                return valueOrDefault(button.getToolTipText(), defaultOpt);
+    private String[] getCustomAppletNames() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (int i = 0; i < appletInstances.length; i++) {
+            JCheckBox box = appletInstances[i];
+            if (box.isSelected()) {
+                result[j++] = valueOrDefault(customAIDs[i].getText(), box.getActionCommand());
             }
         }
-        return defaultOpt;
+        return result;
     }
 
-    private String getSelectedAID() {
-        if (selectedAID.getSelection() == null) {
-            List<AID> aids = src.getAppletAIDs();
-            return (aids.size() > 0) ? src.getAppletAIDs().get(0).toString() : null;
+    private String[] getSelectedAppletNames() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) {
+                result[j++] = box.getText().equals(DEFAULT_APP_NAME) ? "" : box.getText();
+            }
         }
-        return selectedAID.getSelection().getActionCommand();
+        return result;
     }
 
-    private void enableAll(boolean enable) {
-        for (JTextField f : customAIDs) {
-            f.setEnabled(enable);
+    private String[] getSelectedAIDs() {
+        String[] result = new String[numOfAppletsToInstall()];
+        int j = 0;
+        for (JCheckBox box : appletInstances) {
+            if (box.isSelected()) {
+                result[j++] = box.getActionCommand().equals(DEFAULT_APP_NAME) ? "" : box.getActionCommand();
+            }
         }
+        return result;
     }
 
     private JLabel getHint(String langKey, String width) {
         JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>", 10f);
         hint.setForeground(Color.DARK_GRAY);
         return hint;
+    }
+
+    public boolean validCustomAIDs() {
+        boolean valid = true;
+        for (JTextField f : customAIDs) {
+            valid = valid && validAID(f);
+        }
+        return valid;
     }
 
     private static boolean validAID(JTextField field) {

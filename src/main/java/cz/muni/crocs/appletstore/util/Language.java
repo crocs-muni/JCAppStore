@@ -6,6 +6,8 @@ public interface Language {
 
     String getLocaleString();
 
+    String getImageString();
+
     Locale get();
 
     boolean has(String locale);

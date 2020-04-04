@@ -2,25 +2,35 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
+import cz.muni.crocs.appletstore.ReinstallWarnPanel;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.*;
+import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
+import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.KeyboardFocusManager;
+import java.awt.Dialog;
+import java.awt.HeadlessException;
+import java.awt.Container;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Set;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
-
 
 /**
  * Class to add to button as listener target to perform applet installation
@@ -33,7 +43,7 @@ public class InstallAction extends CardAbstractAction {
 
     private InstallBundle data;
     private boolean installed;
-    private boolean defaultSelected;
+    private String defaultSelected;
     private CAPFile code;
 
     private boolean fromCustomFile = false;
@@ -42,23 +52,23 @@ public class InstallAction extends CardAbstractAction {
      * Create an install action
      *
      * @param installData data for install
-     * @param installed  whether installed on the card already
-     * @param call       callback that is called before action and after failure or after success
+     * @param installed   whether installed on the card already
+     * @param call        callback that is called before action and after failure or after success
      */
-    public InstallAction(InstallBundle installData, boolean installed, boolean defaultSelected, OnEventCallBack<Void, Void> call) {
+    public InstallAction(InstallBundle installData, boolean installed, String defaultSelected, OnEventCallBack<Void, Void> call) {
         super(call);
         this.data = installData;
         this.installed = installed;
         this.defaultSelected = defaultSelected;
     }
 
+    /**
+     * Create install action from custom source
+     * @param call callback on events start/fail/finish
+     */
     public InstallAction(OnEventCallBack<Void, Void> call) {
-        this(InstallBundle.empty(), false, false, call);
+        this(InstallBundle.empty(), false, null, call);
         this.fromCustomFile = true;
-    }
-
-    public InstallAction(InstallBundle installData, OnEventCallBack<Void, Void> call) {
-        this(installData, false, false, call);
     }
 
     @Override
@@ -69,23 +79,112 @@ public class InstallAction extends CardAbstractAction {
             return;
         }
 
-        if (fromCustomFile) data.setCapfile(CapFileChooser.chooseCapFile(Config.APP_LOCAL_DIR));
+        if (fromCustomFile) data.setCapfile(CapFileChooser.chooseCapFile());
         code = CapFileChooser.getCapFile(data.getCapfile());
         if (code == null) {
             return;
         }
 
         if (fromCustomFile) {
-            verifyCustomInstallationAndShowInstallDialog();
+            runCustomInstallationGuide();
         } else {
-            verifyStoreInstallationAndShowInstallDialog();
+            runStoreInstallationGuide();
         }
     }
 
-    private void verifyCustomInstallationAndShowInstallDialog() {
-        final InstallDialogWindow dialogWindow = showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", true);
-        if (dialogWindow == null) return;
-        final File customSign = dialogWindow.getCustomSignatureFile();
+
+    private void runCustomInstallationGuide() {
+        showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", true);
+    }
+
+    private void runStoreInstallationGuide() {
+        verifySignatureRoutine(new Executable() {
+            @Override
+            void work() {
+                final Signature signature = new SignatureImpl();
+                try {
+                    result = signature.verifyPGPAndReturnMessage("JCAppStore", data.getCapfile());
+                    if (data.getSigner() != null && !data.getSigner().isEmpty()) {
+                        Tuple<Integer, String> another =
+                                signature.verifyPGPAndReturnMessage(data.getSigner(), data.getCapfile());
+                        result = new Tuple<>(another.first,
+                                "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
+                    }
+                } catch (LocalizedSignatureException e) {
+                    logger.warn("Signature verification failed", e);
+                    result = new Tuple<>(2, e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            void after() {
+                showInstallDialog(result.second, Signature.getImageByErrorCode(result.first), false);
+            }
+        });
+    }
+
+    private void showInstallDialog(String verifyResult, String imgIcon, final boolean isCustom) {
+        //simple usage will always do force install
+        final boolean forceInstall = installed; /*todo removed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);*/
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom, data.getAppletNames());
+        String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
+        CustomJOptionPane pane = new CustomJOptionPane(dialog, new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
+        pane.setOnClose(() -> {
+            int selectedValue = CustomJOptionPane.getSelectedValue(buttons, pane.getValue());
+            switch (selectedValue) {
+                case JOptionPane.YES_OPTION:
+                    //invalid data
+                    if (!dialog.validCustomAIDs() || !dialog.validInstallParams()) {
+                        InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
+                        showInstallDialog(pane);
+                        return null;
+                    } else if (!dialog.getInstallOpts().isForce()) { //check if custom AID is not conflicting
+                        logger.info("No force install: check the applets");
+                        if (someCustomAppletAIDsConflicts(dialog.getInstallOpts().getCustomAIDs())) {
+                            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
+                            showInstallDialog(pane);
+                            return null;
+                        }
+                    }
+                    break;
+                case JOptionPane.NO_OPTION:
+                case CLOSED_OPTION:
+                    return null;
+            }
+
+            if (isCustom) {
+                verifyCustomInstallationAndInstall(dialog);
+            } else {
+                fireInstall(dialog.getInstallOpts());
+            }
+            return null;
+        });
+        showInstallDialog(pane);
+    }
+
+    private void showInstallDialog(JOptionPane pane) {
+        JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
+        window.setModal(false);
+        window.pack();
+        window.setVisible(true);
+    }
+
+    private boolean someCustomAppletAIDsConflicts(String[] aids) {
+        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
+        for (AppletInfo applet : applets) {
+            for (String customAID : aids) {
+                if (applet.getAid().equals(AID.fromString(customAID))) {
+                    logger.info("applet: " + applet.getAid() + ", with " + customAID);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void verifyCustomInstallationAndInstall(final InstallDialogWindow resultDialog) {
+        if (resultDialog == null) return;
+        final File customSign = resultDialog.getCustomSignatureFile();
         if (customSign != null) {
             verifySignatureRoutine(new Executable() {
                 @Override
@@ -95,104 +194,51 @@ public class InstallAction extends CardAbstractAction {
                         result = signature.verifyPGPAndReturnMessage(null, data.getCapfile(), customSign);
                     } catch (LocalizedSignatureException e) {
                         logger.warn("Signature verification failed", e);
-                        result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
+                        result = new Tuple<>(2, e.getLocalizedMessage());
                     }
                 }
 
                 @Override
                 void after() {
-                    int choice = JOptionPane.showConfirmDialog(null,
+                    //confirm install only if signature failed
+                    int choice = (result.first == 0) ? YES_OPTION :
+                            JOptionPane.showConfirmDialog(null,
                             "<html><div width=\"350\">" + result.second + "<br>" +
                                     textSrc.getString("install_ask") + "</div></html>",
                             textSrc.getString("signature_title_dialog"),
                             JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                            new ImageIcon(Config.IMAGE_DIR + result.first));
+                            new ImageIcon(Config.IMAGE_DIR + Signature.getImageByErrorCode(result.first)));
                     if (choice == YES_OPTION) {
-                        fireInstall(dialogWindow.getInstallOpts());
+                        fireInstall(resultDialog.getInstallOpts());
                     }
                 }
             });
         } else {
-            fireInstall(dialogWindow.getInstallOpts());
+            fireInstall(resultDialog.getInstallOpts());
         }
     }
 
-    private void verifyStoreInstallationAndShowInstallDialog() {
-        verifySignatureRoutine(new Executable() {
-            @Override
-            void work() {
-                final Signature signature = new SignatureImpl();
-                try {
-                    result = signature.verifyPGPAndReturnMessage("JCAppStore", data.getCapfile());
-                    if (data.getSigner() != null && !data.getSigner().isEmpty()) {
-                        Tuple<String, String> another =
-                                signature.verifyPGPAndReturnMessage(data.getSigner(), data.getCapfile());
-                        result = new Tuple<>(another.first,
-                                "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
-                    }
-                } catch (LocalizedSignatureException e) {
-                    logger.warn("Signature verification failed", e);
-                    result = new Tuple<>("not_verified.png", e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            void after() {
-                InstallDialogWindow dialogWindow = showInstallDialog(result.second, result.first, false);
-                if (dialogWindow == null) return;
-                fireInstall(dialogWindow.getInstallOpts());
-            }
-        });
-    }
-
-    private InstallDialogWindow showInstallDialog(String verifyResult, String imgIcon, boolean buildCustomInstall) {
-        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), installed, verifyResult);
-        String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
-
-        JOptionPane pane = new JOptionPane(dialog, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
-                new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
-        JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
-        if (buildCustomInstall) dialog.buildAdvancedAndCustomSigned(window);
-        else dialog.buildAdvanced(window);
-        window.pack();
-        window.setVisible(true);
-
-        window.dispose();
-        int selectedValue = getSelectedValue(buttons, pane.getValue());//waiting line
-
-        switch (selectedValue) {
-            case JOptionPane.YES_OPTION:
-                if (!dialog.validCustomAID() || !dialog.validInstallParams()) {
-                    InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
-                    return showInstallDialog(verifyResult, imgIcon, buildCustomInstall);
-                }
-                break;
-            case JOptionPane.NO_OPTION:
-            case CLOSED_OPTION:
-                return null;
-        }
-        return dialog;
-    }
-
+    /**
+     * Perform various pre-install checks (memory available, force installs, warns) and fire install
+     *
+     * @param opts install options from the install form
+     */
     private void fireInstall(final InstallOpts opts) {
         final CardManager manager = CardManagerFactory.getManager();
         if (!manager.isCard()) {
             return;
         }
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
-        logger.info("Install AID: " + opts.getAID());
+        logger.info("Install AID: " + opts.getAIDs());
 
-        //if easy mode && package already present
-        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) && !opts.isForce()) {
-            //if applet present dont change anything
+        //do not force install on simple use implicitly
+//        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
+//                !findCollisions(manager.getCard(), opts).isEmpty()) {
+//            opts.setForce(true);
+//        }
 
-            if (manager.getCard().getInstalledApplets().stream().noneMatch(a ->
-                    a.getKind() != Kind.ExecutableLoadFile && a.getAid().equals(opts.getAID()))) {
-                if (manager.getCard().getInstalledApplets().stream().anyMatch(a ->
-                        a.getKind() == Kind.ExecutableLoadFile && a.getAid().equals(code.getPackageAID()))) {
-                    opts.setForce(true);
-                }
-            }
+        if (opts.isForce() && !userAcceptsForceInstallWarn()) {
+            return;
         }
 
         new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
@@ -247,12 +293,36 @@ public class InstallAction extends CardAbstractAction {
         }).start();
     }
 
+    private boolean userAcceptsForceInstallWarn() {
+        if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
+            ReinstallWarnPanel warn = new ReinstallWarnPanel();
+            if (showOptionDialog(null, warn,
+                    textSrc.getString("reinstall_warn_title"), YES_NO_OPTION, QUESTION_MESSAGE,
+                    new ImageIcon(Config.IMAGE_DIR + "announcement.png"),
+                    new String[]{textSrc.getString("continue"), textSrc.getString("cancel")},
+                    "error") == YES_OPTION) {
+                OptionsFactory.getOptions().addOption(Options.KEY_WARN_FORCE_INSTALL,
+                        "" + (!warn.userSelectedDontShowAgain()));
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Actual installation
+     *
+     * @param opts    options from the install form modified by fireInstall() method
+     *                (e.g. simple use mode adds force install if package present)
+     * @param manager card manager instance
+     */
     private void doInstall(final InstallOpts opts, final CardManager manager) {
         if (!manager.isCard()) {
             return;
         }
 
-        if (defaultSelected) {
+        if (defaultSelected != null && !defaultSelected.isEmpty()) {
             //custom applet never reaches this section
             AID selected = manager.getCard().getDefaultSelected();
             AppletInfo info = manager.getCard().getInfoOf(selected);
@@ -267,44 +337,17 @@ public class InstallAction extends CardAbstractAction {
                         new String[]{textSrc.getString("default_selected_yes"),
                                 textSrc.getString("default_selected_no")},
                         textSrc.getString("default_selected_yes"));
-
-                defaultSelected = result == YES_OPTION;
+                if (result != YES_OPTION) defaultSelected = null;
             } // else defaultSelected == true -> silently set as default selected
         }
+        opts.setDefalutSelected(defaultSelected);
         execute(() -> {
-            if (defaultSelected)
-                manager.installAndSelectAsDefault(code, opts);
-            else
-                manager.install(code, opts);
+            manager.install(code, opts);
             SwingUtilities.invokeLater(() ->
                     InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
                             Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));
             data.setCapfile(null);
-        }, "Failed to install applet.", textSrc.getString("install_failed"));
-    }
-
-    //copied from JOptionPane to parse the JOptionPane return value
-    private int getSelectedValue(Object[] options, Object selectedValue) {
-        Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-        if (fo != null && fo.isShowing()) {
-            fo.requestFocus();
-        }
-        if (selectedValue == null) {
-            return CLOSED_OPTION;
-        }
-        if (options == null) {
-            if (selectedValue instanceof Integer) {
-                return (Integer) selectedValue;
-            }
-            return CLOSED_OPTION;
-        }
-        for (int counter = 0, maxCounter = options.length;
-             counter < maxCounter; counter++) {
-            if (options[counter].equals(selectedValue)) {
-                return counter;
-            }
-        }
-        return CLOSED_OPTION;
+        }, "Failed to install applet.", textSrc.getString("install_failed"), 60000);
     }
 
     private static void verifySignatureRoutine(Executable task) {
@@ -334,15 +377,126 @@ public class InstallAction extends CardAbstractAction {
     }
 
 
-    private abstract class Executable {
-        Tuple<String, String> result;
+    private abstract static class Executable {
+        Tuple<Integer, String> result;
 
-        void setResult(Tuple<String, String> result) {
+        void setResult(Tuple<Integer, String> result) {
             this.result = result;
         }
 
         abstract void work();
 
         abstract void after();
+    }
+
+    //this class clontains copied-out code of JOptionPane, slightly modified because JOptionPane does not allow much
+    //custom behaviour
+    private static class CustomJOptionPane extends JOptionPane {
+
+        private CallBack<Void> onClose;
+
+        CustomJOptionPane(Object message, Icon icon, Object[] options, Object initialValue) {
+            super(message, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, icon, options, initialValue);
+        }
+
+        void setOnClose(CallBack<Void> onClose) {
+            this.onClose = onClose;
+        }
+
+        static int getSelectedValue(Object[] options, Object selectedValue) {
+            Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            if (fo != null && fo.isShowing()) {
+                fo.requestFocus();
+            }
+            if (selectedValue == null) {
+                return CLOSED_OPTION;
+            }
+            if (options == null) {
+                if (selectedValue instanceof Integer) {
+                    return (Integer) selectedValue;
+                }
+                return CLOSED_OPTION;
+            }
+            for (int counter = 0, maxCounter = options.length;
+                 counter < maxCounter; counter++) {
+                if (options[counter].equals(selectedValue)) {
+                    return counter;
+                }
+            }
+            return CLOSED_OPTION;
+        }
+
+        @Override
+        public JDialog createDialog(String title) throws HeadlessException {
+            JDialog dialog = new JDialog((Dialog) null, title, true);
+            initDialog(dialog);
+            return dialog;
+        }
+
+        private void initDialog(final JDialog dialog) {
+            dialog.setComponentOrientation(this.getComponentOrientation());
+            Container contentPane = dialog.getContentPane();
+
+            contentPane.setLayout(new BorderLayout());
+            contentPane.add(this, BorderLayout.CENTER);
+            dialog.setResizable(false);
+            if (JDialog.isDefaultLookAndFeelDecorated()) {
+                boolean supportsWindowDecorations =
+                        UIManager.getLookAndFeel().getSupportsWindowDecorations();
+                if (supportsWindowDecorations) {
+                    dialog.setUndecorated(true);
+                    getRootPane().setWindowDecorationStyle(JRootPane.INFORMATION_DIALOG);
+                }
+            }
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+
+            final CustomJOptionPane self = this;
+            final PropertyChangeListener listener = new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent event) {
+                    // Let the defaultCloseOperation handle the closing
+                    // if the user closed the window without selecting a button
+                    // (newValue = null in that case).  Otherwise, close the dialog.
+                    if (dialog.isVisible() && event.getSource() == self &&
+                            (event.getPropertyName().equals(VALUE_PROPERTY)) &&
+                            event.getNewValue() != null &&
+                            event.getNewValue() != JOptionPane.UNINITIALIZED_VALUE) {
+                        dialog.setVisible(false);
+                        onClose.callBack();
+                    }
+                }
+            };
+
+            WindowAdapter adapter = new WindowAdapter() {
+                private boolean gotFocus = false;
+
+                public void windowClosing(WindowEvent we) {
+                    setValue(null);
+                }
+
+                public void windowClosed(WindowEvent e) {
+                    removePropertyChangeListener(listener);
+                    dialog.getContentPane().removeAll();
+                }
+
+                public void windowGainedFocus(WindowEvent we) {
+                    // Once window gets focus, set initial focus
+                    if (!gotFocus) {
+                        selectInitialValue();
+                        gotFocus = true;
+                    }
+                }
+            };
+            dialog.addWindowListener(adapter);
+            dialog.addWindowFocusListener(adapter);
+            dialog.addComponentListener(new ComponentAdapter() {
+                public void componentShown(ComponentEvent ce) {
+                    // reset value to ensure closing works properly
+                    setValue(JOptionPane.UNINITIALIZED_VALUE);
+                }
+            });
+
+            addPropertyChangeListener(listener);
+        }
     }
 }
