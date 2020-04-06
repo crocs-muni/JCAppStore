@@ -212,16 +212,6 @@ public class Menu extends JMenuBar {
         exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
         submenu.add(exclusive);
 
-        JMenuItem autodelete = selectableMenuItem(new AbstractAction(textSrc.getString("implicit_delete")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                OptionsFactory.getOptions().addOption(Options.KEY_DELETE_IMPLICIT,
-                        OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT) ? "false" : "true");
-            }
-        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
-        autodelete.setSelected(OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT));
-        submenu.add(autodelete);
-
         JMenuItem jcmemory = selectableMenuItem(new AbstractAction(textSrc.getString("enable_jcmemory")) {
             @Override
             public void actionPerformed(ActionEvent e) {

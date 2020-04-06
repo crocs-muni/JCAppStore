@@ -57,7 +57,6 @@ public class OptionsImpl implements Options<String> {
         options.put(Options.KEY_SIMPLE_USE, "true");
         options.put(Options.KEY_VERBOSE_MODE, "false");
         options.put(Options.KEY_KEEP_JCMEMORY, "true");
-        options.put(Options.KEY_DELETE_IMPLICIT, "true");
         options.put(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
         options.put(Options.KEY_WARN_FORCE_INSTALL, "true");
         options.put(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());

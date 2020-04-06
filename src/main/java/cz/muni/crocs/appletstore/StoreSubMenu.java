@@ -43,7 +43,7 @@ public class StoreSubMenu extends JPanel {
     }
 
     private void setupWithoutImage() {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         setOpaque(false);
 
         back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "store_back.png"));
@@ -54,11 +54,12 @@ public class StoreSubMenu extends JPanel {
         t.setBorder(BorderFactory.createEmptyBorder(10, 40, 5, 0));
         add(t);
 
-        add(Box.createHorizontalGlue());
+        add(Box.createHorizontalStrut(200));
 
         setupReloadButton();
         reload.setForeground(Color.WHITE);
         reload.setAlignmentY(Component.TOP_ALIGNMENT);
+        reload.setMaximumSize(new Dimension(250, reload.getMaximumSize().height));
         add(reload);
     }
 

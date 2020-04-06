@@ -27,7 +27,6 @@ public interface Options<ValueType> {
     String KEY_VERBOSE_MODE = "verbose";
     String KEY_SIMPLE_USE = "simple_usage";
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
-    String KEY_DELETE_IMPLICIT = "delete_pkg";
     String KEY_WARN_FORCE_INSTALL = "warn_force_install";
     String KEY_LAST_SELECTION_LOCATION = "custom_applet_folder";
 

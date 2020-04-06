@@ -41,6 +41,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     private JPanel windowLayout;
     private JScrollPane windowScroll;
 
+    private SearchBar searchBar;
     private TreeSet<LocalItem> items = new TreeSet<>();
     private LocalInstallItem installCmd = new LocalInstallItem();
 
@@ -100,17 +101,10 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     @Override
     public void showItems(String query) {
-        if (query == null || query.isEmpty()) {
-            showPanel(items);
-        } else {
-            TreeSet<LocalItem> sortedIems = new TreeSet<>();
-            for (LocalItem item : items) {
-                if (item.getSearchQuery().toLowerCase().contains(query.toLowerCase())) {
-                    sortedIems.add(item);
-                }
-            }
-            showPanel(sortedIems);
+        if (query == null) {
+            query = searchBar.getQuery();
         }
+        showItemsInternal(query);
     }
 
     @Override
@@ -135,7 +129,10 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                 return;
             }
             removeAll();
+
             loadApplets(card.getInstalledApplets(), manager);
+            //skip calling search bar as it might not have been initialized
+            showItemsInternal(null);
 
             constraints.fill = GridBagConstraints.BOTH;
 
@@ -155,6 +152,11 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
         revalidate();
         repaint();
+    }
+
+    @Override
+    public void registerSearchBar(SearchBar bar) {
+        this.searchBar = bar;
     }
 
     @Override
@@ -190,6 +192,20 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
         infoLayout.setVisible(CardManagerFactory.getManager().isAppletStoreSelected());
+    }
+
+    private void showItemsInternal(String query) {
+        if (query == null || query.isEmpty()) {
+            showPanel(items);
+        } else {
+            TreeSet<LocalItem> sortedIems = new TreeSet<>();
+            for (LocalItem item : items) {
+                if (item.getSearchQuery().toLowerCase().contains(query.toLowerCase())) {
+                    sortedIems.add(item);
+                }
+            }
+            showPanel(sortedIems);
+        }
     }
 
     /**
@@ -273,7 +289,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             });
             items.add(item);
         }
-        showPanel(items);
         windowScroll.setViewportView(windowLayout);
     }
 

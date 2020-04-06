@@ -64,9 +64,8 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                 job.interrupt();
                 t.cancel();
                 t.purge();
-                SwingUtilities.invokeLater(() -> {
-                    InformerFactory.getInformer().showMessage(textSrc.getString("E_timeout"));
-                });
+                SwingUtilities.invokeLater(() ->
+                        InformerFactory.getInformer().showMessage(textSrc.getString("E_timeout")));
             }
         }, msTimeout);
         job.start();
@@ -76,7 +75,8 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         handleUnknownKey(toExecute, loggerMessage, title, null, e);
     }
 
-    protected void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, String image, UnknownKeyException e) {
+    protected void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title,
+                                    String image, UnknownKeyException e) {
         try {
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
@@ -113,7 +113,8 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         e.printStackTrace();
         logger.warn(loggerMessage + e.getMessage());
         if (title != null) {
-            InformerFactory.getInformer().showFullScreenInfo(new ErrorPane(textSrc.getString(title), e.getLocalizedMessage(), image));
+            InformerFactory.getInformer().showFullScreenInfo(
+                    new ErrorPane(textSrc.getString(title), e.getLocalizedMessage(), image));
         }
         SwingUtilities.invokeLater(call::onFail);
     }

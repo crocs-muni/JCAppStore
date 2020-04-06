@@ -32,7 +32,7 @@ public class DeleteDialogWindow extends JPanel {
         this.keys = hasKeys;
         this.kind = kind;
 
-        boolean implicit = OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
+        boolean implicit = OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);
         boolean pkg = kind == GPRegistryEntry.Kind.ExecutableLoadFile;
         String question;
         if (!implicit) {
@@ -46,7 +46,8 @@ public class DeleteDialogWindow extends JPanel {
         add(new HtmlText("<p width=\"600\">" + textSrc.getString(pkg && !implicit ? "pkg_id" : "app_id") + aid + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
-        if (!implicit) {
+        //enable force uninstall on applets only, packages are treated afterwards when found dependencies
+        if (!implicit && kind == GPRegistryEntry.Kind.Application) {
             add(forceUninstall);
             add(new Text(textSrc.getString("chbox_force_delete")), "span 4, wrap");
             add(getHint("chbox_force_delete_expl"), "span 5, wrap");

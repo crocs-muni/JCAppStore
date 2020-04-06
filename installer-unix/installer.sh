@@ -40,3 +40,6 @@ fi
 
 mv ${FILE}-unix.tar.gz ../build/deploy-unix/
 rm -rf ${FILE}/
+
+
+

@@ -74,6 +74,8 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
         pages.add(localPanel);
         pages.add(storePanel);
         LeftMenu leftMenu = new LeftMenu(this);
+        localPanel.registerSearchBar(leftMenu);
+        storePanel.registerSearchBar(leftMenu);
 
         setOpaque(false);
         content.add(leftMenu, BorderLayout.WEST);
@@ -116,6 +118,10 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
         return (storePanel.isVisible()) ? storePanel : localPanel;
     }
 
+    /**
+     * Get 'my card' panel
+     * @return panel for 'my card'
+     */
     public LocalWindowPane getRefreshablePane() {
         return localPanel;
     }

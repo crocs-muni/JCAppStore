@@ -6,9 +6,11 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -16,6 +18,7 @@ import pro.javacard.gp.GPRegistryEntry;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
@@ -41,8 +44,10 @@ public class DeleteAction extends CardAbstractAction {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        final CardManager manager = CardManagerFactory.getManager();
+
         if (!(info.getKind() == Kind.ExecutableLoadFile ||
-                info.getKind() == Kind.Application)) {
+                info.getKind() == Kind.Application) || manager.getCard() == null) {
             return;
         }
 
@@ -56,30 +61,45 @@ public class DeleteAction extends CardAbstractAction {
         }
         logger.info("Delete applet: " + info.toString());
 
-        final CardManager manager = CardManagerFactory.getManager();
-        boolean willForce = opts.willForce() || OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT);
-
+        boolean willForce = opts.willForce();
         AppletInfo packageInfo = null;
-        if (info.getKind() == Kind.Application) {
+        if ((info.getKind() == Kind.Application) && (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE))) {
             //implicit mode deletes package too
-            if (OptionsFactory.getOptions().is(Options.KEY_DELETE_IMPLICIT)) {
-                packageInfo = getPackageOf(info);
-                logger.info("Implicit delete package too: " +
-                        (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
-            }
-        } else { //executable because of the very first if clause
-            //simple use deletes applet when deleting package
-            //todo re-define uninstall policy
-            if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
-                CardInstance card = manager.getCard();
-                for (AID mod : info.getModules()) {
-                    if (card != null && card.getInstalledApplets().stream().anyMatch(a -> a.getAid().equals(mod))) {
+            packageInfo = getPackageOf(info);
+            logger.info("Implicit delete package too: " +
+                    (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
+        }
 
-                        willForce = true;
-                        break;
+        //ask user whether to delete applet too
+        StringBuilder appletsToDelete = new StringBuilder();
+
+        if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+            for (AID mod : info.getModules()) {
+                for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
+                    if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
+                            //do not notify about the applet we are removing now
+                            !(info.getKind() == Kind.Application && info.getAid().equals(nfo.getAid()))) {
+                        appletsToDelete.append("<br>").append(info.getName());
                     }
                 }
             }
+        }
+        String applets = appletsToDelete.toString();
+        //if found dependencies and  we do not try to uninstall package as a dependency from simple mode
+        if (!applets.isEmpty() && packageInfo == null) {
+            logger.info("Found applet collisions: " + applets);
+            ConfirmDeletion confirm = new ConfirmDeletion(applets);
+            if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
+                    != JOptionPane.YES_OPTION)  return;
+            willForce = confirm.agreed();
+            if (!willForce)return; //did not agreed
+        } else {
+            //do not uninstall package dependency if more applets are still on the card
+            if (!applets.isEmpty()) {
+                packageInfo = null;
+                logger.info("Package not implicitly deleted: other applets still active.");
+            }
+            willForce = false;
         }
 
         if (willForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted
@@ -97,7 +117,7 @@ public class DeleteAction extends CardAbstractAction {
 
         final boolean finalWillForce = willForce;
         final AppletInfo finalPackage = packageInfo;
-        execute(() -> {
+         execute(() -> {
             manager.uninstall(info, finalWillForce);
             if (finalPackage != null) { //todo force package delete should suffice..?
                 manager.uninstall(finalPackage, true);
@@ -130,5 +150,20 @@ public class DeleteAction extends CardAbstractAction {
             }
         }
         return null;
+    }
+
+    private static class ConfirmDeletion extends JPanel {
+        private JCheckBox verify = new JCheckBox();
+        public ConfirmDeletion(String appletName) {
+            super(new MigLayout());
+            add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion1")+appletName+"</div>"), "wrap");
+            add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion2")+"</div>"), "wrap");
+            verify.setText("<html><div width=\"300\">" + textSrc.getString("W_confirm_applet_delete") + "</div></html>");
+            add(verify);
+        }
+
+        public boolean agreed() {
+            return verify.isSelected();
+        }
     }
 }
