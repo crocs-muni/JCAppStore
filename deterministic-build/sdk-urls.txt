@@ -1,0 +1,6 @@
+https://www.oracle.com/java/technologies/java-archive-downloads-javame-downloads.html#java_card_kit-classic-3_0_5-ga-win32-bin-do
+java_card_kit-2_1_2-win.zip
+java_card_kit-2_2_2-windows.zip   --> bin folder inside
+java_card_kit-2_2_1-windows.zip	
+java_card_kit-classic-3_0_3-rr-bin-do-b36-windows-11_nov_2010.jar -->installer
+java_card_kit-classic-3_0_4-rr-bin-do-b28-windows-06_sep_2011.jar --> installer

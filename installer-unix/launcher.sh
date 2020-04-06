@@ -1,9 +1,9 @@
 #!/bin/bash
 VERSION=1.0
-DIRECTORY=./
+DIR=./
 
 if ! cat jcappstore-do-not-ask.info ; then
-	if ! gpg --help > /dev/null 2&>1 ; then
+	if ! gpg --version > /dev/null 2&>1 ; then
 	   echo "You don't have GnuPG installed, the store will be unable to verify software integrity.\
 	      this can be fixed anytime by GnuPG installation and JCAppStore key import."
      echo "Next time, the application will start WITHOUT THIS NOTICE!"
@@ -30,4 +30,4 @@ if ! cat jcappstore-do-not-ask.info ; then
 	fi
   touch jcappstore-do-not-ask.info
 fi
-java -jar ${DIRECTORY}/JCAppStore-${VERSION}.jar
+java -jar ${DIR}/JCAppStore-${VERSION}.jar

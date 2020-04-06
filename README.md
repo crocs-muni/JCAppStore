@@ -25,21 +25,26 @@ How to get the store
 In Releases, download the latest windows zip file. Extract contents of the zip and open it. Inside, double click 
 JCAppStore-[version]-win.jar file - it is an installer that will install the store for you: follow the instructions.
 
-#### Unix
-Unfortunately, there is no package yet. The store will be available both via RPM and DEB packaging system. For now, 
-you have to move the files manually.
+#### Unix/Linux
+For ubuntu/debian, a `.deb` package is available. Just install the package and run the application twice: for the first time using `root`:
+```
+$ sudo jcapp
+```
+The store has to change access rights for the JCAppStore sources folder. We are unable to do it when installing as we can't 
+get the user name we should change the rights to. All necessary setup is done and the shell exits. Now run jcappstore again: `jcapp`
 
+###### Universal UNIX
 1. Download the tar ball for unix from the latest release and extract it.
 2. Decide on where to put the application data. We recommed to choose folder such as: **/usr/share/java**
 3. Inside your selected folder, create another folder called **JCAppStore** and move here all files from the package except launcher.sh file.
-4. Modify **launcher.sh** file: set DIRECTORY=path_to_the_sources. For example: DIRECTORY=/usr/share/java/JCAppStore
-5. Put the launcher script anywhere you like and launch the app with it. You can put it inside /usr/bin folder so that it is 
-visible from anywhere and rename it conveniently. You may have to set the executable rights to the launcher as follows: 
+4. Modify **launcher.sh** file: set `DIR=path_to_the_sources`. For example: `DIR=/usr/share/java/JCAppStore`
+5. Put the launcher script anywhere you like and launch the app with it. You can put it inside `/usr/bin` folder so that it is 
+visible from anywhere and rename it conveniently (**jcapp**, for example). You may have to set executable rights to the launcher as follows: 
 **chmod u+x launcher.sh**. It is up to you where the script is located and how the application will be launched. 
 All you need to do is execute the shell script.
 
-#### Apple OS-x
-There are no specific sources available - the unix way will do.
+###### Apple OS-x
+Apple is also a UNIX system. Use the guide above.
 
 
 
@@ -50,9 +55,9 @@ How the store works?
 applications themselves.** That's why we try to include a pool (store), that contains safe, and
 intuitive software to install. You will always find the usage guide in the store item details. 
 Also, in the right upper corner, browse help for more detailed description. 
-Full documentation is accessible in [TODO]
+Full documentation is accessible in `readme_res` resources folder.
 
-Useful set of tutorials and how-tos can be found on (https://github.com/OpenSC/OpenSC/wiki/Using-smart-cards-with-applications)[OpenSC wiki] 
+Useful set of tutorials and how-tos can be found on [OpenSC wiki](https://github.com/OpenSC/OpenSC/wiki/Using-smart-cards-with-applications).
 
 #### Basic terms (not exact, but a lot easier to understand to) ####
 <details>
@@ -146,7 +151,7 @@ using PGP signatures - that means, the store makes sure no one maliciously modif
    **You do not need this feature if you are not an advanced user.**
    The values that are used in the advanced settings are hexadecimal numbers. That is, valid characters are **123456789ABCDEFabcdef** only.
    
-   _Radio button applet IDs_: select the applet to install if more available. Also, custom AID is supported.
+   _Applets checkboxes_: select the applet(s) to install if more available. Also, custom AID is supported.
    
    _Installation parameters_: is a value passed to the application when installing. The target applet use info section in store provides necessary information.
    
@@ -191,11 +196,12 @@ The deletion is very simple; there are only two things you need to know:
 
 Store content
 -----
-You can browse the store using search bar in the left menu. You can search either by application name or developer. Follow these steps:
+You can browse the store using search bar in the left menu. You can search either by application name, category or a developer. Follow these steps:
 
 1) Read the applet use info field before installing. It states any necessary steps that has to be taken in order to use the applet.
-2) Install the newest applet version. If installation fails check if you:
-    3) have enough install memory space
-    4) know whether the sdk installed is supported by your card (see SDK version field in the install dialog window)
-    5) modified advanced install section with incorrect values
+2) Install the newest applet version. In the case of failure check whether:
+    3) the card have enough install memory space,
+    4) you know whether the sdk installed is supported by your card (see SDK version field in the install dialog window),
+    5) the applet requires a technology not suported by your card (NFC for example) - find your card [here](https://www.fi.muni.cz/~xsvenda/jcalgtest/),
+    6) you modified advanced install section with incorrect values.
 6) Enjoy!    

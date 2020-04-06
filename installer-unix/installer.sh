@@ -1,9 +1,6 @@
- #!/bin/bash
+#!/bin/bash
 
-#This is an old artefact to be replaced by RPM or DEB
-
-exit 1;
-
+#This file generates the tarball.
 VERSION=1.0
 FILE=JCAppStore-${VERSION}
 
