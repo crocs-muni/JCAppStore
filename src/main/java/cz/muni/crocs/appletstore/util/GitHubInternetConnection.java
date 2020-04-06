@@ -27,8 +27,8 @@ public class GitHubInternetConnection {
             final URL url = new URL(Config.REMOTE_STORE_LATEST_URL);
             final URLConnection conn = url.openConnection();
             conn.connect();
-            JsonParser jp = new JsonParser();
-            JsonElement root = jp.parse(new InputStreamReader((InputStream) conn.getContent()));
+            JsonParser parser = new JsonParser();
+            JsonElement root = parser.parse(new InputStreamReader((InputStream) conn.getContent()));
             conn.getInputStream().close();
             JsonObject latest = root.getAsJsonObject();
 
