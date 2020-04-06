@@ -18,7 +18,6 @@ import java.util.*;
 public class JsonStoreParser implements JsonParser {
 
     private File info;
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public List<JsonObject> getValues() throws FileNotFoundException {
         File file = getFileInfo(); //safe
@@ -56,7 +55,7 @@ public class JsonStoreParser implements JsonParser {
 
     private boolean verifyInfoFile() {
         info = new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
+                + OptionsFactory.getOptions().getLanguage().getLocaleString()
                 + Config.FILE_INFO_SUFFIX);
         if (!info.exists()) {
             info = new File(Config.APP_STORE_DIR,Config.FILE_INFO_PREFIX + "en" + Config.FILE_INFO_SUFFIX);

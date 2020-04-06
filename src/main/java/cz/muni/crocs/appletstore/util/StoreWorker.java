@@ -82,7 +82,7 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
         } else {
             return Config.APP_STORE_CAPS_DIR.exists() &&
                     new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                            + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
+                            + OptionsFactory.getOptions().getLanguage().getLocaleString()
                             + Config.FILE_INFO_SUFFIX).exists();
         }
     }
