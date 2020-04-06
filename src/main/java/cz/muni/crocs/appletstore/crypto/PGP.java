@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -61,19 +62,32 @@ public class PGP extends CmdTask {
      * @return 0 if ok, 1 if invalid, 2 if error occured
      */
     int verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
+        int counter = 0;
+        while (!Files.isReadable(file.toPath()) || !Files.isReadable(signatureFile.toPath())) {
+            try {
+                Thread.currentThread().wait(500);
+                counter++;
+                if (counter > 6) return 3;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
             Process sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
                     + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
                     .process();
-            logger.info(CmdTask.toString(sig));
-            return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
+            String output = CmdTask.toString(sig);
+            logger.info(output);
+            return (author == null || output.contains(author)) ? sig.exitValue() : 1;
         } else if (SystemUtils.IS_OS_WINDOWS) {
             Process sig = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("\"" + file.getAbsolutePath() + "\"")
                     .process();
-            logger.info(CmdTask.toString(sig));
-            return (author == null || CmdTask.toString(sig).contains(author)) ? sig.exitValue() : 1;
+            String output = CmdTask.toString(sig);
+            logger.info(output);
+            return (author == null || output.contains(author)) ? sig.exitValue() : 1;
         } else return 2;
     }
 
@@ -81,23 +95,31 @@ public class PGP extends CmdTask {
         if (!file.exists() || !signatureFile.exists())
             return new Tuple<>(3, textSrc.getString("H_no_file_pgp"));
         int exitCode = verifySignature(author, file, signatureFile);
-        if (exitCode == 0) {
-            if (author == null) {
-                return new Tuple<>(exitCode, textSrc.getString("H_verified_no_author"));
+        switch (exitCode) {
+            case 0: {
+                if (author == null) {
+                    return new Tuple<>(exitCode, textSrc.getString("H_verified_no_author"));
                 /*TODO cannot find out missing trust set on the key, so the message will be
                    "succeeded" even though key not trusted*/
                  /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
                         textSrc.getString("H_verified_not_trusted"))*/
-            } else {
-                return new Tuple<>(exitCode, textSrc.getString("H_verified") + author);
-                /*TODO cannot find out missing trust set on the key*/
+                } else {
+                    return new Tuple<>(exitCode, textSrc.getString("H_verified") + author);
+                    /*TODO cannot find out missing trust set on the key*/
                 /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified") + author +
                         textSrc.getString("H_verified_not_trusted")) */
+                }
             }
-        } else if (exitCode == 1) {
-            return new Tuple<>(exitCode, textSrc.getString("H_not_verified"));
-        } else {
-            return new Tuple<>(exitCode, textSrc.getString("H_signature_failed"));
+            case 1: {
+                return new Tuple<>(exitCode, textSrc.getString("H_not_verified"));
+            }
+            case 3: {
+                return new Tuple<>(exitCode, textSrc.getString("H_unable_to_read"));
+            }
+            default: {
+                return new Tuple<>(exitCode, textSrc.getString("H_signature_failed"));
+
+            }
         }
     }
 }

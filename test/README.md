@@ -21,7 +21,9 @@ The store should be untouched as if just installed, except
    the JCAppStore must be able to authenticate to the card automatically,
    - the JCAppStore language is set to English.
 
-Also some test-case-specific conditions must be met. The `my_card/` folder must contain`JCAlgTest_v1.7.4_sdk2.2.2.cap`
+Empty card means all packages and applet instances are deleted except an ISD applet. Toggle "packages" checkbox to verify
+no packages without instantiated applet are present.
+Also some other test-case-specific conditions must be met. The `my_card/` folder must contain`JCAlgTest_v1.7.4_sdk2.2.2.cap`
 for custom installation test execution, along with `\[the cap filename\].sig`
  file for custom signature verification. Both files can be copied from the `store/` folder.
  
@@ -39,4 +41,4 @@ for custom installation test execution, along with `\[the cap filename\].sig`
   - different performance: the card activities may take different time on your platform. There are timeouts for actions set, JUBULA can not
   handle our "WORKING..." window well and the timeouts for installations are between 15 and 30 seconds, deletion between 5 and 15 seconds. 
   In case an action is not performed within these limits, the tests will fail.
-  - updates: use release dated to 5.4. 2020. Any newer releases might change behaviour and the tests could fail.  
+  - updates: use release dated to 5.4. 2020. Any newer releases might change behaviour and the tests could fail.

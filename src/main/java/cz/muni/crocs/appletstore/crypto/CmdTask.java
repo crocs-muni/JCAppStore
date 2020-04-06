@@ -41,7 +41,6 @@ public class CmdTask {
 
     public Process process(int timeoutSec) throws LocalizedSignatureException {
         try {
-            //todo for some reason gpg --help stucks
             logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
             Process result = new ProcessBuilder(process).redirectErrorStream(true).start();
             result.waitFor(timeoutSec, TimeUnit.SECONDS);
@@ -74,6 +73,8 @@ public class CmdTask {
             result = builder.toString();
         } catch (Exception e) {
             logger.error("Couldn't read command output:" , e);
+            logger.info("Note: this error is not serious, probably just closed stream, this is used for " +
+                    "logger to display more info only.");
         }
         process.destroy();
         logger.debug(result);
