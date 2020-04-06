@@ -1,4 +1,4 @@
-###Deterministic builds
+### Deterministic builds
 
 Because all sources from store contents repository (https://github.com/petrs/JCAppStoreContent) are
 compiled, we provide an advices on how to compile the exact binaries independently.
