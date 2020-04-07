@@ -4,7 +4,7 @@ import java.io.File;
 
 /**
  * Serialize installed-from-store applet info
- * @param <T>
+ * @param <T> type to serialize
  */
 public interface AppletSerializer<T> {
 

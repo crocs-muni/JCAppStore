@@ -4,6 +4,12 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import java.awt.*;
 
+/**
+ * Custom combo box editor style
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class StyledItemEditor extends BasicComboBoxEditor {
     private String selected;
 

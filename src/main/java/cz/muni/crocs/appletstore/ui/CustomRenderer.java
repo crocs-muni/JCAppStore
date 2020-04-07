@@ -4,10 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
+ * Renderer style for drop-down list components
+ *
  * @author Jiří Horák
  * @version 1.0
  */
-public class CusomRenderer extends DefaultListCellRenderer implements ListCellRenderer<Object> {
+public class CustomRenderer extends DefaultListCellRenderer implements ListCellRenderer<Object> {
 
     @Override
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellMasFocus) {

@@ -14,11 +14,16 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/*
-PGP: RSA 4096
-export public:  gpg --armor --export you@example.com > you.asc
-sign file:      gpg --output file.sig --detach-sign file
-verify:         if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --verify file.sig file
+/**
+ * CMD Task extension to talk to GnuPG
+ *
+ * Used commands
+ * export public:   gpg --armor --export you@example.com > you.asc
+ * sign file:       gpg --output file.sig --detach-sign file
+ * import & verify: if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --verify file.sig file
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public class PGP extends CmdTask {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
@@ -27,6 +32,11 @@ public class PGP extends CmdTask {
     private static boolean verified = false;
     private static String location;
 
+    /**
+     * Verifies whether GnuPG installed for the first time when run
+     * @throws LocalizedSignatureException when no GnuPG installed or found
+     * (e.g. 'gpg' not in $PATH and no custom path specified)
+     */
     public PGP() throws LocalizedSignatureException {
         String fromSettings = OptionsFactory.getOptions().getOption(Options.KEY_PGP_LOCATION);
         if (!verified) {
@@ -46,10 +56,12 @@ public class PGP extends CmdTask {
             } catch (LocalizedSignatureException e) {
                 throw new LocalizedSignatureException("GnuPG not present.", "no_pgp");
             }
-
         }
     }
 
+    /**
+     * Invalidates the GnuPG installation - next time, gpg existence is verified again
+     */
     public static void invalidate() {
         verified = false;
     }
@@ -72,26 +84,35 @@ public class PGP extends CmdTask {
                 Thread.currentThread().interrupt();
             }
         }
-
+        Process sig;
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            Process sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
+            sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
                     + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
                     .process();
-            String output = CmdTask.toString(sig);
-            logger.info(output);
-            return (author == null || output.contains(author)) ? sig.exitValue() : 1;
+
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            Process sig = new CmdTask().add(location).add("--verify")
+            sig = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("\"" + file.getAbsolutePath() + "\"")
                     .process();
-            String output = CmdTask.toString(sig);
-            logger.info(output);
-            return (author == null || output.contains(author)) ? sig.exitValue() : 1;
         } else return 2;
+        String output = CmdTask.toString(sig);
+        logger.info(output);
+        output = output.replaceAll("\\s", "");
+
+        if (author == null) {
+            return (output.contains(OptionsFactory.getOptions().getOption(Options.KEY_STORE_FINGERPRINT)))
+                    ? sig.exitValue() : 1;
+        }
+        return (output.contains(author)) ? sig.exitValue() : 1;
     }
 
-    Tuple<Integer, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile) throws LocalizedSignatureException {
+    /**
+     * Just a wrapper that assesses int output from verifySignature()
+     * @return tuple: first: forwards exit code value; second: string message to display
+     */
+    Tuple<Integer, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile)
+            throws LocalizedSignatureException {
         if (!file.exists() || !signatureFile.exists())
             return new Tuple<>(3, textSrc.getString("H_no_file_pgp"));
         int exitCode = verifySignature(author, file, signatureFile);
@@ -110,16 +131,9 @@ public class PGP extends CmdTask {
                         textSrc.getString("H_verified_not_trusted")) */
                 }
             }
-            case 1: {
-                return new Tuple<>(exitCode, textSrc.getString("H_not_verified"));
-            }
-            case 3: {
-                return new Tuple<>(exitCode, textSrc.getString("H_unable_to_read"));
-            }
-            default: {
-                return new Tuple<>(exitCode, textSrc.getString("H_signature_failed"));
-
-            }
+            case 1: return new Tuple<>(exitCode, textSrc.getString("H_not_verified"));
+            case 3: return new Tuple<>(exitCode, textSrc.getString("H_unable_to_read"));
+            default: return new Tuple<>(exitCode, textSrc.getString("H_signature_failed"));
         }
     }
 }

@@ -9,6 +9,9 @@ import java.awt.*;
 
 /**
  * BasicSplitPaneDivider custom graphics
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public class CustomSplitPaneDivider extends BasicSplitPaneDivider {
 

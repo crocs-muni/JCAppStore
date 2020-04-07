@@ -29,6 +29,7 @@ public interface Options<ValueType> {
     String KEY_KEEP_JCMEMORY = "jcmemory_keep";
     String KEY_WARN_FORCE_INSTALL = "warn_force_install";
     String KEY_LAST_SELECTION_LOCATION = "custom_applet_folder";
+    String KEY_STORE_FINGERPRINT = "public_key_fingerprint";
 
     /**
      * Get option for app
@@ -45,12 +46,17 @@ public interface Options<ValueType> {
     void addOption(String name, ValueType value);
 
     /**
+     * Loads the options
+     */
+    void load();
+
+    /**
      * Save the opts into file
      */
     void save();
 
     /**
-     * Resets all options
+     * Adds all missing options with default values
      */
     void setDefaults();
 

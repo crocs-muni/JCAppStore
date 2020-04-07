@@ -20,6 +20,49 @@ public class StoreItem extends JPanel implements Item {
     private String searchQuery;
     private int position;
 
+    /**
+     * Create a store item
+     * @param dataSet json object from info_[lang].json file
+     * @param category category the applet belongs to
+     * @param position position as defined in the file
+     */
+    public StoreItem(JsonObject dataSet, String category, int position) {
+        this(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
+                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
+                category,
+                dataSet.get(JsonParser.TAG_LATEST).getAsString(),
+                dataSet.get(JsonParser.TAG_ICON).getAsString()
+        );
+        this.position = position;
+    }
+
+    @Override
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    @Override
+    public int hashCode() {
+        return position;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Item)) return false;
+        return obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public int compareTo(Item o) {
+        int thisCode = hashCode();
+        int otherCode = o.hashCode();
+
+        if (thisCode == otherCode) {
+            return 0;
+        }
+        return thisCode > otherCode ? 1 : -1;
+    }
+
     private StoreItem(String title, String author, String category, String version, String image) {
         searchQuery = title + author + category;
         setLayout(new GridBagLayout());
@@ -71,16 +114,6 @@ public class StoreItem extends JPanel implements Item {
         add(container, gbc);
     }
 
-    public StoreItem(JsonObject dataSet, String category, int position) {
-        this(dataSet.get(JsonParser.TAG_TITLE).getAsString(),
-                dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
-                category,
-                dataSet.get(JsonParser.TAG_LATEST).getAsString(),
-                dataSet.get(JsonParser.TAG_ICON).getAsString()
-                );
-        this.position = position;
-    }
-
     private JLabel getLabel(String text, String css, Float fontSize, boolean title) {
         return (title) ?
                 new HtmlTitle("<div style=\"" + css + "\">" + text + "</div>", fontSize)
@@ -95,32 +128,5 @@ public class StoreItem extends JPanel implements Item {
         File img = new File(Config.RESOURCES + imgName);
         img = (img.exists()) ? img : new File(Config.IMAGE_DIR + "applet_plain.png");
         return img.getAbsolutePath();
-    }
-
-    @Override
-    public String getSearchQuery() {
-        return searchQuery;
-    }
-
-    @Override
-    public int hashCode() {
-        return position;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Item)) return false;
-        return obj.hashCode() == hashCode();
-    }
-
-    @Override
-    public int compareTo(Item o) {
-        int thisCode = hashCode();
-        int otherCode = o.hashCode();
-
-        if (thisCode == otherCode) {
-            return 0;
-        }
-        return thisCode > otherCode ? 1 : -1;
     }
 }

@@ -5,6 +5,8 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 
 /**
+ * Custom scroll bars style
+ *
  * @author Jiří Horák
  * @version 1.0
  */

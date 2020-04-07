@@ -20,6 +20,9 @@ import java.util.TimerTask;
 
 /**
  * Abstract card action wrapper providing failure management
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public abstract class CardAbstractAction extends MouseAdapter implements CardAction {
     private static final Logger logger = LoggerFactory.getLogger(CardAbstractAction.class);
@@ -50,12 +53,20 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         job(toExecute, loggerMessage, title, null).start();
     }
 
+    /**
+     * Routine wrapper for the card action execution providing error handling and
+     * unknown key management
+     *
+     * @param toExecute     CardExecutable implementation that is to be executed
+     * @param loggerMessage message to write into logger on a failure
+     * @param title         title (must be translated!) for the user dialog on failure
+     * @param msTimeout     timeout in ms the action should error after, must be greater then 1000
+     */
     protected void execute(CardExecutable toExecute, String loggerMessage, String title, int msTimeout) {
         if (msTimeout < 1000) {
             logger.warn("Execute called with timeout less than one second. Aborting...");
             return;
         }
-        //todo tasks should abort if thread flag interrupt = true
         Timer t = new Timer();
         Thread job = job(toExecute, loggerMessage, title, t);
         t.schedule(new TimerTask() {
@@ -71,10 +82,15 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
         job.start();
     }
 
-    private void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, UnknownKeyException e) {
-        handleUnknownKey(toExecute, loggerMessage, title, null, e);
-    }
-
+    /**
+     * Task that handles unknown key error
+     * @param toExecute     CardExecutable implementation that is to be executed again, it should be the task
+     *                      that invoked the unknown key error
+     * @param loggerMessage original (toExecute) message to write into logger on a failure
+     * @param title         original (toExecute) title (must be translated!) for the user dialog on failure
+     * @param image         image to display in case the handler fails
+     * @param e             UnknownKeyException error that is being handled
+     */
     protected void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title,
                                     String image, UnknownKeyException e) {
         try {
@@ -92,6 +108,10 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                     new ErrorPane(textSrc.getString("E_authentication"),
                             textSrc.getString("E_master_key_not_found"), "lock.png"));
         }
+    }
+
+    private void handleUnknownKey(CardExecutable toExecute, String loggerMessage, String title, UnknownKeyException e) {
+        handleUnknownKey(toExecute, loggerMessage, title, null, e);
     }
 
     private static void showFailed(String title, String message) {

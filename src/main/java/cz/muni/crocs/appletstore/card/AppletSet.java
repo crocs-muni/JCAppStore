@@ -8,6 +8,9 @@ import java.util.HashSet;
  * Exec. laod files are from GPPro returned twice, once instance
  * with executable load file with modules -> if contains and we found module version
  * replace
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public class AppletSet extends HashSet<AppletInfo> {
 

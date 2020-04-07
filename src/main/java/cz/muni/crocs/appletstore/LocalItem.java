@@ -42,87 +42,10 @@ public class LocalItem extends JPanel implements Item {
     private Color selected = new Color(207, 244, 210);
     private CardManager manager;
 
-    private LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
-        this.info = info;
-        this.name = title;
-        this.manager = CardManagerFactory.getManager();
-        loadLabels();
-        setAlignmentX(LEFT_ALIGNMENT);
-
-        searchQuery = title + author + ((info == null) ? "" : Arrays.toString(info.getAid().getBytes()));
-        setLayout(new GridBagLayout());
-        setOpaque(false);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.weighty = 1.0;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.CENTER;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-
-        JLabel icon = new HtmlText("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                super.paintComponent(g);
-                if (info != null && info.getKind() == Kind.IssuerSecurityDomain)
-                    g2d.drawImage(issuer, null, 20, 4);
-            }
-        };
-        add(icon, gbc);
-
-        container = new JPanel();
-        container.setLayout(new GridBagLayout());
-        container.setBackground(Color.WHITE);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-
-        int titleLength = 25;
-
-        if (info != null) {
-               title = (info.getKind() == Kind.ExecutableLoadFile ? textSrc.getString("package_for") : "") + title;
-            if (info.getName() == null) titleLength = 15;
-        }
-        title = adjustLength(title, titleLength);
-        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", 16f), gbc);
-
-        gbc.fill = GridBagConstraints.RELATIVE;
-        gbc.anchor = GridBagConstraints.LAST_LINE_START;
-        author = adjustLength(author, 15);
-        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", 13f);
-        infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
-        container.add(infoPanel, gbc);
-
-        gbc.fill = GridBagConstraints.RELATIVE;
-        gbc.anchor = GridBagConstraints.LAST_LINE_END;
-        version = adjustLength(version, 5);
-        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", 15f), gbc);
-
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(container, gbc);
-    }
-
-    private static void loadLabels() {
-        if (newItem == null) newItem = loadLabel( "newlabel.png");
-        if (superSelected == null)  superSelected = loadLabel("main.png");
-    }
-
-    private static BufferedImage loadLabel(String name) {
-            try {
-                return ImageIO.read(new File(Config.IMAGE_DIR + name));
-            } catch (IOException e) {
-                e.printStackTrace();
-                logger.warn("Failed to load the \"new\" label for the local item", e);
-                return new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-            }
-    }
-
+    /**
+     * Create an applet instance item from its info
+     * @param info AppletInfo info data class
+     */
     public LocalItem(AppletInfo info) {
         this(
                 breakIfTooLong(getName(info)),
@@ -131,21 +54,6 @@ public class LocalItem extends JPanel implements Item {
                 (info.getVersion() == null) ? "" : info.getVersion(),
                 info
         );
-    }
-
-    private static String getName(AppletInfo info) {
-        if (info.getName() == null) {
-            return info.getAid().toString();
-        }
-        return info.getName();
-    }
-
-    private static String breakIfTooLong(String name) {
-        int index = name.indexOf(' ');
-        if ((index < 0 || index > 14) && name.length() > 14) {
-            return name.substring(0, 14) + " " + name.substring(14);
-        }
-        return name;
     }
 
     @Override
@@ -208,6 +116,102 @@ public class LocalItem extends JPanel implements Item {
             container.setBackground(Color.WHITE);
         }
         super.paintComponent(g);
+    }
+
+    private LocalItem(String title, String imgName, String author, String version, AppletInfo info) {
+        this.info = info;
+        this.name = title;
+        this.manager = CardManagerFactory.getManager();
+        loadLabels();
+        setAlignmentX(LEFT_ALIGNMENT);
+
+        searchQuery = title + author + ((info == null) ? "" : Arrays.toString(info.getAid().getBytes()));
+        setLayout(new GridBagLayout());
+        setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.weighty = 1.0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        JLabel icon = new HtmlText("<img src=\"file:///" + getImgAddress(imgName) + "\" width=\"130\" height=\"130\"/>") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                super.paintComponent(g);
+                if (info != null && info.getKind() == Kind.IssuerSecurityDomain)
+                    g2d.drawImage(issuer, null, 20, 4);
+            }
+        };
+        add(icon, gbc);
+
+        container = new JPanel();
+        container.setLayout(new GridBagLayout());
+        container.setBackground(Color.WHITE);
+
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        int titleLength = 25;
+
+        if (info != null) {
+            title = (info.getKind() == Kind.ExecutableLoadFile ? textSrc.getString("package_for") : "") + title;
+            if (info.getName() == null) titleLength = 15;
+        }
+        title = adjustLength(title, titleLength);
+        container.add(getLabel(title, "width:100px; height: 60px; margin: 5px", 16f), gbc);
+
+        gbc.fill = GridBagConstraints.RELATIVE;
+        gbc.anchor = GridBagConstraints.LAST_LINE_START;
+        author = adjustLength(author, 15);
+        JLabel infoPanel = getLabel(author, "width:85px; max-lines:1; margin: 5px", 13f);
+        infoPanel.setHorizontalAlignment(SwingConstants.RIGHT);
+        container.add(infoPanel, gbc);
+
+        gbc.fill = GridBagConstraints.RELATIVE;
+        gbc.anchor = GridBagConstraints.LAST_LINE_END;
+        version = adjustLength(version, 5);
+        container.add(getLabel(version, "width:10px; text-overflow: ellipsis; margin: 5px", 15f), gbc);
+
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(container, gbc);
+    }
+
+    private static void loadLabels() {
+        if (newItem == null) newItem = loadLabel( "newlabel.png");
+        if (superSelected == null)  superSelected = loadLabel("main.png");
+    }
+
+    private static BufferedImage loadLabel(String name) {
+        try {
+            return ImageIO.read(new File(Config.IMAGE_DIR + name));
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.warn("Failed to load the \"new\" label for the local item", e);
+            return new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        }
+    }
+
+    private static String getName(AppletInfo info) {
+        if (info.getName() == null) {
+            return info.getAid().toString();
+        }
+        return info.getName();
+    }
+
+    private static String breakIfTooLong(String name) {
+        int index = name.indexOf(' ');
+        if ((index < 0 || index > 14) && name.length() > 14) {
+            return name.substring(0, 14) + " " + name.substring(14);
+        }
+        return name;
     }
 
     private boolean wasLastInstalled(CardManager manager) {

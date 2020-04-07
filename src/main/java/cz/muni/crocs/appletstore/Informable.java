@@ -1,7 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.ErrorPane;
-
 import javax.swing.*;
 
 /**

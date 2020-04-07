@@ -11,7 +11,14 @@ import java.util.*;
 
 import static cz.muni.crocs.appletstore.Config.S;
 
+/**
+ * JCAppStore options implementation
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class OptionsImpl implements Options<String> {
+
     private static final Logger logger = LoggerFactory.getLogger(OptionsImpl.class);
 
     private final String HEADER = "JCAppStore";
@@ -22,44 +29,34 @@ public class OptionsImpl implements Options<String> {
     private Font text;
     private Font title;
 
+    /**
+     * Creates a new options instance from default options file
+     */
     OptionsImpl() {
-        getFileOptions();
-        if (options.isEmpty())
-            setDefaults();
+        this.options = new HashMap<>();
+        load();
+        setDefaults();
         setup();
-    }
-
-    OptionsImpl(HashMap<String, String> options) {
-        this.options = options;
-        if (options.isEmpty())
-            setDefaults();
-        setup();
-    }
-
-    private void setup() {
-        loadLanguage();
-        setStyles();
-        loadFonts();
     }
 
     @Override
     public void setDefaults() {
-        options.clear();
-        options.put(Options.KEY_SHOW_WELCOME, "true");
-        options.put(Options.KEY_LANGUAGE, Locale.getDefault().toString());
-        options.put(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
-        options.put(Options.KEY_GITHUB_LATEST_VERSION, "none");
-        options.put(Options.KEY_HINT, "true");
-        options.put(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
-        options.put(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
-        options.put(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
-        options.put(Options.KEY_PGP_LOCATION, "");
-        options.put(Options.KEY_SIMPLE_USE, "true");
-        options.put(Options.KEY_VERBOSE_MODE, "false");
-        options.put(Options.KEY_KEEP_JCMEMORY, "true");
-        options.put(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
-        options.put(Options.KEY_WARN_FORCE_INSTALL, "true");
-        options.put(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());
+        addIfMissing(Options.KEY_SHOW_WELCOME, "true");
+        addIfMissing(Options.KEY_LANGUAGE, Locale.getDefault().toString());
+        addIfMissing(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
+        addIfMissing(Options.KEY_GITHUB_LATEST_VERSION, "none");
+        addIfMissing(Options.KEY_HINT, "true");
+        addIfMissing(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
+        addIfMissing(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");
+        addIfMissing(Options.KEY_TITLE_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"title.ttf");
+        addIfMissing(Options.KEY_PGP_LOCATION, "");
+        addIfMissing(Options.KEY_SIMPLE_USE, "true");
+        addIfMissing(Options.KEY_VERBOSE_MODE, "false");
+        addIfMissing(Options.KEY_KEEP_JCMEMORY, "true");
+        addIfMissing(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
+        addIfMissing(Options.KEY_WARN_FORCE_INSTALL, "true");
+        addIfMissing(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());
+        addIfMissing(Options.KEY_STORE_FINGERPRINT, "4EB13B314E3FB0D05075897EFFACBB3D7B9FE0F5");
     }
 
     @Override
@@ -137,6 +134,26 @@ public class OptionsImpl implements Options<String> {
     }
 
     @Override
+    public void load() {
+        File file = new File(Config.OPTIONS_FILE);
+
+        try {
+            if (!file.createNewFile()) {
+                IniParser parser = new IniParserImpl(file, HEADER, "");
+                Set<String> keyset = parser.keySet();
+                if (keyset == null)
+                    return;
+                for (String key : keyset) {
+                    options.put(key, parser.getValue(key));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Failed to read app options.", e);
+        }
+    }
+
+    @Override
     public void save() {
         File file = new File(Config.OPTIONS_FILE);
         try {
@@ -150,34 +167,20 @@ public class OptionsImpl implements Options<String> {
         }
     }
 
-    private void loadLanguage() {
-        language = LanguageImpl.from(getOption(KEY_LANGUAGE));
+    private void setup() {
+        loadLanguage();
+        setStyles();
+        loadFonts();
     }
 
-    private void getFileOptions() {
-        options = new HashMap<>();
-        File file = new File(Config.OPTIONS_FILE);
-
-        try {
-            if (!file.createNewFile()) {
-                IniParser parser = new IniParserImpl(file, HEADER, "");
-                Set<String> keyset = parser.keySet();
-                if (keyset == null)
-                    return;
-                for (String key : keyset) {
-                    options.put(key, parser.getValue(key));
-                }
-                if (options.size() == 0) {
-                    setDefaults();
-                }
-            } else {
-                setDefaults();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.warn("Failed to read app options.", e);
-            setDefaults();
+    private void addIfMissing(String key, String value) {
+        if (!options.containsKey(key)) {
+            options.put(key, value);
         }
+    }
+
+    private void loadLanguage() {
+        language = LanguageImpl.from(getOption(KEY_LANGUAGE));
     }
 
     private void setStyles() {
@@ -241,57 +244,4 @@ public class OptionsImpl implements Options<String> {
     private Font getDefaultFont() {
         return new Font("Courier", Font.PLAIN, 14);
     }
-
-
-    //handles the custom opt settings, leave for later
-//    //available languages
-//    private final String[] langs = new String[]{
-//            "English", "eng",
-//            "Česky", "cz"
-//    };
-//    OptionsLoader(File file, boolean startAppOnSelect) {
-//
-//        Config.options.clear();
-//        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//        //center this dialog
-//        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-//        this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
-//        this.setSize(50, 30 * (langs.length / 2) + 40 /*bar height*/);
-//
-//
-//        JPanel panel = (JPanel) this.getContentPane();
-//        CustomJListFactory list = new CustomJListFactory();
-//        list.setCellSize(50, 20);
-//        for (int i = 0; i < langs.length; i += 2) {
-//            list.add(langs[i], Config.IMAGE_DIR + langs[i+1] + ".jpg");
-//        }
-//        JList jList = list.build();
-//        jList.setBorder(new EmptyBorder(10,10, 10, 10));
-//
-//        //on click save choosed language and run
-//        jList.addListSelectionListener(new ListSelectionListener() {
-//            @Override
-//            public void valueChanged(ListSelectionEvent e) {
-//                int valueIndex = e.getLastIndex();
-//                BufferedWriter writer = null;
-//                try {
-//                    writer = new BufferedWriter(new FileWriter(file));
-//                    writer.write("lang=" + langs[(2*valueIndex+1)] + "\n");
-//                    writer.close();
-//                    populateOptions(langs[(2*valueIndex+1)]);
-//                } catch (IOException e1) {
-//                    e1.printStackTrace();
-//                    populateOptions("eng");
-//                }
-//                //context.dispose();
-//                //problem cannot get language while fetching options
-//                JOptionPane.showMessageDialog(null, "Changes will apply after an restart.");
-//
-//            }
-//        });
-//        panel.add(jList);
-//    }
-//private void populateOptions(String key, String value) {
-//    Config.options.put(key, value);
-//}
 }

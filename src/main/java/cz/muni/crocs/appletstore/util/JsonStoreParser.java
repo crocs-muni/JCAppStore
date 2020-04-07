@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 /**
+ * Parsing the info_[lang].json from store
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -19,6 +21,7 @@ public class JsonStoreParser implements JsonParser {
 
     private File info;
 
+    @Override
     public List<JsonObject> getValues() throws FileNotFoundException {
         File file = getFileInfo(); //safe
         if (file == null) return null;
@@ -34,6 +37,7 @@ public class JsonStoreParser implements JsonParser {
         return result;
     }
 
+    @Override
     public String[] jsonArrayToDataArray(JsonArray array) {
         if (array == null) return null;
         int len = array.size();

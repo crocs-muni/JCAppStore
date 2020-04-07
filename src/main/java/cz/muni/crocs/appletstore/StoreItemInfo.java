@@ -13,12 +13,9 @@ import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pro.javacard.AID;
-import pro.javacard.CAPFile;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
-import javax.smartcardio.Card;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -28,7 +25,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 /**
  * Item detail in store
@@ -48,6 +44,12 @@ public class StoreItemInfo extends HintPanel {
     private JComboBox<String> compilerVersionComboBox;
     private static final ImageIcon website = new ImageIcon(Config.IMAGE_DIR + "web.png");
 
+    /**
+     * Create a detailed store info
+     * @param dataSet json object from info_[lang].json file
+     * @param store parent store panel
+     * @param callBack callback to forward to install action
+     */
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 

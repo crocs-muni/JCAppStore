@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 
 
 /**
- * todo worth creating interface
+ * Error Panel to display important messages (e.g. failed to load the card)
  *
  * @author Jiří Horák
  * @version 1.0
@@ -23,6 +23,11 @@ import java.util.ResourceBundle;
 public class ErrorPane extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    /**
+     * Error panel creation
+     * @param title panel error title, should be translated
+     * @param imgName error image, should be translated
+     */
     public ErrorPane(String title, String imgName) {
         setOpaque(false);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -40,6 +45,12 @@ public class ErrorPane extends JPanel {
         add(errorMsg);
     }
 
+    /**
+     * Error panel creation
+     * @param titleKey translation key for ResourceBundle
+     * @param imgName error image
+     * @param callable callback to call when clicked on a "retry" option
+     */
     public ErrorPane(String titleKey, String imgName, CallBack callable) {
         this(titleKey, imgName);
 
@@ -64,12 +75,18 @@ public class ErrorPane extends JPanel {
         add(panel);
     }
 
+    /**
+     * Error panel creation
+     * @param title error title
+     * @param message error message
+     * @param imgName error image
+     */
     public ErrorPane(String title, String message, String imgName) {
         this(title, imgName);
         add(getCopiableLabel(message));
     }
 
-    public JTextPane getCopiableLabel(String text) {
+    private JTextPane getCopiableLabel(String text) {
         JTextPane f = TextField.getTextField(text, "width: 300px; text-align:center;", Color.WHITE);
         f.setAlignmentX(CENTER_ALIGNMENT);
         f.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));

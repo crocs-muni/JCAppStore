@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+/**
+ * Card Manager, the component visible from outside of this package
+ */
 public interface CardManager {
 
     /**

@@ -3,6 +3,12 @@ package cz.muni.crocs.appletstore.util;
 import java.util.Arrays;
 import java.util.Locale;
 
+/**
+ * Enum for languages, add new to display in the Settings
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public enum LanguageImpl implements Language {
 
     ENGLISH("en", "en.jpg","English");
@@ -34,10 +40,20 @@ public enum LanguageImpl implements Language {
         return Locale.forLanguageTag(locale);
     }
 
+    /**
+     * Getting a Language enum value
+     * @param locale locale to parse
+     * @return corresponding enum or ENGLISH if not supported
+     */
     public static Language from(Locale locale) {
         return from(locale.toString());
     }
 
+    /**
+     * Getting a Language enum value
+     * @param locale locale sting to parse
+     * @return corresponding enum or ENGLISH if not supported
+     */
     public static Language from(String locale) {
         if (locale == null || locale.length() < 2) return DEFAULT;
         for (LanguageImpl l : LanguageImpl.values()) {

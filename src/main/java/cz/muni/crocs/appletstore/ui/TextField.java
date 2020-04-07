@@ -11,15 +11,33 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ResourceBundle;
 
+/**
+ * Facade for JTextPane creation
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class TextField {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    /**
+     * Get application default styled text field
+     * @param text text to initialize with
+     * @return JTextPane component
+     */
     public static JTextPane getTextField(String text) {
         JTextPane field = getTextFieldCore(false);
         field.setText("<html><div>" + text + "</div></html>");
         return field;
     }
 
+    /**
+     * Get application default styled text field
+     * @param text text to initialize with
+     * @param css css to style the text with
+     * @param background background color
+     * @return JTextPane component
+     */
     public static JTextPane getTextField(String text, String css, Color background) {
         JTextPane field = getTextFieldCore(background != null && background.getAlpha() < 255);
         field.setText("<html><div style=\"" + css + "\">" + text + "</div></html>");
@@ -31,6 +49,10 @@ public class TextField {
         return field;
     }
 
+    /**
+     * Get copy popup menu to attach to a textfield
+     * @return popup menu with "copy" item only
+     */
     public static JPopupMenu getCopyMenu() {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CopyAction());

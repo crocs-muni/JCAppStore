@@ -5,6 +5,8 @@ import java.awt.*;
 
 
 /**
+ * JMenu Item that can notify user by temporary change color, used for Readers
+ *
  * @author Jiří Horák
  * @version 1.0
  */

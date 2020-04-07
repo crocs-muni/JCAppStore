@@ -8,6 +8,8 @@ import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
+ * Informer to remove cyclic dependency in component hierarchy (child wants to display message on an predecessor)
+ *
  * @author Jiří Horák
  * @version 1.0
  */

@@ -1,17 +1,18 @@
 package cz.muni.crocs.appletstore.ui;
 
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 
 /**
+ * Loading panel, used when downloading the store
+ * rectangle - loading bar used
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -26,6 +27,10 @@ public class LoadingPane extends JPanel {
 
     private GridBagConstraints constraints;
 
+    /**
+     * Create a loading panel
+     * @param initialMsg initial message to display
+     */
     public LoadingPane(String initialMsg) {
         setLayout(new GridBagLayout());
         setOpaque(false);
@@ -34,8 +39,21 @@ public class LoadingPane extends JPanel {
         this.constraints.insets = new Insets(80, 0, 0, 0);
     }
 
+    /**
+     * Update message on progress
+     * @param msg message to show
+     */
     public void setMessage(String msg) {
         this.message = msg;
+    }
+
+    /**
+     * Update graphic on progress
+     * @param value progress value, between 0 and 100
+     */
+    public boolean update(int value) {
+        progress = value;
+        return progress <= 100;
     }
 
     @Override
@@ -56,11 +74,6 @@ public class LoadingPane extends JPanel {
         } else {
             graphics2D.drawString(message,  -(width/2), -(height/2) - 20);
         }
-    }
-
-    public boolean update(int value) {
-        progress = value;
-        return progress <= 100;
     }
 
     public void showAbort(AbstractAction abstractAction) {

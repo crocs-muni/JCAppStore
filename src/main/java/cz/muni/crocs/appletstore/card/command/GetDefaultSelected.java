@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.card.command;
 
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -9,7 +8,6 @@ import pro.javacard.gp.GPRegistry;
 
 import java.io.IOException;
 import java.util.Optional;
-
 
 /**
  * Modified install process from GPPro

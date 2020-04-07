@@ -9,8 +9,6 @@ import java.io.IOException;
 /**
  * Interface for javacard commands that don't require secure channel
  * such as obtaining card info
- * @author Jiří Horák
- * @version 1.0
  */
 public interface CardCommand {
 

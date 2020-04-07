@@ -12,7 +12,10 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Created by Jiří on 21. 6. 2017.
+ * Check GitHubConnection and get latest release name
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 
 public class GitHubInternetConnection {

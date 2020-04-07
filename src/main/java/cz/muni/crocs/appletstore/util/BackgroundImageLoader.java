@@ -17,6 +17,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Class to load background image as defined in options
+ * can blur the image
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -30,6 +33,12 @@ public class BackgroundImageLoader {
     private int radius;
     private int size;
 
+    /**
+     * Create a loader instance
+     * @param imgName image to load
+     * @param panel panel the image should be displayed as a background on
+     * @param blurAmount blur amount the image should be blurred with
+     */
     public BackgroundImageLoader(String imgName, Component panel, int blurAmount) {
         radius = (blurAmount == 0) ? 0 : 2 + blurAmount * 2;
         size = radius * 2 + 1;
@@ -49,6 +58,7 @@ public class BackgroundImageLoader {
         }
     }
 
+    //save image to /data folder
     private void save() {
         try {
             File outputfile = new File(Config.APP_DATA_DIR, imgName);
@@ -60,6 +70,7 @@ public class BackgroundImageLoader {
         }
     }
 
+    //setup default store background image
     private void defaultBg() {
         OptionsFactory.getOptions().addOption(Options.KEY_BACKGROUND, Config.IMAGE_DIR + imgName);
         try {
@@ -79,6 +90,7 @@ public class BackgroundImageLoader {
         }
     }
 
+    //generate gaussian blur matrix based on blur amount
     private float[] gaussianMatrix() {
         final double sigma = 8d;
         double sum = 0;
@@ -104,6 +116,7 @@ public class BackgroundImageLoader {
         return data;
     }
 
+    //apply blur matrix
     private void applyFilter() {
         BufferedImageOp filter;
         background = new RescaleOp(.5f, 0f, null).filter(background, null);

@@ -27,6 +27,10 @@ public class HintPanel extends JPanel {
     private boolean shown = false;
     private Dimension hintDimen;
 
+    /**
+     * Create a hint panel
+     * @param enable whether the hints should be displayed, changes the value for every hint panel (static)
+     */
     public HintPanel(boolean enable) {
         enabled = enable;
 
@@ -39,7 +43,7 @@ public class HintPanel extends JPanel {
                 Component c = getComponentAt(at);
                 if (c instanceof HintLabel) {
                     p = e.getPoint();
-                    hint = ((HintLabel) c).hint;
+                    hint = ((HintLabel) c).getHint();
                     if (hint.isEmpty()) {
                         hint = null;
                         shown = false;
@@ -63,6 +67,10 @@ public class HintPanel extends JPanel {
 
     }
 
+    /**
+     * Enable hint display, enables it globally for all hint panels
+     * @param enable true if show hints
+     */
     public static void enableHint(boolean enable) {
         enabled = enable;
     }

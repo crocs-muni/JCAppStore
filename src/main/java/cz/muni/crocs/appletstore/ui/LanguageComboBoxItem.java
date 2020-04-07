@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
+ * Custom combobox with images - used in Settings
+ *
  * @author Jiří Horák
  * @version 1.0
  */

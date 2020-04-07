@@ -3,6 +3,10 @@ package cz.muni.crocs.appletstore.action;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Card action abstraction. These actions are invoked from buttons or manually in code and creates a layer
+ * between GUI and card manager
+ */
 public interface CardAction {
 
     /**

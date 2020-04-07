@@ -10,11 +10,10 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Dialog window for applet deletion - additional information and confirmation window
+ * Dialog panel for applet deletion - additional information and confirmation window
  *
  * @author Jiří Horák
  * @version 1.0
@@ -26,7 +25,12 @@ public class DeleteDialogWindow extends JPanel {
     private KeysPresence keys;
     private GPRegistryEntry.Kind kind;
 
-
+    /**
+     * Create a new deletion dialog panel
+     * @param aid applet/package aid to delete
+     * @param kind kind (package or application)
+     * @param hasKeys if applet can contain sensitive data, warn about the deletion
+     */
     public DeleteDialogWindow(String aid, GPRegistryEntry.Kind kind, KeysPresence hasKeys) {
         setLayout(new MigLayout("width 250px"));
         this.keys = hasKeys;

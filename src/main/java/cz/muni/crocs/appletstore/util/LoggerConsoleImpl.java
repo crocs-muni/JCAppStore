@@ -18,6 +18,12 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * Logging console component
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
     //logger xml-file defined
     private static final Logger logger = LoggerFactory.getLogger(LoggerConsole.class);

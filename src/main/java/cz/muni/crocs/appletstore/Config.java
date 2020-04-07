@@ -2,10 +2,11 @@ package cz.muni.crocs.appletstore;
 
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 
 /**
+ * Application global configurations
+ *
  * @author Jiří Horák
  * @version 1.0
  */

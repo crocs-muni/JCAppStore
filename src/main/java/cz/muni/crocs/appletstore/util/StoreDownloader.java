@@ -35,11 +35,20 @@ public class StoreDownloader {
 
     private ProcessTrackable parent;
 
+    /**
+     * Download the store
+     * @param address address to downland from
+     * @param parentThread paren thread reference that initialized also a loader component - update progress
+     */
     public StoreDownloader(String address, ProcessTrackable parentThread) {
         parent = parentThread;
         this.address = address;
     }
 
+    /**
+     * Download the store
+     * @return true if completed successfully
+     */
     public boolean run() {
         parent.setLoaderMessage(textSrc.getString("downloading"));
         FileCleaner.cleanFolder(Config.APP_STORE_DIR);

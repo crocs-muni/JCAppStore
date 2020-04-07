@@ -1,9 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 /**
- * Allows to track the process, for progress bars update.
- * @author Jiří Horák
- * @version 1.0
+ * Allows to track the process, for progress bars updates.
  */
 public interface ProcessTrackable extends Runnable {
 

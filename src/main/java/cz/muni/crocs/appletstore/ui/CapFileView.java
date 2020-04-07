@@ -7,6 +7,8 @@ import javax.swing.filechooser.FileView;
 import java.io.File;
 
 /**
+ * FieView for FileChooser, defines icon for .cap files
+ *
  * @author Jiří Horák
  * @version 1.0
  */

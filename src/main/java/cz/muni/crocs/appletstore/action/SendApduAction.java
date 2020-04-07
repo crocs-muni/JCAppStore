@@ -22,6 +22,8 @@ import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
 
 /**
+ * Action to send custom APDU command
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -37,6 +39,10 @@ public class SendApduAction extends MouseAdapter implements CardAction {
         this.info = info;
     }
 
+    /**
+     * Set applet info to send the command to
+     * @param info AppletInfo that contains applet AID to send the command to
+     */
     public void setInfo(AppletInfo info) {
         this.info = info;
     }
@@ -75,7 +81,7 @@ public class SendApduAction extends MouseAdapter implements CardAction {
                 return null;
             case JOptionPane.YES_OPTION: //continue
         }
-        //todo validation does not work yet
+        //todo sanity checks on the command
         return window.getCommand();
         //if (window.hasValidData()) return window.getCommand();
         //return getAPDU(window.getCommand(), textSrc.getString("E_custom_coomand_format"));
@@ -151,7 +157,6 @@ public class SendApduAction extends MouseAdapter implements CardAction {
             if (apdu.getData() == null || apdu.getData().length == 0) {
                 return new HtmlText("<p width=\"300px\">" +  textSrc.getString("custom_command_no_data") + "</p>");
             }
-            //todo add some more data like panel with text Return data:
             return TextField.getTextField(Hex.toHexString(apdu.getData()));
         }
     }

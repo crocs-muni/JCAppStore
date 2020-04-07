@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.crypto;
 
-import cz.muni.crocs.appletstore.StoreItemInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,7 +12,9 @@ import java.util.stream.Collectors;
 
 /**
  * Command Execution environment
+ *
  * @author Jiří Horák
+ * @version 1.0
  */
 public class CmdTask {
     private static final Logger logger = LogManager.getLogger(CmdTask.class);
@@ -39,6 +40,13 @@ public class CmdTask {
         return process(10);
     }
 
+    /**
+     * Process the command and return its processed instance
+     * the caller is responsible for destroying the process instance
+     * @param timeoutSec command timeout
+     * @return process that was executed
+     * @throws LocalizedSignatureException on command failure
+     */
     public Process process(int timeoutSec) throws LocalizedSignatureException {
         try {
             logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
@@ -60,6 +68,11 @@ public class CmdTask {
         return toString(process());
     }
 
+    /**
+     * Parse command output
+     * @param process to get the output from
+     * @return process output as returned, empty string if process stream closed
+     */
     public static String toString(Process process) {
         String result = "";
 

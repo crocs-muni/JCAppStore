@@ -14,12 +14,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+/**
+ * SubMenu from the store, can return from detailed info panel nad re-download the store
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class StoreSubMenu extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private JLabel back;
     private BufferedImage storeTitle;
     private JButton reload;
 
+    /**
+     * Create a submenu
+     */
     public StoreSubMenu() {
         try {
             storeTitle = ImageIO.read(new File(Config.IMAGE_DIR + "jcappstore-submenu.png"));
@@ -29,10 +38,18 @@ public class StoreSubMenu extends JPanel {
         }
     }
 
+    /**
+     * Set callback for re-download
+     * @param a action that can re-download the store
+     */
     void setOnReload(Action a) {
         reload.addActionListener(a);
     }
 
+    /**
+     * Set callback for back
+     * @param a action that can return from applet detailed info panel
+     */
     void setOnBack(Action a) {
         back.addMouseListener(new MouseAdapter() {
             @Override

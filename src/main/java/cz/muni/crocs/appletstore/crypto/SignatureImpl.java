@@ -6,6 +6,12 @@ import cz.muni.crocs.appletstore.util.Tuple;
 import java.io.File;
 import java.util.ResourceBundle;
 
+/**
+ * Verification implementation
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class SignatureImpl implements Signature {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 

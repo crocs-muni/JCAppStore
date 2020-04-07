@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * "working..." pane blocker that blocks user interaction while card is being used
+ *
  * @author Jiří Horák
  * @version 1.0
  */

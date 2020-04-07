@@ -6,6 +6,12 @@ import org.bouncycastle.util.encoders.Hex;
 import java.io.*;
 import java.security.*;
 
+/**
+ * SHA512 wrapper, not used (but might be in future, kept therefore)
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class SHA512 implements Hash {
 
     private static boolean providerSet = false;

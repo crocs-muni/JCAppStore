@@ -3,7 +3,10 @@ package cz.muni.crocs.appletstore.card;
 import cz.muni.crocs.appletstore.LocalizedException;
 
 /**
- * Just to separate different exception source
+ * Class to separate different exception types
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public class LocalizedCardException extends LocalizedException {
 

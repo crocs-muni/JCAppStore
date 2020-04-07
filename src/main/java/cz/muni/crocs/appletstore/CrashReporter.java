@@ -1,11 +1,9 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.URLAdapter;
-import jdk.nashorn.internal.scripts.JO;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -26,6 +24,12 @@ public class CrashReporter {
                     System.getProperty("os.arch") + "_" +
                     System.getProperty("os.version");
 
+    /**
+     * Create a crash reporter
+     * @param title title to display on window
+     * @param description error description
+     * @param parent parent component
+     */
     public CrashReporter(String title, String description, Component parent) {
         if (title.isEmpty()) title = "JCAppStore reporter";
         if (description == null)
@@ -43,7 +47,6 @@ public class CrashReporter {
                     new ImageIcon(Config.IMAGE_DIR + "bug.png"));
 
     }
-
 
     /**
      * GUI error-feedback form class

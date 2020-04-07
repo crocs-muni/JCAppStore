@@ -3,6 +3,12 @@ package cz.muni.crocs.appletstore.card;
 import java.io.*;
 import java.util.Set;
 
+/**
+ * Applet info serialization
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class AppletSerializerImpl implements AppletSerializer<Set<AppletInfo>> {
 
     @Override

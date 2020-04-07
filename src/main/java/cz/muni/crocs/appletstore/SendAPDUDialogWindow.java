@@ -1,12 +1,9 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ResourceBundle;
@@ -16,12 +13,23 @@ import org.bouncycastle.util.encoders.Hex;
 
 import static cz.muni.crocs.appletstore.InstallDialogWindow.HEXA_PATTERN;
 
+/**
+ * Dialog window panel for sending APDU commands
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class SendAPDUDialogWindow extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private Color wrong = new Color(0xA3383D);
     private JTextField apdu = new JTextField(70);
     //private JCheckBox inHex = new JCheckBox();
 
+    /**
+     * Create send APDU panel
+     * @param predefinedCommand command to put in if pre-defined
+     * @param additionalMsg additional information to show
+     */
     public SendAPDUDialogWindow(String predefinedCommand, String additionalMsg) {
         super(new MigLayout("width 250px"));
 
@@ -54,6 +62,10 @@ public class SendAPDUDialogWindow extends JPanel {
 //        add(inHex);
     }
 
+    /**
+     * Get the command provided/changed by user
+     * @return command APDU in hexadecimal string
+     */
     public String getCommand() {
 //        if (inHex.isSelected()) {
 //            return apdu.getText();
@@ -62,14 +74,18 @@ public class SendAPDUDialogWindow extends JPanel {
         return apdu.getText();
     }
 
+    /**
+     * Check if the command is valid
+     * @return true if valid
+     */
+    public boolean hasValidData() {
+        return validCommand(apdu);
+    }
+
     private JLabel getHint(String langKey, String width) {
         JLabel hint = new HtmlText("<p width=\"" + width + "\">" + textSrc.getString(langKey) + "</p>", 10f);
         hint.setForeground(Color.DARK_GRAY);
         return hint;
-    }
-
-    public boolean hasValidData() {
-        return validCommand(apdu);
     }
 
     private static boolean validCommand(JTextComponent field) {

@@ -4,7 +4,8 @@ import apdu4j.APDUBIBO;
 import pro.javacard.gp.GPSession;
 
 /**
- * GlobalPlatform-like command
+ * GlobalPlatform-like command abstraction
+ *
  * @author Jiří Horák
  * @version 1.0
  */

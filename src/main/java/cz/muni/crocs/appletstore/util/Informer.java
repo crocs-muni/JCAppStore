@@ -10,7 +10,7 @@ import javax.swing.*;
  */
 public interface Informer {
 
-    public static int INFINITY = Integer.MAX_VALUE;
+    int INFINITY = Integer.MAX_VALUE;
 
     /**
      * Show ingo to the user
