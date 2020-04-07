@@ -2,6 +2,9 @@ package cz.muni.crocs.appletstore.util;
 
 import java.util.Locale;
 
+/**
+ * Languages support by JCAppStore
+ */
 public interface Language {
 
     String getLocaleString();

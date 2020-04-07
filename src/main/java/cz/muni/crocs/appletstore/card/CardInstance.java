@@ -3,6 +3,9 @@ package cz.muni.crocs.appletstore.card;
 import pro.javacard.AID;
 import java.util.Set;
 
+/**
+ * Card instance definition, also visible from outisde of the package, but through manager only
+ */
 public interface CardInstance {
 
     /**

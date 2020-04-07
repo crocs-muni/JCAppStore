@@ -16,7 +16,6 @@ import pro.javacard.gp.GPRegistryEntry;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -113,11 +112,19 @@ public class InstallDialogWindow extends JPanel {
                 isInstalled, new byte[0]);
     }
 
+    /**
+     * Check whether installation parameters are valid
+     * @return true if valid
+     */
     public boolean validInstallParams() {
         String text = installParams.getText();
         return text == null || validHex(text);
     }
 
+    /**
+     * Get file with a custom signature
+     * @return File representing the custom signature file
+     */
     public File getCustomSignatureFile() {
         logger.info("Custom signature file selected: " +
                 (customSignatureFile != null ? customSignatureFile.getAbsolutePath() : "none"));

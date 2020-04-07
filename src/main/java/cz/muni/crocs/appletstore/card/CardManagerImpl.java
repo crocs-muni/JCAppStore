@@ -271,7 +271,43 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
+    /**
+     * Performs GET_DATA command
+     * to get data from inserted card and create new CardInstance instance
+     */
+    private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
+        logger.info("Manager: GET_DATA command");
+        Card card;
+        APDUBIBO channel;
+        boolean exclusive = OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT);
+
+        try {
+            card = terminal.connect("*");
+            if (exclusive) card.beginExclusive();
+            channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
+            logger.info("Manager: GET_DATA channel created.");
+        } catch (CardException e) {
+            //if (card != null) card.endExclusive();
+            throw new LocalizedCardException("Could not connect to selected reader: " +
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+        }
+
+        GPCommand<CardDetails> command = new GetDetails(channel);
+        command.setChannel(channel);
+        command.execute();
+        logger.info("Manager: GET_DATA data returned.");
+        if (exclusive) card.endExclusive();
+        card.disconnect(false);
+
+        CardDetails details = command.getResult();
+        details.setAtr(card.getATR());
+        return details;
+    }
+
+
+    //delete applet metadata when uninstalling
     private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+        logger.info("Delete applet metadata: " + applet.toString());
         Set<AppletInfo> appletInfoList = card.getApplets();
         deleteInfo(appletInfoList, applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -283,6 +319,7 @@ public class CardManagerImpl implements CardManager {
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
+    //delete single applet metadata
     private void deleteInfo(Set<AppletInfo> list, AID toDelete) {
         Iterator<AppletInfo> info = list.iterator();
         while(info.hasNext()) {
@@ -294,36 +331,7 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
-    /**
-     * Performs card insecure-channel use (e.g. GET)
-     * to get data from inserted card
-     */
-    private CardDetails getCardDetails(CardTerminal terminal) throws CardException, LocalizedCardException, IOException {
-        Card card;
-        APDUBIBO channel;
-        boolean exclusive = OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT);
-
-        try {
-            card = terminal.connect("*");
-            if (exclusive) card.beginExclusive();
-            channel = CardChannelBIBO.getBIBO(card.getBasicChannel());
-        } catch (CardException e) {
-            //if (card != null) card.endExclusive();
-            throw new LocalizedCardException("Could not connect to selected reader: " +
-                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
-        }
-
-        GPCommand<CardDetails> command = new GetDetails(channel);
-        command.setChannel(channel);
-        command.execute();
-        if (exclusive) card.endExclusive();
-        card.disconnect(false);
-
-        CardDetails details = command.getResult();
-        details.setAtr(card.getATR());
-        return details;
-    }
-
+    //applet deletion implementation
     private synchronized void uninstallImpl(AppletInfo nfo, boolean force) throws CardException, LocalizedCardException{
         while (busy) {
             try {
@@ -359,6 +367,7 @@ public class CardManagerImpl implements CardManager {
         }
     }
 
+    //applet installation implementation
     private synchronized void installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");

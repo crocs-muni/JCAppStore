@@ -4,6 +4,12 @@ import cz.muni.crocs.appletstore.Informable;
 
 import java.security.InvalidParameterException;
 
+/**
+ * Factory patter for informer
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class InformerFactory {
 
     private static Informer informer = null;

@@ -52,13 +52,19 @@ public class CardInstanceImpl implements CardInstance {
      * Compares the card id and updates card data if needed
      * e.g. swaps the card instance
      *
-     * @param newDetails of the card: ATR is a must, other optional
+     * @param newDetails of the card: ATR is a must, other optional. Data from GET_CATA APDU command.
      */
     CardInstanceImpl(CardDetails newDetails, CardTerminal terminal)
             throws LocalizedCardException, CardException, UnknownKeyException {
         this(newDetails, terminal, false);
     }
 
+    /**
+     * Creates new card instance
+     * @param newDetails of the card: ATR is a must, other optional. Data from GET_CATA APDU command.
+     * @param terminal terminal used to talk to this card
+     * @param defaultTestKey default test key value
+     */
     CardInstanceImpl(CardDetails newDetails, CardTerminal terminal, boolean defaultTestKey)
             throws LocalizedCardException, CardException, UnknownKeyException {
         if (newDetails == null || terminal == null) {

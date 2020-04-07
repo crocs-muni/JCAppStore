@@ -7,6 +7,8 @@ import java.awt.geom.Ellipse2D;
 
 
 /**
+ * Circle animation for loading
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -18,12 +20,25 @@ public class CircleAnimation  {
 
     private Dimension prefferedSize = new Dimension(250, 250);
 
+    /**
+     * Create circle animation 250x250 px
+     */
     public CircleAnimation() {}
 
+    /**
+     * Create circle animation
+     * @param prefferedSize optional size
+     */
     public CircleAnimation(Dimension prefferedSize) {
         this.prefferedSize = prefferedSize;
     }
 
+    /**
+     * Paint the circle
+     * @param g2d Graphics2D graphic to use for painting
+     * @param screenWidth parent screen width
+     * @param screenHeight parent screen height
+     */
     public void paint(Graphics2D g2d, int screenWidth, int screenHeight) {
         g2d.translate(screenWidth / 2, screenHeight / 2);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -42,6 +57,7 @@ public class CircleAnimation  {
     public Dimension getPreferredSize() {
         return prefferedSize;
     }
+
     public Dimension getMinimumSize() {
         return prefferedSize;
     }

@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Simplified GPRegistryEntry version with additional information obtained from our database (about specific applet)
+ * GPRegistryEntry "extension" with additional information obtained from our database (about specific applet)
  *
  * @author Jiří Horák
  * @version 1.0
@@ -92,7 +92,6 @@ public class AppletInfo implements Serializable, Cloneable {
 
     /**
      * Get the info from card registry
-     *
      * @param registry GP info from a card
      */
     public AppletInfo(GPRegistryEntry registry) {
@@ -107,6 +106,11 @@ public class AppletInfo implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Get the info from card registry and saved applet data
+     * @param registry GP info from a card
+     * @param savedApplets applets serialized from this card before
+     */
     public AppletInfo(GPRegistryEntry registry, Set<AppletInfo> savedApplets) {
         this();
         if (registry != null) {

@@ -38,6 +38,10 @@ public class DeleteAction extends CardAbstractAction {
         this.info = info;
     }
 
+    /**
+     * Set info of the applet to delete
+     * @param info AppletInfo info to delete, must contain AID
+     */
     public void setInfo(AppletInfo info) {
         this.info = info;
     }
@@ -45,35 +49,63 @@ public class DeleteAction extends CardAbstractAction {
     @Override
     public void mouseClicked(MouseEvent e) {
         final CardManager manager = CardManagerFactory.getManager();
-
         if (!(info.getKind() == Kind.ExecutableLoadFile ||
                 info.getKind() == Kind.Application) || manager.getCard() == null) {
             return;
         }
 
+        DeleteDialogWindow opts = showDeletionDialog();
+        if (opts == null) return;
+        boolean willForce = opts.willForce();
+        AppletInfo packageInfo = getPackageIfShouldBeUninstalled();
+        String applets = findCollisions(willForce, manager);
+
+        //if found dependencies and  we do not try to uninstall package as a dependency from simple mode
+        if (!applets.isEmpty() && packageInfo == null) {
+            logger.info("Found applet collisions: " + applets);
+            ConfirmDeletion confirm = new ConfirmDeletion(applets);
+            if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
+                    != JOptionPane.YES_OPTION)  return;
+            willForce = confirm.agreed();
+            if (!willForce) return; //did not agreed
+        } else {
+            //do not uninstall package dependency if more applets are still on the card
+            if (!applets.isEmpty()) {
+                packageInfo = null;
+                logger.info("Package not implicitly deleted: other applets still active.");
+            }
+            willForce = false;
+        }
+        if (!confirmForceInstallWarnDialog(willForce, opts)) return;
+
+        final boolean finalWillForce = willForce;
+        final AppletInfo finalPackage = packageInfo;
+         execute(() -> {
+            manager.uninstall(info, finalWillForce);
+            if (finalPackage != null) {
+                manager.uninstall(finalPackage, true);
+            }
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 150000);
+    }
+
+    private DeleteDialogWindow showDeletionDialog() {
         DeleteDialogWindow opts = new DeleteDialogWindow(info.getAid().toString(), info.getKind(), info.hasKeys());
         switch (showDialog(textSrc.getString("CAP_delete_applet"), opts, "delete.png", "delete")) {
             case JOptionPane.NO_OPTION:
             case JOptionPane.CLOSED_OPTION:
-                return;
+                return null;
             case JOptionPane.YES_OPTION:
                 break;
         }
         logger.info("Delete applet: " + info.toString());
+        return opts;
+    }
 
-        boolean willForce = opts.willForce();
-        AppletInfo packageInfo = null;
-        if ((info.getKind() == Kind.Application) && (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE))) {
-            //implicit mode deletes package too
-            packageInfo = getPackageOf(info);
-            logger.info("Implicit delete package too: " +
-                    (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
-        }
-
+    private String findCollisions(boolean isForce, CardManager manager) {
         //ask user whether to delete applet too
         StringBuilder appletsToDelete = new StringBuilder();
 
-        if (!willForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+        if (!isForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
             for (AID mod : info.getModules()) {
                 for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
                     if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
@@ -84,45 +116,34 @@ public class DeleteAction extends CardAbstractAction {
                 }
             }
         }
-        String applets = appletsToDelete.toString();
-        //if found dependencies and  we do not try to uninstall package as a dependency from simple mode
-        if (!applets.isEmpty() && packageInfo == null) {
-            logger.info("Found applet collisions: " + applets);
-            ConfirmDeletion confirm = new ConfirmDeletion(applets);
-            if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
-                    != JOptionPane.YES_OPTION)  return;
-            willForce = confirm.agreed();
-            if (!willForce)return; //did not agreed
-        } else {
-            //do not uninstall package dependency if more applets are still on the card
-            if (!applets.isEmpty()) {
-                packageInfo = null;
-                logger.info("Package not implicitly deleted: other applets still active.");
-            }
-            willForce = false;
-        }
+        return appletsToDelete.toString();
+    }
 
-        if (willForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted
-            String msg = opts.confirm();
+    private AppletInfo getPackageIfShouldBeUninstalled() {
+        if ((info.getKind() == Kind.Application) && (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE))) {
+            //implicit mode deletes package too
+            AppletInfo packageInfo = getPackageOf(info);
+            logger.info("Implicit delete package too: " +
+                    (packageInfo != null ? packageInfo.toString() : "ERROR: no package found!"));
+            return packageInfo;
+        }
+        return null;
+    }
+
+    private boolean confirmForceInstallWarnDialog(boolean isForce, DeleteDialogWindow options) {
+        if (isForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted
+            String msg = options.confirm();
             if (msg != null) {
                 switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
                     case JOptionPane.NO_OPTION:
                     case JOptionPane.CLOSED_OPTION:
-                        return;
+                        return false;
                     case JOptionPane.YES_OPTION:
-                        break;
+                        return true;
                 }
             }
         }
-
-        final boolean finalWillForce = willForce;
-        final AppletInfo finalPackage = packageInfo;
-         execute(() -> {
-            manager.uninstall(info, finalWillForce);
-            if (finalPackage != null) { //todo force package delete should suffice..?
-                manager.uninstall(finalPackage, true);
-            }
-        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 150000);
+        return true;
     }
 
     private static int showDialog(String title, Object msg, String imgname, String confirmBtnKey) {

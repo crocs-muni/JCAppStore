@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Objects;
 
 /**
+ * Deletion of a folder files
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -37,5 +39,4 @@ public class FileCleaner {
         }
         return ret && path.delete();
     }
-
 }

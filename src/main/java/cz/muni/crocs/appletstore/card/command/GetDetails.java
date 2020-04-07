@@ -16,7 +16,10 @@ import static pro.javacard.gp.GPData.fetchKeyInfoTemplate;
 import static pro.javacard.gp.GPData.getData;
 
 /**
+ * Backend command for getting card data
+ *
  * @author Jiří Horák
+ * @version 1.0
  */
 public class GetDetails extends GPCommand<CardDetails> {
     private static final Logger logger = LoggerFactory.getLogger(GetDetails.class);

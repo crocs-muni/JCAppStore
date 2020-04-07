@@ -1,18 +1,18 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.action.FreeMemoryAction;
-import cz.muni.crocs.appletstore.action.JCMemory;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.ui.Text;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ResourceBundle;
 
+/**
+ * Panel to display with popup when store attempts to reinstall applet
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class ReinstallWarnPanel extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
@@ -27,6 +27,10 @@ public class ReinstallWarnPanel extends JPanel {
         add(dontShowAgain, "wrap");
     }
 
+    /**
+     * Check if user blocked this message
+     * @return true if blocked next time - dont show anymore
+     */
     public boolean userSelectedDontShowAgain() {
         return dontShowAgain.isSelected();
     }

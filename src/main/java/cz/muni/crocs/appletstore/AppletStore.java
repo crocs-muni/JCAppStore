@@ -5,7 +5,6 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.util.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -37,10 +35,17 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private Menu menu;
     private GlassPaneBlocker blocker = new GlassPaneBlocker();
 
+    /**
+     * Create an application
+     */
     public AppletStore() {
         this(null);
     }
 
+    /**
+     * Create an application
+     * @param fromLoading error exception found when loading the store
+     */
     public AppletStore(Exception fromLoading) {
         logger.info("------- App started --------");
 

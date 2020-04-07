@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.LeftMenuButton;
 import cz.muni.crocs.appletstore.ui.InputHintTextField;
@@ -15,7 +14,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -43,6 +41,10 @@ public class LeftMenu extends JPanel implements SearchBar {
 
     private MainPanel parent;
 
+    /**
+     * Create a left menu
+     * @param parent MainPanel parent
+     */
     public LeftMenu(MainPanel parent) {
         this.parent = parent;
 
@@ -56,7 +58,7 @@ public class LeftMenu extends JPanel implements SearchBar {
         setListeners();
     }
 
-    public void buildMenuComponents() {
+    private void buildMenuComponents() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;

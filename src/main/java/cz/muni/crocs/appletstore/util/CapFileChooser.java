@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
 
 /**
  * File chooser to obtain cap file
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -21,6 +22,11 @@ public class CapFileChooser {
     private static Logger logger = LoggerFactory.getLogger(CapFileChooser.class);
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    /**
+     * Create a CAPFile from a file
+     * @param from File instance of the cap file
+     * @return CAPFile representation
+     */
     public static CAPFile getCapFile(File from) {
         CAPFile instcap = null;
         if (from == null) return null;

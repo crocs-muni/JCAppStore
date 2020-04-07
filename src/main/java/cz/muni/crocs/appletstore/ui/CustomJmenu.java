@@ -5,8 +5,9 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import javax.swing.*;
 import java.awt.*;
 
-
 /**
+ * Custom JMenu style
+ *
  * @author Jiří Horák
  * @version 1.0
  */

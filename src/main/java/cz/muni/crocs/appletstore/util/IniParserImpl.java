@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
+ * Parsing ini files - wrapper for ini4j
+ *
  * @author Jiří Horák
  * @version 1.0
  */

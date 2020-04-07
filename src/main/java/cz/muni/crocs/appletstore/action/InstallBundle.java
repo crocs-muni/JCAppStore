@@ -5,6 +5,12 @@ import cz.muni.crocs.appletstore.card.AppletInfo;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Class that contains installation data as passed to InstallAction from the store info panel
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class InstallBundle {
     private String titleBar;
     private AppletInfo info;

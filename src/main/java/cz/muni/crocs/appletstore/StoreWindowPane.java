@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Scroll pane with items from store
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -29,6 +30,10 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private JsonObject currentlyShown;
     private SearchBar searchBar;
 
+    /**
+     * Store panel
+     * @param callback callback forwarded to inner children, it can disable the panel (defined in MainPanel)
+     */
     public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
         this.data = data;
         this.callback = callback;

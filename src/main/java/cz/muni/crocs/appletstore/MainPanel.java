@@ -6,7 +6,6 @@ import cz.muni.crocs.appletstore.util.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -25,6 +24,10 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
     private Component current = null;
     private LoggerConsole console;
 
+    /**
+     * Create a main panel containing left menu, store, my card panels
+     * @param context
+     */
     public MainPanel(BackgroundChangeable context) {
         //there was a problem with focus when using search feature, request focus
         requestFocusInWindow();

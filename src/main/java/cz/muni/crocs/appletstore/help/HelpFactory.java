@@ -1,5 +1,11 @@
 package cz.muni.crocs.appletstore.help;
 
+/**
+ * Help section definitions
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class HelpFactory {
 
     public static Help getMasterKeyHelp() {

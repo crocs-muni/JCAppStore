@@ -12,14 +12,16 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 /**
+ * Parsing the info_[lang].json from store
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class JsonStoreParser implements JsonParser {
 
     private File info;
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    @Override
     public List<JsonObject> getValues() throws FileNotFoundException {
         File file = getFileInfo(); //safe
         if (file == null) return null;
@@ -35,6 +37,7 @@ public class JsonStoreParser implements JsonParser {
         return result;
     }
 
+    @Override
     public String[] jsonArrayToDataArray(JsonArray array) {
         if (array == null) return null;
         int len = array.size();
@@ -56,7 +59,7 @@ public class JsonStoreParser implements JsonParser {
 
     private boolean verifyInfoFile() {
         info = new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
+                + OptionsFactory.getOptions().getLanguage().getLocaleString()
                 + Config.FILE_INFO_SUFFIX);
         if (!info.exists()) {
             info = new File(Config.APP_STORE_DIR,Config.FILE_INFO_PREFIX + "en" + Config.FILE_INFO_SUFFIX);

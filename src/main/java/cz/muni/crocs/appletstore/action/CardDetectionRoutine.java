@@ -12,6 +12,12 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 
+/**
+ * Routine running on the background, card detection each DELAY ms
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class CardDetectionRoutine extends CardAbstractAction {
 
     private static final Logger logger = LoggerFactory.getLogger(CardDetectionRoutine.class);

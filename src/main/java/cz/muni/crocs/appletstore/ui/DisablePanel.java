@@ -8,42 +8,18 @@ import java.awt.event.FocusListener;
 
 /**
  * Panel intended to be able to look disabled
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class DisablePanel extends JPanel {
 
-    private FocusListener nothing = new FocusListener() {
-        @Override
-        public void focusGained(FocusEvent e) {
-
-        }
-
-        @Override
-        public void focusLost(FocusEvent e) {
-
-        }
-    };
     private CircleAnimation animation = new CircleAnimation();
 
-//    public void setEnabledAll(boolean enabled) {
-//        setEnabledAll(this, enabled);
-//    }
-//
-//    private void setEnabledAll(JPanel parrent, boolean enabled) {
-//        parrent.setEnabled(enabled);
-//
-//        Component[] components = parrent.getComponents();
-//
-//        for (Component c : components) {
-//            if (c instanceof JPanel) {
-//                setEnabledAll((JPanel) c, enabled);
-//            }
-//            c.setEnabled(enabled);
-//        }
-//    }
-
-
+    /**
+     * Enable or disable the panel
+     * @param enabled
+     */
     public void setEnabledAll(boolean enabled) {
         setEnabled(enabled);
         transferFocus();

@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * Background panel used as a base class for MainPanel, displays the background image
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -24,16 +26,27 @@ public class BackgroundImgSplitPanel extends JSplitPane {
     private Image bg;
     private int width = -1, height = -1;
 
+    /**
+     * Default split panel initialization
+     */
     public BackgroundImgSplitPanel() {
         super(JSplitPane.VERTICAL_SPLIT);
         setup();
     }
 
+    /**
+     * Split panel initialization with custom directon
+     * @param direction split panel direction, JSplitPane constant VERTICAL_SPLIT or HORIZONTAL_SPLIT
+     */
     public BackgroundImgSplitPanel(int direction) {
         super(direction);
         setup();
     }
 
+    /**
+     * Set new background dimage
+     * @param newBackground image to set
+     */
     public void setNewBackground(BufferedImage newBackground) {
         width = getWidth();
         height = getHeight();
@@ -41,7 +54,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
         revalidate();
         repaint();
     }
-
+    
     private void setup() {
         setContinuousLayout(true);
         setUI(new CustomSplitPaneUI());

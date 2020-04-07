@@ -92,11 +92,12 @@ public class InstallAction extends CardAbstractAction {
         }
     }
 
-
+    //shows the dialog window without verifying the signature
     private void runCustomInstallationGuide() {
         showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", true);
     }
 
+    //shows the dialog window AFTER verifying the signature
     private void runStoreInstallationGuide() {
         verifySignatureRoutine(new Executable() {
             @Override
@@ -123,6 +124,7 @@ public class InstallAction extends CardAbstractAction {
         });
     }
 
+    //display intallation dialog window
     private void showInstallDialog(String verifyResult, String imgIcon, final boolean isCustom) {
         //simple usage will always do force install
         final boolean forceInstall = installed; /*todo removed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);*/
@@ -162,6 +164,7 @@ public class InstallAction extends CardAbstractAction {
         showInstallDialog(pane);
     }
 
+    //modal dialog window displayer
     private void showInstallDialog(JOptionPane pane) {
         JDialog window = pane.createDialog(textSrc.getString("CAP_install_applet") + data.getTitleBar());
         window.setModal(false);
@@ -169,6 +172,7 @@ public class InstallAction extends CardAbstractAction {
         window.setVisible(true);
     }
 
+    //collision finder
     private boolean someCustomAppletAIDsConflicts(String[] aids) {
         Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
         for (AppletInfo applet : applets) {
@@ -182,6 +186,7 @@ public class InstallAction extends CardAbstractAction {
         return false;
     }
 
+    //verifies signature of custom installation AFTER dialog window closed
     private void verifyCustomInstallationAndInstall(final InstallDialogWindow resultDialog) {
         if (resultDialog == null) return;
         final File customSign = resultDialog.getCustomSignatureFile();
@@ -219,8 +224,7 @@ public class InstallAction extends CardAbstractAction {
     }
 
     /**
-     * Perform various pre-install checks (memory available, force installs, warns) and fire install
-     *
+     * Perform various pre-install checks (memory available, force installs, warns) and fires install
      * @param opts install options from the install form
      */
     private void fireInstall(final InstallOpts opts) {
@@ -230,12 +234,6 @@ public class InstallAction extends CardAbstractAction {
         }
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
         logger.info("Install AID: " + opts.getAIDs());
-
-        //do not force install on simple use implicitly
-//        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) &&
-//                !findCollisions(manager.getCard(), opts).isEmpty()) {
-//            opts.setForce(true);
-//        }
 
         if (opts.isForce() && !userAcceptsForceInstallWarn()) {
             return;
@@ -350,6 +348,7 @@ public class InstallAction extends CardAbstractAction {
         }, "Failed to install applet.", textSrc.getString("install_failed"), 60000);
     }
 
+    //routine used to verify the signatures
     private static void verifySignatureRoutine(Executable task) {
         JOptionPane pane = new JOptionPane(textSrc.getString("H_pgp_loading"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
@@ -376,7 +375,7 @@ public class InstallAction extends CardAbstractAction {
         dialog.setVisible(true);
     }
 
-
+    //executable abstraction callback for signature verification worker routine
     private abstract static class Executable {
         Tuple<Integer, String> result;
 
@@ -385,12 +384,13 @@ public class InstallAction extends CardAbstractAction {
         }
 
         abstract void work();
-
         abstract void after();
     }
 
-    //this class clontains copied-out code of JOptionPane, slightly modified because JOptionPane does not allow much
-    //custom behaviour
+    /**
+     * Copied and modified code from JOptionPane Swing class
+     * enables custom JOptionPane behaviour
+     */
     private static class CustomJOptionPane extends JOptionPane {
 
         private CallBack<Void> onClose;

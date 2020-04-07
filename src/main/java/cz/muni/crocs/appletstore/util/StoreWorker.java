@@ -25,14 +25,27 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
 
     private Store parent;
 
+    /**
+     * Create a new worker
+     * @param parent store parent to notify about progress
+     */
     public StoreWorker(Store parent) {
         this.parent = parent;
     }
 
+    /**
+     * Forward the message to parent store
+     * @param message message to forward
+     */
     public void setLoaderMessage(String message) {
         SwingUtilities.invokeLater(() -> parent.setProcessMessage(message));
     }
 
+    /**
+     * Verifies the connection and version of latest downloaded release.
+     * Re-downloads the store if newer version found or crucial store files missing.
+     * @return store state. NO_CONNECTION if no internet found, FAILED if failed and REBUILD if successfully completed
+     */
     @Override
     public Store.State doInBackground() {
         setProgress(0);
@@ -82,7 +95,7 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
         } else {
             return Config.APP_STORE_CAPS_DIR.exists() &&
                     new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                            + OptionsFactory.getOptions().getOption(Options.KEY_LANGUAGE)
+                            + OptionsFactory.getOptions().getLanguage().getLocaleString()
                             + Config.FILE_INFO_SUFFIX).exists();
         }
     }

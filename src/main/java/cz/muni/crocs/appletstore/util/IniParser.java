@@ -6,6 +6,7 @@ import java.util.Set;
  * Parser class that focuses only on one header inside INI file:
  * simplified, as we are concerted about one card only at time.
  * The header is implicitly used, given in constructor.
+ *
  * @author Jiří Horák
  * @version 1.0
  */

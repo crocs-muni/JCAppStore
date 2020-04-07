@@ -6,6 +6,12 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.event.MouseEvent;
 
+/**
+ * Getting the free card memory action
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class FreeMemoryAction extends CardAbstractAction {
 
     private static final Logger logger = LoggerFactory.getLogger(CardAbstractAction.class);

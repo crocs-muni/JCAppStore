@@ -17,8 +17,10 @@ import javax.swing.Timer;
 /**
  * App loading - checks for card readers, initializes basic things
  * needed for app to start & loads settings
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
-
 public class SplashScreen extends JWindow {
     private static final boolean INITIALIZED = Config.setupLogger();
     private static final Logger logger = LoggerFactory.getLogger(SplashScreen.class);

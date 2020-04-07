@@ -42,6 +42,10 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private StoreSubMenu submenu;
     private SearchBar searchBar;
 
+    /**
+     * Store behaviour manager
+     * @param callbackOnAction callback forwarded to inner children, it can disable the panel (defined in MainPanel)
+     */
     public StoreWindowManager(OnEventCallBack<Void, Void> callbackOnAction) {
         this.callbackOnAction = callbackOnAction;
 
@@ -66,10 +70,18 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         });
     }
 
+    /**
+     * Set store state, called from worker
+     * @param state state to set
+     */
     public synchronized void setState(State state) {
         this.state = state;
     }
 
+    /**
+     * Set process mesage, called from worker on initialization
+     * @param msg message to show
+     */
     public void setProcessMessage(String msg) {
         if (currentComponent instanceof LoadingPane)
             ((LoadingPane) currentComponent).setMessage(msg);

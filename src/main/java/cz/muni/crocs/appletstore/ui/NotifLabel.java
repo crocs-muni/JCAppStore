@@ -21,6 +21,8 @@ import java.util.ResourceBundle;
 
 /**
  * Notif frames for the left menu
+ * left menu used to display other messages that were moved to popup windows/removed instead
+ * Kept just for possible use in future
  *
  * @author Jiří Horák
  * @version 1.0

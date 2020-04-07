@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -43,6 +42,10 @@ public class Settings extends JPanel {
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
             new EmptyBorder(new Insets(4, 4, 4, 4)));
 
+    /**
+     * Create settings panel
+     * @param context parent with changeable background (settings can change it)
+     */
     public Settings(BackgroundChangeable context) {
         this.context = context;
         setLayout(new MigLayout("fillx, gap 5px 5px"));
@@ -52,6 +55,9 @@ public class Settings extends JPanel {
         self = this;
     }
 
+    /**
+     * Save the settings.
+     */
     public void apply() {
         saveBackgroundImage();
         saveLanguage();

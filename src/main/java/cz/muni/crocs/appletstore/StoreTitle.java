@@ -1,15 +1,25 @@
 package cz.muni.crocs.appletstore;
 
-
 import cz.muni.crocs.appletstore.ui.Title;
 
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Store category title item
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class StoreTitle extends Title implements Item {
 
     private int position;
 
+    /**
+     * Create a category name
+     * @param text category
+     * @param position positiona s defined in json info_[lang].json file
+     */
     public StoreTitle(String text, int position) {
         super(text, 25f);
         this.position = position;

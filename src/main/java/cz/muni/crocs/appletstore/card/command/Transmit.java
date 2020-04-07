@@ -13,6 +13,12 @@ import pro.javacard.gp.ISO7816;
 import javax.smartcardio.CardException;
 import java.io.IOException;
 
+/**
+ * Custom APDU transmission
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class Transmit extends GPCommand<ResponseAPDU> {
     private static final Logger logger = LoggerFactory.getLogger(Transmit.class);
 

@@ -1,11 +1,16 @@
 package cz.muni.crocs.appletstore.help;
 
-import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.ui.Title;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 
+/**
+ * Help panel
+ *
+ * @author Jiří Horák
+ * @version 1.0
+ */
 public class Help extends JPanel {
 
     public Help() {

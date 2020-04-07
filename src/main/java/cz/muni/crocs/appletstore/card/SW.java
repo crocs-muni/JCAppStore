@@ -5,7 +5,8 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.ISO7816;
 
 /**
- * SW constants from GPPro
+ * SW constants from GPPro, returns error messages that may hint user what went wrong.
+ *
  * @author Jiří Horák
  * @version 1.0
  */

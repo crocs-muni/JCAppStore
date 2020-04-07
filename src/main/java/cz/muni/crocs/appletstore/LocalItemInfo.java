@@ -43,6 +43,10 @@ public class LocalItemInfo extends HintPanel {
     private SendApduAction send;
     private DeleteAction delete;
 
+    /**
+     * Create a local applet detailed info panel
+     * @param call callback to forward to actions performed from this panel (send APDU/delete applet)
+     */
     public LocalItemInfo(OnEventCallBack<Void, Void> call) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
@@ -129,6 +133,35 @@ public class LocalItemInfo extends HintPanel {
         setVisible(true);
     }
 
+    /**
+     * Hide the info panel
+     */
+    public void unset() {
+        name.setText("", "");
+        version.setText("", "");
+        id.setText("", "");
+        type.setText("", "");
+        domain.setText("", "");
+        setVisible(false);
+        revalidate();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(300, Integer.MAX_VALUE);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        Graphics2D g2d = (Graphics2D)g;
+        Composite old = g2d.getComposite();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+        g2d.setComposite(old);
+        super.paint(g);
+    }
+
     private String getValue(String maybe) {
         if (maybe == null || maybe.isEmpty())
             return textSrc.getString("unknown");
@@ -141,19 +174,6 @@ public class LocalItemInfo extends HintPanel {
 
     private void setLabel(JLabel label, String data) {
         label.setText("<html><p width=\"280\">" + data + "</p></html>");
-    }
-
-    /**
-     * Hide the info panel
-     */
-    public void unset() {
-        name.setText("", "");
-        version.setText("", "");
-        id.setText("", "");
-        type.setText("", "");
-        domain.setText("", "");
-        setVisible(false);
-        revalidate();
     }
 
     private void setEnabled(JLabel component, boolean enabled) {
@@ -172,11 +192,6 @@ public class LocalItemInfo extends HintPanel {
         component.setFocusable(enabled);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(300, Integer.MAX_VALUE);
-    }
-
     private String getType(GPRegistryEntry.Kind kind) {
         switch (kind) {
             case ExecutableLoadFile:
@@ -190,16 +205,5 @@ public class LocalItemInfo extends HintPanel {
             default:
                 return "unknown";
         }
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
-        Composite old = g2d.getComposite();
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
-        g2d.setComposite(old);
-        super.paint(g);
     }
 }

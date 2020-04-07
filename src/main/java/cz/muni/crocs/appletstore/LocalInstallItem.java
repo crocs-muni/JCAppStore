@@ -3,13 +3,11 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.ui.Title;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -22,6 +20,9 @@ import java.util.ResourceBundle;
 public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    /**
+     * Create a local item which is actually an custom applet INSTALL button
+     */
     public LocalInstallItem() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);

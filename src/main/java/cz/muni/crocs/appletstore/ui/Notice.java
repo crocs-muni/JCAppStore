@@ -15,20 +15,35 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Notice to display in the store below main bar
+ *
  * @author Jiří Horák
  * @version 1.0
  */
 public class Notice extends JPanel {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
+    /**
+     * Importance levels, decide the color
+     */
     public enum Importance {
         FATAL, SEVERE, INFO
     }
 
+    /**
+     * Icon to display (retry when callback defined, close if supports closing).
+     */
     public enum CallBackIcon {
         RETRY, CLOSE, NO_ICON
     }
 
+    /**
+     * Cerate a notification
+     * @param msg message to display
+     * @param status status - color
+     * @param type - icon type
+     * @param onClick - callbacks to perform, the type should be either close or retry, not called if NO_ICON
+     */
     public Notice(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
         setLayout(new MigLayout("center, gapy 20, insets 0 20 0 20"));
         MouseAdapter call = new MouseAdapter() {
@@ -57,8 +72,6 @@ public class Notice extends JPanel {
             default:
                 image = "info.png";
         }
-
-//        ((FlowLayout) getLayout()).setAlignment(FlowLayout.CENTER);
 
         JLabel error = new Text(new ImageIcon(Config.IMAGE_DIR + image));
         error.setBorder(new EmptyBorder(10, 10, 10, 10));

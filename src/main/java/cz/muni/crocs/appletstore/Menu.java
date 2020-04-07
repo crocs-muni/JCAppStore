@@ -10,11 +10,11 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
+ * Main Menu Bar
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -52,6 +52,9 @@ public class Menu extends JMenuBar {
         repaint();
     }
 
+    /**
+     * Reset if new card readers found
+     */
     public void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
@@ -83,10 +86,6 @@ public class Menu extends JMenuBar {
         }
     }
 
-    private ActionListener selectReaderListener() {
-        return e -> CardManagerFactory.getManager().setSelectedTerminal(e.getActionCommand());
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -103,6 +102,10 @@ public class Menu extends JMenuBar {
         buildFileItem();
         buildReadersItem();
         buildHelpItem();
+    }
+
+    private ActionListener selectReaderListener() {
+        return e -> CardManagerFactory.getManager().setSelectedTerminal(e.getActionCommand());
     }
 
     private void buildFileItem() {
@@ -293,13 +296,6 @@ public class Menu extends JMenuBar {
                 new HelpWindow(textSrc.getString("def_title"), HelpFactory.getMainAppletHelp()).showIt();
             }
         }, textSrc.getString("def_h")));
-
-//        help.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("pgp")) {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                new HelpWrapper(textSrc.getString("pgp"), new Keybase()).showIt();
-//            }
-//        }, textSrc.getString("H_pgp")));
     }
 
     /**

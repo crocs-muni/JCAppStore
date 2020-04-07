@@ -8,6 +8,8 @@ import java.awt.geom.Ellipse2D;
 
 
 /**
+ * Loading panel with circle
+ *
  * @author Jiří Horák
  * @version 1.0
  */

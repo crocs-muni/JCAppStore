@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.ui;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**

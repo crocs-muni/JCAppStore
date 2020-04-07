@@ -1,0 +1,1 @@
+Testing is done using Jubula ITE. See `/test` folder.

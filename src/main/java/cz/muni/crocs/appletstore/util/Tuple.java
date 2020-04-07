@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.util;
 
 /**
+ * A tuple
+ *
  * @author Jiří Horák
  * @version 1.0
  */

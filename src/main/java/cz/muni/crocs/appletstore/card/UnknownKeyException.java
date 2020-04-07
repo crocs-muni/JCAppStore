@@ -9,6 +9,9 @@ import java.util.ResourceBundle;
 /**
  * Exception to be thrown on unknown key
  * indicates that user should've been asked for keys to provide
+ *
+ * @author Jiří Horák
+ * @version 1.0
  */
 public class UnknownKeyException extends Exception {
     private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
