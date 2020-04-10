@@ -21,10 +21,11 @@ How to get the store
 **The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
 (also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
 
-More information on how to install the store is avaiable in the release description or in this below:
+More information on how to install the store is avaiable in the release description or below:
 <details>
    <summary>Installation process</summary>
-   #### Windows
+   
+#### Windows
 In Releases, download the latest windows zip file. Extract contents of the zip and open it. Inside, double click 
 JCAppStore-[version]-win.jar file - it is an installer that will install the store for you: follow the instructions.
 
