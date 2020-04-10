@@ -11,6 +11,7 @@ Our public key.
 
 #### deb folder
 Contains files used to geterate `.deb` package.
- - jcapp: shell script placed in `/usr/bin` to start the JCAppStore with
+ - jcapp: shell script placed in `/usr/bin` to start the JCAppStore with. Same as `launcher.sh`, but also modifies the access rights
+ for jcappstore files (these are given to root from `dpkg`)
 #### rpm folder
 To-be rpm packaging.
