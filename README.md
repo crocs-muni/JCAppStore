@@ -21,7 +21,10 @@ How to get the store
 **The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
 (also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
 
-#### Windows
+More information on how to install the store is avaiable in the release description or in this below:
+<details>
+   <summary>Installation process</summary>
+   #### Windows
 In Releases, download the latest windows zip file. Extract contents of the zip and open it. Inside, double click 
 JCAppStore-[version]-win.jar file - it is an installer that will install the store for you: follow the instructions.
 
@@ -53,6 +56,7 @@ Advanced:
 We are going to introduce Apple-specific .tar distribution (some GUI features), but now we are unable to build it because
 we have no access to a mac computer. You can build yours version: in the `AppletStore` class, uncomment the applet-specific
 lines and build the application.
+</details>
 
 
 How the store works?
