@@ -63,8 +63,6 @@ public class LogOutputStream extends OutputStream {
 
     /**
      * Sets the logger where to log the bytes.
-     *
-     * @param logger the logger
      */
     public void setLogger (Logger logger) {
         this.logger = logger;
@@ -72,8 +70,6 @@ public class LogOutputStream extends OutputStream {
 
     /**
      * Returns the logger.
-     *
-     * @return DOCUMENT ME!
      */
     public Logger getLogger () {
         return logger;
@@ -81,8 +77,6 @@ public class LogOutputStream extends OutputStream {
 
     /**
      * Sets the logging level.
-     *
-     * @param level DOCUMENT ME!
      */
     public void setLevel (Level level) {
         this.level = level;
@@ -90,8 +84,6 @@ public class LogOutputStream extends OutputStream {
 
     /**
      * Returns the logging level.
-     *
-     * @return DOCUMENT ME!
      */
     public Level getLevel () {
         return level;
@@ -99,8 +91,6 @@ public class LogOutputStream extends OutputStream {
 
     /**
      * Writes a byte to the output stream. This method flushes automatically at the end of a line.
-     *
-     * @param b DOCUMENT ME!
      */
     public void write (int b) {
         byte[] bytes = new byte[1];

@@ -25,6 +25,9 @@ How to get the store
 In Releases, download the latest windows zip file. Extract contents of the zip and open it. Inside, double click 
 JCAppStore-[version]-win.jar file - it is an installer that will install the store for you: follow the instructions.
 
+You should be able to run the installer by double-clicking; if it asks for the software to run the .jar with, select JRE
+from `C:\Program Files\Java\jre_[version]\bin\java.exe`.
+
 #### Unix/Linux
 For ubuntu/debian, a `.deb` package is available. Just install the package and run the application twice: for the first time using `root`:
 ```
@@ -46,6 +49,10 @@ All you need to do is execute the shell script.
 ###### Apple OS-x
 Apple is also a UNIX system. Use the guide above.
 
+Advanced:
+We are going to introduce Apple-specific .tar distribution (some GUI features), but now we are unable to build it because
+we have no access to a mac computer. You can build yours version: in the `AppletStore` class, uncomment the applet-specific
+lines and build the application.
 
 
 How the store works?

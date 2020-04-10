@@ -70,7 +70,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
                 bg = ImageIO.read(f);
             } catch (IOException e) {
                 e.printStackTrace();
-                logger.warn("Could not open backround image file " + bg, e);
+                logger.warn("Could not open background image file " + bg, e);
                 loadDefault();
             }
         }

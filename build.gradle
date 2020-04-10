@@ -87,8 +87,13 @@ izPackCreateInstaller.dependsOn jar
 ///////////////////////////
 
 task unix(type: Exec) {
+    //note if this task fails for you, just run the script manually (from the folder the script is in)
     group 'installation'
-    executable "$projectDir/installer-unix/installer.sh"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        println "Unable to run on Windows."
+        return 1
+    }
+    commandLine '$projectDir/installer-unix/targenerator.sh'
 }
 
 unix.dependsOn jar
