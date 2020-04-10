@@ -56,7 +56,7 @@ public class OptionsImpl implements Options<String> {
         addIfMissing(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
         addIfMissing(Options.KEY_WARN_FORCE_INSTALL, "true");
         addIfMissing(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());
-        addIfMissing(Options.KEY_STORE_FINGERPRINT, "4EB13B314E3FB0D05075897EFFACBB3D7B9FE0F5");
+        addIfMissing(Options.KEY_STORE_FINGERPRINT, "AE14854BECCAC4CC0BC695E83D6FE2832EDFE9C9");
     }
 
     @Override

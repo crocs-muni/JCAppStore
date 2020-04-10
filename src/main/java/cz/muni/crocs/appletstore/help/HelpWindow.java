@@ -21,9 +21,9 @@ public class HelpWindow extends JDialog {
        setModal(true);
        component.setBackground(Color.WHITE);
        setPreferredSize(new Dimension(850, 550));
-
        setContentPane(new JScrollPane(component));
        pack();
+       setLocationRelativeTo(null);
    }
 
     /**

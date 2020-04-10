@@ -11,10 +11,18 @@ JCAppStore's public key is imported into PGP keyring. The Internet connection mu
 #### Jubula Setup
 The file `jcappstore_test_suite.jub` should be imported to Jubula using `Test` menu item.
 The test project require AUT to be set up with tested jar executable provided. Select `Test > Properties` and Add or Edit AUT depending on
-whether an AUT is already created. Add or Edit AUT configuration, use `localhost` and provide path to JCAppStore executable `.jar` file
-in **JRE Executable** field (leave the other fields empty).
+whether an AUT is already created. Add or Edit AUT configuration, use `localhost`, provide path to JCAppStore executable `.jar` file
+in **Executable JAR File Name** field and set your **AUT Working Directory** to the folder the .jre is in (leave the other fields empty).
 
-The AUT must be running and the tested application started. The "Running AUTs" window should display running JCAppstore application.
+Example values when installed with windows installer:
+```
+Executable JAR File Name: C:\Program Files\JCAppStore\JCAppStore-1.0.jar
+AUT Working Directory:    C:\Program Files\JCAppStore
+```
+
+
+The AUT must be running and the tested application started (see the red ball and green arrow icons). 
+The "Running AUTs" window should display running JCAppstore application.
 The application should be directly behind Jubula in system window hierarchy - once the test is started, the ITE is minimized
  and the application should get the focus.
 
@@ -31,7 +39,11 @@ no packages without instantiated applet are present. The store must be "as insta
 file. This will reset all your setup (or move it somewhere else for the testing purpose and replace afterwards).
 Also some other test-case-specific conditions must be met. The `my_card/` folder must contain`JCAlgTest_v1.7.4_sdk2.2.2.cap`
 for custom installation test execution, along with `\[the cap filename\].sig` file for custom signature verification. 
-Both files can be copied from the `store/` folder.
+Both files can be copied from the `store/JCAlgTest/` folder.
+
+#### Testing
+The suite contains folders with testing scenarios. All the tests are grouped in `FULLTEST` taget - in Test Suite Browser,
+select FULLTEST and wait for the testing to start. There is around 15 seconds delay before the AUT starts the execution.
  
 #### Possible failures
  

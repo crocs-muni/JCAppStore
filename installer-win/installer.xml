@@ -18,7 +18,7 @@
     <info>
         <appname>JCAppStore</appname>
         <appversion>1.0</appversion>
-        <appsubpath>JCAppStore-1.0</appsubpath>
+        <appsubpath>JCAppStore</appsubpath>
         <javaversion>1.8</javaversion>
         <authors>
             <author name="Jiří Horák" email="horakj7@gmail.com"/>
