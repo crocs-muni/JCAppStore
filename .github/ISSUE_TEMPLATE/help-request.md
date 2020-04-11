@@ -2,7 +2,7 @@
 name: Help request
 about: 'Help with the store use: mainly for applet installation/usage.'
 title: 'Help:'
-labels: ''
+labels: help wanted
 assignees: ''
 
 ---
