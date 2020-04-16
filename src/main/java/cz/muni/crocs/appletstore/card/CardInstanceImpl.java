@@ -107,12 +107,16 @@ public class CardInstanceImpl implements CardInstance {
         if (applets == null)
             return 0;
 
+        AppletInfo sd = null;
         for (AppletInfo info : applets) {
             if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
                 return info.getLifecycle();
+            } else if (info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
+                sd = info;
             }
         }
-        throw new Error("Should not end here.");
+        if (sd != null) return sd.getLifecycle();
+        return -1;
     }
 
     @Override
