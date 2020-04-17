@@ -56,6 +56,7 @@ public class SendAPDUDialogWindow extends JPanel {
 //        });
         add(apdu, "wrap");
         add(getHint("H_custom_command", "600"), "span 5, wrap");
+        add(getHint("H_valid_command", "600"), "span 5, wrap");
 
 //        inHex.setSelected(true);
 //        inHex.setText(textSrc.getString("in_hex"));
