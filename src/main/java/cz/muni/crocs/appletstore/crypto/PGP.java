@@ -68,12 +68,12 @@ public class PGP extends CmdTask {
 
     /**
      * Verify signature
-     * @param author author - signature key owner identifier as showin in PGP or null
+     * @param fingerprint - key identifier or null
      * @param file file to verify
      * @param signatureFile detached signature file
      * @return 0 if ok, 1 if invalid, 2 if error occured
      */
-    int verifySignature(String author, File file, File signatureFile) throws LocalizedSignatureException {
+    int verifySignature(String fingerprint, File file, File signatureFile) throws LocalizedSignatureException {
         int counter = 0;
         while (!Files.isReadable(file.toPath()) || !Files.isReadable(signatureFile.toPath())) {
             try {
@@ -100,32 +100,32 @@ public class PGP extends CmdTask {
         logger.info(output);
         output = output.replaceAll("\\s", "");
 
-        if (author == null) {
+        if (fingerprint == null) {
             return (output.contains(OptionsFactory.getOptions().getOption(Options.KEY_STORE_FINGERPRINT)))
                     ? sig.exitValue() : 1;
         }
-        return (output.contains(author)) ? sig.exitValue() : 1;
+        return (output.contains(fingerprint.replaceAll("\\s", ""))) ? sig.exitValue() : 1;
     }
 
     /**
      * Just a wrapper that assesses int output from verifySignature()
      * @return tuple: first: forwards exit code value; second: string message to display
      */
-    Tuple<Integer, String> verifySignatureAndGetErrorMsg(String author, File file, File signatureFile)
+    Tuple<Integer, String> verifySignatureAndGetErrorMsg(String fingerprint, File file, File signatureFile)
             throws LocalizedSignatureException {
         if (!file.exists() || !signatureFile.exists())
             return new Tuple<>(3, textSrc.getString("H_no_file_pgp"));
-        int exitCode = verifySignature(author, file, signatureFile);
+        int exitCode = verifySignature(fingerprint, file, signatureFile);
         switch (exitCode) {
             case 0: {
-                if (author == null) {
+                if (fingerprint == null) {
                     return new Tuple<>(exitCode, textSrc.getString("H_verified_no_author"));
                 /*TODO cannot find out missing trust set on the key, so the message will be
                    "succeeded" even though key not trusted*/
                  /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified_no_author") +
                         textSrc.getString("H_verified_not_trusted"))*/
                 } else {
-                    return new Tuple<>(exitCode, textSrc.getString("H_verified") + author);
+                    return new Tuple<>(exitCode, textSrc.getString("H_verified_key") + fingerprint);
                     /*TODO cannot find out missing trust set on the key*/
                 /*new Tuple<>("verify_trust.png", textSrc.getString("H_verified") + author +
                         textSrc.getString("H_verified_not_trusted")) */
