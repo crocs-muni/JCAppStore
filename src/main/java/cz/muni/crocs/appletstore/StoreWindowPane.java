@@ -103,12 +103,12 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         if (sortedItems.size() == 0) {
             storeLayout.add(new NotFoundItem());
         } else {
-
             for (Item item : sortedItems) {
                 storeLayout.add((JComponent)item);
             }
         }
         storeLayout.revalidate();
+        storeLayout.requestFocusInWindow();
         currentlyShown = null;
         setViewportView(storeLayout);
     }
