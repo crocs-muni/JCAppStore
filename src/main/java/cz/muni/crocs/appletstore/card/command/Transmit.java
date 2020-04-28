@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.card.command;
 import apdu4j.CommandAPDU;
 import apdu4j.HexUtils;
 import apdu4j.ResponseAPDU;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
