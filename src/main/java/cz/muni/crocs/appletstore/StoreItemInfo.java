@@ -115,7 +115,7 @@ public class StoreItemInfo extends HintPanel {
                         fireInstall(appletName, getInfoPack(dataSet, latestV,
                                 sdks, sdks.size() - 1),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
-                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 callback,
                                 installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
@@ -219,7 +219,7 @@ public class StoreItemInfo extends HintPanel {
                         fireInstall(dataSet.get(JsonParser.TAG_NAME).getAsString(),
                                 getInfoPack(dataSet, version, sdks, compilerIdx),
                                 dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
-                                dataSet.get(JsonParser.TAG_PGP_IDENTIFIER).getAsString(),
+                                dataSet.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString(),
                                 dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
                                 call,
                                 installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
@@ -318,7 +318,7 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, String signer, String identifier, JsonElement appNames,
+    private static void fireInstall(String name, AppletInfo info, String signer, String fingerprint, JsonElement appNames,
                                     OnEventCallBack<Void, Void> call, boolean installed,
                                     String defaultSelected, MouseEvent e) {
 
@@ -342,7 +342,7 @@ public class StoreItemInfo extends HintPanel {
         }
 
         new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, signer, identifier, appletNamesData), installed, defaultSelected, call).mouseClicked(e);
+                info, file, signer, fingerprint, appletNamesData), installed, defaultSelected, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

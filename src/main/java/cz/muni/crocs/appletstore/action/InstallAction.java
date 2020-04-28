@@ -104,10 +104,10 @@ public class InstallAction extends CardAbstractAction {
             void work() {
                 final Signature signature = new SignatureImpl();
                 try {
-                    result = signature.verifyPGPAndReturnMessage("JCAppStore", data.getCapfile());
+                    result = signature.verifyPGPAndReturnMessage(data.getCapfile());
                     if (data.getSigner() != null && !data.getSigner().isEmpty()) {
-                        Tuple<Integer, String> another =
-                                signature.verifyPGPAndReturnMessage(data.getSigner(), data.getCapfile());
+                        Tuple<Integer, String> another = signature.verifyPGPAndReturnMessage(data.getFingerprint(),
+                                data.getCapfile(), signature.getSignatureFileFromString(data.getSigner(), data.getCapfile().getAbsolutePath()));
                         result = new Tuple<>(another.first,
                                 "JCAppStore: " + result.second + "<br>" + data.getSigner() + ": " + another.second);
                     }

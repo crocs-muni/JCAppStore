@@ -30,12 +30,12 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public boolean verifyPGP(String author, String file, String fileSignature) throws LocalizedSignatureException {
+    public boolean verifyPGP(String fingerprint, String file, String fileSignature) throws LocalizedSignatureException {
         File code = new File(file);
         throwIfNotExists(code);
         File signature = new File(fileSignature);
         throwIfNotExists(signature);
-        return verifyPGP(author, code, signature);
+        return verifyPGP(fingerprint, code, signature);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String author, String file) throws LocalizedSignatureException {
-        return verifyPGPAndReturnMessage(author, new File(file));
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(String file) throws LocalizedSignatureException {
+        return verifyPGPAndReturnMessage(new File(file));
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String author, File file)  throws LocalizedSignatureException {
-        return verifyPGPAndReturnMessage(author, file, getSignatureFileFromString(author, file.getAbsolutePath()));
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(File file)  throws LocalizedSignatureException {
+        return verifyPGPAndReturnMessage(null, file, getSignatureFileFromString("JCAppStore", file.getAbsolutePath()));
     }
 
     @Override
@@ -74,13 +74,13 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException {
-        return verifyPGPAndReturnMessage(author, new File(file), new File(detachedSignature));
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, String file, String detachedSignature) throws LocalizedSignatureException {
+        return verifyPGPAndReturnMessage(fingerprint, new File(file), new File(detachedSignature));
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException {
-        return new PGP().verifySignatureAndGetErrorMsg(author, file, detachedSignature);
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, File file, File detachedSignature) throws LocalizedSignatureException {
+        return new PGP().verifySignatureAndGetErrorMsg(fingerprint, file, detachedSignature);
     }
 
     private void throwIfNotExists(File f) throws LocalizedSignatureException {

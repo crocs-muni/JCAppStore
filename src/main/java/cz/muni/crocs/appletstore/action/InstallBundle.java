@@ -16,19 +16,19 @@ public class InstallBundle {
     private AppletInfo info;
     private File capfile;
     private String signer;
-    private String identifier;
+    private String fingerprint;
     private ArrayList<String> appletNames;
 
-    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String identifier) {
+    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String fingerprint) {
         this.titleBar = titleBar;
         this.info = info;
         this.capfile = capfile;
         this.signer = signer;
-        this.identifier = identifier;
+        this.fingerprint = fingerprint;
     }
 
-    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String identifier, ArrayList<String> appletNames) {
-        this(titleBar, info, capfile, signer, identifier);
+    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String fingerprint, ArrayList<String> appletNames) {
+        this(titleBar, info, capfile, signer, fingerprint);
         this.appletNames = appletNames;
     }
 
@@ -52,8 +52,8 @@ public class InstallBundle {
         return signer;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public String getFingerprint() {
+        return fingerprint;
     }
 
     public void setCapfile(File file) {

@@ -24,7 +24,7 @@ public interface JsonParser {
     String TAG_USAGE = "usage";
     String TAG_KEYS = "keys";
     String TAG_DEFAULT_SELECTED = "default_selected";
-    String TAG_PGP_IDENTIFIER = "pgp"; //can be email or key ID
+    String TAG_PGP_FINGERPRINT = "pgp"; //can be email or key ID
     String TAG_PGP_SIGNER = "signed_by";
     String TAG_APPLET_INSTANCE_NAMES = "applet_instance_names";
 
