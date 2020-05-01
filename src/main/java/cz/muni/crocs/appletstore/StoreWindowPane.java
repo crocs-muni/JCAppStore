@@ -108,7 +108,6 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
             }
         }
         storeLayout.revalidate();
-        storeLayout.requestFocusInWindow();
         currentlyShown = null;
         setViewportView(storeLayout);
     }
