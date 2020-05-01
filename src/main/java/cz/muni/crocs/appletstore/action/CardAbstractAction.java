@@ -148,6 +148,9 @@ public abstract class CardAbstractAction extends MouseAdapter implements CardAct
                 handleUnknownKey(toExecute, loggerMessage, title, e);
             } catch (LocalizedCardException ex) {
                 caught(title, loggerMessage, ex);
+            } catch (Exception e) {
+                caught(null, "Unknown exception: " + e.getMessage(),
+                        new LocalizedCardException(e, "E_unknown_error"));
             } finally {
                 if (Thread.interrupted()) {
                     SwingUtilities.invokeLater(call::onFail);

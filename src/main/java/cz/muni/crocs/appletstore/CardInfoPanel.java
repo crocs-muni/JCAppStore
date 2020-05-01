@@ -74,7 +74,6 @@ public class CardInfoPanel extends JPanel {
                 }
             }).start();
         } else {
-            add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "no-card-black.png")), "align center, wrap");
             add(new Text(textSrc.getString("no_card")));
         }
     }
