@@ -42,7 +42,7 @@ public class Transmit extends GPCommand<ResponseAPDU> {
         result = channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, targetAid.getBytes()));
         logger.debug("<< " + HexUtils.bin2hex(result.getBytes()));
         if (result.getSW() != 0x9000) return false;
-        logger.debug(">> " + APDU.substring(0, 10) + " [data hidden]");
+        logger.debug(">> " + getAPDUHiddenData());
         CommandAPDU c = new CommandAPDU(HexUtils.stringToBin(APDU));
         result = channel.transmit(c);
         logger.debug("<< " + result.getSW() + " [data not displayed if present]");
@@ -51,6 +51,10 @@ public class Transmit extends GPCommand<ResponseAPDU> {
 
     @Override
     public String getDescription() {
-        return "Transmit method with command of " + APDU.substring(0, 10) + " [data hidden], sent to AID: " + targetAid;
+        return "Transmit method with command of " + getAPDUHiddenData() + ", sent to AID: " + targetAid;
+    }
+
+    private String getAPDUHiddenData() {
+        return  APDU == null || APDU.length() < 10 ? APDU :  APDU.substring(0, 10) + " [data hidden]";
     }
 }

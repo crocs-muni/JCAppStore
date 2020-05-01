@@ -308,6 +308,5 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         windowLayout.add(installCmd);
         windowLayout.revalidate();
         windowLayout.repaint();
-        windowLayout.requestFocusInWindow();
     }
 }

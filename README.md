@@ -19,8 +19,7 @@ How to get the store
 -----
 
 **The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version 8+ 
-(also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
-
+(also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 More information on how to install the store is avaiable in the release description or below:
 <details>
    <summary>Installation process</summary>
@@ -111,9 +110,10 @@ Useful set of tutorials and how-tos can be found on [OpenSC wiki](https://github
    <p>The applet on a card needs to communicate with something on your computer. Most applets do not have
    these hosts and thus are very difficult to use. The store does not offer such software.
    
-   There are two types of host applications - with GUI and without.
-   For host applications that can be used through command line only (without GUI) see guide 'Command line'
-   in the app help section (right upper corner). GUI host should be intuitive.</p>
+   There are two types of host applications - with GUI (graphical) and CLI (command line).
+   For CLI host applications usage see guide 'Command line'
+   in the app help section (right upper corner). GUI host should be intuitive. The applet info panel in the store
+   should contain more about the applet usage.</p>
 </details>
 
 <details>

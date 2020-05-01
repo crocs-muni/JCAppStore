@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=1.0
+VERSION=1.1
 DIR=./
 
 if ! cat jcappstore-do-not-ask.info ; then
