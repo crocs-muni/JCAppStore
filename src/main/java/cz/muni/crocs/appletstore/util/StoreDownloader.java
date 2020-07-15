@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -26,14 +26,14 @@ import java.util.zip.ZipInputStream;
  */
 public class StoreDownloader {
     private static final Logger logger = LogManager.getLogger(StoreDownloader.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private File zipFile = new File(Config.APP_STORE_DIR, "JCAppStoreContent.zip");
-    private String address;
+    private final File zipFile = new File(Config.APP_STORE_DIR, "JCAppStoreContent.zip");
+    private final String address;
     private int downloaded = 0;
     private int size;
 
-    private ProcessTrackable parent;
+    private final ProcessTrackable parent;
 
     /**
      * Download the store

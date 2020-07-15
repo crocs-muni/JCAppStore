@@ -1,11 +1,10 @@
 package cz.muni.crocs.appletstore;
 
-import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.DeleteAction;
 import cz.muni.crocs.appletstore.action.SendApduAction;
 import cz.muni.crocs.appletstore.ui.*;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.card.AppletInfo;
@@ -17,7 +16,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**

@@ -9,7 +9,7 @@ import cz.muni.crocs.appletstore.ui.DisablePanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -125,7 +125,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
 
         if (verifyCardLifeState(card.getLifeCycle())) {
-            Set<AppletInfo> cardApplets = card.getInstalledApplets();
+            Set<AppletInfo> cardApplets = card.getCardMetadata();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null as applet array returned.");
@@ -133,7 +133,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             }
             removeAll();
 
-            loadApplets(card.getInstalledApplets(), manager);
+            loadApplets(cardApplets, manager);
             //skip calling search bar as it might not have been initialized
             showItemsInternal(null);
 

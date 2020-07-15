@@ -1,16 +1,14 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.ResponseAPDU;
-import cz.muni.crocs.appletstore.util.CallBack;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * Card Manager, the component visible from outside of this package

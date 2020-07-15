@@ -1,7 +1,7 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.util.ProcessTrackable;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;

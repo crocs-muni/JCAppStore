@@ -17,8 +17,8 @@ import java.net.URISyntaxException;
  * @version 1.0
  */
 public class URLAdapter extends MouseAdapter {
-    private static Logger logger = LoggerFactory.getLogger(URLAdapter.class);
-    private String urlAddress;
+    private static final Logger logger = LoggerFactory.getLogger(URLAdapter.class);
+    private final String urlAddress;
 
     public URLAdapter(String url) {
         urlAddress = url;

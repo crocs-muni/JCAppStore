@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.util.JsonParser;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
 import cz.muni.crocs.appletstore.util.OptionsFactory;

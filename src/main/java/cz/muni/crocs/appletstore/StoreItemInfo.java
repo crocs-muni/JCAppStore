@@ -8,7 +8,7 @@ import cz.muni.crocs.appletstore.action.InstallAction;
 import cz.muni.crocs.appletstore.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.ui.TextField;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
@@ -94,7 +94,7 @@ public class StoreItemInfo extends HintPanel {
 
         //check whether installed
         CardInstance card = CardManagerFactory.getManager().getCard();
-        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
+        Set<AppletInfo> appletInfos = card == null ? null : card.getCardMetadata();
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();

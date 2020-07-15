@@ -32,19 +32,19 @@ public class Config {
     public static final String DATA_DIR = RESOURCES_DIR +"data"+S;
 
     //config files related constants
-    public static final String CARD_LIST_FILE = Config.APP_DATA_DIR + Config.S + "cards.ini";
+    public static final String CARD_LIST_FILE = APP_DATA_DIR + S + "cards.ini";
     public static final String CARD_TYPES_FILE = "src"+S+"main"+S+"resources"+S+"data"+S+"types.ini";
-    public static final String OPTIONS_FILE = Config.APP_DATA_DIR + Config.S + "jcappstore.options";
+    public static final String OPTIONS_FILE = APP_DATA_DIR + S + "jcappstore.options";
 
-    //store constants
+    //store constants - URLs to store repo & jcalgtest
+    public static final String JCALGTEST_RESULTS_DIR = "https://api.github.com/repos/crocs-muni/JCAlgTest/contents/Profiles/results";
     public static final String REMOTE_STORE_URL = "https://github.com/petrs/JCAppStoreContent.git";
     public static final String REMOTE_STORE_LATEST_URL = "https://api.github.com/repos/petrs/JCAppStoreContent/releases/latest";
-
     public static final String REPO_ISSUES = "https://github.com/JavaCardSpot-dev/JCAppStore/issues";
     public static final String FILE_INFO_PREFIX = "info_";
     public static final String FILE_INFO_SUFFIX = ".json";
 
-    public static final String RESOURCES = Config.APP_STORE_DIR + Config.S + "Resources" + Config.S;
+    public static final String RESOURCES = APP_STORE_DIR + S + "Resources" + S;
 
     /**
      * Gets the default app folder root location
@@ -61,7 +61,7 @@ public class Config {
     }
 
     public static boolean setupLogger() {
-        MainMapLookup.setMainArguments(Config.APP_LOG_DIR.getAbsolutePath(), Config.LOG_FILENAME, Config.LOG_FILENAME_EXT);
+        MainMapLookup.setMainArguments(APP_LOG_DIR.getAbsolutePath(), LOG_FILENAME, LOG_FILENAME_EXT);
         return true;
     }
 

@@ -6,7 +6,9 @@ import apdu4j.TerminalManager;
 import apdu4j.ResponseAPDU;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.Store;
 import cz.muni.crocs.appletstore.card.command.*;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 /**
  * Manager providing all functionality over card
@@ -72,7 +74,7 @@ public class CardManagerImpl implements CardManager {
             aid = null;
         }
 
-        if (card.getApplets() == null)
+        if (card.getCardMetadata() == null)
             return;
         this.selectedAID = aid;
     }
@@ -146,6 +148,10 @@ public class CardManagerImpl implements CardManager {
                 tryGeneric = false;
             }
             logger.info("Card successfully refreshed.");
+
+            if (card != null && card.getCardMetadata().getJcAlgTestData() == null) {
+                new Thread(new JCAlgTestResultsFinder(card)).start();
+            }
         }
     }
 
@@ -266,18 +272,17 @@ public class CardManagerImpl implements CardManager {
         return details;
     }
 
-
     //delete applet metadata when uninstalling
     private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
-        Set<AppletInfo> appletInfoList = card.getApplets();
+        CardInstanceMetaData appletInfoList = card.getCardMetadata();
         deleteInfo(appletInfoList, applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
             for (AID aid : applet.getModules()) {
                 deleteInfo(appletInfoList, aid);
             }
         }
-        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
+        AppletSerializer<CardInstanceMetaData> toSave = new AppletSerializerImpl();
         toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
@@ -297,7 +302,7 @@ public class CardManagerImpl implements CardManager {
     private void uninstallImpl(AppletInfo nfo, boolean force) throws CardException, LocalizedCardException{
         synchronized(lock) {
             GPCommand delete = new Delete(nfo, force);
-            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
+            GPCommand<CardInstanceMetaData> contents = new ListContents(card.getId());
             card.secureExecuteCommands(delete, new GPCommand() {
                 @Override
                 public String getDescription() {
@@ -310,7 +315,7 @@ public class CardManagerImpl implements CardManager {
                     return true;
                 }
             }, contents);
-            card.setApplets(contents.getResult());
+            card.setMetaData(contents.getResult());
             selectedAID = null;
         }
     }
@@ -373,7 +378,7 @@ public class CardManagerImpl implements CardManager {
                     saveInfoData();
                     ListContents cmd = new ListContents(card.getId());
                     card.secureExecuteCommands(cmd);
-                    card.setApplets(cmd.getResult());
+                    card.setMetaData(cmd.getResult());
                 } finally {
                     selectedAID = null;
                 }
@@ -400,12 +405,13 @@ public class CardManagerImpl implements CardManager {
     }
 
     private void saveInfoData() throws LocalizedCardException {
-        Set<AppletInfo> appletInfoList = getAppletsToSave(card.getApplets());
+        CardInstanceMetaData appletInfoList = card.getCardMetadata();
+        appletInfoList.removeInvalid();
         for (AppletInfo info : toSave) {
             insertOrRewrite(info, appletInfoList);
         }
 
-        AppletSerializer<Set<AppletInfo>> serializer = new AppletSerializerImpl();
+        AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
         serializer.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
     }
 
@@ -414,13 +420,5 @@ public class CardManagerImpl implements CardManager {
             to.remove(item);
             to.add(item);
         }
-    }
-
-    private Set<AppletInfo> getAppletsToSave(Set<AppletInfo> all) {
-        return all.stream().filter(a -> a.getAuthor() != null ||
-                a.getVersion() != null ||
-                a.getSdk() != null ||
-                a.getName() != null)
-                .collect(Collectors.toSet());
     }
 }

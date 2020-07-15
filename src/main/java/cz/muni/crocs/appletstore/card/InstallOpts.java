@@ -24,14 +24,15 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class InstallOpts {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private String[] customAIDs;
-    private String[] originalAIDs;
-    private String[] appletNames;
-    private AppletInfo info;
+    private final String[] customAIDs;
+    private final String[] originalAIDs;
+    private final String[] appletNames;
+    private final AppletInfo info;
+    private final byte[] installParams;
+
     private boolean force;
-    private byte[] installParams;
     private String defalutSelected;
 
     /**

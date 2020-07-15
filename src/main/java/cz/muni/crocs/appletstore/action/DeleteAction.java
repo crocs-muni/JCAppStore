@@ -7,7 +7,7 @@ import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
@@ -18,9 +18,7 @@ import pro.javacard.gp.GPRegistryEntry;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -107,7 +105,7 @@ public class DeleteAction extends CardAbstractAction {
 
         if (!isForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
             for (AID mod : info.getModules()) {
-                for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
+                for (AppletInfo nfo : manager.getCard().getCardMetadata()) {
                     if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
                             //do not notify about the applet we are removing now
                             !(info.getKind() == Kind.Application && info.getAid().equals(nfo.getAid()))) {
@@ -161,7 +159,7 @@ public class DeleteAction extends CardAbstractAction {
     private AppletInfo getPackageOf(AppletInfo applet) {
         CardInstance card = CardManagerFactory.getManager().getCard();
         if (card == null) return null;
-        for (AppletInfo info : card.getInstalledApplets()) {
+        for (AppletInfo info : card.getCardMetadata()) {
             if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
                 for (AID instance : info.getModules()) {
                     if (instance.equals(applet.getAid())) {

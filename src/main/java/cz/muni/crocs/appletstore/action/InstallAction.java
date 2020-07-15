@@ -7,10 +7,10 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
 import cz.muni.crocs.appletstore.crypto.SignatureImpl;
-import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.*;
-import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -174,7 +174,7 @@ public class InstallAction extends CardAbstractAction {
 
     //collision finder
     private boolean someCustomAppletAIDsConflicts(String[] aids) {
-        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getInstalledApplets();
+        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getCardMetadata();
         for (AppletInfo applet : applets) {
             for (String customAID : aids) {
                 if (applet.getAid().equals(AID.fromString(customAID))) {

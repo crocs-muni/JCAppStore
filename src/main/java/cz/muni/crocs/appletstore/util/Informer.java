@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 
 import javax.swing.*;

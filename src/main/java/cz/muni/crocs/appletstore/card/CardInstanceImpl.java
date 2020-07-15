@@ -7,6 +7,7 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import cz.muni.crocs.appletstore.util.Options;
@@ -17,6 +18,7 @@ import pro.javacard.AID;
 import pro.javacard.gp.*;
 import pro.javacard.gp.PlaintextKeys.Diversification;
 
+import javax.smartcardio.ATR;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
@@ -34,7 +36,8 @@ import java.util.*;
  */
 public class CardInstanceImpl implements CardInstance {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceImpl.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
+            OptionsFactory.getOptions().getLanguageLocale());
 
     private String masterKey;
     private String kcv;
@@ -45,8 +48,10 @@ public class CardInstanceImpl implements CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private Set<AppletInfo> applets;
+    private CardInstanceMetaData metadata;
     private AID defaultSelected;
+
+    private ProcessTrackable task;
 
     /**
      * Compares the card id and updates card data if needed
@@ -81,14 +86,14 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     @Override
-    public Set<AppletInfo> getInstalledApplets() {
-        return Collections.unmodifiableSet(getApplets());
+    public CardInstanceMetaData getCardMetadata() {
+        return metadata;
     }
 
     @Override
     public AppletInfo getInfoOf(AID aid) {
         if (aid == null) return null;
-        Optional<AppletInfo> info = getApplets().stream().filter(a -> aid.equals(a.getAid())).findFirst();
+        Optional<AppletInfo> info = metadata.stream().filter(a -> aid.equals(a.getAid())).findFirst();
         return info.orElse(null);
     }
 
@@ -104,11 +109,11 @@ public class CardInstanceImpl implements CardInstance {
 
     @Override
     public Integer getLifeCycle() {
-        if (applets == null)
+        if (metadata == null)
             return 0;
 
         AppletInfo sd = null;
-        for (AppletInfo info : applets) {
+        for (AppletInfo info : metadata) {
             if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
                 return info.getLifecycle();
             } else if (info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
@@ -135,9 +140,26 @@ public class CardInstanceImpl implements CardInstance {
         updateCardName(newName);
     }
 
+    @Override
+    public boolean addTask(ProcessTrackable task) {
+        if (task == null || isTask()) return false;
+        this.task = task;
+        this.task.run();
+        return true;
+    }
+
+    @Override
+    public boolean isTask() {
+        return task != null && !task.finished();
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
     ////////////////////////////////////////////////////////////////////////////
+
+    CardDetails getDetails() {
+        return details;
+    }
 
     /**
      * Set default selected applet of the card
@@ -246,20 +268,11 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     /**
-     * Modifiable access for local classes
-     *
-     * @return modifiable applet list
-     */
-    Set<AppletInfo> getApplets() {
-        return applets;
-    }
-
-    /**
      * Used to update applet list on install
-     * @param applets applet info list to set
+     * @param metadata applet info list and other information to set
      */
-    void setApplets(Set<AppletInfo> applets) {
-        this.applets = applets;
+    void setMetaData(CardInstanceMetaData metadata) {
+        this.metadata = metadata;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -408,10 +421,10 @@ public class CardInstanceImpl implements CardInstance {
         //todo image that represents not trying to auth
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        GPCommand<Set<AppletInfo>> listContents = new ListContents(id);
+        GPCommand<CardInstanceMetaData> listContents = new ListContents(id);
         GPCommand<Optional<AID>> selected = new GetDefaultSelected();
         secureExecuteCommands(listContents, selected);
-        applets = listContents.getResult();
+        metadata = listContents.getResult();
         defaultSelected = selected.getResult().orElse(null);
     }
 
