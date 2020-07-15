@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -28,18 +29,15 @@ public class AppletSerializerImpl implements AppletSerializer<CardInstanceMetaDa
         if (!file.exists())
             throw new LocalizedCardException("No file.", "E_no_applets_file");
 
-        CardInstanceMetaData result;
-
         try (FileInputStream fis = new FileInputStream(file);
              ObjectInputStream in = new ObjectInputStream(fis)) {
 
-            result = (CardInstanceMetaData) in.readObject();
+            return (CardInstanceMetaData) in.readObject();
 
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save applets into file.", "E_deserialize_applets", e);
         } catch (ClassNotFoundException e) {
             throw new LocalizedCardException("Unable to serialize: class not present.", "E_deserialize_applets", e);
         }
-        return result;
     }
 }

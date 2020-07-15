@@ -32,33 +32,33 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class InstallDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private static Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
 
     private final String DEFAULT_APP_NAME = "Applet";
     //applet info and setting GUI components
-    private JTextField name = new JTextField(50);
-    private JTextField author = new JTextField(10);
-    private JTextField version = new JTextField(10);
-    private JTextField sdk = new JTextField(10);
-    private JTextField installParams = new JTextField(50);
-    private JCheckBox forceInstall = new JCheckBox();
-    private JCheckBox hasKeys = new JCheckBox();
-    private JPanel advanced = new JPanel();
+    private final JTextField name = new JTextField(50);
+    private final JTextField author = new JTextField(10);
+    private final JTextField version = new JTextField(10);
+    private final JTextField sdk = new JTextField(10);
+    private final JTextField installParams = new JTextField(50);
+    private final JCheckBox forceInstall = new JCheckBox();
+    private final JCheckBox hasKeys = new JCheckBox();
+    private final JPanel advanced = new JPanel();
     //private ButtonGroup selectedAID = new ButtonGroup();
 
     private JTextField[] customAIDs;
     private JCheckBox[] appletInstances;
 
     //applet install info variables
-    private AppletInfo info;
-    private CAPFile src;
-    private boolean isInstalled;
-    private ArrayList<String> appletNames;
+    private final AppletInfo info;
+    private final CAPFile src;
+    private final boolean isInstalled;
+    private final ArrayList<String> appletNames;
 
     private boolean initialized;
     private File customSignatureFile;
-    private Color wrong = new Color(0xA3383D);
+    private final Color wrong = new Color(0xA3383D);
     public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
     /**
@@ -72,6 +72,7 @@ public class InstallDialogWindow extends JPanel {
      * @param appletNames applet names that are to be displayed, usable if cap file with multiple applets
      */
     public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg,
+                               String issueMsg, String issueDetails,
                                boolean isCustom, ArrayList<String> appletNames) {
         this.info = info;
         this.src = file;
@@ -84,6 +85,7 @@ public class InstallDialogWindow extends JPanel {
             this.appletNames = appletNames;
         }
         build(verifyMsg);
+        buildNoticeSection(issueMsg, issueDetails);
         buildAdvanced();
         if (isCustom) {
             buildCustomSigned();
@@ -141,6 +143,22 @@ public class InstallDialogWindow extends JPanel {
         add(new JLabel(textSrc.getString("pkg_id")), "span 2");
         add(new JLabel(src.getPackageAID().toString()), "span 3, wrap");
         buildMetaDataSection();
+    }
+
+    private void buildNoticeSection(String issueMsg, String issueDetails) {
+        if (issueMsg == null) return;
+        JLabel issueNotice = new HtmlText(issueMsg);
+        if (issueDetails != null) {
+            issueNotice.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showConfirmDialog(null, new HtmlText(issueDetails),
+                            textSrc.getString("jc_title"), JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "code.png"));
+                }
+            });
+        }
+        add(issueNotice, "span 3, wrap");
     }
 
     private void buildMetaDataSection() {

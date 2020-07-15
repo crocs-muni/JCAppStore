@@ -105,7 +105,7 @@ public class DeleteAction extends CardAbstractAction {
 
         if (!isForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
             for (AID mod : info.getModules()) {
-                for (AppletInfo nfo : manager.getCard().getCardMetadata()) {
+                for (AppletInfo nfo : manager.getCard().getCardMetadata().getApplets()) {
                     if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
                             //do not notify about the applet we are removing now
                             !(info.getKind() == Kind.Application && info.getAid().equals(nfo.getAid()))) {
@@ -159,7 +159,7 @@ public class DeleteAction extends CardAbstractAction {
     private AppletInfo getPackageOf(AppletInfo applet) {
         CardInstance card = CardManagerFactory.getManager().getCard();
         if (card == null) return null;
-        for (AppletInfo info : card.getCardMetadata()) {
+        for (AppletInfo info : card.getCardMetadata().getApplets()) {
             if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
                 for (AID instance : info.getModules()) {
                     if (instance.equals(applet.getAid())) {

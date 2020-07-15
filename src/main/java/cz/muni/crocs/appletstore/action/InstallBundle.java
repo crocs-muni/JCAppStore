@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.action;
 
+import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.card.AppletInfo;
 
 import java.io.File;
@@ -12,12 +13,14 @@ import java.util.ArrayList;
  * @version 1.0
  */
 public class InstallBundle {
-    private String titleBar;
-    private AppletInfo info;
+    private final String titleBar;
+    private final AppletInfo info;
+    private final String signer;
+    private final String fingerprint;
     private File capfile;
-    private String signer;
-    private String fingerprint;
     private ArrayList<String> appletNames;
+    private String folder;
+    private JsonObject dataSet;
 
     public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String fingerprint) {
         this.titleBar = titleBar;
@@ -27,13 +30,24 @@ public class InstallBundle {
         this.fingerprint = fingerprint;
     }
 
-    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String fingerprint, ArrayList<String> appletNames) {
+    public InstallBundle(String titleBar, AppletInfo info, File capfile, String signer, String fingerprint,
+                         ArrayList<String> appletNames, String folder, JsonObject dataSet) {
         this(titleBar, info, capfile, signer, fingerprint);
         this.appletNames = appletNames;
+        this.folder = folder;
+        this.dataSet = dataSet;
     }
 
     public static InstallBundle empty() {
         return new InstallBundle("", null, null, null, null);
+    }
+
+    public String getStoreFolder() {
+        return folder;
+    }
+
+    public JsonObject getDataSet() {
+        return dataSet;
     }
 
     public String getTitleBar() {

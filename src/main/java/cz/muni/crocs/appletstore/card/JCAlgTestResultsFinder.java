@@ -168,11 +168,17 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
         }
 
         String atr = data.get("Header").get("Card ATR");
-        if (atr == null || atr.length() < 2 || !card.getDetails().getAtr().equals(new ATR(HexUtils.hex2bin(atr)))) {
+        if (atr == null || atr.length() < 2 || !card.getDetails().getAtr().equals(
+                new ATR(HexUtils.hex2bin(atr.replaceAll(" |_|:|0x", ""))))) {
             return false;
         }
 
-        card.getCardMetadata().setJcAlgTestData(data);
+        card.getCardMetadata().setJCData(data);
+        try {
+            card.saveInfoData();
+        } catch (LocalizedCardException e) {
+            logger.error("Failed to save smart card metadata after successful jcalgtest database match.", e);
+        }
         return true;
     }
 }

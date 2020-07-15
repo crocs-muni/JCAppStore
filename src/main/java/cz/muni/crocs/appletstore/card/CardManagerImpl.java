@@ -149,7 +149,7 @@ public class CardManagerImpl implements CardManager {
             }
             logger.info("Card successfully refreshed.");
 
-            if (card != null && card.getCardMetadata().getJcAlgTestData() == null) {
+            if (card != null && card.getCardMetadata().getJCData() == null) {
                 new Thread(new JCAlgTestResultsFinder(card)).start();
             }
         }
@@ -272,32 +272,6 @@ public class CardManagerImpl implements CardManager {
         return details;
     }
 
-    //delete applet metadata when uninstalling
-    private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
-        logger.info("Delete applet metadata: " + applet.toString());
-        CardInstanceMetaData appletInfoList = card.getCardMetadata();
-        deleteInfo(appletInfoList, applet.getAid());
-        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
-            for (AID aid : applet.getModules()) {
-                deleteInfo(appletInfoList, aid);
-            }
-        }
-        AppletSerializer<CardInstanceMetaData> toSave = new AppletSerializerImpl();
-        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
-    }
-
-    //delete single applet metadata
-    private void deleteInfo(Set<AppletInfo> list, AID toDelete) {
-        Iterator<AppletInfo> info = list.iterator();
-        while(info.hasNext()) {
-            AppletInfo nfo = info.next();
-            if (toDelete.equals(nfo.getAid())) {
-                info.remove();
-                return;
-            }
-        }
-    }
-
     //applet deletion implementation
     private void uninstallImpl(AppletInfo nfo, boolean force) throws CardException, LocalizedCardException{
         synchronized(lock) {
@@ -311,7 +285,7 @@ public class CardManagerImpl implements CardManager {
 
                 @Override
                 public boolean execute() throws LocalizedCardException {
-                    deleteData(nfo, force);
+                    card.deleteData(nfo, force);
                     return true;
                 }
             }, contents);
@@ -375,7 +349,7 @@ public class CardManagerImpl implements CardManager {
                 lastInstalledAIDs = data.getAppletAIDsAsInstalled();
             } finally {
                 try {
-                    saveInfoData();
+                    card.saveInfoData();
                     ListContents cmd = new ListContents(card.getId());
                     card.secureExecuteCommands(cmd);
                     card.setMetaData(cmd.getResult());
@@ -402,23 +376,5 @@ public class CardManagerImpl implements CardManager {
             logger.warn("Unable to save applet info data: " + realInstalledAID, e);
         }
         return clone;
-    }
-
-    private void saveInfoData() throws LocalizedCardException {
-        CardInstanceMetaData appletInfoList = card.getCardMetadata();
-        appletInfoList.removeInvalid();
-        for (AppletInfo info : toSave) {
-            insertOrRewrite(info, appletInfoList);
-        }
-
-        AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
-        serializer.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
-    }
-
-    private void insertOrRewrite(AppletInfo item, Set<AppletInfo> to) {
-        if(!to.add(item)) {
-            to.remove(item);
-            to.add(item);
-        }
     }
 }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
+import javax.print.DocFlavor;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.BorderLayout;
@@ -26,8 +27,8 @@ import java.awt.Container;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -94,12 +95,12 @@ public class InstallAction extends CardAbstractAction {
 
     //shows the dialog window without verifying the signature
     private void runCustomInstallationGuide() {
-        showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", true);
+        showInstallDialog(textSrc.getString("custom_file"), "verify_no_pgp.png", null, null, true);
     }
 
     //shows the dialog window AFTER verifying the signature
     private void runStoreInstallationGuide() {
-        verifySignatureRoutine(new Executable() {
+        doAsyncWorkRoutine(textSrc.getString("H_pgp_loading"), new Executable<Tuple<Integer, String>>() {
             @Override
             void work() {
                 final Signature signature = new SignatureImpl();
@@ -119,16 +120,29 @@ public class InstallAction extends CardAbstractAction {
 
             @Override
             void after() {
-                showInstallDialog(result.second, Signature.getImageByErrorCode(result.first), false);
+                final Tuple<Integer, String> signResult = result;
+                doAsyncWorkRoutine("CheckITTTT", new Executable<Tuple<String, String>>() {
+                    @Override
+                    void work() {
+                        result = checkDependencies();
+                    }
+
+                    @Override
+                    void after() {
+                        showInstallDialog(signResult.second, Signature.getImageByErrorCode(signResult.first),
+                                result.first, result.second, false);
+                    }
+                });
+
             }
         });
     }
 
     //display intallation dialog window
-    private void showInstallDialog(String verifyResult, String imgIcon, final boolean isCustom) {
-        //simple usage will always do force install
+    private void showInstallDialog(String verifyResult, String imgIcon, String issueMsg, String issueDetails, final boolean isCustom) {
         final boolean forceInstall = installed; /*todo removed || OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE);*/
-        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult, isCustom, data.getAppletNames());
+        InstallDialogWindow dialog = new InstallDialogWindow(code, data.getInfo(), forceInstall, verifyResult,
+                issueMsg, issueDetails, isCustom, data.getAppletNames());
         String[] buttons = new String[]{textSrc.getString("install"), textSrc.getString("cancel")};
         CustomJOptionPane pane = new CustomJOptionPane(dialog, new ImageIcon(Config.IMAGE_DIR + imgIcon), buttons, "error");
         pane.setOnClose(() -> {
@@ -174,7 +188,7 @@ public class InstallAction extends CardAbstractAction {
 
     //collision finder
     private boolean someCustomAppletAIDsConflicts(String[] aids) {
-        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getCardMetadata();
+        Set<AppletInfo> applets = CardManagerFactory.getManager().getCard().getCardMetadata().getApplets();
         for (AppletInfo applet : applets) {
             for (String customAID : aids) {
                 if (applet.getAid().equals(AID.fromString(customAID))) {
@@ -191,7 +205,7 @@ public class InstallAction extends CardAbstractAction {
         if (resultDialog == null) return;
         final File customSign = resultDialog.getCustomSignatureFile();
         if (customSign != null) {
-            verifySignatureRoutine(new Executable() {
+            doAsyncWorkRoutine(textSrc.getString("H_pgp_loading"), new Executable<Tuple<Integer, String>>() {
                 @Override
                 void work() {
                     final Signature signature = new SignatureImpl();
@@ -348,9 +362,78 @@ public class InstallAction extends CardAbstractAction {
         }, "Failed to install applet.", textSrc.getString("install_failed"), 60000);
     }
 
+    /**
+     * Find closest file to version available and verify dependencies
+     * @return tuple: 1st string is a short message, second contains more detailed information on the problem
+     *         null: no compatibility issues found
+     */
+    private Tuple<String, String> checkDependencies() {
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        HashMap<String, HashMap<String, String>> capabilities = card.getCardMetadata().getJCData();
+        if (capabilities == null) return new Tuple<>(textSrc.getString("not_found"), null);
+
+        String[] versions = JsonParser.jsonArrayToStringArray(data.getDataSet().getAsJsonArray(JsonParser.TAG_VERSION));
+        Arrays.sort(versions, Comparator.reverseOrder());
+
+        StringBuilder unmetRequirements = new StringBuilder();
+
+        for (String version : versions) {
+            File file = new File(data.getStoreFolder() + "requirements_" + version + ".txt");
+            if (file.exists()) {
+                try (BufferedReader input = new BufferedReader(new FileReader(file))) {
+                    HashMap<String, String> category = null;
+                    String line;
+                    while ((line = input.readLine()) != null) {
+                        line = line.trim();
+                        if (line.length() > 0) {
+                            if (category == null) category = capabilities.get(line);
+                            else {
+                                String required = category.get(line);
+                                if (!required.equals("yes")) {
+                                    unmetRequirements.append(line).append(", ");
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    //todo
+                    e.printStackTrace();
+                    continue;
+                }
+                break;
+            } //else //not applicable, missing file = no dependencies
+        }
+
+        String result = unmetRequirements.toString();
+        String sdkVersion = capabilities.get("JavaCard support version").get("JavaCard support version");
+        if (!sdkVersion.equals(data.getInfo().getSdk())) {
+            unmetRequirements = new StringBuilder();
+            unmetRequirements.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
+                    .append("</p><p>").append(textSrc.getString("applet_sdk")).append(sdkVersion).append("</p>");
+        } else if (result.isEmpty()) return null;
+
+        return new Tuple<>(textSrc.getString("unmet_requirements"),
+                getReport(capabilities.get("Header"), unmetRequirements.toString(), result));
+    }
+
+    private String getReport(HashMap<String, String> header, String sdkReport, String requirementsReport) {
+        StringBuilder result = new StringBuilder();
+        result.append("<p style='float:right;'>").append(textSrc.getString("test_date"))
+                .append(header.get("Execution date/time")).append("</p><h3>")
+                .append(header.get("Card name")).append("</h3><p>")
+                .append(textSrc.getString("reader_user")).append(header.get("Used reader")).append("</p><br><h4>")
+                .append(textSrc.getString("not_supported_requirements")).append("</h4>");
+        result.append(sdkReport);
+        if (!requirementsReport.isEmpty()) {
+            result.append("<br><p>").append(textSrc.getString("not_supported_requirements_list"))
+                    .append("</p><p>").append(requirementsReport).append("</p>");
+        }
+        return result.toString();
+    }
+
     //routine used to verify the signatures
-    private static void verifySignatureRoutine(Executable task) {
-        JOptionPane pane = new JOptionPane(textSrc.getString("H_pgp_loading"),
+    private static void doAsyncWorkRoutine(String msg, Executable task) {
+        JOptionPane pane = new JOptionPane(msg,
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),
                 new Object[]{}, null);
@@ -376,12 +459,8 @@ public class InstallAction extends CardAbstractAction {
     }
 
     //executable abstraction callback for signature verification worker routine
-    private abstract static class Executable {
-        Tuple<Integer, String> result;
-
-        void setResult(Tuple<Integer, String> result) {
-            this.result = result;
-        }
+    private abstract static class Executable<T> {
+        T result;
 
         abstract void work();
         abstract void after();

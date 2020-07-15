@@ -125,7 +125,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         }
 
         if (verifyCardLifeState(card.getLifeCycle())) {
-            Set<AppletInfo> cardApplets = card.getCardMetadata();
+            Set<AppletInfo> cardApplets = card.getCardMetadata().getApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
                 logger.warn("Applet list failed, null as applet array returned.");

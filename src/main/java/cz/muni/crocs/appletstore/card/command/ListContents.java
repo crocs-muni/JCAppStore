@@ -29,7 +29,7 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
 
     @Override
     public boolean execute() throws CardException, GPException, IOException {
-        result = new CardInstanceMetaData();
+        result = CardInstanceMetaData.empty();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
@@ -51,8 +51,9 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
         }
 
         for (GPRegistryEntry entry : registry) {
-            result.add(new AppletInfo(entry, saved));
+            result.addApplet(new AppletInfo(entry, saved.getApplets()));
         }
+        result.setJCData(saved.getJCData());
         return true;
     }
 

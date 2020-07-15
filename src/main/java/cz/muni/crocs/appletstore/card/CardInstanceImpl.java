@@ -93,7 +93,7 @@ public class CardInstanceImpl implements CardInstance {
     @Override
     public AppletInfo getInfoOf(AID aid) {
         if (aid == null) return null;
-        Optional<AppletInfo> info = metadata.stream().filter(a -> aid.equals(a.getAid())).findFirst();
+        Optional<AppletInfo> info = metadata.getApplets().stream().filter(a -> aid.equals(a.getAid())).findFirst();
         return info.orElse(null);
     }
 
@@ -113,7 +113,7 @@ public class CardInstanceImpl implements CardInstance {
             return 0;
 
         AppletInfo sd = null;
-        for (AppletInfo info : metadata) {
+        for (AppletInfo info : metadata.getApplets()) {
             if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
                 return info.getLifecycle();
             } else if (info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
@@ -167,6 +167,31 @@ public class CardInstanceImpl implements CardInstance {
      */
     void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
+    }
+
+    void saveInfoData() throws LocalizedCardException {
+        AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
+        serializer.serialize(metadata, new File(Config.APP_DATA_DIR + Config.S + getId()));
+    }
+
+    void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
+        metadata.removeInvalidApplets();
+        for (AppletInfo info : toSave) {
+            metadata.insertOrRewriteApplet(info);
+        }
+        saveInfoData();
+    }
+
+    //delete applet metadata when uninstalling
+    void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+        logger.info("Delete applet metadata: " + applet.toString());
+        metadata.deleteAppletInfo(applet.getAid());
+        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
+            for (AID aid : applet.getModules()) {
+                metadata.deleteAppletInfo(aid);
+            }
+        }
+        saveInfoData();
     }
 
     /**
@@ -446,25 +471,6 @@ public class CardInstanceImpl implements CardInstance {
                 return Diversification.NONE;
         }
     }
-
-//    private boolean askDefault() {
-//        RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
-//                null,
-//                new HtmlText(textSrc.getString("I_use_default_keys_1") +
-//                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
-//                        textSrc.getString("I_use_default_keys_2")),
-//                textSrc.getString("key_not_found"),
-//                JOptionPane.OK_CANCEL_OPTION,
-//                JOptionPane.INFORMATION_MESSAGE,
-//                new ImageIcon(Config.IMAGE_DIR + "")) == JOptionPane.YES_OPTION);
-//        SwingUtilities.invokeLater(task);
-//        try {
-//            return task.get();
-//        } catch (InterruptedException | ExecutionException ex) {
-//            ex.printStackTrace();
-//            return false;
-//        }
-//    }
 
     @Override
     public int hashCode() {
