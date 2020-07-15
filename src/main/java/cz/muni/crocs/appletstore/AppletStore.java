@@ -92,8 +92,10 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         UIManager.put("MenuItem.background", Color.BLACK);
         UIManager.put("Menu.background", Color.BLACK);
         UIManager.put("Menu.selectionBackground", Color.BLACK);
+        UIManager.put("MenuBar.border", null);
+        UIManager.put("PopupMenu.border", null);
 
-        UIManager.put("MenuBar.borderColor", Color.BLACK);
+        UIManager.put("JMenuBar.borderColor", Color.BLACK);
         UIManager.put("Button.focus", new Color(0, 0, 0, 0));
         UIManager.put("ToggleButton.focus", new Color(0, 0, 0, 0));
         UIManager.put("CheckBox.focus", new Color(0, 0, 0, 0));

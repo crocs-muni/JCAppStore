@@ -6,7 +6,8 @@ import pro.javacard.gp.GPDataException;
 import javax.smartcardio.ATR;
 
 /**
- * Card details class, container for data obtained from GET_DATA GlobalPlatform command
+ * Card details class, container for data obtained from GET_DATA GlobalPlatform command,
+ * not meant for cached data
  *
  * @author Jiří Horák
  * @version 1.0

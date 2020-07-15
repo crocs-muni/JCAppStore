@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class JCAlgTestResultsFinder implements ProcessTrackable {
     private static final Logger logger = LoggerFactory.getLogger(JCAlgTestResultsFinder.class);
-    private static final Pattern atrPattern = Pattern.compile("[0-9a-fA-F]{2}(( |_|:|0x)[0-9a-fA-F]{2})*");
+    private static final Pattern atrPattern = Pattern.compile("[0-9a-fA-F]{2}(( |_|:|0x)[0-9a-fA-F]{2}){2,}");
 
 
     private int progress = 0;
@@ -90,7 +90,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 JsonObject file = f.getAsJsonObject();
                 String filename = file.get("name").getAsString();
                 Matcher match = atrPattern.matcher(filename);
-                if (match.matches()) {
+                if (match.find()) {
                     String foundATR = match.group().replaceAll(" |_|:|0x", "");
 
                     //download the file from GITHUB and load the test results

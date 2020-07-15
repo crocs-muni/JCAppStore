@@ -31,13 +31,13 @@ public class Menu extends JMenuBar {
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
         setBorder(null);
-
         buildMenu();
     }
 
     /**
      * Set new name of the card inserted in the application bar
-     * @param card custom card name provided by user OR obtained from database when inserted
+     *
+     * @param card       custom card name provided by user OR obtained from database when inserted
      * @param identifier card identifier, null or empty string if no card present
      */
     public void setCard(String card, String identifier) {
@@ -90,7 +90,7 @@ public class Menu extends JMenuBar {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+        g.fillRect(0, 0, getWidth(), getHeight());
     }
 
     @Override
@@ -343,13 +343,13 @@ public class Menu extends JMenuBar {
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
-        JMenuItem menuItem = new JMenuItem(action);
+        JMenuItem menuItem = new CustomJmenuItem(action);
         setItemLook(menuItem, descripton);
         return menuItem;
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
-        JMenuItem menuItem = new JMenuItem(action);
+        JMenuItem menuItem = new CustomJmenuItem(action);
         setItemLook(menuItem, descripton);
         menuItem.setIcon(new ImageIcon(image));
         return menuItem;
@@ -358,6 +358,7 @@ public class Menu extends JMenuBar {
     private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
+
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         component.setFont(OptionsFactory.getOptions().getTitleFont());
