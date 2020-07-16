@@ -149,9 +149,7 @@ public class CardManagerImpl implements CardManager {
             }
             logger.info("Card successfully refreshed.");
 
-            if (card != null && card.getCardMetadata().getJCData() == null) {
-                new Thread(new JCAlgTestResultsFinder(card)).start();
-            }
+            getJCAlgTestDependencies();
         }
     }
 
@@ -163,6 +161,15 @@ public class CardManagerImpl implements CardManager {
     @Override
     public void setReloadCard() {
         this.terminals.setNeedsRefresh();
+    }
+
+    @Override
+    public boolean getJCAlgTestDependencies() {
+        if (card != null && card.getCardMetadata().getJCData() == null) {
+            new Thread(new JCAlgTestResultsFinder(card)).start();
+            return true;
+        }
+        return card != null;
     }
 
     @Override

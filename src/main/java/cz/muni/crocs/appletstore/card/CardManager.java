@@ -122,6 +122,13 @@ public interface CardManager {
     void setReloadCard();
 
     /**
+     * Should download a dependencies file from
+     * jcalgtest results
+     * @return false if the file is already downloaded
+     */
+    boolean getJCAlgTestDependencies();
+
+    /**
      * Install new applet onto current card
      * @param file file with the applet
      * @param data data from install user, namely 3 items: install params, force install and custom AID

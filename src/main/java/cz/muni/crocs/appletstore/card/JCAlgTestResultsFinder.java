@@ -60,6 +60,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
 
     @Override
     public void run() {
+        logger.info("Running a JCAlgtest Results Finder: CARD " + card.getId());
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
@@ -80,7 +81,10 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
 
             if (root == null) return;
             ATR cardATR = card.getDetails().getAtr();
-            if (cardATR == null) return;
+            if (cardATR == null) {
+                logger.warn("Unknown ATR.");
+                return;
+            }
 
             updateProgress(50);
             JsonArray files = root.getAsJsonArray();
@@ -95,10 +99,14 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
 
                     //download the file from GITHUB and load the test results
                     if (cardATR.equals(new ATR(HexUtils.hex2bin(foundATR)))) {
+                        logger.info("Found file: " + filename);
                         Future<Boolean> task = executor.submit(() ->
                                 processFile(file.get("download_url").getAsString()));
                         try {
-                            if (task.get(150, TimeUnit.SECONDS)) return;
+                            if (task.get(150, TimeUnit.SECONDS)) {
+                                logger.info("Found results.");
+                                return;
+                            }
                         } catch (TimeoutException e) {
                             logger.warn("Timeout: failed to load file: " + filename, e);
                             future.cancel(true);
@@ -141,19 +149,17 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                     if (separated.length < 2) continue;
                     currentData.put(separated[0].trim(), separated[1].trim());
                 }
-                if (line == null) return false; //no body?
+                if (line == null) return false; //no body
 
-                currentData = new HashMap<>();
                 do {
                     String[] separated;
-
                     line = line.trim();
                     if (line.length() <= 0) {
                         line = reader.readLine();
                         if (line == null) break;
                         separated = line.split(";");
-                        data.put(separated[0].trim(), currentData);
                         currentData = new HashMap<>();
+                        data.put(separated[0].trim(), currentData);
                     } else {
                         separated = line.split(";");
                     }
@@ -176,6 +182,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
         card.getCardMetadata().setJCData(data);
         try {
             card.saveInfoData();
+            logger.info("JCAlgtest data saved.");
         } catch (LocalizedCardException e) {
             logger.error("Failed to save smart card metadata after successful jcalgtest database match.", e);
         }

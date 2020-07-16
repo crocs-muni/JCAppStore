@@ -85,11 +85,11 @@ public class InstallDialogWindow extends JPanel {
             this.appletNames = appletNames;
         }
         build(verifyMsg);
-        buildNoticeSection(issueMsg, issueDetails);
         buildAdvanced();
         if (isCustom) {
             buildCustomSigned();
         }
+        buildNoticeSection(issueMsg, issueDetails);
     }
 
     /**
@@ -147,7 +147,7 @@ public class InstallDialogWindow extends JPanel {
 
     private void buildNoticeSection(String issueMsg, String issueDetails) {
         if (issueMsg == null) return;
-        JLabel issueNotice = new HtmlText(issueMsg);
+        JLabel issueNotice = new HtmlText("<div style='width: 450px; background: #ff9933; padding: 8px 5px'>" + issueMsg + "</div>");
         if (issueDetails != null) {
             issueNotice.addMouseListener(new MouseAdapter() {
                 @Override
@@ -158,7 +158,8 @@ public class InstallDialogWindow extends JPanel {
                 }
             });
         }
-        add(issueNotice, "span 3, wrap");
+        issueNotice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        add(issueNotice, "span 5, gaptop 10, wrap");
     }
 
     private void buildMetaDataSection() {
@@ -199,7 +200,7 @@ public class InstallDialogWindow extends JPanel {
         JLabel more = new JLabel(textSrc.getString("advanced_settings"), new ImageIcon(Config.IMAGE_DIR + "arrow_small.png"), JLabel.LEFT);
         more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(more, "gaptop 22, span 4, wrap");
+        add(more, "gaptop 15, span 4, wrap");
 
         final InstallDialogWindow self = this;
         more.addMouseListener(new MouseAdapter() {

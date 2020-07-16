@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 
 /**
  * Check GitHubConnection and get latest release name
@@ -34,6 +35,10 @@ public class GitHubApiGetter {
             conn.connect();
             JsonParser parser = new JsonParser();
             return parser.parse(new InputStreamReader((InputStream) conn.getContent()));
+        } catch (UnknownHostException e) {
+            logger.warn("Could not recognize the Github API URL.", e);
+            conn = null;
+            return null;
         } catch (IOException | NullPointerException e) {
             logger.warn("Could not open a connection to github.", e);
             return null;

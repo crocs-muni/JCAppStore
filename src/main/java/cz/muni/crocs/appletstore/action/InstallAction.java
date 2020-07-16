@@ -125,6 +125,7 @@ public class InstallAction extends CardAbstractAction {
                     @Override
                     void work() {
                         result = checkDependencies();
+                        if (result == null) result = new Tuple<>(null, null);
                     }
 
                     @Override
@@ -386,19 +387,20 @@ public class InstallAction extends CardAbstractAction {
                     while ((line = input.readLine()) != null) {
                         line = line.trim();
                         if (line.length() > 0) {
-                            if (category == null) category = capabilities.get(line);
+                            if (category == null) {
+                                category = capabilities.get(line);
+                            }
                             else {
                                 String required = category.get(line);
-                                if (!required.equals("yes")) {
+                                if (required == null || !required.equals("yes")) {
                                     unmetRequirements.append(line).append(", ");
                                 }
                             }
-                        }
+                        } else category = null;
                     }
                 } catch (IOException e) {
-                    //todo
-                    e.printStackTrace();
-                    continue;
+                    logger.error("Could not read file: " + file.getAbsolutePath(), e);
+                    return new Tuple<>("jcfile_failure", null);
                 }
                 break;
             } //else //not applicable, missing file = no dependencies
@@ -406,28 +408,28 @@ public class InstallAction extends CardAbstractAction {
 
         String result = unmetRequirements.toString();
         String sdkVersion = capabilities.get("JavaCard support version").get("JavaCard support version");
+        StringBuilder sdk = new StringBuilder();
         if (!sdkVersion.equals(data.getInfo().getSdk())) {
-            unmetRequirements = new StringBuilder();
-            unmetRequirements.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
+            sdk.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
                     .append("</p><p>").append(textSrc.getString("applet_sdk")).append(sdkVersion).append("</p>");
         } else if (result.isEmpty()) return null;
 
         return new Tuple<>(textSrc.getString("unmet_requirements"),
-                getReport(capabilities.get("Header"), unmetRequirements.toString(), result));
+                getReport(capabilities.get("Header"), sdk.toString(), result));
     }
 
     private String getReport(HashMap<String, String> header, String sdkReport, String requirementsReport) {
         StringBuilder result = new StringBuilder();
-        result.append("<p style='float:right;'>").append(textSrc.getString("test_date"))
-                .append(header.get("Execution date/time")).append("</p><h3>")
+        result.append("<div style='text-align:right;'>").append(textSrc.getString("test_date"))
+                .append(header.get("Execution date/time")).append("</div><h3>")
                 .append(header.get("Card name")).append("</h3><p>")
-                .append(textSrc.getString("reader_user")).append(header.get("Used reader")).append("</p><br><h4>")
-                .append(textSrc.getString("not_supported_requirements")).append("</h4>");
+                .append(textSrc.getString("reader_user")).append(header.get("Used reader")).append("</p><br>");
         result.append(sdkReport);
         if (!requirementsReport.isEmpty()) {
             result.append("<br><p>").append(textSrc.getString("not_supported_requirements_list"))
-                    .append("</p><p>").append(requirementsReport).append("</p>");
+                    .append("</p><p>").append(requirementsReport, 0, requirementsReport.length() - 2).append("</p>");
         }
+        result.append("<br><p style='width:350px;'>").append(textSrc.getString("jc_test_note")).append("</p>");
         return result.toString();
     }
 
