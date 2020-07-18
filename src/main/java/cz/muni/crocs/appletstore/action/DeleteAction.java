@@ -19,6 +19,8 @@ import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -26,7 +28,7 @@ import java.awt.event.MouseEvent;
  * @author Jiří Horák
  * @version 1.0
  */
-public class DeleteAction extends CardAbstractAction {
+public class DeleteAction extends CardAbstractAction<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(DeleteAction.class);
 
     private AppletInfo info;
@@ -83,7 +85,8 @@ public class DeleteAction extends CardAbstractAction {
             if (finalPackage != null) {
                 manager.uninstall(finalPackage, true);
             }
-        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 150000);
+            return null;
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 3, TimeUnit.MINUTES);
     }
 
     private DeleteDialogWindow showDeletionDialog() {
@@ -172,7 +175,7 @@ public class DeleteAction extends CardAbstractAction {
     }
 
     private static class ConfirmDeletion extends JPanel {
-        private JCheckBox verify = new JCheckBox();
+        private final JCheckBox verify = new JCheckBox();
         public ConfirmDeletion(String appletName) {
             super(new MigLayout());
             add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion1")+appletName+"</div>"), "wrap");

@@ -14,15 +14,22 @@ import java.util.concurrent.TimeUnit;
  * @author Jiří Horák
  * @version 1.0
  */
-public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionBase<TRet, TArg> {
+public abstract class CardAbstractCronJob<TRet, TArg> extends CardAbstractActionBase<TRet, TArg> {
 
-    protected CardAbstractAction(OnEventCallBack<TRet, TArg> call) {
+    private final int timeUnit;
+    private final TimeUnit unitMeaning;
+    private ScheduledFuture<?> scheduledFuture;
+
+    protected CardAbstractCronJob(OnEventCallBack<TRet, TArg> call, int timeUnit, TimeUnit unitMeaning) {
         super(call);
+        this.timeUnit = timeUnit;
+        this.unitMeaning = unitMeaning;
     }
 
     @Override
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title) {
-        new Thread(job(toExecute, loggerMessage, title)).start();
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> job(toExecute, loggerMessage, title), 0, timeUnit, unitMeaning);
     }
 
     @Override
@@ -31,11 +38,15 @@ public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionB
 
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        final ScheduledFuture<?> scheduledFuture = executor.schedule(
-                () -> job(toExecute, loggerMessage, title), 0, TimeUnit.SECONDS);
+        scheduledFuture = executor.scheduleAtFixedRate(
+                () -> job(toExecute, loggerMessage, title), 0, timeUnit, unitMeaning);
 
         executor.schedule(() -> {
             scheduledFuture.cancel(true);
         }, timeOut, unitsMeaning);
+    }
+
+    protected void breakExecution() {
+        if (scheduledFuture != null && !scheduledFuture.isCancelled()) scheduledFuture.cancel(true);
     }
 }

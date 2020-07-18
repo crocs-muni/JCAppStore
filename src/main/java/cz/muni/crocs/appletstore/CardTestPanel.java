@@ -1,10 +1,10 @@
 package cz.muni.crocs.appletstore;
 
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.action.JCMemory;
-import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardInfoPanel extends JPanel {
+public class CardTestPanel extends JPanel {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
@@ -28,9 +28,9 @@ public class CardInfoPanel extends JPanel {
      * @param changeable background component
      * @param refreshable refreshable panel component
      */
-    public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
+    public CardTestPanel(BackgroundChangeable changeable, Refreshable refreshable) {
         setLayout(new MigLayout());
-        final CardInfoPanel self = this;
+        final CardTestPanel self = this;
 
         if (CardManagerFactory.getManager().isCard()) {
             new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.event.MouseEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Detection of any new card
@@ -13,7 +14,7 @@ import java.awt.event.MouseEvent;
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardDetectionAction extends CardAbstractAction {
+public class CardDetectionAction extends CardAbstractAction<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(CardDetectionAction.class);
 
     public CardDetectionAction(OnEventCallBack<Void, Void> call) {
@@ -31,7 +32,8 @@ public class CardDetectionAction extends CardAbstractAction {
                     } else {
                         logger.info("No service enabled: card refresh not performed.");
                     }
+                    return null;
                 }, "Card detection on app startup failed.",
-                null, 10000);
+                null, 10, TimeUnit.SECONDS);
     }
 }

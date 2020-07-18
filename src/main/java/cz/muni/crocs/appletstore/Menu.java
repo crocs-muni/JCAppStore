@@ -154,6 +154,15 @@ public class Menu extends JMenuBar {
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
 
+        submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("test_card")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,
+                        new CardTestPanel(context, context.getWindow().getRefreshablePane()), textSrc.getString("card_info"),
+                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+            }
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
+
         return submenu;
     }
 

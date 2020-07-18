@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
  * @author Jiří Horák
  * @version 1.0
  */
-public class FreeMemoryAction extends CardAbstractAction<Void, byte[]> {
+public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
-    public FreeMemoryAction(OnEventCallBack<Void, byte[]> call) {
+    public JCAlgTestAction(OnEventCallBack<Void, byte[]> call) {
         super(call);
     }
 

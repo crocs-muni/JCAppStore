@@ -29,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -360,7 +361,8 @@ public class InstallAction extends CardAbstractAction {
                     InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
                             Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));
             data.setCapfile(null);
-        }, "Failed to install applet.", textSrc.getString("install_failed"), 60000);
+            return null;
+        }, "Failed to install applet.", textSrc.getString("install_failed"), 5, TimeUnit.MINUTES);
     }
 
     /**
