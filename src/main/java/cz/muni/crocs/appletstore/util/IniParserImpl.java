@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class IniParserImpl implements IniParser {
 
-    private Ini ini;
+    private final Ini ini;
     private String header;
 
     /**

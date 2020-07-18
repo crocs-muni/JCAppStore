@@ -282,9 +282,9 @@ public class CardManagerImpl implements CardManager {
     //applet deletion implementation
     private void uninstallImpl(AppletInfo nfo, boolean force) throws CardException, LocalizedCardException{
         synchronized(lock) {
-            GPCommand delete = new Delete(nfo, force);
+            GPCommand<?> delete = new Delete(nfo, force);
             GPCommand<CardInstanceMetaData> contents = new ListContents(card.getId());
-            card.secureExecuteCommands(delete, new GPCommand() {
+            card.secureExecuteCommands(delete, new GPCommand<Void>() {
                 @Override
                 public String getDescription() {
                     return "Delete applet metadata inside secure loop.";
@@ -312,9 +312,9 @@ public class CardManagerImpl implements CardManager {
             try (PrintStream print = new PrintStream(loggerStream)) {
                 file.dump(print);
 
-                GPCommand[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
+                GPCommand<?>[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
                 commands[0] = new Load(file, data);
-                commands[1] = new GPCommand() {
+                commands[1] = new GPCommand<Void>() {
                     @Override
                     public String getDescription() {
                         return "Register package info for save.";
@@ -336,7 +336,7 @@ public class CardManagerImpl implements CardManager {
                     Install command = new Install(file, data, appidx,
                             AID.fromString(data.getOriginalAIDs()[appidx]).equals(defaultSelected));
                     commands[i++] = command;
-                    commands[i++] = new GPCommand() {
+                    commands[i++] = new GPCommand<Void>() {
                         @Override
                         public String getDescription() {
                             return "Register applet info for save.";
@@ -356,6 +356,9 @@ public class CardManagerImpl implements CardManager {
                 lastInstalledAIDs = data.getAppletAIDsAsInstalled();
             } finally {
                 try {
+                    for (AppletInfo info : toSave) {
+                        card.getCardMetadata().addApplet(info);
+                    }
                     card.saveInfoData();
                     ListContents cmd = new ListContents(card.getId());
                     card.secureExecuteCommands(cmd);

@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 
 import java.awt.event.MouseEvent;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Getting the free card memory action
@@ -19,7 +18,15 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        execute(JCMemory::getSystemInfo, "JCMemory.getSystemInfo() failed",
-                textSrc.getString("E_could_not_get_memory"), 10, TimeUnit.SECONDS);
+
+        //todo first install the JCAlgTest if not present (ask user, if metadata - check whether SDK does not clash)
+
+        //todo include client app
+
+        //todo then somehow pass the arguments to cmd client app
+
+        //todo show results and send to MUNI
+
+
     }
 }

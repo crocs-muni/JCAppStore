@@ -31,6 +31,7 @@ public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionB
         Runnable job = job(toExecute, loggerMessage, title);
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
+        //note: calling scheduleAtFixedRate( () -> job(args..) ) would cause repeated CONSTRUCTING of the job, not calling it
         final ScheduledFuture<?> scheduledFuture = executor.schedule(job, 0, TimeUnit.SECONDS);
 
         executor.schedule(() -> {

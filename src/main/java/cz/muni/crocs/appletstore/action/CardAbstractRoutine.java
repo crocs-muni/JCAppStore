@@ -38,7 +38,7 @@ public abstract class CardAbstractRoutine<TRet, TArg> extends CardAbstractAction
                            int timeOut, TimeUnit unitsMeaning) {
         Runnable job = job(toExecute, loggerMessage, title);
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-
+        //note: calling scheduleAtFixedRate( () -> job(args..) ) would cause repeated CONSTRUCTING of the job, not calling it
         scheduledFuture = executor.scheduleAtFixedRate(job, timeUnit, timeUnit, unitMeaning);
 
         executor.schedule(() -> {

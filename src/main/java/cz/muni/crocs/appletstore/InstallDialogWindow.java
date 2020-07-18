@@ -147,7 +147,8 @@ public class InstallDialogWindow extends JPanel {
 
     private void buildNoticeSection(String issueMsg, String issueDetails) {
         if (issueMsg == null) return;
-        JLabel issueNotice = new HtmlText("<div style='width: 450px; background: #ff9933; padding: 8px 5px'>" + issueMsg + "</div>");
+        String noticeColor = "transparent";
+        JLabel issueNotice = new HtmlText();
         if (issueDetails != null) {
             issueNotice.addMouseListener(new MouseAdapter() {
                 @Override
@@ -157,8 +158,11 @@ public class InstallDialogWindow extends JPanel {
                             JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "code.png"));
                 }
             });
+            issueNotice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            noticeColor = "#ff9933";
         }
-        issueNotice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        issueNotice.setText("<div style='width: 450px; background: " + noticeColor +
+                "; padding: 8px 5px'>" + issueMsg + "</div>");
         add(issueNotice, "span 5, gaptop 10, wrap");
     }
 

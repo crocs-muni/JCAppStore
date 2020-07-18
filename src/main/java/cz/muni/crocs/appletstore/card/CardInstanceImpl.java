@@ -273,7 +273,7 @@ public class CardInstanceImpl implements CardInstance {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
-                        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "H_authentication"), "warn.png", e);
+                        throw new LocalizedCardException(e.getMessage(), "H_authentication", "warn_white.png", e);
                     }
                     throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
                 }

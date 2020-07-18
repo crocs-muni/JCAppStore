@@ -251,7 +251,7 @@ public class InstallAction extends CardAbstractAction {
         logger.info("Install fired, list of AIDS: " + code.getApplets().toString());
         logger.info("Install AID: " + opts.getAIDs());
 
-        if (opts.isForce() && !userAcceptsForceInstallWarn()) {
+        if (opts.isForce() && !userAcceptsForceInstallWarn(manager.getCard())) {
             return;
         }
 
@@ -307,7 +307,12 @@ public class InstallAction extends CardAbstractAction {
         }).start();
     }
 
-    private boolean userAcceptsForceInstallWarn() {
+    private boolean userAcceptsForceInstallWarn(CardInstance card) {
+        for (AppletInfo info: card.getCardMetadata().getApplets()) {
+            //todo recognize applet has onlyone package and do not bother the user!!!!
+        }
+
+
         if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
             ReinstallWarnPanel warn = new ReinstallWarnPanel();
             if (showOptionDialog(null, warn,
