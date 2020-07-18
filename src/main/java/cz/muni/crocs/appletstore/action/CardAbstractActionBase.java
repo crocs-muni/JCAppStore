@@ -197,7 +197,7 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
      * tries to use 4041...4E4F default test key for authentication
      * if user agrees or fails while showing the failure cause.
      */
-    static class UnknownKeyHandler<T> {
+    public static class UnknownKeyHandler<T> {
         private final UnknownKeyException e;
         private final CardExecutable<T> failed;
 
@@ -221,7 +221,7 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
             }
         }
 
-        int useDefaultTestKey() {
+        public static int useDefaultTestKey() {
             return JOptionPane.showConfirmDialog(
                     null,
                     new HtmlText(textSrc.getString("I_use_default_keys_1") +

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardDetectionRoutine extends CardAbstractCronJob<Void, Void> {
+public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
 
     private static final Logger logger = LoggerFactory.getLogger(CardDetectionRoutine.class);
     private static final int DELAY = 2;
@@ -34,17 +34,20 @@ public class CardDetectionRoutine extends CardAbstractCronJob<Void, Void> {
     @Override
     public void mouseClicked(MouseEvent e) {
         final CardManager manager = CardManagerFactory.getManager();
-
+        logger.info("------- Routine started -------");
         execute(() -> {
-            logger.info("------- Routine started -------");
                     try {
                         int result = manager.needsCardRefresh();
 
                         if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
                             //todo debug
 
-                            SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfoToClose(
-                                    textSrc.getString("H_service"), Notice.Importance.FATAL, 20000));
+                            SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
+                                    textSrc.getString("H_service"), Notice.Importance.FATAL,
+                                    Notice.CallBackIcon.RETRY, () -> {
+                                        new CardDetectionRoutine(main, OnEventCallBack.empty()).start();
+                                        return null;
+                                    }));
                             logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
                             main.getWindow().getRefreshablePane().refresh();
                             breakExecution();

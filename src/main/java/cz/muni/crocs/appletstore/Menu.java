@@ -161,7 +161,7 @@ public class Menu extends JMenuBar {
                         new CardTestPanel(context, context.getWindow().getRefreshablePane()), textSrc.getString("card_info"),
                         JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
             }
-        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
 
         return submenu;
     }

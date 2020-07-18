@@ -28,11 +28,10 @@ public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionB
     @Override
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title,
                            int timeOut, TimeUnit unitsMeaning) {
+        Runnable job = job(toExecute, loggerMessage, title);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        final ScheduledFuture<?> scheduledFuture = executor.schedule(
-                () -> job(toExecute, loggerMessage, title), 0, TimeUnit.SECONDS);
+        final ScheduledFuture<?> scheduledFuture = executor.schedule(job, 0, TimeUnit.SECONDS);
 
         executor.schedule(() -> {
             scheduledFuture.cancel(true);

@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.action.JCMemory;
+import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -56,12 +57,14 @@ public class CardInfoPanel extends JPanel {
                 public Void onFinish(byte[] apduData) {
                     changeable.switchEnabled(true);
                     if (apduData == null) {
-                        self.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "announcement.png")), "align center, wrap");
+                        self.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "announcement.png")),
+                                "align center, wrap");
                         self.add(new Text(textSrc.getString("memory_could_not_obtain")));
                     } else {
                         int memory = JCMemory.getPersistentMemory(apduData);
                         if (memory == 32767) {
-                            self.add(new Text(textSrc.getString("card_free_memory_over32kb")), "wrap");
+                            self.add(new HtmlText("<p style='width:350px;'>" +
+                                    textSrc.getString("card_free_memory_over32kb") + "</div>"), "wrap");
                         } else {
                             self.add(new Text(textSrc.getString("card_free_memory")), "");
                             self.add(new Text(memory + " bytes."), "align right, wrap");

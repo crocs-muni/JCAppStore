@@ -14,13 +14,13 @@ import java.util.concurrent.TimeUnit;
  * @author Jiří Horák
  * @version 1.0
  */
-public abstract class CardAbstractCronJob<TRet, TArg> extends CardAbstractActionBase<TRet, TArg> {
+public abstract class CardAbstractRoutine<TRet, TArg> extends CardAbstractActionBase<TRet, TArg> {
 
     private final int timeUnit;
     private final TimeUnit unitMeaning;
     private ScheduledFuture<?> scheduledFuture;
 
-    protected CardAbstractCronJob(OnEventCallBack<TRet, TArg> call, int timeUnit, TimeUnit unitMeaning) {
+    protected CardAbstractRoutine(OnEventCallBack<TRet, TArg> call, int timeUnit, TimeUnit unitMeaning) {
         super(call);
         this.timeUnit = timeUnit;
         this.unitMeaning = unitMeaning;
@@ -28,18 +28,18 @@ public abstract class CardAbstractCronJob<TRet, TArg> extends CardAbstractAction
 
     @Override
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> job(toExecute, loggerMessage, title), 0, timeUnit, unitMeaning);
+        Runnable job = job(toExecute, loggerMessage, title);
+        Executors.newSingleThreadScheduledExecutor()
+                .scheduleAtFixedRate(job, timeUnit, timeUnit, unitMeaning);
     }
 
     @Override
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title,
                            int timeOut, TimeUnit unitsMeaning) {
+        Runnable job = job(toExecute, loggerMessage, title);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        scheduledFuture = executor.scheduleAtFixedRate(
-                () -> job(toExecute, loggerMessage, title), 0, timeUnit, unitMeaning);
+        scheduledFuture = executor.scheduleAtFixedRate(job, timeUnit, timeUnit, unitMeaning);
 
         executor.schedule(() -> {
             scheduledFuture.cancel(true);

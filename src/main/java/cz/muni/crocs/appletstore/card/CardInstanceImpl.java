@@ -227,7 +227,7 @@ public class CardInstanceImpl implements CardInstance {
                 command.execute();
             }
         } catch (GPException e) {
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), "error.png", e);
         } catch (IOException e) {
             throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e);
         } finally {
