@@ -48,6 +48,10 @@ public class CmdTask {
      * @throws LocalizedSignatureException on command failure
      */
     public Process process(int timeoutSec) throws LocalizedSignatureException {
+        //TODO consider: not necessary to add bash -c arg? test
+        // Process process = Runtime.getRuntime().exec(command);
+        // maybe not:            Runtime.getRuntime().exec(new String[] {"cmd", "/K", "Start"});
+
         try {
             logger.info(process.stream().collect(Collectors.joining(" ", ">> ", " [EXEC]")));
             Process result = new ProcessBuilder(process).redirectErrorStream(true).start();

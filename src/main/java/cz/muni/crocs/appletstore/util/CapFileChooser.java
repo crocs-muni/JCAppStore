@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.ui.CapFileView;
+import cz.muni.crocs.appletstore.ui.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
@@ -19,8 +20,9 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class CapFileChooser {
-    private static Logger logger = LoggerFactory.getLogger(CapFileChooser.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(CapFileChooser.class);
+    private static final ResourceBundle textSrc = ResourceBundle
+            .getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     /**
      * Create a CAPFile from a file
@@ -55,12 +57,8 @@ public class CapFileChooser {
      * @return selected cap file or null if selection failed
      */
     public static File chooseCapFile(File dir) {
-        JFileChooser fileChooser = new JFileChooser(dir);
+        JFileChooser fileChooser = FileChooser.getSingleFile(dir, textSrc.getString("cap_files"), "cap");
         fileChooser.setFileView(new CapFileView());
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter(textSrc.getString("cap_files"), "cap"));
-        fileChooser.setAcceptAllFileFilterUsed(false);
 
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File cap = fileChooser.getSelectedFile();

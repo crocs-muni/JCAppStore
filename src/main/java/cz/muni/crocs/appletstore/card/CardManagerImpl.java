@@ -221,6 +221,23 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
+    public boolean select(String AID) throws LocalizedCardException {
+        synchronized(lock) {
+            if (card == null) {
+                throw new LocalizedCardException("No card recognized.", "no_card");
+            }
+
+            GPCommand<Boolean> send = new Select(AID);
+            try {
+                card.executeCommands(send);
+            } catch (CardException e) {
+                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            }
+            return send.getResult();
+        }
+    }
+
+    @Override
     public ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
         synchronized(lock) {
             if (card == null) {

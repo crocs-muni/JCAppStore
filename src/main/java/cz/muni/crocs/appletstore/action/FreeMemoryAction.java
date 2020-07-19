@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.action;
 
+import cz.muni.crocs.appletstore.action.applet.Applets;
+import cz.muni.crocs.appletstore.action.applet.JCMemory;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 
 import java.awt.event.MouseEvent;
@@ -19,7 +21,7 @@ public class FreeMemoryAction extends CardAbstractAction<Void, byte[]> {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        execute(JCMemory::getSystemInfo, "JCMemory.getSystemInfo() failed",
+        execute(() -> Applets.JCMEMORY.performDefault(), "JCMemory.getSystemInfo() failed",
                 textSrc.getString("E_could_not_get_memory"), 10, TimeUnit.SECONDS);
     }
 }

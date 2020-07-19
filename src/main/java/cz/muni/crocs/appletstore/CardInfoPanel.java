@@ -2,7 +2,7 @@ package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.FreeMemoryAction;
-import cz.muni.crocs.appletstore.action.JCMemory;
+import cz.muni.crocs.appletstore.action.applet.JCMemory;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;

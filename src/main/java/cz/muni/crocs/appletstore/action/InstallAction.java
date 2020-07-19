@@ -3,6 +3,7 @@ package cz.muni.crocs.appletstore.action;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.InstallDialogWindow;
 import cz.muni.crocs.appletstore.ReinstallWarnPanel;
+import cz.muni.crocs.appletstore.action.applet.JCMemory;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.crypto.Signature;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
-import javax.print.DocFlavor;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.BorderLayout;

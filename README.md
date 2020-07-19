@@ -22,7 +22,7 @@ How to get the store
 (also called 1.8+) should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
 More information on how to install the store [see wiki](https://github.com/crocs-muni/JCAppStore/wiki/Installation). 
 
-
+Unix users also need BASH as we run command line tools from time to time. We will work on this to make the JCAppStore more portable in the future.
 
 How the store works?
 ------

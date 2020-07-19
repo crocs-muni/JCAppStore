@@ -154,6 +154,15 @@ public interface CardManager {
     void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException;
 
     /**
+     * Perform SELECT operation
+     *
+     * @param AID target applet AID
+     * @return true if applet present (e.g. select was successful)
+     * @throws LocalizedCardException when failed to execute the command transfer
+     */
+    boolean select(String AID) throws LocalizedCardException;
+
+    /**
      * Send command to applet
      * @param AID target applet AID to send the command to
      * @param APDU commandAPDU to send
