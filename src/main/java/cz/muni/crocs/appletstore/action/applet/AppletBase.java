@@ -2,25 +2,35 @@ package cz.muni.crocs.appletstore.action.applet;
 
 import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ResourceBundle;
 
 
 public abstract class AppletBase<T> {
     private static final Logger logger = LoggerFactory.getLogger(AppletBase.class);
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     public T performDefault() throws UnknownKeyException, LocalizedCardException {
-        return performCardOperation(this::executeAppletCommunication);
+        return performAppletOperation(this::executeAppletCommunication);
     }
 
     public T perform(AppletAction<T> action) throws UnknownKeyException, LocalizedCardException {
-        return performCardOperation(action);
+        return performAppletOperation(action);
+    }
+
+    public T performDefault(String installFailureMessage) throws UnknownKeyException, LocalizedCardException {
+        return performAppletOperation(this::executeAppletCommunication, installFailureMessage);
+    }
+
+    public T perform(AppletAction<T> action, String installFailureMessage)
+            throws UnknownKeyException, LocalizedCardException {
+        return performAppletOperation(action, installFailureMessage);
     }
 
     /**
@@ -82,10 +92,23 @@ public abstract class AppletBase<T> {
 
     /**
      * Tries to USE applet and install it in case it fails. Uninstalls applets unless keepJCMemory is enabled.
+     * @param operation operation to perform
      * @throws LocalizedCardException the command could not be performed
      * @throws UnknownKeyException if the key to the card is unknown
      */
-    protected T performCardOperation(AppletAction<T> operation) throws LocalizedCardException, UnknownKeyException {
+    protected T performAppletOperation(AppletAction<T> operation) throws UnknownKeyException, LocalizedCardException {
+        return performAppletOperation(operation, null);
+    }
+
+    /**
+     * Tries to USE applet and install it in case it fails. Uninstalls applets unless keepJCMemory is enabled.
+     * @param operation operation to perform
+     * @param installFailureMessage message for the user when installation fails
+     * @throws LocalizedCardException the command could not be performed
+     * @throws UnknownKeyException if the key to the card is unknown
+     */
+    protected T performAppletOperation(AppletAction<T> operation, String installFailureMessage)
+            throws LocalizedCardException, UnknownKeyException {
         final CardManager manager = CardManagerFactory.getManager();
         T result;
 
@@ -105,8 +128,17 @@ public abstract class AppletBase<T> {
             try {
                 logger.info("Installing " + getAppletName() + "...");
                 manager.install(getSource(), getInstallOptions());
-            } catch (IOException e) {
-                throw new LocalizedCardException("Failed to install " + getAppletName(), "jcmemory_install_failure", e);
+            } catch (Exception e) { //we want to catch any exception because we want to report this the same way
+                if (installFailureMessage == null || installFailureMessage.isEmpty()) {
+                    throw new LocalizedCardException("Failed to install " + getAppletName(), "generic_install_failure", e);
+                }
+                LocalizedCardException ex = new LocalizedCardException("Failed to install " + getAppletName(), e);
+                String cause = e.getLocalizedMessage();
+                String verbose = OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && cause != null && !cause.isEmpty() ?
+                        "<br>" + textSrc.getString("cause") + "<br>" + cause : "";
+
+                ex.setTranslation(installFailureMessage + verbose);
+                throw ex;
             }
         }
 
@@ -131,6 +163,6 @@ public abstract class AppletBase<T> {
      */
     @FunctionalInterface
     public interface AppletAction<T> {
-        T perform(CardManager manager) throws LocalizedSignatureException;
+        T perform(CardManager manager) throws LocalizedCardException;
     }
 }

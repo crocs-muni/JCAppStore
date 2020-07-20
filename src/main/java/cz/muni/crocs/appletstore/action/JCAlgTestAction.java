@@ -11,12 +11,19 @@ import cz.muni.crocs.appletstore.crypto.CmdTask;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.FileChooser;
+import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.ui.Title;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.lang.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.*;
 
@@ -27,6 +34,7 @@ import java.io.*;
  * @version 1.0
  */
 public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
+    private static final Logger logger = LoggerFactory.getLogger(JCAlgTestAction.class);
 
     public JCAlgTestAction(OnEventCallBack<Void, byte[]> call) {
         super(call);
@@ -34,47 +42,56 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (CardManagerFactory.getManager().getCard() == null) {
+        CardManager manager = CardManagerFactory.getManager();
+        if (manager.getCard() == null) {
             //todo  error
          return;
         }
 
-        try {
-            JPanel result = Applets.JCALG_TEST.perform(manager -> {
-                //we _don't_ call the card explicitly, but now we know it is installed: run client
+        final TestForm form = getFormForCardName(manager.getCard().getName());
+        if (form == null) return;
 
-                Process p = runJcAlgTestClient();
+        execute(() -> {
+            try {
+                //perform() call verified the JCAlgTest presence
+                JPanel result = Applets.JCALG_TEST.perform(mngr -> {
+                    try {
+                        Process p = runJcAlgTestClient(form, mngr);
+                    } catch (LocalizedSignatureException localizedSignatureException) {
+                        localizedSignatureException.printStackTrace();
+                    }
 
-                //todo show results and send to MUNI
+                    //todo show results and send to MUNI
 
-                return null;
-            });
-        } catch (UnknownKeyException | LocalizedCardException ex) {
-            ex.printStackTrace();
-        }
+                    return null;
+                }, textSrc.getString("jc_install_failure"));
+            } catch (UnknownKeyException | LocalizedCardException ex) {
+                logger.error("Failed to run JCAlgTest.", ex);
+                InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
+            }
+            return null;
+        }, "", "");
     }
 
-    private Process runJcAlgTestClient() throws LocalizedSignatureException {
+    private Process runJcAlgTestClient(TestForm form, CardManager manager) throws LocalizedSignatureException {
         Options<String> opts = OptionsFactory.getOptions();
-        CardManager manager = CardManagerFactory.getManager();
-
 
         if (!verifyJavaPresence(opts.getOption(Options.KEY_JAVA_EXECUTABLE))) return null;
 
+        String cardName = form.getCardName() + ", " + manager.getCard().getId();
 
-        CmdTask task;
+ //       String input = "( echo 1 && echo " + cardName + " ) | ";
 
-        String cardName = getFormForCardName(manager.getCard().getName()) + ", " + manager.getCard().getId();
-        String input = "( echo 1 && echo " + cardName + " ) | ";
-
-        //todo test on unix
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            task = new CmdTask().add("bash").add("-c").add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
-                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
-        } else if (SystemUtils.IS_OS_WINDOWS) {
-            task = new CmdTask().add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
-                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
-        }
+//        CmdTask task;
+//
+//        //todo test on unix
+//        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
+//            task = new CmdTask().add("bash").add("-c").add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
+//                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
+//        } else if (SystemUtils.IS_OS_WINDOWS) {
+//            task = new CmdTask().add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
+//                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
+//        }
 
         ProcessBuilder builder = new ProcessBuilder( opts.getOption(Options.KEY_JAVA_EXECUTABLE), "-jar",
                 opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
@@ -92,24 +109,26 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
             //todo notify
             return null;
         }
+
+        //todo send
     }
 
-    //todo bigger form with more information (safety, duration, sent to MUNI etc.)
-    private String getFormForCardName(String defaultName) {
-        JTextField field = new JTextField(defaultName);
-        if (JOptionPane.showOptionDialog(null, field, textSrc.getString("ask_for_card_specifier"),
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "creditcard.png"),
-                new String[]{textSrc.getString("ok"), textSrc.getString("cancel")}, textSrc.getString("ok")) == JOptionPane.YES_OPTION) {
-            return field.getText();
+    private TestForm getFormForCardName(String defaultName) {
+        TestForm form = new TestForm(defaultName);
+        if (JOptionPane.showOptionDialog(null, form, textSrc.getString("jcdia_title"),
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(),
+                new String[]{textSrc.getString("jcdia_confirm"), textSrc.getString("cancel")},
+                textSrc.getString("cancel")) == JOptionPane.YES_OPTION) {
+            return form;
         }
         return null;
     }
 
     private boolean verifyJavaPresence(String javaExecutable) throws LocalizedSignatureException {
-        //todo also verify whether the output contains some specific value (e.g. java might be different program...)
-
         String cmdPrefix = (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) ? "bash -c" : "";
-        if (new CmdTask().add(cmdPrefix).add(javaExecutable).add("--version").process(5).exitValue() != 0) {
+        Process p = new CmdTask().add(cmdPrefix).add(javaExecutable).add("--version").process(5);
+        String output = CmdTask.toString(p);
+        if (p.exitValue() != 0 && (output.contains("openjdk") || output.contains("Runtime Environment"))) {
 
             JFileChooser chooser = FileChooser.getSingleFile(new File(Config.APP_ROOT_DIR));
             chooser.setDialogTitle(textSrc.getString("java_executable"));
@@ -125,5 +144,48 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
         }
         OptionsFactory.getOptions().addOption(Options.KEY_JAVA_EXECUTABLE,javaExecutable);
         return true;
+    }
+
+    private static class TestForm extends JPanel {
+        private static final String NOTICE_COLOR = "#ffcc99";
+
+        private final JTextField cardName = new JTextField(30);
+        private final JCheckBox sendResult = new JCheckBox();
+
+        public TestForm(String cardNameAsDefined) {
+            super(new MigLayout());
+
+            add(new Title(textSrc.getString("jcdia_title"), new ImageIcon(
+                    Config.IMAGE_DIR + "creditcard-exclamation.png"), 18f, SwingConstants.CENTER), "span 2, wrap");
+            add(new HtmlText("<div style='width: 450px'>" + textSrc.getString("jcdia_intro") + "</div>"),
+                    "span 2, wrap");
+
+            add(new Text(textSrc.getString("jcdia_card_name")), "span 2, gaptop 10, wrap");
+            cardName.setText(cardNameAsDefined);
+            add(cardName, "span 2 , wrap");
+            add(getHint("H_jcdia_card_name"), "span 2, wrap");
+
+            sendResult.setSelected(true);
+            add(sendResult);
+            add(new Text(textSrc.getString("jcdia_send")), "wrap");
+            add(getHint("H_jcdia_send"), "span 2, wrap");
+
+            add(new HtmlText("<div style='padding: 8px; background: " + NOTICE_COLOR + "; width: 450px'>" +
+                    textSrc.getString("jcdia_warn") + "</div>"), "span 2, gaptop 7, wrap");
+        }
+
+        public String getCardName() {
+            return cardName.getText();
+        }
+
+        public boolean isShareTestResultsSelected() {
+            return sendResult.isSelected();
+        }
+
+        private JLabel getHint(String langKey) {
+            JLabel hint = new HtmlText("<p width=\"550\">" + textSrc.getString(langKey) + "</p>", 10f);
+            hint.setForeground(Color.DARK_GRAY);
+            return hint;
+        }
     }
 }

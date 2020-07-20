@@ -58,7 +58,8 @@ public class InstallDialogWindow extends JPanel {
 
     private boolean initialized;
     private File customSignatureFile;
-    private final Color wrong = new Color(0xA3383D);
+    private static final Color COLOR_WRONG = new Color(0xA3383D);
+    private static final String NOTICE_COLOR = "#ffcc99";
     public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
     /**
@@ -159,7 +160,7 @@ public class InstallDialogWindow extends JPanel {
                 }
             });
             issueNotice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            noticeColor = "#ff9933";
+            noticeColor = NOTICE_COLOR;
         }
         issueNotice.setText("<div style='width: 450px; background: " + noticeColor +
                 "; padding: 8px 5px'>" + issueMsg + "</div>");
@@ -235,17 +236,17 @@ public class InstallDialogWindow extends JPanel {
         installParams.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
         });
         advanced.add(installParams, "span 3, wrap");
@@ -309,17 +310,17 @@ public class InstallDialogWindow extends JPanel {
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
             });
             to.add(box, "span 2");

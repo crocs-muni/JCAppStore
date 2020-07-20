@@ -80,6 +80,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
             }
 
             if (root == null) return;
+
             ATR cardATR = card.getDetails().getAtr();
             if (cardATR == null) {
                 logger.warn("Unknown ATR.");

@@ -38,16 +38,17 @@ public class CardManagerImpl implements CardManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardManagerImpl.class);
     private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private Terminals terminals = new Terminals();
+    private final Terminals terminals = new Terminals();
     private CardInstanceImpl card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
     private String[] lastInstalledAIDs = null;
     private boolean tryGeneric = false;
 
-    private ArrayList<AppletInfo> toSave = new ArrayList<>();
+    private final ArrayList<AppletInfo> toSave = new ArrayList<>();
     private CallBack<Void> notifier;
 
     private static final Object lock = new Object();
@@ -227,13 +228,13 @@ public class CardManagerImpl implements CardManager {
                 throw new LocalizedCardException("No card recognized.", "no_card");
             }
 
-            GPCommand<Boolean> send = new Select(AID);
             try {
-                card.executeCommands(send);
+                GPCommand<Boolean> select = new Select(AID);
+                card.executeCommands(select);
+                return select.getResult();
             } catch (CardException e) {
                 throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
             }
-            return send.getResult();
         }
     }
 
@@ -244,13 +245,13 @@ public class CardManagerImpl implements CardManager {
                 throw new LocalizedCardException("No card recognized.", "no_card");
             }
 
-            GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
             try {
+                GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
                 card.executeCommands(send);
+                return send.getResult();
             } catch (CardException e) {
                 throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
             }
-            return send.getResult();
         }
     }
 

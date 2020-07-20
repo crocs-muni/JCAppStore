@@ -9,7 +9,6 @@ import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 
 import java.io.File;
-import java.io.IOException;
 
 import static cz.muni.crocs.appletstore.Config.S;
 

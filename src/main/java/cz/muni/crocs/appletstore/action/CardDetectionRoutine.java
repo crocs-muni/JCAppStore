@@ -73,13 +73,7 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                             SwingUtilities.invokeLater(() -> {
                                 if (result == 2) {
                                     main.getWindow().getRefreshablePane().refresh();
-
-                                    CardInstance card = manager.getCard();
-                                    if (card == null) {
-                                        main.getMenu().setCard(null, null);
-                                    } else {
-                                        main.getMenu().setCard(card.getName(), card.getId());
-                                    }
+                                    main.getMenu().setCard(manager.getCard());
                                 }
                                 main.getMenu().resetTerminalButtonGroup();
                             });

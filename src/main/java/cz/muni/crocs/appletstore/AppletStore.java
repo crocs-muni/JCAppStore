@@ -25,7 +25,8 @@ import java.util.ResourceBundle;
  */
 
 public class AppletStore extends JFrame implements BackgroundChangeable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
@@ -33,7 +34,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private volatile boolean windowOpened = true;
     private MainPanel window;
     private Menu menu;
-    private GlassPaneBlocker blocker = new GlassPaneBlocker();
+    private final GlassPaneBlocker blocker = new GlassPaneBlocker();
 
     /**
      * Create an application
@@ -121,12 +122,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         }
 
         menu = new Menu(this);
-        CardInstance card = CardManagerFactory.getManager().getCard();
-        if (card == null) {
-            menu.setCard(null, null);
-        } else {
-            menu.setCard(card.getName(), card.getId());
-        }
+        menu.setCard(CardManagerFactory.getManager().getCard());
+
         setJMenuBar(menu);
         setGlassPane(blocker);
 
