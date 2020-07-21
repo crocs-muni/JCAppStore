@@ -20,6 +20,7 @@ public class Config {
     public static final File APP_STORE_DIR = checkFolders(APP_ROOT_DIR + S + "store");
     public static final File APP_LOCAL_DIR = checkFolders(APP_ROOT_DIR + S + "my_applets");
     public static final File APP_LOG_DIR = checkFolders(APP_DATA_DIR + S + "logs");
+    public static final File APP_TEST_DIR = checkFolders(APP_DATA_DIR + S + "results");
 
     public static final String LOG_FILENAME = "jcAppStore";
     public static final String LOG_FILENAME_EXT = ".log";

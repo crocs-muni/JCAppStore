@@ -28,8 +28,9 @@ How the store works?
 ------
 
 **This application is only a tool for card management. It will not allow you to use the card 
-applications themselves.** That's why we try to include a pool (store), that contains safe, and
-intuitive software to install. You will always find the usage guide in the store item details. 
+applications themselves** (mostly). Finding an application for a smart card that is useful can be very tough: 
+that's why we introduce the JCAppStore that contains safe, and intuitive (as much as the applets themselves allow) software to install. 
+You will always find the usage guide in the store item details. 
 Also, in the right upper corner, browse help for more detailed description. 
 
 More details, description and
@@ -37,12 +38,11 @@ More details, description and
 
 Useful set of tutorials and how-tos can be found on [OpenSC wiki](https://github.com/OpenSC/OpenSC/wiki/Using-smart-cards-with-applications).
 
+JCAppStore furthermore hosts [JCAlgTest](https://github.com/crocs-muni/JCAlgTest): you can run the test suite directly from the GUI.
 
 Authentication
 -----
 The card authentication is automatic unless you change the default test key. For more information see [our wiki](https://github.com/crocs-muni/JCAppStore/wiki/Inserting-a-new-card).
-
-
 
 
 Installing Applets

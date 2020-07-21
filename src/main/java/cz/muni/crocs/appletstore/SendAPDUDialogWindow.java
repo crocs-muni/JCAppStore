@@ -20,7 +20,8 @@ import static cz.muni.crocs.appletstore.InstallDialogWindow.HEXA_PATTERN;
  * @version 1.0
  */
 public class SendAPDUDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private Color wrong = new Color(0xA3383D);
     private JTextField apdu = new JTextField(70);
     //private JCheckBox inHex = new JCheckBox();

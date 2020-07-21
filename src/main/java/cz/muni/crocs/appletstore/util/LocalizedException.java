@@ -1,11 +1,5 @@
-package cz.muni.crocs.appletstore;
+package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -13,7 +7,8 @@ import java.util.ResourceBundle;
  * also supports image for optional image inclusion (error pane with images that help understand to cause)
  */
 public class LocalizedException extends Exception {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private String translated;
     private String image;
     private boolean isKey = true;
@@ -113,6 +108,19 @@ public class LocalizedException extends Exception {
         super(cause, ex);
         this.translated = translated;
         this.image = image;
+    }
+
+    public static LocalizedException from(Exception e) {
+        LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(), e.getCause());
+        result.isKey = false;
+        return result;
+    }
+
+    public static LocalizedException from(LocalizedException e) {
+        LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(),
+                e.getImageName(), e.getCause());
+        result.isKey = false;
+        return result;
     }
 
     /**

@@ -10,6 +10,7 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.LoadingPaneCircle;
 
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;

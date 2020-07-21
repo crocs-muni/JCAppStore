@@ -174,6 +174,13 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
+    public boolean loadJCAlgTestDependencies(File from, boolean rewrite) throws LocalizedCardException {
+        if (card == null) return false;
+        if (card.getCardMetadata().getJCData() != null && !rewrite) return false;
+        return JCAlgTestResultsFinder.parseFile(from);
+    }
+
+    @Override
     public void setTryGenericTestKey() {
         this.tryGeneric = true;
     }

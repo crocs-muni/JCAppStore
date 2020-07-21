@@ -1,10 +1,8 @@
 package cz.muni.crocs.appletstore.crypto;
 
-import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
 
 import java.io.File;
-import java.util.ResourceBundle;
 
 /**
  * Verification implementation
@@ -13,7 +11,6 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class SignatureImpl implements Signature {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     @Override
     public boolean verify(String author, String file, String fileSignature) throws LocalizedSignatureException {
@@ -25,7 +22,7 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public boolean verify(String author, File file, File fileSignature) throws LocalizedSignatureException {
+    public boolean verify(String author, File file, File fileSignature) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
@@ -44,12 +41,12 @@ public class SignatureImpl implements Signature {
     }
 
     @Override
-    public Tuple<Integer, String> verifyAndReturnMessage(String author, String file) throws LocalizedSignatureException {
+    public Tuple<Integer, String> verifyAndReturnMessage(String author, String file) {
         return verifyAndReturnMessage(author, new File(file));
     }
 
     @Override
-    public Tuple<Integer, String> verifyAndReturnMessage(String author, File file) throws LocalizedSignatureException {
+    public Tuple<Integer, String> verifyAndReturnMessage(String author, File file) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
@@ -60,26 +57,29 @@ public class SignatureImpl implements Signature {
 
     @Override
     public Tuple<Integer, String> verifyPGPAndReturnMessage(File file)  throws LocalizedSignatureException {
-        return verifyPGPAndReturnMessage(null, file, getSignatureFileFromString("JCAppStore", file.getAbsolutePath()));
+        return verifyPGPAndReturnMessage(null, file,
+                getSignatureFileFromString("JCAppStore", file.getAbsolutePath()));
     }
 
     @Override
-    public Tuple<Integer, String> verifyAndReturnMessage(String author, String file, String detachedSignature) throws LocalizedSignatureException{
+    public Tuple<Integer, String> verifyAndReturnMessage(String author, String file, String detachedSignature) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Tuple<Integer, String> verifyAndReturnMessage(String author, File file, File detachedSignature) throws LocalizedSignatureException{
+    public Tuple<Integer, String> verifyAndReturnMessage(String author, File file, File detachedSignature) {
         throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, String file, String detachedSignature) throws LocalizedSignatureException {
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, String file, String detachedSignature)
+            throws LocalizedSignatureException {
         return verifyPGPAndReturnMessage(fingerprint, new File(file), new File(detachedSignature));
     }
 
     @Override
-    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, File file, File detachedSignature) throws LocalizedSignatureException {
+    public Tuple<Integer, String> verifyPGPAndReturnMessage(String fingerprint, File file, File detachedSignature)
+            throws LocalizedSignatureException {
         return new PGP().verifySignatureAndGetErrorMsg(fingerprint, file, detachedSignature);
     }
 

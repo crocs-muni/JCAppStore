@@ -3,6 +3,8 @@ package cz.muni.crocs.appletstore.card;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import pro.javacard.AID;
 
+import javax.smartcardio.ATR;
+
 /**
  * Card instance definition, also visible from outisde of the package, but through manager only
  */
@@ -32,6 +34,12 @@ public interface CardInstance {
      * @return card descriptor
      */
     String getDescriptor();
+
+    /**
+     * Return card ATR
+     * @return card ATR
+     */
+    ATR getCardATR();
 
     /**
      * Get life cycle of the card

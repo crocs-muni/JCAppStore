@@ -1,11 +1,8 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.LocalizedException;
 import cz.muni.crocs.appletstore.action.CardAbstractActionBase;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.ui.HtmlText;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pro.javacard.gp.GPException;

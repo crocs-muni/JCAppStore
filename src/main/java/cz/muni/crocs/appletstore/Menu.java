@@ -36,6 +36,7 @@ public class Menu extends JMenuBar {
     private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
         @Override
         public void onStart() {
+            context.setDisabledMessage(textSrc.getString("jcdia_runmsg"));
             context.switchEnabled(false);
         }
 

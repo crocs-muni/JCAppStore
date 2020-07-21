@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.crypto;
 
-import cz.muni.crocs.appletstore.LocalizedException;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 
 /**
  * Just to separate different exception source

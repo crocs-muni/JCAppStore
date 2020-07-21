@@ -31,4 +31,11 @@ public interface BackgroundChangeable {
      * @param enabled true if enabled
      */
     void switchEnabled(boolean enabled);
+
+    /**
+     * Set a message for next disablement ( switchEnabled(false); call )
+     * The message is removed after one use: replaced by the default: "waiting..."
+     * @param message message to display
+     */
+    void setDisabledMessage(String message);
 }

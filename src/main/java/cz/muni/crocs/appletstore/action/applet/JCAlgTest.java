@@ -17,7 +17,7 @@ import static cz.muni.crocs.appletstore.Config.S;
  * @author Jiří Horák
  * @version 1.0
  */
-public class JCAlgTest extends AppletBase<JPanel> {
+public class JCAlgTest extends AppletBase<Void> {
 
     JCAlgTest() {}
 
@@ -77,7 +77,7 @@ public class JCAlgTest extends AppletBase<JPanel> {
     }
 
     @Override
-    protected JPanel executeAppletCommunication(CardManager manager) {
+    protected Void executeAppletCommunication(CardManager manager) {
         throw new UnsupportedOperationException("Use non-default call with custom implementation.");
     }
 }

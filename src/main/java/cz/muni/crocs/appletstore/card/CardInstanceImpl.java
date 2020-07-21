@@ -108,6 +108,11 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     @Override
+    public ATR getCardATR() {
+        return details == null ? null : details.getAtr();
+    }
+
+    @Override
     public Integer getLifeCycle() {
         if (metadata == null)
             return 0;

@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
@@ -12,7 +11,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -22,18 +20,27 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class GlassPaneBlocker extends JPanel implements MouseListener, FocusListener {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+        ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+
+    private final JLabel working;
 
     public GlassPaneBlocker() {
         setLayout(new MigLayout("align center center, gapy 15"));
-        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "load.gif")), "wrap");
-        JLabel working = new JLabel(textSrc.getString("working"));
+        add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "load.gif")), "align center, wrap");
+
+        working = new JLabel(textSrc.getString("working"));
         working.setFont(OptionsFactory.getOptions().getTitleFont(20f));
-        add(working, "align center");
+        add(working, "align center, wrap");
 
         setOpaque(false);
         addMouseListener(this);
         addFocusListener(this);
+    }
+
+    public void setMessage(String msg) {
+        working.setText(msg);
+        revalidate();
     }
 
     @Override

@@ -3,16 +3,12 @@ package cz.muni.crocs.appletstore.crypto;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
-import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * CMD Task extension to talk to GnuPG
@@ -26,8 +22,9 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class PGP extends CmdTask {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private static Logger logger = LoggerFactory.getLogger(CmdTask.class);
+    private static final ResourceBundle textSrc =
+        ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(CmdTask.class);
 
     private static boolean verified = false;
     private static String location;
@@ -84,18 +81,11 @@ public class PGP extends CmdTask {
                 Thread.currentThread().interrupt();
             }
         }
-        Process sig;
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-            sig = new CmdTask().add("bash").add("-c").add(location + " --verify \'"
-                    + signatureFile.getAbsolutePath() + "\' \'" + file.getAbsolutePath() + "\'")
-                    .process();
-
-        } else if (SystemUtils.IS_OS_WINDOWS) {
-            sig = new CmdTask().add(location).add("--verify")
+        Process sig = new CmdTask().add(location).add("--verify")
                     .add("\"" + signatureFile.getAbsolutePath() + "\"")
                     .add("\"" + file.getAbsolutePath() + "\"")
                     .process();
-        } else return 2;
+
         String output = CmdTask.toString(sig);
         logger.info(output);
         output = output.replaceAll("\\s", "");

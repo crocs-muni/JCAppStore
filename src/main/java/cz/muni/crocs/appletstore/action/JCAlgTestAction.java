@@ -1,12 +1,11 @@
 package cz.muni.crocs.appletstore.action;
 
+import algtestprocess.SupportTable;
+import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.action.applet.AppletBase;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.action.applet.Applets;
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.card.UnknownKeyException;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.CmdTask;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
@@ -17,15 +16,25 @@ import cz.muni.crocs.appletstore.ui.Title;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.smartcardio.ATR;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.Color;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Getting the free card memory action
@@ -44,73 +53,73 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
     public void mouseClicked(MouseEvent e) {
         CardManager manager = CardManagerFactory.getManager();
         if (manager.getCard() == null) {
-            //todo  error
-         return;
+            InformerFactory.getInformer().showMessage(textSrc.getString("no_card"));
+            return;
         }
 
         final TestForm form = getFormForCardName(manager.getCard().getName());
         if (form == null) return;
 
         execute(() -> {
+            AtomicReference<Process> p = new AtomicReference<>();
             try {
-                //perform() call verified the JCAlgTest presence
-                JPanel result = Applets.JCALG_TEST.perform(mngr -> {
+                Applets.JCALG_TEST.perform(mngr -> { //perform() call verifies the JCAlgTest presence
                     try {
-                        Process p = runJcAlgTestClient(form, mngr);
-                    } catch (LocalizedSignatureException localizedSignatureException) {
-                        localizedSignatureException.printStackTrace();
+                        p.set(runJcAlgTestClient(form));
+                    } catch (LocalizedSignatureException esig) {
+                        throw LocalizedException.from(esig);
                     }
+
+                    File testResults = getResultsFile(); //call first to delete JCAlgTest logs
 
                     //todo show results and send to MUNI
 
+                    propagateTestResults(testResults);
+                    try {
+                        URLAdapter.browse(getHTMLTestResults());
+                    } catch (IOException | URISyntaxException ex) {
+                        throw new LocalizedCardException("Unable to show the tset results.", "E_jcdia_show", ex);
+                    }
+
                     return null;
                 }, textSrc.getString("jc_install_failure"));
-            } catch (UnknownKeyException | LocalizedCardException ex) {
+            } catch (LocalizedException ex) {
                 logger.error("Failed to run JCAlgTest.", ex);
                 InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
+            } finally {
+                if (p.get() != null) p.get().destroy();
             }
             return null;
         }, "", "");
     }
 
-    private Process runJcAlgTestClient(TestForm form, CardManager manager) throws LocalizedSignatureException {
+    private Process runJcAlgTestClient(TestForm form)
+            throws LocalizedSignatureException, LocalizedCardException {
         Options<String> opts = OptionsFactory.getOptions();
 
-        if (!verifyJavaPresence(opts.getOption(Options.KEY_JAVA_EXECUTABLE))) return null;
+        if (!verifyJavaPresence(opts.getOption(Options.KEY_JAVA_EXECUTABLE))) {
+            throw new LocalizedCardException("No java found.", "E_no_java");
+        }
 
-        String cardName = form.getCardName() + ", " + manager.getCard().getId();
-
- //       String input = "( echo 1 && echo " + cardName + " ) | ";
-
-//        CmdTask task;
-//
-//        //todo test on unix
-//        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
-//            task = new CmdTask().add("bash").add("-c").add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
-//                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
-//        } else if (SystemUtils.IS_OS_WINDOWS) {
-//            task = new CmdTask().add(input).add(opts.getOption(Options.KEY_JAVA_EXECUTABLE))
-//                    .add("-jar").add(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
-//        }
-
-        ProcessBuilder builder = new ProcessBuilder( opts.getOption(Options.KEY_JAVA_EXECUTABLE), "-jar",
-                opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH));
-        builder.directory(Config.APP_DATA_DIR.getAbsoluteFile());
-        builder.redirectErrorStream(true);
+        String cardName = form.getCardName().replaceAll("'", "");
+        CmdTask task = new CmdTask().add(opts.getOption(Options.KEY_JAVA_EXECUTABLE)).add("-jar")
+                .add(absolutePath(opts.getOption(Options.KEY_JCALGTEST_CLIENT_PATH))).cwd(Config.APP_TEST_DIR).log(true);
 
         try {
-            Process process = builder.start();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-            writer.write(String.format("1%n"));
-            writer.write(String.format("%s%n", cardName));
+            Process process = task.processUnblocked();
+            BufferedOutputStream stdin = new BufferedOutputStream(process.getOutputStream());
+            Thread.sleep(50);
+            stdin.write(String.format("1%n").getBytes());
+            stdin.flush();
+            Thread.sleep(1000);
+            stdin.write(String.format("%s%n", cardName).getBytes());
+            stdin.flush();
+
             process.waitFor();
             return process;
         } catch (IOException | InterruptedException e) {
-            //todo notify
-            return null;
+            throw new LocalizedCardException("Failed to run JCAlgTest client.", "E_jcdia_fire_client", e);
         }
-
-        //todo send
     }
 
     private TestForm getFormForCardName(String defaultName) {
@@ -124,26 +133,92 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
         return null;
     }
 
-    private boolean verifyJavaPresence(String javaExecutable) throws LocalizedSignatureException {
-        String cmdPrefix = (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) ? "bash -c" : "";
-        Process p = new CmdTask().add(cmdPrefix).add(javaExecutable).add("--version").process(5);
-        String output = CmdTask.toString(p);
-        if (p.exitValue() != 0 && (output.contains("openjdk") || output.contains("Runtime Environment"))) {
+    private boolean verifyJavaPresence(String javaExecutable) throws LocalizedSignatureException, LocalizedCardException {
+        Process p = new CmdTask().add(javaExecutable).add("--version").process(5);
+        try {
+            String output = CmdTask.toString(p);
+            if (p.exitValue() != 0 && (output.contains("openjdk") || output.contains("Runtime Environment"))) {
 
-            JFileChooser chooser = FileChooser.getSingleFile(new File(Config.APP_ROOT_DIR));
-            chooser.setDialogTitle(textSrc.getString("java_executable"));
+                JFileChooser chooser = FileChooser.getSingleFile(new File(Config.APP_ROOT_DIR));
+                chooser.setDialogTitle(textSrc.getString("java_executable"));
+
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    File jre = chooser.getSelectedFile();
+                    if (!jre.exists()) throw new LocalizedCardException("Invalid file.", "E_no_java_executable");
+
+                    return verifyJavaPresence(jre.getAbsolutePath());
+                } else return false;
+            }
+            OptionsFactory.getOptions().addOption(Options.KEY_JAVA_EXECUTABLE, javaExecutable);
+            return true;
+        } finally {
+            if (p != null) p.destroy();
+        }
+    }
+
+    private File getResultsFile() throws LocalizedCardException {
+        File results = scanForResultsFile();
+        if (results == null || !results.exists()) {
+            JFileChooser chooser = FileChooser.getSingleFile(Config.APP_TEST_DIR,
+                    textSrc.getString("jcdia_algtest_files"), "csv");
+            chooser.setDialogTitle(textSrc.getString("jcdia_algtest_files"));
 
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                File jre = chooser.getSelectedFile();
-                if (!jre.exists()) {
-                    InformerFactory.getInformer().showMessage(textSrc.getString("E_no_java_executable"));
+                File chosed = chooser.getSelectedFile();
+                if (!chosed.exists()) throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file");
+                return chosed;
+            } else throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file");
+        }
+        return results;
+    }
+
+    //also deletes log files...
+    private File scanForResultsFile() {
+        ATR cardATR = CardManagerFactory.getManager().getCard().getCardATR();
+        try (Stream<Path> walk = Files.walk(Paths.get(Config.APP_TEST_DIR.getAbsolutePath()), 1)) {
+            List<Path> result = walk.filter(f -> {
+                try {
+                    File current = f.toFile();
+                    if (current.isDirectory()) return false;
+                    if (current.getName().endsWith(".csv")) {
+                        return true;
+                    } else Files.delete(f);
+                    return false;
+                } catch (IOException e) {
                     return false;
                 }
-                return verifyJavaPresence(jre.getAbsolutePath());
-            } else return false;
+            }).collect(Collectors.toList());
+            for (Path path : result) {
+                Matcher match = JCAlgTestResultsFinder.ATR_PATTERN.matcher(path.getFileName().toString());
+                if (match.find()) {
+                    String foundATR = match.group().replaceAll(" |_|:|0x", "");
+                    if (cardATR.equals(new ATR(HexUtils.hex2bin(foundATR)))) return path.toFile();
+                }
+            }
+        } catch (IOException e) {
+            logger.warn("Scanning for jcalgtest results failed.", e);
+            return null;
         }
-        OptionsFactory.getOptions().addOption(Options.KEY_JAVA_EXECUTABLE,javaExecutable);
-        return true;
+        return null;
+    }
+
+    private boolean propagateTestResults(File results) throws LocalizedCardException {
+        return CardManagerFactory.getManager().loadJCAlgTestDependencies(results, true);
+    }
+
+    private File getHTMLTestResults() throws IOException {
+        String basePath = Config.APP_DATA_DIR.getAbsolutePath();
+        String fileName = basePath + Config.S + "AlgTest_html_table.html";
+        SupportTable.generateHTMLTable(Config.APP_DATA_DIR.getAbsolutePath() + Config.S);
+        return new File(fileName);
+    }
+
+    private void shareTestResults(File results) {
+        //todo
+    }
+
+    private static String absolutePath(String relative) {
+        return new File(relative).getAbsolutePath();
     }
 
     private static class TestForm extends JPanel {
@@ -172,6 +247,8 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
             add(new HtmlText("<div style='padding: 8px; background: " + NOTICE_COLOR + "; width: 450px'>" +
                     textSrc.getString("jcdia_warn") + "</div>"), "span 2, gaptop 7, wrap");
+            add(new HtmlText("<div style='width: 450px'>" + textSrc.getString("jcdia_hint_progress") + "</div>"),
+                    "span 2, wrap");
         }
 
         public String getCardName() {
@@ -183,7 +260,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
         }
 
         private JLabel getHint(String langKey) {
-            JLabel hint = new HtmlText("<p width=\"550\">" + textSrc.getString(langKey) + "</p>", 10f);
+            JLabel hint = new HtmlText("<p width=\"550\">" + textSrc.getString(langKey) + "</p>", 11f);
             hint.setForeground(Color.DARK_GRAY);
             return hint;
         }

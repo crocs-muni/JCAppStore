@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.action.applet;
 
 import apdu4j.ResponseAPDU;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -16,20 +17,20 @@ public abstract class AppletBase<T> {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    public T performDefault() throws UnknownKeyException, LocalizedCardException {
+    public T performDefault() throws LocalizedException {
         return performAppletOperation(this::executeAppletCommunication);
     }
 
-    public T perform(AppletAction<T> action) throws UnknownKeyException, LocalizedCardException {
+    public T perform(AppletAction<T> action) throws LocalizedException {
         return performAppletOperation(action);
     }
 
-    public T performDefault(String installFailureMessage) throws UnknownKeyException, LocalizedCardException {
+    public T performDefault(String installFailureMessage) throws LocalizedException {
         return performAppletOperation(this::executeAppletCommunication, installFailureMessage);
     }
 
     public T perform(AppletAction<T> action, String installFailureMessage)
-            throws UnknownKeyException, LocalizedCardException {
+            throws LocalizedException {
         return performAppletOperation(action, installFailureMessage);
     }
 
@@ -96,7 +97,7 @@ public abstract class AppletBase<T> {
      * @throws LocalizedCardException the command could not be performed
      * @throws UnknownKeyException if the key to the card is unknown
      */
-    protected T performAppletOperation(AppletAction<T> operation) throws UnknownKeyException, LocalizedCardException {
+    protected T performAppletOperation(AppletAction<T> operation) throws LocalizedException {
         return performAppletOperation(operation, null);
     }
 
@@ -108,7 +109,7 @@ public abstract class AppletBase<T> {
      * @throws UnknownKeyException if the key to the card is unknown
      */
     protected T performAppletOperation(AppletAction<T> operation, String installFailureMessage)
-            throws LocalizedCardException, UnknownKeyException {
+            throws LocalizedException {
         final CardManager manager = CardManagerFactory.getManager();
         T result;
 
@@ -148,12 +149,17 @@ public abstract class AppletBase<T> {
     }
 
     private void uninstallIfNotKeep(CardManager manager, boolean refresh)
-            throws LocalizedCardException, UnknownKeyException {
-        if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
-            logger.info(getAppletName() + " removed because of the mode disabled.");
-            manager.uninstall(getPackageInfo(), true);
-        } else if (refresh) {
-            manager.loadCard();
+            throws LocalizedException {
+        try {
+            if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
+                logger.info(getAppletName() + " removed because of the mode disabled.");
+                manager.uninstall(getPackageInfo(), true);
+            } else if (refresh) { //refresh is implicit when uninstalling
+                manager.setReloadCard();
+                manager.loadCard();
+            }
+        } catch (UnknownKeyException e) {
+            throw LocalizedException.from(e);
         }
     }
 
@@ -163,6 +169,6 @@ public abstract class AppletBase<T> {
      */
     @FunctionalInterface
     public interface AppletAction<T> {
-        T perform(CardManager manager) throws LocalizedCardException;
+        T perform(CardManager manager) throws LocalizedException;
     }
 }

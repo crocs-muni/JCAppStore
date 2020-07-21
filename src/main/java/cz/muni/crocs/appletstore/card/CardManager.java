@@ -113,6 +113,7 @@ public interface CardManager {
      * makes necessary steps to be ready to work with
      *
      * @link Terminals::checkTerminals()
+     * @see CardManager::setReloadCard()
      */
     void loadCard() throws LocalizedCardException, UnknownKeyException;
 
@@ -127,6 +128,14 @@ public interface CardManager {
      * @return false if the file is already downloaded
      */
     boolean getJCAlgTestDependencies();
+
+    /**
+     * Load dependencies from a file
+     * @param from file that contains the jcalgtest algorithm support results
+     * @param rewrite true to replace if present
+     * @return true on successful completition
+     */
+    boolean loadJCAlgTestDependencies(File from, boolean rewrite) throws LocalizedCardException;
 
     /**
      * Install new applet onto current card

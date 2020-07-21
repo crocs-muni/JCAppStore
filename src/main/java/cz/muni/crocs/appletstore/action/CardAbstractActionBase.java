@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  */
 public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter implements CardAction {
-    private static final Logger logger = LoggerFactory.getLogger(CardAbstractActionBase.class);
+    protected static final Logger logger = LoggerFactory.getLogger(CardAbstractActionBase.class);
 
     protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
             OptionsFactory.getOptions().getLanguageLocale());
