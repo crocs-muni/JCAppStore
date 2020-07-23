@@ -30,6 +30,7 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -122,17 +123,22 @@ public class InstallAction extends CardAbstractAction {
             @Override
             void after() {
                 final Tuple<Integer, String> signResult = result;
-                doAsyncWorkRoutine("CheckITTTT", new Executable<Tuple<String, String>>() {
+                doAsyncWorkRoutine("Verify dependencies...", new Executable<Tuple<String, String>>() {
                     @Override
                     void work() {
-                        result = checkDependencies();
-                        if (result == null) result = new Tuple<>(null, null);
+                        this.result = checkDependencies();
                     }
 
                     @Override
                     void after() {
-                        showInstallDialog(signResult.second, Signature.getImageByErrorCode(signResult.first),
-                                result.first, result.second, false);
+                        if (result == null) {
+                            logger.info("Dependency file not found;");
+                            showInstallDialog(signResult.second, Signature.getImageByErrorCode(signResult.first),
+                                    null, null, false);
+                        } else {
+                            showInstallDialog(signResult.second, Signature.getImageByErrorCode(signResult.first),
+                                    result.first, result.second, false);
+                        }
                     }
                 });
 
@@ -287,17 +293,30 @@ public class InstallAction extends CardAbstractAction {
                     e.printStackTrace();
                     size = 0; //pretend nothing happened
                 }
-                //if no reinstall and memory is not max and applet size + 1kB install space > remaining memory
-                if (!installed && cardMemory < JCMemory.LIMITED_BY_API && size + 1024 > cardMemory) {
-                    int res = JOptionPane.showConfirmDialog(null,
-                            "<html>" + textSrc.getString("no_space_1") + (size + 1024) +
-                                    textSrc.getString("no_space_2") + cardMemory +
-                                    textSrc.getString("no_space_3") + "</html>");
-                    if (res == YES_OPTION) {
+                //do not add instance install size to the limit, the actual zip file is bigger than on card
+                if (!installed && cardMemory < JCMemory.LIMITED_BY_API && size > cardMemory) {
+                    AtomicBoolean alreadyPresent = new AtomicBoolean(false);
+                    manager.getCard().foreachAppletOf(Kind.ExecutableLoadFile, info -> {
+                        boolean found = code.getPackageAID().equals(info.getAid());
+                        if (found) alreadyPresent.set(true);
+                        return !found;
+                    });
+
+                    if (alreadyPresent.get() && cardMemory > 1024){
                         doInstall(opts, manager);
                     } else {
-                        call.onFinish();
-                        return null;
+                        int res = showConfirmDialog(null,
+                                "<html><p style='width: 350px;'>" + textSrc.getString("no_space_1") +
+                                        size + ", " + textSrc.getString("no_space_2") +
+                                        cardMemory + ". " + textSrc.getString("no_space_3") + "</p></html>",
+                                textSrc.getString("ifaq_low_memory_title"), YES_NO_OPTION, INFORMATION_MESSAGE,
+                                new ImageIcon(Config.IMAGE_DIR + "error.png"));
+                        if (res == YES_OPTION) {
+                            doInstall(opts, manager);
+                        } else {
+                            call.onFinish();
+                            return null;
+                        }
                     }
                 } else {
                     doInstall(opts, manager);
@@ -308,10 +327,9 @@ public class InstallAction extends CardAbstractAction {
     }
 
     private boolean userAcceptsForceInstallWarn(CardInstance card) {
-        for (AppletInfo info: card.getCardMetadata().getApplets()) {
+        //for (AppletInfo info: card.getCardMetadata().getApplets()) {
             //todo recognize applet has onlyone package and do not bother the user!!!!
-        }
-
+        //}
 
         if (OptionsFactory.getOptions().is(Options.KEY_WARN_FORCE_INSTALL)) {
             ReinstallWarnPanel warn = new ReinstallWarnPanel();
@@ -386,7 +404,7 @@ public class InstallAction extends CardAbstractAction {
         StringBuilder unmetRequirements = new StringBuilder();
 
         for (String version : versions) {
-            File file = new File(data.getStoreFolder() + "requirements_" + version + ".txt");
+            File file = new File(data.getStoreFolder() + Config.S + "requirements_" + version + ".txt");
             if (file.exists()) {
                 try (BufferedReader input = new BufferedReader(new FileReader(file))) {
                     HashMap<String, String> category = null;
@@ -414,14 +432,19 @@ public class InstallAction extends CardAbstractAction {
         }
 
         String result = unmetRequirements.toString();
-        String sdkVersion = capabilities.get("JavaCard support version").get("JavaCard support version");
+        String sdkVersion = null;
+        HashMap<String, String> jcsupportVersion = capabilities.get("JavaCard support version");
+        if (jcsupportVersion != null) sdkVersion = jcsupportVersion.get("JavaCard support version");
+
         StringBuilder sdk = new StringBuilder();
-        if (!sdkVersion.equals(data.getInfo().getSdk())) {
+        if (sdkVersion == null) {
+            sdk.append("<br><p style='width:350px;'>").append(textSrc.getString("jcdia_nosdk")).append("</p>");
+        } else if (!sdkVersion.equals(data.getInfo().getSdk())) {
             sdk.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
                     .append("</p><p>").append(textSrc.getString("applet_sdk")).append(sdkVersion).append("</p>");
         } else if (result.isEmpty()) return null;
 
-        return new Tuple<>(textSrc.getString("unmet_requirements"),
+        return new Tuple<>(textSrc.getString((result.isEmpty() ? "not_found_sdk" : "unmet_requirements")),
                 getReport(capabilities.get("Header"), sdk.toString(), result));
     }
 
@@ -434,14 +457,15 @@ public class InstallAction extends CardAbstractAction {
         result.append(sdkReport);
         if (!requirementsReport.isEmpty()) {
             result.append("<br><p>").append(textSrc.getString("not_supported_requirements_list"))
-                    .append("</p><p>").append(requirementsReport, 0, requirementsReport.length() - 2).append("</p>");
+                    .append("</p><p style='width:350px;'>")
+                    .append(requirementsReport, 0, requirementsReport.length() - 2).append("</p>");
         }
         result.append("<br><p style='width:350px;'>").append(textSrc.getString("jc_test_note")).append("</p>");
         return result.toString();
     }
 
     //routine used to verify the signatures
-    private static void doAsyncWorkRoutine(String msg, Executable task) {
+    private static void doAsyncWorkRoutine(String msg, Executable<?> task) {
         JOptionPane pane = new JOptionPane(msg,
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.YES_NO_OPTION,
                 new ImageIcon(Config.IMAGE_DIR + "verify_loading.png"),

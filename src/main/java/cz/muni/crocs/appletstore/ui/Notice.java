@@ -19,7 +19,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Notice extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     /**
      * Importance levels, decide the color
@@ -32,7 +33,7 @@ public class Notice extends JPanel {
      * Icon to display (retry when callback defined, close if supports closing).
      */
     public enum CallBackIcon {
-        RETRY, CLOSE, NO_ICON
+        RETRY, CLOSE, OPEN_FOLDER, NO_ICON
     }
 
     /**
@@ -42,12 +43,12 @@ public class Notice extends JPanel {
      * @param type - icon type
      * @param onClick - callbacks to perform, the type should be either close or retry, not called if NO_ICON
      */
-    public Notice(String msg, Importance status, CallBackIcon type, CallBack ... onClick) {
+    public Notice(String msg, Importance status, CallBackIcon type, CallBack<?> ... onClick) {
         setLayout(new MigLayout("center, gapy 20, insets 0 20 0 20"));
         MouseAdapter call = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for (CallBack c : onClick) {
+                for (CallBack<?> c : onClick) {
                     c.callBack();
                 }
             }
@@ -82,15 +83,10 @@ public class Notice extends JPanel {
 
         switch (type) {
             case CLOSE:
-                JLabel iconClose = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
-                iconClose.setBorder(new EmptyBorder(0, 20, 0, 0));
-                iconClose.addMouseListener(call);
-                add(iconClose);
+                add(addIcon("close_black.png", call));
                 break;
             case RETRY:
-                JLabel iconRetry = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
-                iconRetry.setBorder(new EmptyBorder(0, 20, 0, 0));
-                add(iconRetry);
+                add(addIcon("sync.png"));
 
                 JLabel retry = new JLabel(textSrc.getString("retry"));
                 retry.setFont(OptionsFactory.getOptions().getTitleFont(12f));
@@ -98,8 +94,24 @@ public class Notice extends JPanel {
                 add(retry);
                 retry.addMouseListener(call);
                 break;
+            case OPEN_FOLDER:
+                add(addIcon("folder-open.png", call));
+                break;
             default:
                 break;
         }
     }
+
+    private JLabel addIcon(String imgName) {
+        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + imgName));
+        icon.setBorder(new EmptyBorder(0, 20, 0, 0));
+        return icon;
+    }
+
+    private JLabel addIcon(String imgName, MouseAdapter callback) {
+        JLabel icon = addIcon(imgName);
+        icon.addMouseListener(callback);
+        return icon;
+    }
+
 }

@@ -41,9 +41,9 @@ public class CardInstanceMetaData implements Serializable {
     }
 
     public boolean addApplet(AppletInfo info) {
-        if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile && applets.contains(info)
-                && (info.getModules() == null || info.getModules().isEmpty())) {
-            applets.remove(info);
+        if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile &&
+                (info.getModules() == null || info.getModules().isEmpty())) {
+            return false;
         }
         return applets.add(info);
     }

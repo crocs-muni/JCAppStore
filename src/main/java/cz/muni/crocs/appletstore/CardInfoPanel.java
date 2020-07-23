@@ -31,6 +31,7 @@ public class CardInfoPanel extends JPanel {
      */
     public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
         setLayout(new MigLayout());
+        add(new JLabel(textSrc.getString("working")));
         final CardInfoPanel self = this;
 
         if (CardManagerFactory.getManager().isCard()) {
@@ -56,6 +57,7 @@ public class CardInfoPanel extends JPanel {
                 @Override
                 public Void onFinish(byte[] apduData) {
                     changeable.switchEnabled(true);
+                    self.removeAll();
                     if (apduData == null) {
                         self.add(new JLabel(new ImageIcon(Config.IMAGE_DIR + "announcement.png")),
                                 "align center, wrap");

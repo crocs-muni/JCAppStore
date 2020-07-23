@@ -19,8 +19,8 @@ import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -160,18 +160,19 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
     }
 
     private AppletInfo getPackageOf(AppletInfo applet) {
+        AtomicReference<AppletInfo> result = new AtomicReference<>(null);
         CardInstance card = CardManagerFactory.getManager().getCard();
         if (card == null) return null;
-        for (AppletInfo info : card.getCardMetadata().getApplets()) {
-            if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
-                for (AID instance : info.getModules()) {
-                    if (instance.equals(applet.getAid())) {
-                        return info;
-                    }
+        card.foreachAppletOf(GPRegistryEntry.Kind.ExecutableLoadFile, info -> {
+            for (AID instance : info.getModules()) {
+                if (instance.equals(applet.getAid())) {
+                    result.set(info);
+                    return false;
                 }
             }
-        }
-        return null;
+            return true;
+        });
+        return result.get();
     }
 
     private static class ConfirmDeletion extends JPanel {

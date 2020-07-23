@@ -7,6 +7,7 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
+import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
@@ -143,6 +144,17 @@ public class CardInstanceImpl implements CardInstance {
     public void setName(String newName) throws LocalizedCardException {
         name = newName;
         updateCardName(newName);
+    }
+
+    @Override
+    public void foreachAppletOf(GPRegistryEntry.Kind kind, CallableParam<Boolean, AppletInfo> call) {
+        Set<AppletInfo> applets = getCardMetadata().getApplets();
+        if (applets == null) return;
+        for (AppletInfo nfo : getCardMetadata().getApplets()) {
+            if (kind.equals(nfo.getKind())) {
+                if (!call.callBack(nfo)) break;
+            }
+        }
     }
 
     @Override

@@ -1,7 +1,10 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import pro.javacard.AID;
+import pro.javacard.gp.GPRegistryEntry;
 
 import javax.smartcardio.ATR;
 
@@ -63,6 +66,13 @@ public interface CardInstance {
      * Set custom card name
      */
     void setName(String name) throws LocalizedCardException;
+
+    /**
+     * Executes the call for each applet
+     * @param kind kind to call the callback for
+     * @param call to execute, returns true if continue in loop
+     */
+    void foreachAppletOf(GPRegistryEntry.Kind kind, CallableParam<Boolean, AppletInfo> call);
 
     /**
      * Adds and executes given task. The task cannot be assigned

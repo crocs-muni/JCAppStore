@@ -3,28 +3,22 @@ package cz.muni.crocs.appletstore.action;
 import algtestprocess.SupportTable;
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.LocalizedException;
+import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.ui.*;
+import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.action.applet.Applets;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.crypto.CmdTask;
 import cz.muni.crocs.appletstore.crypto.LocalizedSignatureException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.ui.FileChooser;
-import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.ui.Text;
-import cz.muni.crocs.appletstore.ui.Title;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
-import cz.muni.crocs.appletstore.util.URLAdapter;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.smartcardio.ATR;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.Color;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -72,13 +66,15 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                     File testResults = getResultsFile(); //call first to delete JCAlgTest logs
 
-                    //todo show results and send to MUNI
+                    if (form.isShareTestResultsSelected()) {
+                        //todo show results and send to MUNI
+                    }
 
                     propagateTestResults(testResults);
                     try {
                         URLAdapter.browse(getHTMLTestResults());
                     } catch (IOException | URISyntaxException ex) {
-                        throw new LocalizedCardException("Unable to show the tset results.", "E_jcdia_show", ex);
+                        throw new LocalizedCardException("Unable to show the test results.", "E_jcdia_show", ex);
                     }
 
                     return null;
@@ -88,6 +84,16 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                 InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
             } finally {
                 if (p.get() != null) p.get().destroy();
+                InformerFactory.getInformer().showInfo(textSrc.getString("jcida_done"),
+                        Notice.Importance.INFO, Notice.CallBackIcon.OPEN_FOLDER, () -> {
+                            try {
+                                Desktop.getDesktop().open(Config.APP_DATA_DIR);
+                            } catch (IOException ex) {
+                                logger.warn("Failed to open test results dir.", ex);
+                                InformerFactory.getInformer().showMessage(textSrc.getString("E_jcdia_open_dir"));
+                            }
+                            return null;
+                        });
             }
             return null;
         }, "", "");

@@ -154,18 +154,20 @@ public class StoreItemInfo extends HintPanel {
         for (Map.Entry<String, JsonElement> entry : entrySet) {
             String urlName = entry.getKey();
             String urlAddress = websites.get(urlName).getAsString();
-            JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName + "</b></div>", 14f);
+            JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName +
+                    "</b></div>", 14f);
             name.setOpaque(false);
             name.setForeground(Color.white);
 
             add(name, "span 2, gaptop 10, gapleft 20");
 
-            JLabel url = new HtmlText("<div style=\"margin: 5px;\">" + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
+            JLabel url = new HtmlText("<div style=\"margin: 5px;\">"
+                    + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
             url.setOpaque(false);
             url.setCursor(new Cursor(Cursor.HAND_CURSOR));
             url.addMouseListener(new URLAdapter(urlAddress));
             url.setForeground(Color.white);
-            add(url, "span 2, gaptop 10, gapleft 5, wrap");
+            add(url, "span 2, gaptop 10, gapleft 5, wmax 500, wrap");
         }
     }
 
@@ -270,7 +272,7 @@ public class StoreItemInfo extends HintPanel {
         return new ImageIcon(newIcon);
     }
 
-    private static int getComboBoxSelected(JComboBox box, String errorKey) {
+    private static int getComboBoxSelected(JComboBox<?> box, String errorKey) {
         int selected = box.getSelectedIndex();
         if (selected < 0) {
             InformerFactory.getInformer().showInfoToClose(textSrc.getString(errorKey), Notice.Importance.INFO);

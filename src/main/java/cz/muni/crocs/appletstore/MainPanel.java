@@ -18,7 +18,8 @@ import java.util.ResourceBundle;
  */
 public class MainPanel extends BackgroundImgSplitPanel implements Informable {
 
-    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private JPanel content;
     private final LocalWindowPane localPanel;
     private final StoreWindowManager storePanel;
