@@ -22,7 +22,7 @@ a difficult build systems - in case of doubt, ask me for help at _horakj7@gmail.
 
 #### The actual verification
 is pretty simple - we are in Java. Open the `.cap` file and compare sources. The usual tree is:
-``
+```
  -- META/INF 
         | -- MANIFEST.mf
     the
@@ -31,5 +31,5 @@ is pretty simple - we are in Java. Open the `.cap` file and compare sources. The
                            | -- file1.cap
                            | -- file2.cap
               
-``
+```
 Compare only the files in package name tree structure - avoid MANIFEST.mf as it contains various meta data such as the time of the compilation.
