@@ -23,7 +23,7 @@ a difficult build systems - in case of doubt, ask me for help at _horakj7@gmail.
 #### The actual verification
 is pretty simple - we are in Java. Open the `.cap` file and compare sources. The usual tree is:
 ```
- -- META/INF 
+ -- META-INF 
         | -- MANIFEST.mf
     the
         | -- package
