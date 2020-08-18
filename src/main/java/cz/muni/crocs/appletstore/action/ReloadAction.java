@@ -1,11 +1,12 @@
 package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.card.*;
-import cz.muni.crocs.appletstore.util.*;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.event.MouseEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to add to button as listener target to perform applet installation
@@ -13,7 +14,7 @@ import java.awt.event.MouseEvent;
  * @author Jiří Horák
  * @version 1.0
  */
-public class ReloadAction extends CardAbstractAction {
+public class ReloadAction extends CardAbstractAction<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(ReloadAction.class);
 
     public ReloadAction(OnEventCallBack<Void, Void> call) {
@@ -26,6 +27,7 @@ public class ReloadAction extends CardAbstractAction {
         execute(() -> {
             CardManager manager = CardManagerFactory.getManager();
             manager.loadCard();
-        }, "Failed to reload card.", textSrc.getString("failed_to_reload"), 10000);
+            return null;
+        }, "Failed to reload card.", textSrc.getString("failed_to_reload"), 10, TimeUnit.SECONDS);
     }
 }

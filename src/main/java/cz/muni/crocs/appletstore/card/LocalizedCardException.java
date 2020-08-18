@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.card;
 
-import cz.muni.crocs.appletstore.LocalizedException;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 
 /**
  * Class to separate different exception types

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 
 import javax.swing.*;
@@ -31,7 +32,7 @@ public interface Informer {
      * @param icon icon to show
      * @param callable action to perform on click
      */
-    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable);
+    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack<Void> callable);
 
     /**
      * Show warning to the user with close option
@@ -48,7 +49,7 @@ public interface Informer {
      * @param callable action to perform on click
      * @param milis duration after which the message is closed, null if do not close
      */
-    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable, Integer milis);
+    void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack<Void> callable, Integer milis);
 
     /**
      * Show warning to the user with close option

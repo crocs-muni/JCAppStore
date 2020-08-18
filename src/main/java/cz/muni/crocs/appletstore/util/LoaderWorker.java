@@ -1,20 +1,14 @@
 package cz.muni.crocs.appletstore.util;
 
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.LocalizedException;
-import cz.muni.crocs.appletstore.action.CardDetectionAction;
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.card.UnknownKeyException;
-import cz.muni.crocs.appletstore.ui.HtmlText;
-import jnasmartcardio.Smartcardio;
+import cz.muni.crocs.appletstore.action.CardAbstractActionBase;
+import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pro.javacard.gp.GPException;
 
 import javax.swing.*;
 
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static java.lang.Thread.sleep;
@@ -26,7 +20,8 @@ import static java.lang.Thread.sleep;
  * @version 1.0
  */
 public abstract class LoaderWorker extends SwingWorker<Exception, Void> implements ProcessTrackable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LogManager.getLogger(LoaderWorker.class);
 
     private String info = textSrc.getString("loading_opts");
@@ -47,7 +42,7 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
             e.printStackTrace();
             logger.warn("Unable to guess/obtain the card key for first time.", e);
             info = textSrc.getString("E_unknown_key");
-            if (useDefaultTestKey() == JOptionPane.YES_OPTION) {
+            if (CardAbstractActionBase.UnknownKeyHandler.useDefaultTestKey() == JOptionPane.YES_OPTION) {
                 try {
                     manager.setTryGenericTestKey();
                     manager.loadCard();
@@ -67,14 +62,14 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
                 return new LocalizedCardException("Card auth failed: user refused to use default test key.",
                         "E_master_key_not_found", "lock.png");
             }
-        } catch (LocalizedException e) {
+        } catch (LocalizedException | GPException e) {
             update("failed_detect", 200, getMaximum());
             return e;
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Store initialization failed: generic error.", e);
             update("load_failed", 1000, getMaximum());
-            return null;
+            return e;
         }
     }
 
@@ -111,18 +106,6 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
         info = textSrc.getString(key);
         waitWhile(delay);
         setProgress(progress);
-    }
-
-    private int useDefaultTestKey() {
-        return JOptionPane.showConfirmDialog(
-                null,
-                new HtmlText(textSrc.getString("I_use_default_keys_1") +
-                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
-                        textSrc.getString("I_use_default_keys_2")),
-                textSrc.getString("useDefaultTestKey"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                new ImageIcon(Config.IMAGE_DIR + ""));
     }
 }
 

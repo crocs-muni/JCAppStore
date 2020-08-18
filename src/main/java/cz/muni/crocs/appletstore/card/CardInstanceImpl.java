@@ -7,6 +7,8 @@ import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
+import cz.muni.crocs.appletstore.iface.CallableParam;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.IniParser;
 import cz.muni.crocs.appletstore.util.IniParserImpl;
 import cz.muni.crocs.appletstore.util.Options;
@@ -17,6 +19,7 @@ import pro.javacard.AID;
 import pro.javacard.gp.*;
 import pro.javacard.gp.PlaintextKeys.Diversification;
 
+import javax.smartcardio.ATR;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
@@ -34,7 +37,8 @@ import java.util.*;
  */
 public class CardInstanceImpl implements CardInstance {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceImpl.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
+            OptionsFactory.getOptions().getLanguageLocale());
 
     private String masterKey;
     private String kcv;
@@ -45,8 +49,10 @@ public class CardInstanceImpl implements CardInstance {
     private String name = "";
     private final CardDetails details;
     private final CardTerminal terminal;
-    private Set<AppletInfo> applets;
+    private CardInstanceMetaData metadata;
     private AID defaultSelected;
+
+    private ProcessTrackable task;
 
     /**
      * Compares the card id and updates card data if needed
@@ -81,14 +87,14 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     @Override
-    public Set<AppletInfo> getInstalledApplets() {
-        return Collections.unmodifiableSet(getApplets());
+    public CardInstanceMetaData getCardMetadata() {
+        return metadata;
     }
 
     @Override
     public AppletInfo getInfoOf(AID aid) {
         if (aid == null) return null;
-        Optional<AppletInfo> info = getApplets().stream().filter(a -> aid.equals(a.getAid())).findFirst();
+        Optional<AppletInfo> info = metadata.getApplets().stream().filter(a -> aid.equals(a.getAid())).findFirst();
         return info.orElse(null);
     }
 
@@ -103,12 +109,17 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     @Override
+    public ATR getCardATR() {
+        return details == null ? null : details.getAtr();
+    }
+
+    @Override
     public Integer getLifeCycle() {
-        if (applets == null)
+        if (metadata == null)
             return 0;
 
         AppletInfo sd = null;
-        for (AppletInfo info : applets) {
+        for (AppletInfo info : metadata.getApplets()) {
             if (info.getKind() == GPRegistryEntry.Kind.IssuerSecurityDomain) {
                 return info.getLifecycle();
             } else if (info.getKind() == GPRegistryEntry.Kind.SecurityDomain) {
@@ -135,9 +146,37 @@ public class CardInstanceImpl implements CardInstance {
         updateCardName(newName);
     }
 
+    @Override
+    public void foreachAppletOf(GPRegistryEntry.Kind kind, CallableParam<Boolean, AppletInfo> call) {
+        Set<AppletInfo> applets = getCardMetadata().getApplets();
+        if (applets == null) return;
+        for (AppletInfo nfo : getCardMetadata().getApplets()) {
+            if (kind.equals(nfo.getKind())) {
+                if (!call.callBack(nfo)) break;
+            }
+        }
+    }
+
+    @Override
+    public boolean addTask(ProcessTrackable task) {
+        if (task == null || isTask()) return false;
+        this.task = task;
+        this.task.run();
+        return true;
+    }
+
+    @Override
+    public boolean isTask() {
+        return task != null && !task.finished();
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
     ////////////////////////////////////////////////////////////////////////////
+
+    CardDetails getDetails() {
+        return details;
+    }
 
     /**
      * Set default selected applet of the card
@@ -145,6 +184,31 @@ public class CardInstanceImpl implements CardInstance {
      */
     void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
+    }
+
+    void saveInfoData() throws LocalizedCardException {
+        AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
+        serializer.serialize(metadata, new File(Config.APP_DATA_DIR + Config.S + getId()));
+    }
+
+    void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
+        metadata.removeInvalidApplets();
+        for (AppletInfo info : toSave) {
+            metadata.insertOrRewriteApplet(info);
+        }
+        saveInfoData();
+    }
+
+    //delete applet metadata when uninstalling
+    void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+        logger.info("Delete applet metadata: " + applet.toString());
+        metadata.deleteAppletInfo(applet.getAid());
+        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
+            for (AID aid : applet.getModules()) {
+                metadata.deleteAppletInfo(aid);
+            }
+        }
+        saveInfoData();
     }
 
     /**
@@ -180,7 +244,7 @@ public class CardInstanceImpl implements CardInstance {
                 command.execute();
             }
         } catch (GPException e) {
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
+            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), "error.png", e);
         } catch (IOException e) {
             throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e);
         } finally {
@@ -226,7 +290,7 @@ public class CardInstanceImpl implements CardInstance {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
-                        throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "H_authentication"), "warn.png", e);
+                        throw new LocalizedCardException(e.getMessage(), "H_authentication", "warn_white.png", e);
                     }
                     throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
                 }
@@ -246,20 +310,11 @@ public class CardInstanceImpl implements CardInstance {
     }
 
     /**
-     * Modifiable access for local classes
-     *
-     * @return modifiable applet list
-     */
-    Set<AppletInfo> getApplets() {
-        return applets;
-    }
-
-    /**
      * Used to update applet list on install
-     * @param applets applet info list to set
+     * @param metadata applet info list and other information to set
      */
-    void setApplets(Set<AppletInfo> applets) {
-        this.applets = applets;
+    void setMetaData(CardInstanceMetaData metadata) {
+        this.metadata = metadata;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -408,10 +463,10 @@ public class CardInstanceImpl implements CardInstance {
         //todo image that represents not trying to auth
         if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
 
-        GPCommand<Set<AppletInfo>> listContents = new ListContents(id);
+        GPCommand<CardInstanceMetaData> listContents = new ListContents(id);
         GPCommand<Optional<AID>> selected = new GetDefaultSelected();
         secureExecuteCommands(listContents, selected);
-        applets = listContents.getResult();
+        metadata = listContents.getResult();
         defaultSelected = selected.getResult().orElse(null);
     }
 
@@ -433,25 +488,6 @@ public class CardInstanceImpl implements CardInstance {
                 return Diversification.NONE;
         }
     }
-
-//    private boolean askDefault() {
-//        RunnableFuture<Boolean> task = new FutureTask<>(() -> JOptionPane.showConfirmDialog(
-//                null,
-//                new HtmlText(textSrc.getString("I_use_default_keys_1") +
-//                        "<br>" + textSrc.getString("master_key") + ": <b>404142434445464748494A4B4C4D4E4F</b>" +
-//                        textSrc.getString("I_use_default_keys_2")),
-//                textSrc.getString("key_not_found"),
-//                JOptionPane.OK_CANCEL_OPTION,
-//                JOptionPane.INFORMATION_MESSAGE,
-//                new ImageIcon(Config.IMAGE_DIR + "")) == JOptionPane.YES_OPTION);
-//        SwingUtilities.invokeLater(task);
-//        try {
-//            return task.get();
-//        } catch (InterruptedException | ExecutionException ex) {
-//            ex.printStackTrace();
-//            return false;
-//        }
-//    }
 
     @Override
     public int hashCode() {

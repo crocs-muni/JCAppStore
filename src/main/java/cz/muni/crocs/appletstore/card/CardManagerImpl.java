@@ -6,7 +6,9 @@ import apdu4j.TerminalManager;
 import apdu4j.ResponseAPDU;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.Store;
 import cz.muni.crocs.appletstore.card.command.*;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 /**
  * Manager providing all functionality over card
@@ -36,16 +38,17 @@ public class CardManagerImpl implements CardManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardManagerImpl.class);
     private static final LogOutputStream loggerStream = new LogOutputStream(logger, Level.INFO);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private Terminals terminals = new Terminals();
+    private final Terminals terminals = new Terminals();
     private CardInstanceImpl card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
     private String[] lastInstalledAIDs = null;
     private boolean tryGeneric = false;
 
-    private ArrayList<AppletInfo> toSave = new ArrayList<>();
+    private final ArrayList<AppletInfo> toSave = new ArrayList<>();
     private CallBack<Void> notifier;
 
     private static final Object lock = new Object();
@@ -72,7 +75,7 @@ public class CardManagerImpl implements CardManager {
             aid = null;
         }
 
-        if (card.getApplets() == null)
+        if (card.getCardMetadata() == null)
             return;
         this.selectedAID = aid;
     }
@@ -146,6 +149,8 @@ public class CardManagerImpl implements CardManager {
                 tryGeneric = false;
             }
             logger.info("Card successfully refreshed.");
+
+            getJCAlgTestDependencies();
         }
     }
 
@@ -157,6 +162,22 @@ public class CardManagerImpl implements CardManager {
     @Override
     public void setReloadCard() {
         this.terminals.setNeedsRefresh();
+    }
+
+    @Override
+    public boolean getJCAlgTestDependencies() {
+        if (card != null && card.getCardMetadata().getJCData() == null) {
+            new Thread(new JCAlgTestResultsFinder(card)).start();
+            return true;
+        }
+        return card != null;
+    }
+
+    @Override
+    public boolean loadJCAlgTestDependencies(File from, boolean rewrite) throws LocalizedCardException {
+        if (card == null) return false;
+        if (card.getCardMetadata().getJCData() != null && !rewrite) return false;
+        return JCAlgTestResultsFinder.parseFile(from);
     }
 
     @Override
@@ -208,19 +229,36 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
+    public boolean select(String AID) throws LocalizedCardException {
+        synchronized(lock) {
+            if (card == null) {
+                throw new LocalizedCardException("No card recognized.", "no_card");
+            }
+
+            try {
+                GPCommand<Boolean> select = new Select(AID);
+                card.executeCommands(select);
+                return select.getResult();
+            } catch (CardException e) {
+                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            }
+        }
+    }
+
+    @Override
     public ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
         synchronized(lock) {
             if (card == null) {
                 throw new LocalizedCardException("No card recognized.", "no_card");
             }
 
-            GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
             try {
+                GPCommand<ResponseAPDU> send = new Transmit(AID, APDU);
                 card.executeCommands(send);
+                return send.getResult();
             } catch (CardException e) {
                 throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
             }
-            return send.getResult();
         }
     }
 
@@ -266,39 +304,12 @@ public class CardManagerImpl implements CardManager {
         return details;
     }
 
-
-    //delete applet metadata when uninstalling
-    private void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
-        logger.info("Delete applet metadata: " + applet.toString());
-        Set<AppletInfo> appletInfoList = card.getApplets();
-        deleteInfo(appletInfoList, applet.getAid());
-        if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
-            for (AID aid : applet.getModules()) {
-                deleteInfo(appletInfoList, aid);
-            }
-        }
-        AppletSerializer<Set<AppletInfo>> toSave = new AppletSerializerImpl();
-        toSave.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
-    }
-
-    //delete single applet metadata
-    private void deleteInfo(Set<AppletInfo> list, AID toDelete) {
-        Iterator<AppletInfo> info = list.iterator();
-        while(info.hasNext()) {
-            AppletInfo nfo = info.next();
-            if (toDelete.equals(nfo.getAid())) {
-                info.remove();
-                return;
-            }
-        }
-    }
-
     //applet deletion implementation
     private void uninstallImpl(AppletInfo nfo, boolean force) throws CardException, LocalizedCardException{
         synchronized(lock) {
-            GPCommand delete = new Delete(nfo, force);
-            GPCommand<Set<AppletInfo>> contents = new ListContents(card.getId());
-            card.secureExecuteCommands(delete, new GPCommand() {
+            GPCommand<?> delete = new Delete(nfo, force);
+            GPCommand<CardInstanceMetaData> contents = new ListContents(card.getId());
+            card.secureExecuteCommands(delete, new GPCommand<Void>() {
                 @Override
                 public String getDescription() {
                     return "Delete applet metadata inside secure loop.";
@@ -306,11 +317,11 @@ public class CardManagerImpl implements CardManager {
 
                 @Override
                 public boolean execute() throws LocalizedCardException {
-                    deleteData(nfo, force);
+                    card.deleteData(nfo, force);
                     return true;
                 }
             }, contents);
-            card.setApplets(contents.getResult());
+            card.setMetaData(contents.getResult());
             selectedAID = null;
         }
     }
@@ -326,9 +337,9 @@ public class CardManagerImpl implements CardManager {
             try (PrintStream print = new PrintStream(loggerStream)) {
                 file.dump(print);
 
-                GPCommand[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
+                GPCommand<?>[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
                 commands[0] = new Load(file, data);
-                commands[1] = new GPCommand() {
+                commands[1] = new GPCommand<Void>() {
                     @Override
                     public String getDescription() {
                         return "Register package info for save.";
@@ -350,7 +361,7 @@ public class CardManagerImpl implements CardManager {
                     Install command = new Install(file, data, appidx,
                             AID.fromString(data.getOriginalAIDs()[appidx]).equals(defaultSelected));
                     commands[i++] = command;
-                    commands[i++] = new GPCommand() {
+                    commands[i++] = new GPCommand<Void>() {
                         @Override
                         public String getDescription() {
                             return "Register applet info for save.";
@@ -370,10 +381,13 @@ public class CardManagerImpl implements CardManager {
                 lastInstalledAIDs = data.getAppletAIDsAsInstalled();
             } finally {
                 try {
-                    saveInfoData();
+                    for (AppletInfo info : toSave) {
+                        card.getCardMetadata().addApplet(info);
+                    }
+                    card.saveInfoData();
                     ListContents cmd = new ListContents(card.getId());
                     card.secureExecuteCommands(cmd);
-                    card.setApplets(cmd.getResult());
+                    card.setMetaData(cmd.getResult());
                 } finally {
                     selectedAID = null;
                 }
@@ -397,30 +411,5 @@ public class CardManagerImpl implements CardManager {
             logger.warn("Unable to save applet info data: " + realInstalledAID, e);
         }
         return clone;
-    }
-
-    private void saveInfoData() throws LocalizedCardException {
-        Set<AppletInfo> appletInfoList = getAppletsToSave(card.getApplets());
-        for (AppletInfo info : toSave) {
-            insertOrRewrite(info, appletInfoList);
-        }
-
-        AppletSerializer<Set<AppletInfo>> serializer = new AppletSerializerImpl();
-        serializer.serialize(appletInfoList, new File(Config.APP_DATA_DIR + Config.S + card.getId()));
-    }
-
-    private void insertOrRewrite(AppletInfo item, Set<AppletInfo> to) {
-        if(!to.add(item)) {
-            to.remove(item);
-            to.add(item);
-        }
-    }
-
-    private Set<AppletInfo> getAppletsToSave(Set<AppletInfo> all) {
-        return all.stream().filter(a -> a.getAuthor() != null ||
-                a.getVersion() != null ||
-                a.getSdk() != null ||
-                a.getName() != null)
-                .collect(Collectors.toSet());
     }
 }

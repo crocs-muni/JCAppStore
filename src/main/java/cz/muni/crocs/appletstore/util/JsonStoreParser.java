@@ -37,17 +37,6 @@ public class JsonStoreParser implements JsonParser {
         return result;
     }
 
-    @Override
-    public String[] jsonArrayToDataArray(JsonArray array) {
-        if (array == null) return null;
-        int len = array.size();
-        String[] result = new String[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = array.get(i).getAsString();
-        }
-        return result;
-    }
-
     private File getFileInfo() {
         if (info == null) {
             if (!verifyInfoFile()) {

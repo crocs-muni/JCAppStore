@@ -4,7 +4,7 @@ import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
@@ -25,7 +25,8 @@ import java.util.ResourceBundle;
  */
 
 public class AppletStore extends JFrame implements BackgroundChangeable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
@@ -33,7 +34,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private volatile boolean windowOpened = true;
     private MainPanel window;
     private Menu menu;
-    private GlassPaneBlocker blocker = new GlassPaneBlocker();
+    private final GlassPaneBlocker blocker = new GlassPaneBlocker();
 
     /**
      * Create an application
@@ -92,8 +93,10 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         UIManager.put("MenuItem.background", Color.BLACK);
         UIManager.put("Menu.background", Color.BLACK);
         UIManager.put("Menu.selectionBackground", Color.BLACK);
+        UIManager.put("MenuBar.border", null);
+        UIManager.put("PopupMenu.border", null);
 
-        UIManager.put("MenuBar.borderColor", Color.BLACK);
+        UIManager.put("JMenuBar.borderColor", Color.BLACK);
         UIManager.put("Button.focus", new Color(0, 0, 0, 0));
         UIManager.put("ToggleButton.focus", new Color(0, 0, 0, 0));
         UIManager.put("CheckBox.focus", new Color(0, 0, 0, 0));
@@ -119,12 +122,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         }
 
         menu = new Menu(this);
-        CardInstance card = CardManagerFactory.getManager().getCard();
-        if (card == null) {
-            menu.setCard(null, null);
-        } else {
-            menu.setCard(card.getName(), card.getId());
-        }
+        menu.setCard(CardManagerFactory.getManager().getCard());
+
         setJMenuBar(menu);
         setGlassPane(blocker);
 
@@ -142,10 +141,15 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
     @Override
     public void switchEnabled(boolean enabled) {
-        if (enabled == isEnabled())
-            return;
+        if (enabled == isEnabled()) return;
+        if (enabled) blocker.setMessage(textSrc.getString("working"));
         setEnabled(enabled);
         getGlassPane().setVisible(!enabled);
         revalidate();
+    }
+
+    @Override
+    public void setDisabledMessage(String message) {
+        blocker.setMessage(message);
     }
 }

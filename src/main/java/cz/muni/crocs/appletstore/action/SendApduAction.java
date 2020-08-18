@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.action;
 
-import apdu4j.CommandAPDU;
 import apdu4j.HexUtils;
 import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.Config;
@@ -10,18 +9,17 @@ import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
-import jdk.nashorn.internal.scripts.JO;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Action to send custom APDU command
@@ -29,15 +27,14 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class SendApduAction extends MouseAdapter implements CardAction {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private static Logger logger = LoggerFactory.getLogger(SendApduAction.class);
+public class SendApduAction extends CardAbstractAction<Void, ResponseAPDU> {
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(SendApduAction.class);
 
-    private OnEventCallBack<Void, ResponseAPDU> call;
     private AppletInfo info;
 
     public SendApduAction(AppletInfo info, OnEventCallBack<Void, Void> defaultCall) {
-        this.call = new OnSendAPDUCallBack(defaultCall);
+        super(new OnSendAPDUCallBack(defaultCall));
         this.info = info;
     }
 
@@ -63,22 +60,18 @@ public class SendApduAction extends MouseAdapter implements CardAction {
             return;
         }
 
-        call.onStart();
-        new Thread(() -> {
-            ResponseAPDU response;
+        execute(() -> {
             try {
-                response = CardManagerFactory.getManager().sendApdu(info.getAid().toString(), apduCmd);
+                return CardManagerFactory.getManager().sendApdu(info.getAid().toString(), apduCmd);
             } catch (Exception ex) {
                 logger.warn("Failed to send --select " +
                         info.getAid().toString() + " --apdu " + apduCmd, ex);
                 //the command APDU transfer failed due to HW/communication issue (but not necessarily a wrong cmd)
                 SwingUtilities.invokeLater(SendApduAction::showFailToSendCommandAPDU);
-                SwingUtilities.invokeLater(call::onFail);
-                return;
+                return null;
             }
-            final ResponseAPDU finalResponse = response;
-            SwingUtilities.invokeLater(() -> call.onFinish(finalResponse));
-        }).start();
+        }, "Failed to reload card.", textSrc.getString("failed_to_reload"), 10, TimeUnit.SECONDS);
+
     }
 
     private String getAPDU(String initialCommand, String additionalMsg) {
@@ -184,7 +177,7 @@ public class SendApduAction extends MouseAdapter implements CardAction {
     }
 
     private static class OnSendAPDUCallBack implements OnEventCallBack<Void, ResponseAPDU> {
-        private OnEventCallBack<Void, Void> defaultEvent;
+        private final OnEventCallBack<Void, Void> defaultEvent;
 
         public OnSendAPDUCallBack(OnEventCallBack<Void, Void> defaultEvent) {
             this.defaultEvent = defaultEvent;
@@ -203,7 +196,8 @@ public class SendApduAction extends MouseAdapter implements CardAction {
 
         @Override
         public Void onFinish() {
-            throw new RuntimeException("Should not be called.");
+            onFail(); //no return value == failure
+            return null;
         }
 
         @Override

@@ -19,9 +19,9 @@ import java.util.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class ListContents extends GPCommand<Set<AppletInfo>> {
-    private static Logger logger = LoggerFactory.getLogger(ListContents.class);
-    private String cardId;
+public class ListContents extends GPCommand<CardInstanceMetaData> {
+    private static final Logger logger = LoggerFactory.getLogger(ListContents.class);
+    private final String cardId;
 
     public ListContents(String cardId) {
         this.cardId = cardId;
@@ -29,30 +29,31 @@ public class ListContents extends GPCommand<Set<AppletInfo>> {
 
     @Override
     public boolean execute() throws CardException, GPException, IOException {
-        result = new AppletSet();
+        result = CardInstanceMetaData.empty();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;
 
         logger.info("List contents of card: " + cardId);
-        AppletSerializer<Set<AppletInfo>> savedData = new AppletSerializerImpl();
+        AppletSerializer<CardInstanceMetaData> savedData = new AppletSerializerImpl();
         File file = new File(Config.APP_DATA_DIR + Config.S + cardId);
 
-        Set<AppletInfo> saved;
+        CardInstanceMetaData saved;
         if (file.exists()) {
             try {
                 saved = savedData.deserialize(file);
             } catch (LocalizedCardException e) {
                 e.printStackTrace();
                 logger.warn("Failed to obtain card cache file", e);
-                saved = Collections.emptySet();
+                saved = CardInstanceMetaData.empty();
             }
         } else {
-            saved = Collections.emptySet();
+            saved = CardInstanceMetaData.empty();
         }
 
         for (GPRegistryEntry entry : registry) {
-            result.add(new AppletInfo(entry, saved));
+            result.addApplet(new AppletInfo(entry, saved.getApplets()));
         }
+        result.setJCData(saved.getJCData());
         return true;
     }
 

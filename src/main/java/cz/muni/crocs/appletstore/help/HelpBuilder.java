@@ -15,11 +15,12 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class HelpBuilder extends Help {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private float title;
-    private float subtitle;
-    private String css;
+    private final float title;
+    private final float subtitle;
+    private final String css;
 
     /**
      * Create new help builder

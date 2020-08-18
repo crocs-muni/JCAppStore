@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.util;
+package cz.muni.crocs.appletstore.iface;
 
 /**
  * On various events, perform various callbacks depending on the action state.

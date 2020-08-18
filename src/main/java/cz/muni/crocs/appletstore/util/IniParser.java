@@ -24,6 +24,7 @@ public interface IniParser {
     String TAG_DATA = "card_data";
     String TAG_CAPABILITIES = "card_capabilities";
     String TAG_KEY_INFO = "key_info";
+    String TAG_JCALGTEST_UPDATED = "jcalgtest_updated";
 
     /**
      * Get value of INI under header specified in constructor

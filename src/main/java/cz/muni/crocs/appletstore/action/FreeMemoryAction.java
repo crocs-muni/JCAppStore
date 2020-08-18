@@ -1,10 +1,11 @@
 package cz.muni.crocs.appletstore.action;
 
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cz.muni.crocs.appletstore.util.LocalizedException;
+import cz.muni.crocs.appletstore.action.applet.Applets;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 
 import java.awt.event.MouseEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Getting the free card memory action
@@ -12,39 +13,22 @@ import java.awt.event.MouseEvent;
  * @author Jiří Horák
  * @version 1.0
  */
-public class FreeMemoryAction extends CardAbstractAction {
-
-    private static final Logger logger = LoggerFactory.getLogger(CardAbstractAction.class);
-    private OnEventCallBack<Void, byte[]> customCall;
+public class FreeMemoryAction extends CardAbstractAction<Void, byte[]> {
 
     public FreeMemoryAction(OnEventCallBack<Void, byte[]> call) {
-        super(new OnEventCallBack<Void, Void>() {
-            @Override
-            public void onStart() {
-                call.onStart(); //delegated to the wrapper
-            }
-
-            @Override
-            public void onFail() {
-                call.onFail(); //delegated to the wrapper
-            }
-
-            @Override
-            public Void onFinish() {
-                return null; //handled by call
-            }
-
-            @Override
-            public Void onFinish(Void aVoid) {
-                return null; //handled by call
-            }
-        });
-        customCall = call;
+        super(call);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        execute(() -> customCall.onFinish(JCMemory.getSystemInfo()), "JCMemory.getSystemInfo() failed",
-                textSrc.getString("E_could_not_get_memory"), 10000);
+        execute(() -> {
+                    try {
+                        return Applets.JCMEMORY.performDefault();
+                    } catch (LocalizedException ex) {
+                        logger.warn("Failed to measure the memory.", ex);
+                        return null;
+                    }
+                }, "JCMemory.getSystemInfo() failed",
+                textSrc.getString("E_could_not_get_memory"), 10, TimeUnit.SECONDS);
     }
 }

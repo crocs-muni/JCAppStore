@@ -1,13 +1,15 @@
 package cz.muni.crocs.appletstore.util;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.Store;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.File;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -21,9 +23,9 @@ import java.util.ResourceBundle;
 public class StoreWorker extends SwingWorker<Store.State, Object> implements ProcessTrackable {
 
     private static final Logger logger = LogManager.getLogger(StoreWorker.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private Store parent;
+    private final Store parent;
 
     /**
      * Create a new worker
@@ -51,10 +53,7 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
         setProgress(0);
 
         final Options<String> options = OptionsFactory.getOptions();
-        String[] storeInfo = GitHubInternetConnection.checkAndGetLatestReleaseVersion(
-                options.getOption(Options.KEY_GITHUB_LATEST_VERSION)
-        );
-
+        String[] storeInfo = checkAndGetLatestReleaseVersion(options.getOption(Options.KEY_GITHUB_LATEST_VERSION));
         if (storeInfo == null) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("E_no_internet"));
@@ -79,6 +78,21 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
       //  do nothing
     }
 
+    @Override
+    public void updateProgress(int amount) {
+        setProgress(amount);
+    }
+
+    @Override
+    public int getMaximum() {
+        return 100;
+    }
+
+    @Override
+    public String getInfo() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Check if the folder is not damaged by user or system
      *
@@ -100,19 +114,25 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
         }
     }
 
-    @Override
-    public void updateProgress(int amount) {
-        setProgress(amount);
-    }
+    /**
+     * Check for the latest version and internet connection as well
+     * @param currentVersion string of the latest version downloaded
+     * @return url for download if not up to date, "ok" if up to date, null if no internet connection
+     */
+    private String[] checkAndGetLatestReleaseVersion(String currentVersion) {
 
-    @Override
-    public int getMaximum() {
-        return 100;
-    }
+        JsonElement root = GitHubApiGetter.getJsonContents(Config.REMOTE_STORE_LATEST_URL);
+        setProgress(50);
+        if (root == null) return null;
+        JsonObject latest = root.getAsJsonObject();
 
-    @Override
-    public String getInfo() {
-        throw new UnsupportedOperationException();
+        String latestVersion = latest.get("name").getAsString();
+
+        return new String[] {
+                currentVersion.equals(latestVersion) ? "ok" : "nok",
+                latest.get("zipball_url").getAsString(),
+                latestVersion
+        };
     }
 }
 

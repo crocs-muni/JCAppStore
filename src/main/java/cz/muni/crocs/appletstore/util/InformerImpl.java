@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Informable;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 
 import javax.swing.*;
@@ -17,8 +18,8 @@ public class InformerImpl implements Informer, CallBack<Void> {
     private Thread current;
     private static final Integer DELAY = 8000;
 
-    private Informable context;
-    private volatile Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
+    private final Informable context;
+    private final Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
     public InformerImpl(Informable context) {
@@ -37,7 +38,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     @Override
-    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable) {
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack<Void> callable) {
         showInfo(msg, status, icon, callable, DELAY);
     }
 
@@ -47,7 +48,8 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     @Override
-    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon, CallBack callable, Integer milis) {
+    public void showInfo(String msg, Notice.Importance status, Notice.CallBackIcon icon,
+                         CallBack<Void> callable, Integer milis) {
         if (callable == null) {
             showInfoToClose(msg, status, milis);
         } else {

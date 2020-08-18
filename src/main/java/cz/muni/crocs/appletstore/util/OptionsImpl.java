@@ -57,6 +57,8 @@ public class OptionsImpl implements Options<String> {
         addIfMissing(Options.KEY_WARN_FORCE_INSTALL, "true");
         addIfMissing(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());
         addIfMissing(Options.KEY_STORE_FINGERPRINT, "AE14854BECCAC4CC0BC695E83D6FE2832EDFE9C9");
+        addIfMissing(Options.KEY_JCALGTEST_CLIENT_PATH, Config.RESOURCES_DIR + "host" + Config.S + "JCAlgTest_1.7.9.jar");
+        addIfMissing(Options.KEY_JAVA_EXECUTABLE, "java");
     }
 
     @Override

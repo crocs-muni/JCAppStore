@@ -8,7 +8,7 @@ import cz.muni.crocs.appletstore.action.InstallAction;
 import cz.muni.crocs.appletstore.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.ui.TextField;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +37,8 @@ import java.util.*;
 public class StoreItemInfo extends HintPanel {
 
     private static final Logger logger = LogManager.getLogger(StoreItemInfo.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
+            OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean installed = false;
     private JComboBox<String> versionComboBox;
@@ -94,7 +95,7 @@ public class StoreItemInfo extends HintPanel {
 
         //check whether installed
         CardInstance card = CardManagerFactory.getManager().getCard();
-        Set<AppletInfo> appletInfos = card == null ? null : card.getInstalledApplets();
+        Set<AppletInfo> appletInfos = card == null ? null : card.getCardMetadata().getApplets();
         if (appletInfos != null) {
             for (AppletInfo applet : appletInfos) {
                 String name = applet.getName();
@@ -112,15 +113,8 @@ public class StoreItemInfo extends HintPanel {
                 new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        fireInstall(appletName, getInfoPack(dataSet, latestV,
-                                sdks, sdks.size() - 1),
-                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
-                                dataSet.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString(),
-                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
-                                callback,
-                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
-                                e);
+                        fireInstall(dataSet, getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback,
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE), e);
                     }
                 });
         add(install, "align right, span 1 2, wrap");
@@ -160,18 +154,20 @@ public class StoreItemInfo extends HintPanel {
         for (Map.Entry<String, JsonElement> entry : entrySet) {
             String urlName = entry.getKey();
             String urlAddress = websites.get(urlName).getAsString();
-            JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName + "</b></div>", 14f);
+            JLabel name = new HtmlText("<div style=\"margin: 5px;\"><b>" + urlName +
+                    "</b></div>", 14f);
             name.setOpaque(false);
             name.setForeground(Color.white);
 
             add(name, "span 2, gaptop 10, gapleft 20");
 
-            JLabel url = new HtmlText("<div style=\"margin: 5px;\">" + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
+            JLabel url = new HtmlText("<div style=\"margin: 5px;\">"
+                    + urlAddress + "</div>", website, 14f, SwingConstants.RIGHT);
             url.setOpaque(false);
             url.setCursor(new Cursor(Cursor.HAND_CURSOR));
             url.addMouseListener(new URLAdapter(urlAddress));
             url.setForeground(Color.white);
-            add(url, "span 2, gaptop 10, gapleft 5, wrap");
+            add(url, "span 2, gaptop 10, gapleft 5, wmax 500, wrap");
         }
     }
 
@@ -181,11 +177,11 @@ public class StoreItemInfo extends HintPanel {
         addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
         addText("custom_sdk", "H_custom_sdk", "gapleft 20, gaptop 20, wrap");
 
-        String[] versions = parser.jsonArrayToDataArray(dataSet.getAsJsonArray(JsonParser.TAG_VERSION));
+        String[] versions = JsonParser.jsonArrayToStringArray(dataSet.getAsJsonArray(JsonParser.TAG_VERSION));
         versionComboBox = getBoxSelection(versions);
 
         versionComboBox.addActionListener(e -> {
-            String[] compilerVersions = parser.jsonArrayToDataArray(
+            String[] compilerVersions = JsonParser.jsonArrayToStringArray(
                     dataSet.getAsJsonObject(
                             JsonParser.TAG_BUILD).getAsJsonArray((String) versionComboBox.getSelectedItem()
                     )
@@ -196,7 +192,7 @@ public class StoreItemInfo extends HintPanel {
         add(versionComboBox, "gapleft 50, gapleft 20");
 
         JsonObject builds = dataSet.getAsJsonObject(JsonParser.TAG_BUILD);
-        String[] compilerVersions = parser.jsonArrayToDataArray(builds.getAsJsonArray(versions[0]));
+        String[] compilerVersions = JsonParser.jsonArrayToStringArray(builds.getAsJsonArray(versions[0]));
         compilerVersionComboBox = getBoxSelection(compilerVersions);
         add(compilerVersionComboBox, "gapleft 20");
 
@@ -216,15 +212,8 @@ public class StoreItemInfo extends HintPanel {
                         JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
 
-                        fireInstall(dataSet.get(JsonParser.TAG_NAME).getAsString(),
-                                getInfoPack(dataSet, version, sdks, compilerIdx),
-                                dataSet.get(JsonParser.TAG_PGP_SIGNER).getAsString(),
-                                dataSet.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString(),
-                                dataSet.get(JsonParser.TAG_APPLET_INSTANCE_NAMES),
-                                call,
-                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE),
-                                dataSet.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString(),
-                                e);
+                        fireInstall(dataSet, getInfoPack(dataSet, version, sdks, compilerIdx), call,
+                                installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE), e);
                     }
                 });
         add(customInst, "gapleft 10");
@@ -283,7 +272,7 @@ public class StoreItemInfo extends HintPanel {
         return new ImageIcon(newIcon);
     }
 
-    private static int getComboBoxSelected(JComboBox box, String errorKey) {
+    private static int getComboBoxSelected(JComboBox<?> box, String errorKey) {
         int selected = box.getSelectedIndex();
         if (selected < 0) {
             InformerFactory.getInformer().showInfoToClose(textSrc.getString(errorKey), Notice.Importance.INFO);
@@ -318,9 +307,13 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(String name, AppletInfo info, String signer, String fingerprint, JsonElement appNames,
-                                    OnEventCallBack<Void, Void> call, boolean installed,
-                                    String defaultSelected, MouseEvent e) {
+    private static void fireInstall(JsonObject dataPack, AppletInfo info, OnEventCallBack<Void, Void> call,
+                                    boolean installed, MouseEvent e) {
+        String name = dataPack.get(JsonParser.TAG_NAME).getAsString();
+        String signer = dataPack.get(JsonParser.TAG_PGP_SIGNER).getAsString();
+        String fingerprint = dataPack.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString();
+        JsonElement appNames = dataPack.get(JsonParser.TAG_APPLET_INSTANCE_NAMES);
+        String defaultSelected = dataPack.get(JsonParser.TAG_DEFAULT_SELECTED).getAsString();
 
         File file = new File(getInstallFileName(name, info.getVersion(), info.getSdk()));
         logger.info("Prepare to install " + file.getAbsolutePath());
@@ -342,7 +335,8 @@ public class StoreItemInfo extends HintPanel {
         }
 
         new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
-                info, file, signer, fingerprint, appletNamesData), installed, defaultSelected, call).mouseClicked(e);
+                info, file, signer, fingerprint, appletNamesData, Config.APP_STORE_CAPS_DIR + Config.S +
+                name + Config.S, dataPack), installed, defaultSelected, call).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

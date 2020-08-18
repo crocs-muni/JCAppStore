@@ -42,5 +42,13 @@ public interface JsonParser {
      * @param array array of JSON objects
      * @return array of string representations of JSON array
      */
-    String[] jsonArrayToDataArray(JsonArray array);
+    static String[] jsonArrayToStringArray(JsonArray array) {
+        if (array == null) return null;
+        int len = array.size();
+        String[] result = new String[len];
+        for (int i = 0; i < len; i++) {
+            result[i] = array.get(i).getAsString();
+        }
+        return result;
+    }
 }

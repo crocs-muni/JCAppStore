@@ -3,14 +3,12 @@ package cz.muni.crocs.appletstore.card.command;
 import apdu4j.CommandAPDU;
 import apdu4j.HexUtils;
 import apdu4j.ResponseAPDU;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.gp.GPException;
 import pro.javacard.gp.ISO7816;
 
-import javax.smartcardio.CardException;
 import java.io.IOException;
 
 /**
@@ -22,8 +20,8 @@ import java.io.IOException;
 public class Transmit extends GPCommand<ResponseAPDU> {
     private static final Logger logger = LoggerFactory.getLogger(Transmit.class);
 
-    private AID targetAid;
-    private String APDU;
+    private final AID targetAid;
+    private final String APDU;
 
     public Transmit(String targetAid, String APDU) {
         this.targetAid = AID.fromString(targetAid);
@@ -36,7 +34,7 @@ public class Transmit extends GPCommand<ResponseAPDU> {
     }
 
     @Override
-    public boolean execute() throws CardException, GPException, LocalizedCardException, IOException {
+    public boolean execute() throws GPException, IOException {
         logger.info("Transmit command for applet: " + targetAid);
         logger.debug(">> 00A40400 [len byte missing]" + HexUtils.bin2hex(targetAid.getBytes()));
         result = channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, targetAid.getBytes()));
@@ -45,7 +43,7 @@ public class Transmit extends GPCommand<ResponseAPDU> {
         logger.debug(">> " + getAPDUHiddenData());
         CommandAPDU c = new CommandAPDU(HexUtils.stringToBin(APDU));
         result = channel.transmit(c);
-        logger.debug("<< " + result.getSW() + " [data not displayed if present]");
+        logger.debug("<< " + Integer.toHexString(result.getSW()) + " [data not displayed if present]");
         return result.getSW() == 0x9000;
     }
 

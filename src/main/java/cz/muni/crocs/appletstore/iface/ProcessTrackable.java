@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.util;
+package cz.muni.crocs.appletstore.iface;
 
 /**
  * Allows to track the process, for progress bars updates.
@@ -12,7 +12,8 @@ public interface ProcessTrackable extends Runnable {
     int getProgress();
 
     /**
-     * Set progress to new value
+     * Set progress to new value. Does not check maximum.
+     *  !!! Cannot use 'safeSetProgress' !!!
      * @param amount progress value to set
      */
     void updateProgress(int amount);
@@ -24,7 +25,7 @@ public interface ProcessTrackable extends Runnable {
 
     /**
      * Get info about progress
-     * @return
+     * @return description on current progress
      */
     String getInfo();
 
@@ -36,13 +37,10 @@ public interface ProcessTrackable extends Runnable {
 
     /**
      * Set progress safely - won't overcome 100
-     * @param amount
+     * @param amount update the progress
      */
     default void safeSetProgress(int amount) {
-        if (amount > getMaximum())
-            updateProgress(getMaximum());
-        else
-            updateProgress(amount);
+        updateProgress(Math.min(amount, getMaximum()));
     }
 
     /**
@@ -51,5 +49,9 @@ public interface ProcessTrackable extends Runnable {
     default void raiseProgressByOne() {
         if (getProgress() < 100)
             updateProgress(getProgress() + 1);
+    }
+
+    default boolean finished() {
+        return getProgress() >= getMaximum();
     }
 }

@@ -14,7 +14,7 @@ import java.awt.*;
 public class CustomJmenu extends JMenu {
 
     public CustomJmenu(String title) {
-        super("<html><p style='margin: 3 8'>" + title + "</p></html>");
+        super("<html><p style='padding: 3px 8px'>" + title + "</p></html>");
         uiSettings();
     }
 
@@ -24,8 +24,7 @@ public class CustomJmenu extends JMenu {
     }
 
     public CustomJmenu(String title, String description, int mnemonic) {
-        super("<html><p style='margin: 3 8'>" + title + "</p></html>");
-        uiSettings();
+        this(title);
         defaultSettings(description, mnemonic);
     }
 
@@ -53,9 +52,9 @@ public class CustomJmenu extends JMenu {
     }
 
     private void uiSettings() {
-        setOpaque(false); //todo uncomment for mac
+        setOpaque(true); //todo uncomment for mac
         setFocusPainted(false);
-        setFont(OptionsFactory.getOptions().getFont(12f));
+        setFont(OptionsFactory.getOptions().getFont(13f));
         setForeground(Color.WHITE);
     }
 

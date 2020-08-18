@@ -7,7 +7,7 @@ import cz.muni.crocs.appletstore.card.CardInstance;
 import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.util.OnEventCallBack;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
@@ -18,9 +18,9 @@ import pro.javacard.gp.GPRegistryEntry;
 import pro.javacard.gp.GPRegistryEntry.Kind;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class to add to button as listener target to perform applet deletion
@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * @author Jiří Horák
  * @version 1.0
  */
-public class DeleteAction extends CardAbstractAction {
+public class DeleteAction extends CardAbstractAction<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(DeleteAction.class);
 
     private AppletInfo info;
@@ -85,7 +85,8 @@ public class DeleteAction extends CardAbstractAction {
             if (finalPackage != null) {
                 manager.uninstall(finalPackage, true);
             }
-        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 150000);
+            return null;
+        }, "Failed to uninstall applet: ", textSrc.getString("delete_failed"), 3, TimeUnit.MINUTES);
     }
 
     private DeleteDialogWindow showDeletionDialog() {
@@ -107,7 +108,7 @@ public class DeleteAction extends CardAbstractAction {
 
         if (!isForce && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
             for (AID mod : info.getModules()) {
-                for (AppletInfo nfo : manager.getCard().getInstalledApplets()) {
+                for (AppletInfo nfo : manager.getCard().getCardMetadata().getApplets()) {
                     if (nfo.getKind() == Kind.Application && nfo.getAid().equals(mod) &&
                             //do not notify about the applet we are removing now
                             !(info.getKind() == Kind.Application && info.getAid().equals(nfo.getAid()))) {
@@ -159,22 +160,23 @@ public class DeleteAction extends CardAbstractAction {
     }
 
     private AppletInfo getPackageOf(AppletInfo applet) {
+        AtomicReference<AppletInfo> result = new AtomicReference<>(null);
         CardInstance card = CardManagerFactory.getManager().getCard();
         if (card == null) return null;
-        for (AppletInfo info : card.getInstalledApplets()) {
-            if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
-                for (AID instance : info.getModules()) {
-                    if (instance.equals(applet.getAid())) {
-                        return info;
-                    }
+        card.foreachAppletOf(GPRegistryEntry.Kind.ExecutableLoadFile, info -> {
+            for (AID instance : info.getModules()) {
+                if (instance.equals(applet.getAid())) {
+                    result.set(info);
+                    return false;
                 }
             }
-        }
-        return null;
+            return true;
+        });
+        return result.get();
     }
 
     private static class ConfirmDeletion extends JPanel {
-        private JCheckBox verify = new JCheckBox();
+        private final JCheckBox verify = new JCheckBox();
         public ConfirmDeletion(String appletName) {
             super(new MigLayout());
             add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion1")+appletName+"</div>"), "wrap");

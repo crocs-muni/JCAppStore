@@ -26,7 +26,7 @@ public class AppletInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 458932548615025100L;
     private static final Logger logger = LoggerFactory.getLogger(AppletInfo.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static IniParser knownAids;
     private static IniParser knownRids;

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.util.*;
 
@@ -17,16 +18,17 @@ import java.util.ResourceBundle;
  */
 public class MainPanel extends BackgroundImgSplitPanel implements Informable {
 
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private JPanel content;
-    private LocalWindowPane localPanel;
-    private StoreWindowManager storePanel;
+    private final LocalWindowPane localPanel;
+    private final StoreWindowManager storePanel;
     private Component current = null;
     private LoggerConsole console;
 
     /**
      * Create a main panel containing left menu, store, my card panels
-     * @param context
+     * @param context context window
      */
     public MainPanel(BackgroundChangeable context) {
         //there was a problem with focus when using search feature, request focus

@@ -1,16 +1,14 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.ResponseAPDU;
-import cz.muni.crocs.appletstore.util.CallBack;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
 import javax.smartcardio.CardTerminal;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * Card Manager, the component visible from outside of this package
@@ -115,6 +113,7 @@ public interface CardManager {
      * makes necessary steps to be ready to work with
      *
      * @link Terminals::checkTerminals()
+     * @see CardManager::setReloadCard()
      */
     void loadCard() throws LocalizedCardException, UnknownKeyException;
 
@@ -122,6 +121,21 @@ public interface CardManager {
      * Invalidates the card instance data
      */
     void setReloadCard();
+
+    /**
+     * Should download a dependencies file from
+     * jcalgtest results
+     * @return false if the file is already downloaded
+     */
+    boolean getJCAlgTestDependencies();
+
+    /**
+     * Load dependencies from a file
+     * @param from file that contains the jcalgtest algorithm support results
+     * @param rewrite true to replace if present
+     * @return true on successful completition
+     */
+    boolean loadJCAlgTestDependencies(File from, boolean rewrite) throws LocalizedCardException;
 
     /**
      * Install new applet onto current card
@@ -147,6 +161,15 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      */
     void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException;
+
+    /**
+     * Perform SELECT operation
+     *
+     * @param AID target applet AID
+     * @return true if applet present (e.g. select was successful)
+     * @throws LocalizedCardException when failed to execute the command transfer
+     */
+    boolean select(String AID) throws LocalizedCardException;
 
     /**
      * Send command to applet

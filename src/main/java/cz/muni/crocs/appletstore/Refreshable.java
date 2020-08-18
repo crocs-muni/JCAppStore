@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.LocalizedException;
+
 import javax.swing.*;
 
 /**

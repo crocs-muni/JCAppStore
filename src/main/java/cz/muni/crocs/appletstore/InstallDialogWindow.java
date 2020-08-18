@@ -32,33 +32,34 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class InstallDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private static Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(InstallDialogWindow.class);
 
     private final String DEFAULT_APP_NAME = "Applet";
     //applet info and setting GUI components
-    private JTextField name = new JTextField(50);
-    private JTextField author = new JTextField(10);
-    private JTextField version = new JTextField(10);
-    private JTextField sdk = new JTextField(10);
-    private JTextField installParams = new JTextField(50);
-    private JCheckBox forceInstall = new JCheckBox();
-    private JCheckBox hasKeys = new JCheckBox();
-    private JPanel advanced = new JPanel();
+    private final JTextField name = new JTextField(50);
+    private final JTextField author = new JTextField(10);
+    private final JTextField version = new JTextField(10);
+    private final JTextField sdk = new JTextField(10);
+    private final JTextField installParams = new JTextField(50);
+    private final JCheckBox forceInstall = new JCheckBox();
+    private final JCheckBox hasKeys = new JCheckBox();
+    private final JPanel advanced = new JPanel();
     //private ButtonGroup selectedAID = new ButtonGroup();
 
     private JTextField[] customAIDs;
     private JCheckBox[] appletInstances;
 
     //applet install info variables
-    private AppletInfo info;
-    private CAPFile src;
-    private boolean isInstalled;
-    private ArrayList<String> appletNames;
+    private final AppletInfo info;
+    private final CAPFile src;
+    private final boolean isInstalled;
+    private final ArrayList<String> appletNames;
 
     private boolean initialized;
     private File customSignatureFile;
-    private Color wrong = new Color(0xA3383D);
+    private static final Color COLOR_WRONG = new Color(0xA3383D);
+    private static final String NOTICE_COLOR = "#ffcc99";
     public static final Pattern HEXA_PATTERN = Pattern.compile("[0-9a-fA-F]*");
 
     /**
@@ -72,6 +73,7 @@ public class InstallDialogWindow extends JPanel {
      * @param appletNames applet names that are to be displayed, usable if cap file with multiple applets
      */
     public InstallDialogWindow(CAPFile file, AppletInfo info, boolean isInstalled, String verifyMsg,
+                               String issueMsg, String issueDetails,
                                boolean isCustom, ArrayList<String> appletNames) {
         this.info = info;
         this.src = file;
@@ -88,6 +90,7 @@ public class InstallDialogWindow extends JPanel {
         if (isCustom) {
             buildCustomSigned();
         }
+        buildNoticeSection(issueMsg, issueDetails);
     }
 
     /**
@@ -143,6 +146,27 @@ public class InstallDialogWindow extends JPanel {
         buildMetaDataSection();
     }
 
+    private void buildNoticeSection(String issueMsg, String issueDetails) {
+        if (issueMsg == null) return;
+        String noticeColor = "transparent";
+        JLabel issueNotice = new HtmlText();
+        if (issueDetails != null) {
+            issueNotice.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showConfirmDialog(null, new HtmlText(issueDetails),
+                            textSrc.getString("jc_title"), JOptionPane.OK_CANCEL_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "code.png"));
+                }
+            });
+            issueNotice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            noticeColor = NOTICE_COLOR;
+        }
+        issueNotice.setText("<div style='width: 450px; background: " + noticeColor +
+                "; padding: 8px 5px'>" + issueMsg + "</div>");
+        add(issueNotice, "span 5, gaptop 10, wrap");
+    }
+
     private void buildMetaDataSection() {
         add(new JLabel(textSrc.getString("applet_name")), "span 2");
         name.setText(info == null ? textSrc.getString("unknown") : info.getName());
@@ -181,7 +205,7 @@ public class InstallDialogWindow extends JPanel {
         JLabel more = new JLabel(textSrc.getString("advanced_settings"), new ImageIcon(Config.IMAGE_DIR + "arrow_small.png"), JLabel.LEFT);
         more.setFont(OptionsFactory.getOptions().getTitleFont(Font.BOLD, 12f));
         more.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(more, "gaptop 22, span 4, wrap");
+        add(more, "gaptop 15, span 4, wrap");
 
         final InstallDialogWindow self = this;
         more.addMouseListener(new MouseAdapter() {
@@ -212,17 +236,17 @@ public class InstallDialogWindow extends JPanel {
         installParams.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                installParams.setForeground(validInstallParams() ? Color.BLACK : wrong);
+                installParams.setForeground(validInstallParams() ? Color.BLACK : COLOR_WRONG);
             }
         });
         advanced.add(installParams, "span 3, wrap");
@@ -286,17 +310,17 @@ public class InstallDialogWindow extends JPanel {
             f.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent e) {
-                    f.setForeground(validAID(f) ? Color.BLACK : wrong);
+                    f.setForeground(validAID(f) ? Color.BLACK : COLOR_WRONG);
                 }
             });
             to.add(box, "span 2");

@@ -1,7 +1,9 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.action.JCAlgTestAction;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.help.*;
+import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
@@ -19,37 +21,84 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Menu extends JMenuBar {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private AppletStore context;
+    private final AppletStore context;
     private int lastNumOfReadersConnected = 0;
     private CustomNotifiableJmenu readers;
     private JLabel currentCard;
+    private JLabel currentCardImg;
+
+    private static final ImageIcon CARD_OK = new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png");
+    private static final ImageIcon CARD_UNKNOWN = new ImageIcon(Config.IMAGE_DIR + "creditcard-white-exclamation.png");
+
+    private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
+        @Override
+        public void onStart() {
+            context.setDisabledMessage(textSrc.getString("jcdia_runmsg"));
+            context.switchEnabled(false);
+        }
+
+        @Override
+        public void onFail() {
+            context.switchEnabled(true);
+        }
+
+        @Override
+        public Void onFinish() {
+            context.switchEnabled(true);
+            return null;
+        }
+
+        @Override
+        public Void onFinish(byte[] bytes) {
+            context.switchEnabled(true);
+            return null;
+        }
+    });
 
     public Menu(AppletStore parent) {
         context = parent;
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
         setBorder(null);
-
         buildMenu();
     }
 
     /**
      * Set new name of the card inserted in the application bar
-     * @param card custom card name provided by user OR obtained from database when inserted
+     *
+     * @param card       custom card name provided by user OR obtained from database when inserted
      * @param identifier card identifier, null or empty string if no card present
      */
-    public void setCard(String card, String identifier) {
+    public void setCard(String card, String identifier, boolean hasDetails) {
         if (identifier == null || identifier.isEmpty()) {
             card = textSrc.getString("no_card");
         } else {
             card += (card != null && !card.isEmpty()) ?
                     " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
         }
+
+        currentCardImg.setIcon(hasDetails ? CARD_OK : CARD_UNKNOWN);
+        currentCardImg.setToolTipText(hasDetails ? null : textSrc.getString("jc_unknown"));
+
         currentCard.setText(card);
         revalidate();
         repaint();
+    }
+
+    /**
+     * Set new name of the card inserted in the application bar
+     *
+     * @param card       card isntance
+     */
+    public void setCard(CardInstance card) {
+        if (card == null) {
+            setCard(null, null, true);
+        } else {
+            setCard(card.getName(), card.getId(), card.getCardMetadata().getJCData() != null);
+        }
     }
 
     /**
@@ -90,7 +139,7 @@ public class Menu extends JMenuBar {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+        g.fillRect(0, 0, getWidth(), getHeight());
     }
 
     @Override
@@ -153,6 +202,13 @@ public class Menu extends JMenuBar {
                         JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
+
+        submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("test_card")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                testing.mouseClicked(null);
+            }
+        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
 
         return submenu;
     }
@@ -235,7 +291,19 @@ public class Menu extends JMenuBar {
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
-        midContainer.add(new Text(new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png")));
+        currentCardImg = new Text(CARD_OK);
+        currentCardImg.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (currentCardImg.getToolTipText() == null) return;
+                //refresh in case it was already downloaded
+                setCard(CardManagerFactory.getManager().getCard());
+                if (currentCardImg.getToolTipText() == null) return;
+                testing.mouseClicked(e);
+            }
+        });
+        currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        midContainer.add(currentCardImg);
         currentCard = new HtmlText();
         currentCard.setForeground(Color.white);
         currentCard.addMouseListener(new MouseAdapter() {
@@ -250,10 +318,11 @@ public class Menu extends JMenuBar {
                     } catch (LocalizedCardException ex) {
                         InformerFactory.getInformer().showInfoToClose("E_save_card_name", Notice.Importance.SEVERE);
                     }
-                    setCard(newName, card.getId());
+                    setCard(card);
                 }
             }
         });
+        currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         midContainer.add(currentCard);
         add(midContainer);
     }
@@ -343,13 +412,13 @@ public class Menu extends JMenuBar {
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton) {
-        JMenuItem menuItem = new JMenuItem(action);
+        JMenuItem menuItem = new CustomJmenuItem(action);
         setItemLook(menuItem, descripton);
         return menuItem;
     }
 
     private JMenuItem menuItemNoShortcut(AbstractAction action, String descripton, String image) {
-        JMenuItem menuItem = new JMenuItem(action);
+        JMenuItem menuItem = new CustomJmenuItem(action);
         setItemLook(menuItem, descripton);
         menuItem.setIcon(new ImageIcon(image));
         return menuItem;
@@ -358,6 +427,7 @@ public class Menu extends JMenuBar {
     private void setItemLook(AbstractButton component, String descripton) {
         component.setForeground(new Color(0x000000));
         component.setBackground(new Color(0xffffff));
+
         component.getAccessibleContext().setAccessibleDescription(descripton);
         component.setMargin(new Insets(4, 4, 4, 16));
         component.setFont(OptionsFactory.getOptions().getTitleFont());

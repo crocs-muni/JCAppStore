@@ -1,7 +1,12 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.iface.CallableParam;
+import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import pro.javacard.AID;
-import java.util.Set;
+import pro.javacard.gp.GPRegistryEntry;
+
+import javax.smartcardio.ATR;
 
 /**
  * Card instance definition, also visible from outisde of the package, but through manager only
@@ -12,7 +17,7 @@ public interface CardInstance {
      * Get applets on card
      * @return applets info list
      */
-    Set<AppletInfo> getInstalledApplets();
+    CardInstanceMetaData getCardMetadata();
 
     /**
      * Return applet info associated with AID given
@@ -32,6 +37,12 @@ public interface CardInstance {
      * @return card descriptor
      */
     String getDescriptor();
+
+    /**
+     * Return card ATR
+     * @return card ATR
+     */
+    ATR getCardATR();
 
     /**
      * Get life cycle of the card
@@ -55,4 +66,25 @@ public interface CardInstance {
      * Set custom card name
      */
     void setName(String name) throws LocalizedCardException;
+
+    /**
+     * Executes the call for each applet
+     * @param kind kind to call the callback for
+     * @param call to execute, returns true if continue in loop
+     */
+    void foreachAppletOf(GPRegistryEntry.Kind kind, CallableParam<Boolean, AppletInfo> call);
+
+    /**
+     * Adds and executes given task. The task cannot be assigned
+     * if another task is currently active
+     * @param task task to execute on background
+     * @return true when task assigned
+     */
+    boolean addTask(ProcessTrackable task);
+
+    /**
+     * Check whether a task is running
+     * @return true if task running
+     */
+    boolean isTask();
 }

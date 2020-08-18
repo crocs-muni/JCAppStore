@@ -1,5 +1,9 @@
 package cz.muni.crocs.appletstore.card;
 
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Factory patter for manager
  *

@@ -1,4 +1,4 @@
-package cz.muni.crocs.appletstore.util;
+package cz.muni.crocs.appletstore.iface;
 
 @FunctionalInterface
 public interface CallBack<T> {
