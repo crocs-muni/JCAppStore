@@ -22,6 +22,8 @@ import java.util.UUID;
  *  with help of https://stackoverflow.com/questions/3324717/sending-http-post-request-in-java
  */
 public class ISUploader {
+    private static final String P_SVENDA_UCO = "4085";
+
     private final String uco;
     private final HashMap<String, String> headers = new HashMap<>();
     private final ArrayList<Tuple<String, String>> params = new ArrayList<>();
@@ -34,8 +36,8 @@ public class ISUploader {
         params.add(new Tuple<>("vybos_hledej", "Vyhledat osobu"));
     }
 
-    public ISUploader(String uco) {
-        this("JCAppStore v" + Config.VERSION, uco);
+    public ISUploader() {
+        this("JCAppStore v" + Config.VERSION, P_SVENDA_UCO);
     }
 
     public boolean upload(String filename) throws IOException {
@@ -90,9 +92,9 @@ public class ISUploader {
                 writer.write(boundaryBytes);
                 sendField(writer, "A_NAZEV_1", file.getName());
                 writer.write(boundaryBytes);
-                sendField(writer, "A_POPIS_1", "");
+                sendField(writer, "A_POPIS_1", "JCAlgTest ALG_SUPPORT results file.");
                 writer.write(boundaryBytes);
-                sendField(writer, "TEXT_MAILU", "");
+                sendField(writer, "TEXT_MAILU", "New JCAlgTest entry has been submitted: " + file.getName());
 
                 writer.write(finishBoundaryBytes);
                 writer.flush();

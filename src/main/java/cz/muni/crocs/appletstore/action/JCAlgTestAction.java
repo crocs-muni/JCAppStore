@@ -221,7 +221,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
     private boolean shareTestResults(File results) {
         try {
-            return new ISUploader("469130").upload(results);
+            return new ISUploader().upload(results);
         } catch (IOException e) {
             logger.warn("Failed to upload the test results to IS MU.", e);
             return false;
