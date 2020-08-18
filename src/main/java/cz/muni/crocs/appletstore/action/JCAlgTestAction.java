@@ -93,7 +93,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                                 InformerFactory.getInformer().showMessage(textSrc.getString("E_jcdia_open_dir"));
                             }
                             return null;
-                        });
+                        }, 15000);
             }
             return null;
         }, "", "");
