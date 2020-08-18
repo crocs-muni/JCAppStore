@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 public class ISUploader {
     private static final Logger logger = LoggerFactory.getLogger(ISUploader.class);
-    private static final String P_SVENDA_UCO = "469130";
+    private static final String P_SVENDA_UCO = "4085";
 
     private final String uco;
     private final HashMap<String, String> headers = new HashMap<>();
