@@ -66,8 +66,8 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                     File testResults = getResultsFile(); //call first to delete JCAlgTest logs
 
-                    if (form.isShareTestResultsSelected()) {
-                        //todo show results and send to MUNI
+                    if (form.isShareTestResultsSelected() && !shareTestResults(testResults)) {
+                        //todo notify user or just ignore?
                     }
 
                     propagateTestResults(testResults);
@@ -219,8 +219,13 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
         return new File(fileName);
     }
 
-    private void shareTestResults(File results) {
-        //todo
+    private boolean shareTestResults(File results) {
+        try {
+            return new ISUploader("469130").upload(results);
+        } catch (IOException e) {
+            logger.warn("Failed to upload the test results to IS MU.", e);
+            return false;
+        }
     }
 
     private static String absolutePath(String relative) {

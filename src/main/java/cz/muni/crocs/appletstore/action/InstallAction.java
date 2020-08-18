@@ -438,7 +438,8 @@ public class InstallAction extends CardAbstractAction {
 
         StringBuilder sdk = new StringBuilder();
         if (sdkVersion == null) {
-            sdk.append("<br><p style='width:350px;'>").append(textSrc.getString("jcdia_nosdk")).append("</p>");
+            //todo do not bother the user if SDK version not found?
+            //sdk.append("<br><p style='width:350px;'>").append(textSrc.getString("jcdia_nosdk")).append("</p>");
         } else if (!sdkVersion.equals(data.getInfo().getSdk())) {
             sdk.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
                     .append("</p><p>").append(textSrc.getString("applet_sdk")).append(sdkVersion).append("</p>");
@@ -449,6 +450,8 @@ public class InstallAction extends CardAbstractAction {
     }
 
     private String getReport(HashMap<String, String> header, String sdkReport, String requirementsReport) {
+        if (requirementsReport.isEmpty() && sdkReport.isEmpty()) return null;
+
         StringBuilder result = new StringBuilder();
         result.append("<div style='text-align:right;'>").append(textSrc.getString("test_date"))
                 .append(header.get("Execution date/time")).append("</div><h3>")
