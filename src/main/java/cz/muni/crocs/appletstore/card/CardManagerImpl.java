@@ -155,6 +155,29 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
+    public void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException {
+        synchronized(lock) {
+            lastInstalledAIDs = null;
+            selectedAID = null;
+            try {
+                if (terminals.getState() == Terminals.TerminalState.OK) {
+                    CardDetails details = getCardDetails(terminals.getTerminal());
+                    lastCardId = CardDetails.getId(details);
+                    //todo instantiate new card without ability to perform secured actions (new CardInstance impl?)
+                } else {
+                    card = null;
+                }
+            } catch (Exception e) {
+                card = null;
+                throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
+            } finally {
+                tryGeneric = false;
+            }
+            logger.info("Card - unauthorized - loaded.");
+        }
+    }
+
+    @Override
     public String[] getLastAppletInstalledAids() {
         return lastInstalledAIDs;
     }

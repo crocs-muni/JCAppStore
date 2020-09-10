@@ -6,7 +6,7 @@
 
     <shortcut
             name="JCAppStore"
-            target="$INSTALL_PATH\JCAppStore-1.0.jar"
+            target="$INSTALL_PATH\JCAppStore-1.2.exe"
             description="JCAppStore"
             workingDirectory="$INSTALL_PATH"
             iconFile="$INSTALL_PATH\scripts\jcappstore.ico"

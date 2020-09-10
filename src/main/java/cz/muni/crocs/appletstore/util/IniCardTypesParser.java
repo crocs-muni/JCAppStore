@@ -10,7 +10,7 @@ import java.util.Set;
  * @author Jiří Horák
  * @version 1.0
  */
-public interface IniParser {
+public interface IniCardTypesParser {
 
     String TAG_NAME = "name";
     String TAG_KEY = "key";
@@ -39,7 +39,7 @@ public interface IniParser {
      * @param value value to insert
      * @return this instance for builder pattern
      */
-    IniParser addValue(String key, String value);
+    IniCardTypesParser addValue(String key, String value);
 
     /**
      * Add value of INI under header specified in constructor
@@ -47,7 +47,7 @@ public interface IniParser {
      * @param value value to insert
      * @return this instance for builder pattern
      */
-    IniParser addValue(String key, byte[] value);
+    IniCardTypesParser addValue(String key, byte[] value);
 
     /**
      * Save all changes. Without calling this method, all changes
@@ -72,5 +72,5 @@ public interface IniParser {
      * @param newHeader header to use
      * @return this instance for builder pattern
      */
-    IniParser header(String newHeader);
+    IniCardTypesParser header(String newHeader);
 }

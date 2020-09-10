@@ -17,7 +17,7 @@
 
     <info>
         <appname>JCAppStore</appname>
-        <appversion>1.1</appversion>
+        <appversion>1.2</appversion>
         <appsubpath>JCAppStore</appsubpath>
         <javaversion>1.8</javaversion>
         <authors>

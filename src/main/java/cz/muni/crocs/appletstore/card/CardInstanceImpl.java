@@ -9,8 +9,8 @@ import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.util.IniParser;
-import cz.muni.crocs.appletstore.util.IniParserImpl;
+import cz.muni.crocs.appletstore.util.IniCardTypesParser;
+import cz.muni.crocs.appletstore.util.IniCardTypesParserImpl;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -217,7 +217,7 @@ public class CardInstanceImpl implements CardInstance {
      * @throws LocalizedCardException unable to perform command
      * @throws CardException unable to perform command
      */
-    void executeCommands(GPCommand... commands) throws LocalizedCardException, CardException {
+    void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         Card card;
         APDUBIBO channel;
 
@@ -235,7 +235,7 @@ public class CardInstanceImpl implements CardInstance {
         }
 
         try {
-            for (GPCommand command : commands) {
+            for (GPCommand<?> command : commands) {
                 if (Thread.interrupted()) {
                     throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
                 }
@@ -259,8 +259,8 @@ public class CardInstanceImpl implements CardInstance {
      * @param commands commands to execute
      * @throws CardException unable to perform command
      */
-    void secureExecuteCommands(GPCommand... commands) throws LocalizedCardException, CardException {
-        executeCommands(new GPCommand() {
+    void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+        executeCommands(new GPCommand<Void>() {
             @Override
             public String getDescription() {
                 return "Secure channel.";
@@ -295,7 +295,7 @@ public class CardInstanceImpl implements CardInstance {
                     throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
                 }
 
-                for (GPCommand command : commands) {
+                for (GPCommand<?> command : commands) {
                     if (Thread.interrupted()) {
                         throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
                     }
@@ -343,12 +343,12 @@ public class CardInstanceImpl implements CardInstance {
 
     private void updateCardAuth(boolean authenticated) throws LocalizedCardException {
         try {
-            IniParserImpl parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
-            parser.addValue(IniParser.TAG_NAME, name)
-                    .addValue(IniParser.TAG_KEY, masterKey)
-                    .addValue(IniParser.TAG_KEY_CHECK_VALUE, kcv)
-                    .addValue(IniParser.TAG_DIVERSIFIER, diversifier)
-                    .addValue(IniParser.TAG_AUTHENTICATED, authenticated ? "true" : "false")
+            IniCardTypesParserImpl parser = new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
+            parser.addValue(IniCardTypesParser.TAG_NAME, name)
+                    .addValue(IniCardTypesParser.TAG_KEY, masterKey)
+                    .addValue(IniCardTypesParser.TAG_KEY_CHECK_VALUE, kcv)
+                    .addValue(IniCardTypesParser.TAG_DIVERSIFIER, diversifier)
+                    .addValue(IniCardTypesParser.TAG_AUTHENTICATED, authenticated ? "true" : "false")
                     .store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
@@ -357,8 +357,8 @@ public class CardInstanceImpl implements CardInstance {
 
     private void updateCardName(String name) throws LocalizedCardException {
         try {
-            new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
-                    .addValue(IniParser.TAG_NAME, name).store();
+            new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
+                    .addValue(IniCardTypesParser.TAG_NAME, name).store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
         }
@@ -371,16 +371,16 @@ public class CardInstanceImpl implements CardInstance {
      * @return true if card info present and custom master key is set
      */
     private boolean saveDetailsAndCheckMasterKey() throws LocalizedCardException {
-        IniParserImpl parser;
+        IniCardTypesParserImpl parser;
         try {
-            parser = new IniParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
+            parser = new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
             if (parser.isHeaderPresent()) {
                 logger.info("Card " + id + " metadata found.");
-                name = parser.getValue(IniParser.TAG_NAME);
-                masterKey = parser.getValue(IniParser.TAG_KEY);
-                kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
-                diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
-                doAuth = parser.getValue(IniParser.TAG_AUTHENTICATED).toLowerCase().equals("true");
+                name = parser.getValue(IniCardTypesParser.TAG_NAME);
+                masterKey = parser.getValue(IniCardTypesParser.TAG_KEY);
+                kcv = parser.getValue(IniCardTypesParser.TAG_KEY_CHECK_VALUE).toUpperCase();
+                diversifier = parser.getValue(IniCardTypesParser.TAG_DIVERSIFIER).toUpperCase();
+                doAuth = parser.getValue(IniCardTypesParser.TAG_AUTHENTICATED).toLowerCase().equals("true");
 
                 boolean valid = validMasterKey(masterKey);
                 logger.info("With valid master key: " + valid);
@@ -388,20 +388,20 @@ public class CardInstanceImpl implements CardInstance {
             }
 
             logger.info("Card " + id + " saved into card list database.");
-            parser.addValue(IniParser.TAG_NAME, name)
-                    .addValue(IniParser.TAG_KEY, "")
+            parser.addValue(IniCardTypesParser.TAG_NAME, name)
+                    .addValue(IniCardTypesParser.TAG_KEY, "")
                     //key check value from provider, default none
-                    .addValue(IniParser.TAG_KEY_CHECK_VALUE, "")
+                    .addValue(IniCardTypesParser.TAG_KEY_CHECK_VALUE, "")
                     //one of: <no_value>, EMV, KDF3, VISA2
-                    .addValue(IniParser.TAG_DIVERSIFIER, "")
-                    .addValue(IniParser.TAG_AUTHENTICATED, "true")
-                    .addValue(IniParser.TAG_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
-                    .addValue(IniParser.TAG_CIN, details.getCin())
-                    .addValue(IniParser.TAG_IIN, details.getIin())
-                    .addValue(IniParser.TAG_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
-                    .addValue(IniParser.TAG_DATA, details.getCardData())
-                    .addValue(IniParser.TAG_CAPABILITIES, details.getCardCapabilities())
-                    .addValue(IniParser.TAG_KEY_INFO, details.getKeyInfo())
+                    .addValue(IniCardTypesParser.TAG_DIVERSIFIER, "")
+                    .addValue(IniCardTypesParser.TAG_AUTHENTICATED, "true")
+                    .addValue(IniCardTypesParser.TAG_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
+                    .addValue(IniCardTypesParser.TAG_CIN, details.getCin())
+                    .addValue(IniCardTypesParser.TAG_IIN, details.getIin())
+                    .addValue(IniCardTypesParser.TAG_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
+                    .addValue(IniCardTypesParser.TAG_DATA, details.getCardData())
+                    .addValue(IniCardTypesParser.TAG_CAPABILITIES, details.getCardCapabilities())
+                    .addValue(IniCardTypesParser.TAG_KEY_INFO, details.getKeyInfo())
                     .store();
             return false;
         } catch (IOException e) {
@@ -430,13 +430,13 @@ public class CardInstanceImpl implements CardInstance {
 
         if (!useGeneric) {
             try {
-                IniParserImpl parser = new IniParserImpl(Config.CARD_TYPES_FILE,
+                IniCardTypesParserImpl parser = new IniCardTypesParserImpl(Config.CARD_TYPES_FILE,
                         CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()).toLowerCase());
                 if (parser.isHeaderPresent()) {
-                    name = parser.getValue(IniParser.TAG_NAME);
-                    masterKey = parser.getValue(IniParser.TAG_KEY);
-                    kcv = parser.getValue(IniParser.TAG_KEY_CHECK_VALUE).toUpperCase();
-                    diversifier = parser.getValue(IniParser.TAG_DIVERSIFIER).toUpperCase();
+                    name = parser.getValue(IniCardTypesParser.TAG_NAME);
+                    masterKey = parser.getValue(IniCardTypesParser.TAG_KEY);
+                    kcv = parser.getValue(IniCardTypesParser.TAG_KEY_CHECK_VALUE).toUpperCase();
+                    diversifier = parser.getValue(IniCardTypesParser.TAG_DIVERSIFIER).toUpperCase();
                     logger.info("Found test key by card type.");
                 } else {
                     logger.info("No header present for card in card.ini file");
