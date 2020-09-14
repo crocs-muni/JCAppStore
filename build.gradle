@@ -65,7 +65,7 @@ task unixDeployment(dependsOn: jar) {
     }
 
     exec {
-        commandLine '$projectDir/installer-unix/targenerator.sh'
+        commandLine "${projectDir}/installer-unix/targenerator.sh"
     }
 }
 
