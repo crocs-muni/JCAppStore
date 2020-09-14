@@ -57,13 +57,16 @@ task windowsDeployment(type: Launch4jLibraryTask, dependsOn: izPackCreateInstall
     copyConfigurable = []
 }
 
-task unixDeployment(type: Exec, dependsOn: jar) {
+task unixDeployment(dependsOn: jar) {
     //note if this task fails for you, just run the script manually (from the folder the script is in)
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
         println "Unable to run on Windows."
         return 1
     }
-    commandLine '$projectDir/installer-unix/targenerator.sh'
+
+    exec {
+        commandLine '$projectDir/installer-unix/targenerator.sh'
+    }
 }
 
 ///////////////////////////
@@ -71,32 +74,6 @@ task unixDeployment(type: Exec, dependsOn: jar) {
 ///////////////////////////
 
 izpack {
-    //generate folders deploy, out, res, main
-    def folder = file("$buildDir/deploy-win/out/src/main/resources")
-    if( !folder.exists() ) {
-        folder.mkdirs()
-    }
-
-    def scripts = file("$buildDir/deploy-win/scripts")
-    if( !scripts.exists() ) {
-        scripts.mkdirs()
-    }
-
-    copy {
-        from "src/main/resources"
-        into "$buildDir/deploy-win/out/src/main/resources"
-    }
-
-    copy {
-        from "installer-win/dependency"
-        into "$buildDir/deploy-win/scripts"
-    }
-
-    copy {
-        from file("$buildDir/libs/JCAppStore-${project.version}-win.exe")
-        into file("$buildDir/deploy-win/out")
-    }
-
     baseDir = file("$buildDir/deploy-win")
     installFile = file('installer-win/installer.xml')
     outputFile = file("$buildDir/deploy-win/JCAppStore-${project.version}-win.jar")
@@ -105,16 +82,48 @@ izpack {
     appProperties = ['app.group': 'CRoCS', 'app.name': 'jcAppStore', 'app.title': 'JCAppStore',
                      'app.version': project.version, 'app.subpath': "JCAppStore-${project.version}"]
 }
-izPackCreateInstaller.dependsOn '_createAppExe'
+izPackCreateInstaller.dependsOn 'prepareIzPack'
+
+task prepareIzPack(dependsOn: 'createAppExe') {
+    //generate folders deploy, out, res, main
+    doFirst {
+        def folder = file("$buildDir/deploy-win/out/src/main/resources")
+        if( !folder.exists() ) {
+            folder.mkdirs()
+        }
+
+        def scripts = file("$buildDir/deploy-win/scripts")
+        if( !scripts.exists() ) {
+            scripts.mkdirs()
+        }
+    }
+
+    doLast {
+        copy {
+            from "src/main/resources"
+            into "$buildDir/deploy-win/out/src/main/resources"
+        }
+
+        copy {
+            from "installer-win/dependency"
+            into "$buildDir/deploy-win/scripts"
+        }
+
+        copy {
+            from file("$buildDir/libs/JCAppStore-${project.version}.exe")
+            into file("$buildDir/deploy-win/out")
+        }
+    }
+}
 
 ///////////////////////////
 //binary section
 ///////////////////////////
 
-task _createAppExe(type: Launch4jLibraryTask, dependsOn: jar) {
+task createAppExe(type: Launch4jLibraryTask, dependsOn: jar) {
     outputDir="libs"
     jar = "JCAppStore-${project.version}.jar"
-    outfile = "JCAppStore-${project.version}-win.exe"
+    outfile = "JCAppStore-${project.version}.exe"
 
     headerType = "gui"
     manifest = "../../installer-win/launch4j/manifest.mf"
