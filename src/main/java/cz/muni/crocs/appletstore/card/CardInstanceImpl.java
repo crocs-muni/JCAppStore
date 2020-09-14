@@ -44,6 +44,7 @@ public class CardInstanceImpl implements CardInstance {
     private String kcv;
     private String diversifier;
     private boolean doAuth = true;
+    private boolean doJCAlgTestFinder = true;
 
     private final String id;
     private String name = "";
@@ -143,7 +144,7 @@ public class CardInstanceImpl implements CardInstance {
     @Override
     public void setName(String newName) throws LocalizedCardException {
         name = newName;
-        updateCardName(newName);
+        updateIniValue(IniCardTypesParser.TAG_NAME, newName);
     }
 
     @Override
@@ -199,8 +200,12 @@ public class CardInstanceImpl implements CardInstance {
         saveInfoData();
     }
 
-    //delete applet metadata when uninstalling
-    void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+    void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
+        deleteAppletData(pkg, false);
+    }
+
+    //delete applet metadata when uninstalling, presumes applet not to be package
+    void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
         metadata.deleteAppletInfo(applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -236,9 +241,9 @@ public class CardInstanceImpl implements CardInstance {
 
         try {
             for (GPCommand<?> command : commands) {
-                if (Thread.interrupted()) {
-                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
-                }
+//                if (Thread.interrupted()) {
+//                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
+//                }
                 logger.info("EXECUTING: " + command.getDescription());
                 command.setChannel(channel);
                 command.execute();
@@ -296,9 +301,9 @@ public class CardInstanceImpl implements CardInstance {
                 }
 
                 for (GPCommand<?> command : commands) {
-                    if (Thread.interrupted()) {
-                        throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
-                    }
+//                    if (Thread.interrupted()) {
+//                        throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
+//                    }
                     logger.info("SECURE EXECUTING: " + command.getDescription());
                     command.setGP(context);
                     command.setChannel(channel);
@@ -315,6 +320,14 @@ public class CardInstanceImpl implements CardInstance {
      */
     void setMetaData(CardInstanceMetaData metadata) {
         this.metadata = metadata;
+    }
+
+    void disableTemporarilyJCAlgTestFinder() {
+        doJCAlgTestFinder = false;
+    }
+
+    boolean shouldJCAlgTestFinderRun() {
+        return doJCAlgTestFinder;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -355,10 +368,10 @@ public class CardInstanceImpl implements CardInstance {
         }
     }
 
-    private void updateCardName(String name) throws LocalizedCardException {
+    private void updateIniValue(String name, String value) throws LocalizedCardException {
         try {
             new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
-                    .addValue(IniCardTypesParser.TAG_NAME, name).store();
+                    .addValue(name, value).store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
         }

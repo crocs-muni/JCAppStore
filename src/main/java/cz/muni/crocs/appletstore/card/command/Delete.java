@@ -23,10 +23,10 @@ import java.util.ResourceBundle;
  */
 public class Delete extends GPCommand<Void> {
     private static final Logger logger = LoggerFactory.getLogger(Delete.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private boolean force;
-    private AppletInfo toDelete;
+    private final boolean force;
+    private final AppletInfo toDelete;
 
     public Delete(AppletInfo nfo, boolean force) {
         if (nfo == null)

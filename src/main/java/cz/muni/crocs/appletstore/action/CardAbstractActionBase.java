@@ -96,14 +96,14 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
                 caught(null, "Unknown exception: " + e.getMessage(),
                         new LocalizedCardException(e, "E_unknown_error"));
             } finally {
-                if (Thread.interrupted()) {
-                    SwingUtilities.invokeLater(call::onFail);
-                } else {
+//                if (Thread.interrupted()) {
+//                    SwingUtilities.invokeLater(call::onFail);
+//                } else {
                     SwingUtilities.invokeLater(() -> {
                         if (result == null) call.onFinish();
                         else call.onFinish(result);
                     });
-                }
+//                }
             }
         };
     }

@@ -40,11 +40,15 @@ public class CardInstanceMetaData implements Serializable {
         return Collections.unmodifiableSet(applets);
     }
 
-    public boolean addApplet(AppletInfo info) {
+    public boolean addAppletRequireModulesIfPkg(AppletInfo info) {
         if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile &&
                 (info.getModules() == null || info.getModules().isEmpty())) {
             return false;
         }
+        return applets.add(info);
+    }
+
+    public boolean addAppletIgnoreModulesIfPkg(AppletInfo info) {
         return applets.add(info);
     }
 
@@ -60,6 +64,25 @@ public class CardInstanceMetaData implements Serializable {
         }
     }
 
+    public boolean isAppletPresent(String aid) {
+        return isAppletPresent(AID.fromString(aid));
+    }
+
+    public boolean isAppletPresent(AID aid) {
+        AppletInfo found = getAppletInfo(aid);
+        if (found == null) return false;
+        return found.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile;
+    }
+
+    public boolean isPackagePresent(String aid) {
+        return isPackagePresent(AID.fromString(aid));
+    }
+
+    public boolean isPackagePresent(AID aid) {
+        AppletInfo found = getAppletInfo(aid);
+        if (found == null) return false;
+        return found.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile;
+    }
 
     /**
      * Clean up invalid data in applets
@@ -84,5 +107,14 @@ public class CardInstanceMetaData implements Serializable {
 
     public static CardInstanceMetaData empty() {
         return new CardInstanceMetaData();
+    }
+
+    private AppletInfo getAppletInfo(AID aid) {
+        for (AppletInfo nfo : applets) {
+            if (aid.equals(nfo.getAid())) {
+                return nfo;
+            }
+        }
+        return null;
     }
 }

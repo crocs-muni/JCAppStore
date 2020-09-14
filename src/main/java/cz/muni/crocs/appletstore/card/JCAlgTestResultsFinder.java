@@ -28,6 +28,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
     private final CardInstanceImpl card;
 
     public JCAlgTestResultsFinder(CardInstance of) {
+        if (!(of instanceof CardInstanceImpl)) throw new IllegalArgumentException();
         this.card = (CardInstanceImpl)of;
     }
 
@@ -116,6 +117,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 }
                 safeSetProgress(progress * (files.size() / ++i));
             }
+            card.disableTemporarilyJCAlgTestFinder();
         } finally {
             updateProgress(getMaximum());
             executor.shutdownNow();
@@ -149,7 +151,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
      * @param URL url from github API
      * @return true if processed correctly
      */
-    private boolean processURL(String URL) {
+    private boolean processURL(String URL) throws LocalizedCardException {
         HashMap<String, HashMap<String, String>> data = new HashMap<>();
 
         try {

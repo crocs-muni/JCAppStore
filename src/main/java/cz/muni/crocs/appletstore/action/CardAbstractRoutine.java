@@ -37,13 +37,13 @@ public abstract class CardAbstractRoutine<TRet, TArg> extends CardAbstractAction
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title,
                            int timeOut, TimeUnit unitsMeaning) {
         Runnable job = job(toExecute, loggerMessage, title);
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(/*2*/1);
         //note: calling scheduleAtFixedRate( () -> job(args..) ) would cause repeated CONSTRUCTING of the job, not calling it
         scheduledFuture = executor.scheduleAtFixedRate(job, timeUnit, timeUnit, unitMeaning);
 
-        executor.schedule(() -> {
-            scheduledFuture.cancel(true);
-        }, timeOut, unitsMeaning);
+//        executor.schedule(() -> {
+//            scheduledFuture.cancel(true);
+//        }, timeOut, unitsMeaning);
     }
 
     protected void breakExecution() {

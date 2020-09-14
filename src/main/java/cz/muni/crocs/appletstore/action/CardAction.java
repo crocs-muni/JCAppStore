@@ -1,7 +1,5 @@
 package cz.muni.crocs.appletstore.action;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Card action abstraction. These actions are invoked from buttons or manually in code and creates a layer
@@ -16,20 +14,4 @@ public interface CardAction {
      * necessary to call mouseClicked(null); (the MouseEvent value is ignored)
      */
     void start();
-
-    /**
-     * Start with delay
-     * @param delay time to delay the start
-     */
-    default void start(int delay) {
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                start();
-                t.cancel();
-                t.purge();
-            }
-        }, delay);
-    }
 }

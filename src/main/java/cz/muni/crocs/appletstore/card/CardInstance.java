@@ -1,6 +1,5 @@
 package cz.muni.crocs.appletstore.card;
 
-import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import pro.javacard.AID;

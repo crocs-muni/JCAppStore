@@ -171,8 +171,12 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
         saveInfoData();
     }
 
-    //delete applet metadata when uninstalling
-    void deleteData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+    void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
+        deleteAppletData(pkg, false);
+    }
+
+    //delete applet metadata when uninstalling, presumes applet not to be package
+    void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
         metadata.deleteAppletInfo(applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -208,9 +212,9 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
 
         try {
             for (GPCommand<?> command : commands) {
-                if (Thread.interrupted()) {
-                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
-                }
+//                if (Thread.interrupted()) {
+//                    throw new LocalizedCardException("Run out of time.", textSrc.getString("E_timeout"), "timer.png");
+//                }
                 logger.info("EXECUTING: " + command.getDescription());
                 command.setChannel(channel);
                 command.execute();

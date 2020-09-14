@@ -49,6 +49,7 @@ public class DetectUnauthorized extends GPCommand<ResponseAPDU> {
         //OR BRUTEFORCE aid list
         if (aidList == null || !aidList.exists()) return false;
         for (Map.Entry<String, Profile.Section> entry : new Ini(aidList).entrySet()) {
+            //todo first 5 bytes should suffice?
             result = channel.transmit(new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, entry.getKey().getBytes()));
             if (result.getSW() == 0x9000) {
                 AppletInfo nfo = new AppletInfo(entry.getValue().get("name"), "unknown", "unknown",
