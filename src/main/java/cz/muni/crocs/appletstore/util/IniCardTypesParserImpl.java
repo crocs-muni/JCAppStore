@@ -14,7 +14,7 @@ import java.util.Set;
  * @author Jiří Horák
  * @version 1.0
  */
-public class IniParserImpl implements IniParser {
+public class IniCardTypesParserImpl implements IniCardTypesParser {
 
     private final Ini ini;
     private String header;
@@ -25,7 +25,7 @@ public class IniParserImpl implements IniParser {
      * @param comment comment to add at the beggining of the file if not exists
      * @throws IOException cannot modify or read file
      */
-    public IniParserImpl(File file, String header, String comment) throws IOException {
+    public IniCardTypesParserImpl(File file, String header, String comment) throws IOException {
         if (!file.exists()) {
             if (!file.createNewFile()) {
                 throw new IOException("Failed to create missing ini file.");
@@ -47,7 +47,7 @@ public class IniParserImpl implements IniParser {
      * @param comment comment to add at the beggining of the file if not exists
      * @throws IOException cannot modify or read file
      */
-    public IniParserImpl(String path, String header, String comment) throws IOException {
+    public IniCardTypesParserImpl(String path, String header, String comment) throws IOException {
         this(new File(path), header, comment);
     }
 
@@ -56,7 +56,7 @@ public class IniParserImpl implements IniParser {
      * @param header header to read from
      * @throws IOException cannot modify or read file
      */
-    public IniParserImpl(File file, String header) throws IOException {
+    public IniCardTypesParserImpl(File file, String header) throws IOException {
         this(file, header, "");
     }
 
@@ -65,7 +65,7 @@ public class IniParserImpl implements IniParser {
      * @param header header to read from
      * @throws IOException cannot modify or read file
      */
-    public IniParserImpl(String path, String header) throws IOException {
+    public IniCardTypesParserImpl(String path, String header) throws IOException {
         this(new File(path), header);
     }
 
@@ -74,12 +74,12 @@ public class IniParserImpl implements IniParser {
         return (value == null) ? "" : value.trim();
     }
 
-    public IniParserImpl addValue(String key, String value) {
+    public IniCardTypesParserImpl addValue(String key, String value) {
         ini.put(header, key, value);
         return this;
     }
 
-    public IniParserImpl addValue(String key, byte[] value) {
+    public IniCardTypesParserImpl addValue(String key, byte[] value) {
         ini.put(header, key, Arrays.toString(value));
         return this;
     }
@@ -99,7 +99,7 @@ public class IniParserImpl implements IniParser {
         return section.keySet();
     }
 
-    public IniParser header(String newHeader) {
+    public IniCardTypesParser header(String newHeader) {
         this.header = newHeader;
         return this;
     }

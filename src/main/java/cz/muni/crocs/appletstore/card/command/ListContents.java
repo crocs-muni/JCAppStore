@@ -51,7 +51,7 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
         }
 
         for (GPRegistryEntry entry : registry) {
-            result.addApplet(new AppletInfo(entry, saved.getApplets()));
+            result.addAppletRequireModulesIfPkg(new AppletInfo(entry, saved.getApplets()));
         }
         result.setJCData(saved.getJCData());
         return true;

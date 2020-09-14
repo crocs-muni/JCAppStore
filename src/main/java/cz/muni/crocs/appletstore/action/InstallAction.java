@@ -41,11 +41,11 @@ import static pro.javacard.gp.GPRegistryEntry.Kind;
  * @author Jiří Horák
  * @version 1.0
  */
-public class InstallAction extends CardAbstractAction {
+public class InstallAction extends CardAbstractAction<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(InstallAction.class);
 
-    private InstallBundle data;
-    private boolean installed;
+    private final InstallBundle data;
+    private final boolean installed;
     private String defaultSelected;
     private CAPFile code;
 
@@ -294,17 +294,13 @@ public class InstallAction extends CardAbstractAction {
                     size = 0; //pretend nothing happened
                 }
                 //do not add instance install size to the limit, the actual zip file is bigger than on card
-                if (!installed && cardMemory < JCMemory.LIMITED_BY_API && size > cardMemory) {
-                    AtomicBoolean alreadyPresent = new AtomicBoolean(false);
-                    manager.getCard().foreachAppletOf(Kind.ExecutableLoadFile, info -> {
-                        boolean found = code.getPackageAID().equals(info.getAid());
-                        if (found) alreadyPresent.set(true);
-                        return !found;
-                    });
+                //todo JCALgTEST is NOT detected as its installation size exceeds JCMemory.LIMITED_BY_API
+                if (!installed && cardMemory < JCMemory.LIMITED_BY_API) {
+                    int installationSize = Math.max((int)(size / 6), 1024);
 
-                    if (alreadyPresent.get() && cardMemory > 1024){
+                    if (manager.getCard().getCardMetadata().isPackagePresent(code.getPackageAID()) && cardMemory > 1024) { //do not include pkg size if already present
                         doInstall(opts, manager);
-                    } else {
+                    } else if (cardMemory <= (int)(size + installationSize)) {
                         int res = showConfirmDialog(null,
                                 "<html><p style='width: 350px;'>" + textSrc.getString("no_space_1") +
                                         size + ", " + textSrc.getString("no_space_2") +
@@ -317,10 +313,8 @@ public class InstallAction extends CardAbstractAction {
                             call.onFinish();
                             return null;
                         }
-                    }
-                } else {
-                    doInstall(opts, manager);
-                }
+                    } else doInstall(opts, manager);
+                } else doInstall(opts, manager);
                 return null;
             }
         }).start();
@@ -567,18 +561,16 @@ public class InstallAction extends CardAbstractAction {
             dialog.setLocationRelativeTo(null);
 
             final CustomJOptionPane self = this;
-            final PropertyChangeListener listener = new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent event) {
-                    // Let the defaultCloseOperation handle the closing
-                    // if the user closed the window without selecting a button
-                    // (newValue = null in that case).  Otherwise, close the dialog.
-                    if (dialog.isVisible() && event.getSource() == self &&
-                            (event.getPropertyName().equals(VALUE_PROPERTY)) &&
-                            event.getNewValue() != null &&
-                            event.getNewValue() != JOptionPane.UNINITIALIZED_VALUE) {
-                        dialog.setVisible(false);
-                        onClose.callBack();
-                    }
+            final PropertyChangeListener listener = event -> {
+                // Let the defaultCloseOperation handle the closing
+                // if the user closed the window without selecting a button
+                // (newValue = null in that case).  Otherwise, close the dialog.
+                if (dialog.isVisible() && event.getSource() == self &&
+                        (event.getPropertyName().equals(VALUE_PROPERTY)) &&
+                        event.getNewValue() != null &&
+                        event.getNewValue() != JOptionPane.UNINITIALIZED_VALUE) {
+                    dialog.setVisible(false);
+                    onClose.callBack();
                 }
             };
 

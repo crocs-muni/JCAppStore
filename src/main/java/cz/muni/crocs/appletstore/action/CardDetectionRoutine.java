@@ -74,6 +74,8 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                                 if (result == 2) {
                                     main.getWindow().getRefreshablePane().refresh();
                                     main.getMenu().setCard(manager.getCard());
+                                } else {
+                                    main.getMenu().setCard(null, null, true);
                                 }
                                 main.getMenu().resetTerminalButtonGroup();
                             });

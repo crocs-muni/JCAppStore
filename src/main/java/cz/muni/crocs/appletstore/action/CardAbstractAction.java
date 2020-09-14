@@ -29,13 +29,13 @@ public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionB
     protected void execute(CardExecutable<TArg> toExecute, String loggerMessage, String title,
                            int timeOut, TimeUnit unitsMeaning) {
         Runnable job = job(toExecute, loggerMessage, title);
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(/*2*/1);
 
         //note: calling scheduleAtFixedRate( () -> job(args..) ) would cause repeated CONSTRUCTING of the job, not calling it
         final ScheduledFuture<?> scheduledFuture = executor.schedule(job, 0, TimeUnit.SECONDS);
 
-        executor.schedule(() -> {
-            scheduledFuture.cancel(true);
-        }, timeOut, unitsMeaning);
+//        executor.schedule(() -> {
+//            scheduledFuture.cancel(true);
+//        }, timeOut, unitsMeaning);
     }
 }

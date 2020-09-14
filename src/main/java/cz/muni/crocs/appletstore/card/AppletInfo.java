@@ -2,9 +2,8 @@ package cz.muni.crocs.appletstore.card;
 
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.IniParser;
-import cz.muni.crocs.appletstore.util.IniParserImpl;
-import cz.muni.crocs.appletstore.util.Options;
+import cz.muni.crocs.appletstore.util.IniCardTypesParser;
+import cz.muni.crocs.appletstore.util.IniCardTypesParserImpl;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,8 @@ public class AppletInfo implements Serializable, Cloneable {
     private static final Logger logger = LoggerFactory.getLogger(AppletInfo.class);
     private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private static IniParser knownAids;
-    private static IniParser knownRids;
+    private static IniCardTypesParser knownAids;
+    private static IniCardTypesParser knownRids;
 
     private transient int lifecycle;
     private transient GPRegistryEntry.Kind kind;
@@ -44,9 +43,9 @@ public class AppletInfo implements Serializable, Cloneable {
     private String sdk;
     public KeysPresence hasKeys = KeysPresence.UNKNOWN;
 
-    private static IniParser loadSource(String path, String error) {
+    private static IniCardTypesParser loadSource(String path, String error) {
         try {
-            return new IniParserImpl(path, "");
+            return new IniCardTypesParserImpl(path, "");
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(error, e);

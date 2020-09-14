@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.LoaderWorker;
@@ -9,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
@@ -34,9 +38,13 @@ public class SplashScreen extends JWindow {
     private boolean update;
     private String numbers = "";
 
-    private SplashScreen() {
+    private SplashScreen() throws LocalizedException {
         logger.info("Running on java " + System.getProperty("java.version") +
                 " by " +  System.getProperty("java.vendor") + " in " + System.getProperty("java.vm.info"));
+
+        if (! new File(Config.RESOURCES).exists()) {
+            throw new LocalizedException("No sources available.", textSrc.getString("E_no_resources"));
+        }
 
         try {
             if (SystemUtils.IS_OS_LINUX) {
@@ -131,7 +139,7 @@ public class SplashScreen extends JWindow {
         return builder.toString();
     }
 
-    private void showCrashReporter(Exception e) {
+    private static void showCrashReporter(Exception e) {
         e.printStackTrace();
         logger.error("Fatal Error: " + e.getMessage(), e);
         new CrashReporter(textSrc.getString("reporter"), e.getMessage(), null);
@@ -151,6 +159,12 @@ public class SplashScreen extends JWindow {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SplashScreen::new);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new SplashScreen();
+            } catch (LocalizedException e) {
+                showCrashReporter(e);
+            }
+        });
     }
 };

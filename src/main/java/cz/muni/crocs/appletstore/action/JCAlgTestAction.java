@@ -79,11 +79,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                     return null;
                 }, textSrc.getString("jc_install_failure"));
-            } catch (LocalizedException ex) {
-                logger.error("Failed to run JCAlgTest.", ex);
-                InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
-            } finally {
-                if (p.get() != null) p.get().destroy();
+
                 InformerFactory.getInformer().showInfo(textSrc.getString("jcida_done"),
                         Notice.Importance.INFO, Notice.CallBackIcon.OPEN_FOLDER, () -> {
                             try {
@@ -94,6 +90,11 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                             }
                             return null;
                         }, 15000);
+            } catch (LocalizedException ex) {
+                logger.error("Failed to run JCAlgTest.", ex);
+                InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
+            } finally {
+                if (p.get() != null) p.get().destroy();
             }
             return null;
         }, "", "");

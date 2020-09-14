@@ -5,8 +5,6 @@ import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
 import apdu4j.ResponseAPDU;
 
-import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.Store;
 import cz.muni.crocs.appletstore.card.command.*;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.util.*;
@@ -26,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * Manager providing all functionality over card
@@ -48,7 +45,6 @@ public class CardManagerImpl implements CardManager {
     private String[] lastInstalledAIDs = null;
     private boolean tryGeneric = false;
 
-    private final ArrayList<AppletInfo> toSave = new ArrayList<>();
     private CallBack<Void> notifier;
 
     private static final Object lock = new Object();
@@ -150,7 +146,30 @@ public class CardManagerImpl implements CardManager {
             }
             logger.info("Card successfully refreshed.");
 
-            getJCAlgTestDependencies();
+            if (card != null && card.shouldJCAlgTestFinderRun()) getJCAlgTestDependencies();
+        }
+    }
+
+    @Override
+    public void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException {
+        synchronized(lock) {
+            lastInstalledAIDs = null;
+            selectedAID = null;
+            try {
+                if (terminals.getState() == Terminals.TerminalState.OK) {
+                    CardDetails details = getCardDetails(terminals.getTerminal());
+                    lastCardId = CardDetails.getId(details);
+                    //todo instantiate new card without ability to perform secured actions (new CardInstance impl?)
+                } else {
+                    card = null;
+                }
+            } catch (Exception e) {
+                card = null;
+                throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
+            } finally {
+                tryGeneric = false;
+            }
+            logger.info("Card - unauthorized - loaded.");
         }
     }
 
@@ -166,11 +185,12 @@ public class CardManagerImpl implements CardManager {
 
     @Override
     public boolean getJCAlgTestDependencies() {
-        if (card != null && card.getCardMetadata().getJCData() == null) {
-            new Thread(new JCAlgTestResultsFinder(card)).start();
+        if (card != null) {
+            if (card.getCardMetadata().getJCData() == null) new Thread(new JCAlgTestResultsFinder(card)).start();
+            else card.disableTemporarilyJCAlgTestFinder();
             return true;
         }
-        return card != null;
+        return false;
     }
 
     @Override
@@ -317,7 +337,7 @@ public class CardManagerImpl implements CardManager {
 
                 @Override
                 public boolean execute() throws LocalizedCardException {
-                    card.deleteData(nfo, force);
+                    card.deleteAppletData(nfo, force);
                     return true;
                 }
             }, contents);
@@ -333,11 +353,12 @@ public class CardManagerImpl implements CardManager {
                 throw new LocalizedCardException("No card recognized.", "no_card");
             }
 
-            toSave.clear();
+            if (!data.isForce() && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) tryDeletePackageByAID(file);
+
             try (PrintStream print = new PrintStream(loggerStream)) {
                 file.dump(print);
 
-                GPCommand<?>[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2]; //load, save data, n * install and save data
+                GPCommand<?>[] commands = new GPCommand[data.getOriginalAIDs().length * 2 + 2 + 1]; //load, save data, n * install and save data, list
                 commands[0] = new Load(file, data);
                 commands[1] = new GPCommand<Void>() {
                     @Override
@@ -347,8 +368,13 @@ public class CardManagerImpl implements CardManager {
 
                     @Override
                     public boolean execute() throws GPException {
-                        toSave.add(getPackageInfo(data.getInfo(), file));
-                        return true;
+                        card.getCardMetadata().addAppletIgnoreModulesIfPkg(getPackageInfo(data.getInfo(), file));
+                        try {
+                            card.saveInfoData();
+                        } catch (LocalizedCardException e) {
+                            //todo
+                        }
+                        return false;
                     }
                 };
 
@@ -356,7 +382,7 @@ public class CardManagerImpl implements CardManager {
                         null : AID.fromString(data.getDefalutSelected());
                 int appletIdx = 0;
                 int i = 2;
-                for (; i < data.getOriginalAIDs().length * 2 + 2; ) {
+                while (i < data.getOriginalAIDs().length * 2 + 2) {
                     final int appidx = appletIdx;
                     Install command = new Install(file, data, appidx,
                             AID.fromString(data.getOriginalAIDs()[appidx]).equals(defaultSelected));
@@ -371,27 +397,52 @@ public class CardManagerImpl implements CardManager {
                         public boolean execute() throws GPException {
                             AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult(),
                                     data.getAppletNames() != null ? data.getAppletNames()[appidx] : "");
-                            toSave.add(installed);
+                            card.getCardMetadata().addAppletIgnoreModulesIfPkg(installed);
+                            try {
+                                card.saveInfoData();
+                            } catch (LocalizedCardException e) {
+                                //todo
+                            }
                             return false;
                         }
                     };
                     appletIdx++;
                 }
+                ListContents cmd = new ListContents(card.getId());
+                commands[commands.length - 1] = cmd;
+
                 card.secureExecuteCommands(commands);
                 lastInstalledAIDs = data.getAppletAIDsAsInstalled();
+                card.setMetaData(cmd.getResult());
             } finally {
-                try {
-                    for (AppletInfo info : toSave) {
-                        card.getCardMetadata().addApplet(info);
-                    }
-                    card.saveInfoData();
-                    ListContents cmd = new ListContents(card.getId());
-                    card.secureExecuteCommands(cmd);
-                    card.setMetaData(cmd.getResult());
-                } finally {
-                    selectedAID = null;
-                }
+                selectedAID = null;
             }
+        }
+    }
+
+    //deleting without synchronization, card re-listing and other stuff - use with caution
+    private void tryDeletePackageByAID(final CAPFile file) throws CardException, LocalizedCardException {
+        if (!card.getCardMetadata().isPackagePresent(file.getPackageAID())) return;
+        logger.info("Package present - try to uninstall in simple mode.");
+        try {
+            AppletInfo nfo = new AppletInfo("", "", "", "", "", file.getPackageAID().toString());
+            card.secureExecuteCommands(
+                    new Delete(nfo, false),
+                    new GPCommand<Void>() {
+                        @Override
+                        public String getDescription() {
+                            return "Delete applet metadata inside secure loop.";
+                        }
+
+                        @Override
+                        public boolean execute() throws LocalizedCardException {
+                            card.deletePackageData(nfo);
+                            return true;
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            logger.warn("Failed to remove package (ALREADY PRESENT) before installation.");
         }
     }
 

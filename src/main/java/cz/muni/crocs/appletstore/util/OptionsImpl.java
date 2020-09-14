@@ -141,7 +141,7 @@ public class OptionsImpl implements Options<String> {
 
         try {
             if (!file.createNewFile()) {
-                IniParser parser = new IniParserImpl(file, HEADER, "");
+                IniCardTypesParser parser = new IniCardTypesParserImpl(file, HEADER, "");
                 Set<String> keyset = parser.keySet();
                 if (keyset == null)
                     return;
@@ -160,7 +160,7 @@ public class OptionsImpl implements Options<String> {
         File file = new File(Config.OPTIONS_FILE);
         try {
             if (!file.exists()) file.createNewFile();
-            IniParser parser = new IniParserImpl(file, HEADER, "");
+            IniCardTypesParser parser = new IniCardTypesParserImpl(file, HEADER, "");
             options.forEach(parser::addValue);
             parser.store();
         } catch (IOException e) {

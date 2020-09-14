@@ -41,6 +41,7 @@ public class StoreItemInfo extends HintPanel {
             OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean installed = false;
+    private boolean allowInstall; //JCMemory will be blocked
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
     private static final ImageIcon website = new ImageIcon(Config.IMAGE_DIR + "web.png");
@@ -53,6 +54,8 @@ public class StoreItemInfo extends HintPanel {
      */
     public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
+
+        allowInstall = !dataSet.get(JsonParser.TAG_TITLE).getAsString().equals("JCMemory");
 
         //there was a problem with focus when using search feature, request focus
         requestFocusInWindow();
@@ -79,7 +82,11 @@ public class StoreItemInfo extends HintPanel {
         name.setForeground(Color.WHITE);
         add(name, "align left, gaptop 40, width ::350, id title");
 
-        buildMainInstallButton(dataSet, callback);
+        if (allowInstall) {
+            buildMainInstallButton(dataSet, callback);
+        } else {
+            add(getButton("noinstall", new Color(162, 165, 162)), "align right, span 1 2, wrap");
+        }
 
         JLabel author = new Title(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString(), 15f);
         author.setForeground(Color.WHITE);
@@ -172,6 +179,8 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void> call) {
+        if (!allowInstall) return;
+
         addSubTitle("custom_install", "H_custom_install");
 
         addText("custom_version", "H_custom_version", "gapleft 20, gaptop 20");
