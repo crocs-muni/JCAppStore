@@ -85,7 +85,7 @@ public class StoreItemInfo extends HintPanel {
         if (allowInstall) {
             buildMainInstallButton(dataSet, callback);
         } else {
-            add(getButton("noinstall", new Color(162, 165, 162)));
+            add(getButton("noinstall", new Color(162, 165, 162)), "align right, span 1 2, wrap");
         }
 
         JLabel author = new Title(textSrc.getString("author") + dataSet.get(JsonParser.TAG_AUTHOR).getAsString(), 15f);
