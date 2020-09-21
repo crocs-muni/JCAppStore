@@ -19,7 +19,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class ErrorPane extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     /**
      * Error panel creation
@@ -49,18 +50,46 @@ public class ErrorPane extends JPanel {
      * @param imgName error image
      * @param callable callback to call when clicked on a "retry" option
      */
-    public ErrorPane(String titleKey, String imgName, CallBack callable) {
+    public ErrorPane(String titleKey, String imgName, CallBack<?> callable) {
         this(titleKey, imgName);
+        buildRetrySection(callable);
+    }
 
+    /**
+     * Error panel creation
+     * @param titleKey translation key for ResourceBundle
+     * @param message message to display
+     * @param imgName error image
+     * @param callable callback to call when clicked on a "retry" option
+     */
+    public ErrorPane(String titleKey, String message, String imgName, String callableMessage, CallBack<?> callable) {
+        this(titleKey, imgName);
+        add(getCopiableLabel(message));
+        buildRetrySection(callableMessage, callable);
+    }
+
+    /**
+     * Error panel creation
+     * @param title error title
+     * @param message error message
+     * @param imgName error image
+     */
+    public ErrorPane(String title, String message, String imgName) {
+        this(title, imgName);
+        add(getCopiableLabel(message));
+    }
+
+    private void buildRetrySection(String callableMessage, CallBack<?> callable) {
         JPanel panel = new JPanel();
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync.png"));
+        JLabel icon = new JLabel(new ImageIcon(Config.IMAGE_DIR + "sync_white.png"));
         panel.add(icon);
 
-        JLabel retry = new Text(textSrc.getString("retry"), 16f);
+        JLabel retry = new Text(callableMessage, 16f);
         retry.setForeground(Color.WHITE);
+        retry.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panel.add(retry);
 
         panel.setOpaque(false);
@@ -73,15 +102,8 @@ public class ErrorPane extends JPanel {
         add(panel);
     }
 
-    /**
-     * Error panel creation
-     * @param title error title
-     * @param message error message
-     * @param imgName error image
-     */
-    public ErrorPane(String title, String message, String imgName) {
-        this(title, imgName);
-        add(getCopiableLabel(message));
+    private void buildRetrySection(CallBack<?> callable) {
+        buildRetrySection(textSrc.getString("retry"), callable);
     }
 
     private JTextPane getCopiableLabel(String text) {

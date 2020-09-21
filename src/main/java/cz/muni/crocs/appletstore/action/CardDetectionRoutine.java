@@ -24,7 +24,6 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
     private static final int DELAY = 2;
 
     private final AppletStore main;
-    private int counter = 0;
 
     public CardDetectionRoutine(AppletStore main, OnEventCallBack<Void, Void> call) {
         super(call, DELAY, TimeUnit.SECONDS);
@@ -36,12 +35,11 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
         final CardManager manager = CardManagerFactory.getManager();
         logger.info("------- Routine started -------");
         execute(() -> {
-                    try {
+//                    try {
                         int result = manager.needsCardRefresh();
 
                         if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
                             //todo debug
-
                             SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
                                     textSrc.getString("H_service"), Notice.Importance.FATAL,
                                     Notice.CallBackIcon.RETRY, () -> {
@@ -54,21 +52,9 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                         }
 
                         if (result > 0) {
-                            if (result == 2) {
-                                try {
-                                    SwingUtilities.invokeLater(() -> main.switchEnabled(false));
-                                    manager.loadCard();
-                                } catch (LocalizedCardException ex) {
-                                    ex.printStackTrace();
-                                    logger.warn("Failed to load card", ex);
-                                    main.getWindow().getRefreshablePane().showError("E_loading_failed",
-                                            "CARD: " + manager.getLastCardDescriptor() + "<br>",
-                                            ex.getImageName(), ex);
-                                    return null;
-                                } finally {
-                                    SwingUtilities.invokeLater(() -> main.switchEnabled(true));
-                                }
-                            }
+
+                            SwingUtilities.invokeLater(call::onStart);
+                            if (result == 2) manager.loadCard();
 
                             SwingUtilities.invokeLater(() -> {
                                 if (result == 2) {
@@ -78,29 +64,15 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                                     main.getMenu().setCard(null, true);
                                 }
                                 main.getMenu().resetTerminalButtonGroup();
+                                call.onFinish();
                             });
                         }
-                        counter = 0;
-                    } catch (UnknownKeyException ex) {
-                        handleUnknownKey(CardExecutableIdle.get(),
-                                "ERROR: failed to authenticate card. The routine should be error prone!",
-                                "lock.png", textSrc.getString("E_routine"), ex);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        counter++;
-                        main.getWindow().getRefreshablePane().refresh();
-                        if (counter > 10) {
-                            logger.info("[ROUTINE] Terminal routine killed after 10 failures.", ex);
-                            SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfoToClose(
-                                    textSrc.getString("H_routine"), Notice.Importance.FATAL, 20000));
-                            breakExecution();
-                        } else {
-                            logger.info("[ROUTINE] Terminal routine caught an error: " + ex.getMessage() +
-                                    ". The routine continues for: " + counter, e);
-                        }
-                    }
+//                    } catch (UnknownKeyException ex) {
+//                        handleUnknownKey(CardExecutableIdle.get(),
+//                                "ERROR: failed to authenticate card. The routine should be error prone!",
+//                                "lock.png", textSrc.getString("E_routine"), ex);
+//                    }
             return null;
-        }, "ERROR: The routine failure should not occurred. The routine should be error prone!",
-                textSrc.getString("E_routine"));
+        }, "Error loading a card.", textSrc.getString("E_loading_failed"));
     }
 }

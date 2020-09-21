@@ -16,13 +16,14 @@ public class InformerFactory {
 
     public static Informer getInformer() {
         if (informer == null)
-            throw new InvalidParameterException("The informer was not initialized with proper context.");
+            informer = new InformerImpl();
         return informer;
     }
 
     public static Informer setInformer(Informable context) {
         if (informer == null)
-            informer = new InformerImpl(context);
+            informer = new InformerImpl();
+        informer.setInformableDelegate(context);
         return informer;
     }
 

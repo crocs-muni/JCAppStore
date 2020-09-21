@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.action.UnsafeCardOperation;
+
 import java.util.ResourceBundle;
 
 /**
@@ -12,6 +14,8 @@ public class LocalizedException extends Exception {
     private String translated;
     private String image;
     private boolean isKey = true;
+    private UnsafeCardOperation performer = null;
+    private String performerMsg = null;
 
     /**
      * Create an exception
@@ -110,6 +114,39 @@ public class LocalizedException extends Exception {
         this.image = image;
     }
 
+    /**
+     * Create an exception
+     * @param cause cause, english cause description
+     * @param translated translated cause description
+     * @param ex exception to encapsulate
+     * @param op operation callback to perform (to resolve the exception)
+     * @param performerTranslatedMsg string message accompanying the operation - translated
+     */
+    public LocalizedException(String cause, String translated, Throwable ex, String imgName,
+                              UnsafeCardOperation op, String performerTranslatedMsg) {
+        super(cause, ex);
+        this.translated = translated;
+        this.image = imgName;
+        this.performer = op;
+        this.performerMsg = performerTranslatedMsg;
+    }
+
+    /**
+     * Create an exception
+     * @param cause cause, english cause description
+     * @param translated translated cause description
+     * @param op operation callback to perform (to resolve the exception)
+     * @param performerTranslatedMsg string message accompanying the operation - translated
+     */
+    public LocalizedException(String cause, String translated, String imgName,
+                              UnsafeCardOperation op, String performerTranslatedMsg) {
+        super(cause);
+        this.translated = translated;
+        this.image = imgName;
+        this.performer = op;
+        this.performerMsg = performerTranslatedMsg;
+    }
+
     public static LocalizedException from(Exception e) {
         LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(), e.getCause());
         result.isKey = false;
@@ -155,6 +192,29 @@ public class LocalizedException extends Exception {
      */
     public String getImageName() {
         return image == null || image.isEmpty() ? "announcement_white.png" : image;
+    }
+
+    /**
+     * Return unsafe operation to perform to handle the issue
+     * @return unsafe callback (e.g. can throw many exceptions)
+     */
+    public UnsafeCardOperation getUnsafeOperation() {
+        return performer;
+    }
+
+    /**
+     * To erase operation - can prevent from recursion.
+     */
+    public void removeOperation() {
+        this.performer = null;
+    }
+
+    /**
+     * Return associated message with performer (e.g. retry)
+     * @return performer message, localized
+     */
+    public String getOperationLocalizedMsg() {
+        return performerMsg;
     }
 
     @Override

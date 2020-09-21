@@ -3,8 +3,10 @@ package cz.muni.crocs.appletstore.util;
 import cz.muni.crocs.appletstore.Informable;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
+import org.bouncycastle.crypto.engines.EthereumIESEngine;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -18,23 +20,43 @@ public class InformerImpl implements Informer, CallBack<Void> {
     private Thread current;
     private static final Integer DELAY = 8000;
 
-    private final Informable context;
+    private Informable context;
     private final Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
     private volatile Boolean busy = false;
 
-    public InformerImpl(Informable context) {
-        this.context = context;
+    private String lastNotDisplayedMessage;
+    private JPanel lastNotDisplayedPanel;
+
+    @Override
+    public void setInformableDelegate(Informable delegate) {
+        this.context = delegate;
+
+        //some notifications?
+        fireInfo();
+
+        //some messages?
+        if (lastNotDisplayedMessage != null) {
+            showMessage(lastNotDisplayedMessage);
+            lastNotDisplayedMessage = null;
+        }
+
+        //some panel to show?
+        if (lastNotDisplayedPanel != null) {
+            showFullScreenInfo(lastNotDisplayedPanel);
+            lastNotDisplayedPanel = null;
+        }
     }
 
     @Override
     public void showMessage(String info) {
-        SwingUtilities.invokeLater(() -> context.showMessage(info));
+        if (context == null) lastNotDisplayedMessage = info;
+        else SwingUtilities.invokeLater(() -> context.showMessage(info));
     }
 
     @Override
     public void showFullScreenInfo(JPanel panel) {
-        SwingUtilities.invokeLater(() -> context.showFullScreenInfo(panel));
-
+        if (context == null) lastNotDisplayedPanel = panel;
+        else SwingUtilities.invokeLater(() -> context.showFullScreenInfo(panel));
     }
 
     @Override
@@ -54,14 +76,14 @@ public class InformerImpl implements Informer, CallBack<Void> {
             showInfoToClose(msg, status, milis);
         } else {
             queue.add(new Tuple<>(new Notice(msg, status, icon, callable, this), milis));
-            fireInfo();
+            if (context != null) fireInfo();
         }
     }
 
     @Override
     public void showInfoToClose(String msg, Notice.Importance status, Integer milis) {
         queue.add(new Tuple<>(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis));
-        fireInfo();
+        if (context != null) fireInfo();
     }
 
     @Override
@@ -108,7 +130,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
     }
 
     private synchronized void fireInfo() {
-        if (busy)
+        if (busy || queue.isEmpty())
             return;
         busy = true;
         current = getNewNoticeSwitcherThread();

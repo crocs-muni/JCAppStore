@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.util.*;
@@ -30,7 +32,7 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
      * Create a main panel containing left menu, store, my card panels
      * @param context context window
      */
-    public MainPanel(BackgroundChangeable context, CardStatusNotifiable notifiable) {
+    public MainPanel(AppletStore context) {
         //there was a problem with focus when using search feature, request focus
         requestFocusInWindow();
         setOneTouchExpandable(true);
@@ -46,14 +48,14 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     context.switchEnabled(true);
-                    notifiable.updateCardState();
+                    context.getMenu().setCard(CardManagerFactory.getManager().getCard());
                 }
             }, new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     context.switchEnabled(true);
                     localPanel.refresh();
-                    notifiable.updateCardState();
+                    context.getMenu().setCard(CardManagerFactory.getManager().getCard());
                 }
             }
         );
@@ -64,6 +66,8 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
         buildStoreContents();
         buildLogger();
         InformerFactory.setInformer(this);
+
+        new CardDetectionRoutine(context, callback).start();
     }
 
     public void toggleLogger() {

@@ -319,8 +319,7 @@ public class StoreItemInfo extends HintPanel {
     private static void fireInstall(JsonObject dataPack, AppletInfo info, OnEventCallBack<Void, Void> call,
                                     boolean installed, MouseEvent e) {
         if (!CardManagerFactory.getManager().getCard().isAuthenticated()) {
-            InformerFactory.getInformer().showInfo(textSrc.getString("E_install"), Notice.Importance.SEVERE,
-                    Notice.CallBackIcon.CLOSE, null);
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_install"), Notice.Importance.SEVERE, 15000);
             return;
         }
 

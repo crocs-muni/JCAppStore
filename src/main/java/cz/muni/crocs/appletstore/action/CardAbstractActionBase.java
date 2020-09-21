@@ -1,15 +1,14 @@
 package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.card.UnknownKeyException;
+import cz.muni.crocs.appletstore.card.*;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,12 +31,14 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
     protected static ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
             OptionsFactory.getOptions().getLanguageLocale());
     protected final OnEventCallBack<TRet, TArg> call;
-
     //a variable the execution result is stored in
     protected TArg result = null;
 
-    protected CardAbstractActionBase(OnEventCallBack<TRet, TArg> call) {
+    private boolean runImplicitlyCallBack;
+
+    protected CardAbstractActionBase(OnEventCallBack<TRet, TArg> call, boolean runImplicitlyCallBack) {
         this.call = call;
+        this.runImplicitlyCallBack = runImplicitlyCallBack;
     }
 
     @Override
@@ -85,26 +84,26 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
      * @return Job instance (a Thread, Executor service or other way of running the job on another thread)
      */
     protected Runnable job(CardExecutable<TArg> toExecute, String loggerMessage, String title) {
-        call.onStart();
+        if (runImplicitlyCallBack) call.onStart();
         return () -> {
             try {
                 result = toExecute.execute();
-            } catch (UnknownKeyException e) {
-                handleUnknownKey(toExecute, loggerMessage, title, e);
-            } catch (LocalizedCardException ex) {
-                caught(title, loggerMessage, ex);
-            } catch (Exception e) {
-                caught(null, "Unknown exception: " + e.getMessage(),
-                        new LocalizedCardException(e, "E_unknown_error"));
-            } finally {
-//                if (Thread.interrupted()) {
-//                    SwingUtilities.invokeLater(call::onFail);
-//                } else {
+                if (runImplicitlyCallBack) {
                     SwingUtilities.invokeLater(() -> {
                         if (result == null) call.onFinish();
                         else call.onFinish(result);
                     });
-//                }
+                }
+            } catch (UnknownKeyException e) {
+                handleUnknownKey(toExecute, loggerMessage, title, e);
+            } catch (CardNotAuthenticatedException ex) {
+                tryListUnauthenticated();
+            } catch (LocalizedCardException ex) {
+                if (ex.getImageName() != null) caughtGoFullScreen(title, loggerMessage, ex.getImageName(), ex);
+                else caughtGoMessage(title, loggerMessage, ex);
+            } catch (Exception e) {
+                caughtGoMessage(null, "Unknown exception: " + e.getMessage(),
+                        new LocalizedCardException(e, "E_unknown_error"));
             }
         };
     }
@@ -120,35 +119,35 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
      */
     protected void handleUnknownKey(CardExecutable<TArg> toExecute, String loggerMessage, String title,
                                     String image, UnknownKeyException e) {
+        boolean implicit = false;
         try {
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_unknown_key"), "lock.png"));
+
+            if (!runImplicitlyCallBack) SwingUtilities.invokeLater(call::onStart);
+            implicit = runImplicitlyCallBack;
+            runImplicitlyCallBack = true; //act as if it was already enabled -- wont run twice
+
             result = new UnknownKeyHandler<>(toExecute, e).handle();
         } catch (LocalizedCardException ex) {
-            if (image != null) caught(title, loggerMessage, image, ex);
-            else caught(title, loggerMessage, ex);
+            //allways fullscreen
+            caughtGoFullScreen(title, loggerMessage, image, ex);
+        } catch (CardNotAuthenticatedException ex) {
+            logger.warn("Card is not to be authenticated to.", ex);
+            tryListUnauthenticated();
         } catch (UnknownKeyException ex) {
             logger.warn("Card key failure: 2nd time. Running unauthorized version.", ex);
-            SwingUtilities.invokeLater(call::onFail);
-
-            try {
-                //attempt to load unauthorized card
-                CardManagerFactory.getManager().loadCardUnauthorized();
-                InformerFactory.getInformer().showInfo(textSrc.getString("E_master_key_not_found"),
-                        Notice.Importance.SEVERE, Notice.CallBackIcon.CLOSE, null);
-            } catch (LocalizedCardException unauthFail) {
-                InformerFactory.getInformer().showFullScreenInfo(
-                        new ErrorPane(textSrc.getString("E_authentication"),
-                                textSrc.getString("E_master_key_not_found"), "lock.png"));
-            }
+            tryListUnauthenticated();
+        } finally {
+            runImplicitlyCallBack = implicit;
         }
     }
 
     protected void handleUnknownKey(CardExecutable<TArg> toExecute, String loggerMessage, String title, UnknownKeyException e) {
-        handleUnknownKey(toExecute, loggerMessage, title, null, e);
+        handleUnknownKey(toExecute, loggerMessage, title, "error_white.png", e);
     }
 
-    protected void caught(String title, String loggerMessage, LocalizedCardException e) {
+    protected void caughtGoMessage(String title, String loggerMessage, LocalizedException e) {
         e.printStackTrace();
         logger.warn(loggerMessage, e);
         if (title != null) {
@@ -157,17 +156,78 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
         SwingUtilities.invokeLater(call::onFail);
     }
 
-    protected void caught(String title, String loggerMessage, String image, LocalizedCardException e) {
+    protected void caughtGoFullScreen(String title, String loggerMessage, String image, LocalizedException e) {
         e.printStackTrace();
         logger.warn(loggerMessage + e.getMessage());
         if (title != null) {
-            InformerFactory.getInformer().showFullScreenInfo(
-                    new ErrorPane(textSrc.getString(title), e.getLocalizedMessage(), image));
+            ErrorPane err = null;
+
+            try {
+                if (e.getUnsafeOperation() == null) {
+                    err = new ErrorPane(title, e.getLocalizedMessage(), image);
+                } else {
+                    err = getErrorPaneWithOperation(title, image, e);
+                }
+            } catch (Exception ee) {
+                ee.printStackTrace();
+            }
+            InformerFactory.getInformer().showFullScreenInfo(err);
         }
         SwingUtilities.invokeLater(call::onFail);
     }
 
-    private static void showFailed(String title, String message) {
+    protected void tryListUnauthenticated() {
+        if (!runImplicitlyCallBack) SwingUtilities.invokeLater(call::onStart);
+
+        try {
+            //attempt to load unauthorized card
+            CardManagerFactory.getManager().loadCardUnauthorized();
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_master_key_not_found"),
+                    Notice.Importance.SEVERE, 35000);
+            SwingUtilities.invokeLater(call::onFinish);
+
+        } catch (LocalizedCardException unauthFail) {
+            InformerFactory.getInformer().showFullScreenInfo(
+                    new ErrorPane(textSrc.getString("E_authentication"),
+                            textSrc.getString("E_master_key_not_found"), "lock.png"));
+            SwingUtilities.invokeLater(call::onFail);
+        }
+    }
+
+    protected ErrorPane getErrorPaneWithOperation(String title, String image, LocalizedException e) {
+        return new ErrorPane(title, e.getLocalizedMessage(), image, e.getOperationLocalizedMsg(),
+                (CallBack<Void>) () -> {
+//                    new UnsafeCardOperationWrapper(new OnEventCallBack<Void, Void>() {
+//                        @Override
+//                        public void onStart() {
+//                            call.onStart();
+//                        }
+//
+//                        @Override
+//                        public void onFail() {
+//                            call.onFail();
+//                        }
+//
+//                        @Override
+//                        public Void onFinish() {
+//                            call.onFinish();
+//                            return null;
+//                        }
+//
+//                        @Override
+//                        public Void onFinish(Void aVoid) {
+//                            call.onFinish(null);
+//                            return null;
+//                        }
+//                    }, e.getUnsafeOperation()).mouseClicked(null);
+
+                    //todo find solution how to get deafult OnEventCallBack running
+                    InformerFactory.getInformer().showMessage("Not working yet as intended. Re-plug card to perform this operation.");
+                    return null;
+                });
+    }
+
+    protected static void showFailed(String title, String message) {
         JOptionPane.showMessageDialog(null,
                 "<html><div width=\"350\">" + message + "</div></html>",
                 title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
@@ -178,7 +238,7 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
      */
     @FunctionalInterface
     public interface CardExecutable<T> {
-        T execute() throws LocalizedCardException, UnknownKeyException;
+        T execute() throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException;
     }
 
     /**
@@ -214,7 +274,7 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
             this.failed = failedTask;
         }
 
-        T handle() throws LocalizedCardException, UnknownKeyException {
+        T handle() throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
             CardManager manager = CardManagerFactory.getManager();
 
             if (useDefaultTestKey() == JOptionPane.YES_OPTION) {

@@ -97,7 +97,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                 if (p.get() != null) p.get().destroy();
             }
             return null;
-        }, "", "");
+        }, "Failed to run JCAlgTest testing.", textSrc.getString("E_jc_run"));
     }
 
     private Process runJcAlgTestClient(TestForm form)

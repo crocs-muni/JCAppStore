@@ -1,7 +1,16 @@
 package cz.muni.crocs.appletstore.action;
 
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.card.CardNotAuthenticatedException;
+import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.card.UnknownKeyException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
+import cz.muni.crocs.appletstore.ui.ErrorPane;
+import cz.muni.crocs.appletstore.ui.Notice;
+import cz.muni.crocs.appletstore.util.InformerFactory;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 
+import javax.swing.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -10,6 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Abstract card action wrapper providing failure management
  * TODO consider remowing TRet parameter both from wapper and OnEventCallBack iface
+ *
+ * Routine DOES NOT AUTOMATICALLY CALL OnEventCallBack (because it is a routine):
+ *  :either call it manually when implementing execute()
+ *  :but note: it is called once an error is encountered!
  *
  * @author Jiří Horák
  * @version 1.0
@@ -21,7 +34,7 @@ public abstract class CardAbstractRoutine<TRet, TArg> extends CardAbstractAction
     private ScheduledFuture<?> scheduledFuture;
 
     protected CardAbstractRoutine(OnEventCallBack<TRet, TArg> call, int timeUnit, TimeUnit unitMeaning) {
-        super(call);
+        super(call, false);
         this.timeUnit = timeUnit;
         this.unitMeaning = unitMeaning;
     }

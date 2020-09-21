@@ -122,7 +122,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void loadCard() throws LocalizedCardException, UnknownKeyException {
+    public void loadCard() throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         synchronized(lock) {
             lastInstalledAIDs = null;
             selectedAID = null;
@@ -136,7 +136,7 @@ public class CardManagerImpl implements CardManager {
                     card = null;
                 }
 
-            } catch (UnknownKeyException | LocalizedCardException ex) {
+            } catch (UnknownKeyException | CardNotAuthenticatedException | LocalizedCardException ex) {
                 card = null;
                 throw ex;
             } catch (Exception e) {
@@ -211,12 +211,12 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException {
+    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException, CardNotAuthenticatedException {
         install(toCapFile(file), data);
     }
 
     @Override
-    public void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
+    public void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         try {
             installImpl(file, data);
         } catch (CardException e) {
@@ -231,7 +231,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException {
+    public void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }

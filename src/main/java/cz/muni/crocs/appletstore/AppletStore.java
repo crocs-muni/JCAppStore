@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
-import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
@@ -39,14 +38,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      * Create an application
      */
     public AppletStore() {
-        this(null);
-    }
-
-    /**
-     * Create an application
-     * @param fromLoading error exception found when loading the store
-     */
-    public AppletStore(Exception fromLoading) {
         logger.info("------- App started --------");
 
         setup();
@@ -57,7 +48,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
             }
         });
         setBar();
-        initComponents(fromLoading);
+        initComponents();
     }
 
     public MainPanel getWindow() {
@@ -103,17 +94,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     /**
      * Build Swing components and start routine
      */
-    private void initComponents(Exception fromLoading) {
+    private void initComponents() {
         setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
-        window = new MainPanel(this, () -> menu.setCard(CardManagerFactory.getManager().getCard()));
-        setContentPane(window);
-
-        if (fromLoading != null) {
-            fromLoading.printStackTrace();
-            logger.error("Store initialization failed: " + fromLoading.getMessage(), fromLoading);
-            window.getRefreshablePane().showError(new ErrorPane(textSrc.getString("load_failed"),
-                    fromLoading.getLocalizedMessage(), "plug-in-out.png"));
-        }
 
         menu = new Menu(this);
         menu.setCard(CardManagerFactory.getManager().getCard());
@@ -121,10 +103,12 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         setJMenuBar(menu);
         setGlassPane(blocker);
 
+        window = new MainPanel(this);
+        setContentPane(window);
+
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        new CardDetectionRoutine(this, OnEventCallBack.empty()).start();
         setVisible(true);
     }
 

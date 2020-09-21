@@ -13,9 +13,9 @@ import javax.swing.*;
  */
 public class WorkCallback implements OnEventCallBack<Void, Void> {
 
-    private AbstractAction onStart;
-    private AbstractAction onFail;
-    private AbstractAction onFinish;
+    private final AbstractAction onStart;
+    private final AbstractAction onFail;
+    private final AbstractAction onFinish;
 
     /**
      * Create a callback

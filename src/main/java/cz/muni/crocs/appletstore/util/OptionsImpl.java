@@ -23,7 +23,7 @@ public class OptionsImpl implements Options<String> {
 
     private final String HEADER = "JCAppStore";
 
-    private HashMap<String, String> options;
+    private final HashMap<String, String> options;
     private StyleSheet sheet;
     private Language language;
     private Font text;

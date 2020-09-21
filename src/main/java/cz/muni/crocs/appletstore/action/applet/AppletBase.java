@@ -158,7 +158,7 @@ public abstract class AppletBase<T> {
                 manager.setReloadCard();
                 manager.loadCard();
             }
-        } catch (UnknownKeyException e) {
+        } catch (UnknownKeyException | CardNotAuthenticatedException e) {
             throw LocalizedException.from(e);
         }
     }

@@ -167,8 +167,8 @@ public class SendApduAction extends CardAbstractAction<Void, ResponseAPDU> {
     }
 
     private static void showFailToSendCommandAPDU() {
-        InformerFactory.getInformer().showInfo(textSrc.getString("E_custom_command_HW"),
-                Notice.Importance.SEVERE, Notice.CallBackIcon.CLOSE, null, 15000);
+        InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_custom_command_HW"),
+                Notice.Importance.SEVERE, 15000);
     }
 
     @Override
