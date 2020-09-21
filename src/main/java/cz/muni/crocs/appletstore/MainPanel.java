@@ -30,29 +30,33 @@ public class MainPanel extends BackgroundImgSplitPanel implements Informable {
      * Create a main panel containing left menu, store, my card panels
      * @param context context window
      */
-    public MainPanel(BackgroundChangeable context) {
+    public MainPanel(BackgroundChangeable context, CardStatusNotifiable notifiable) {
         //there was a problem with focus when using search feature, request focus
         requestFocusInWindow();
         setOneTouchExpandable(true);
         setDividerLocation(150);
 
-        OnEventCallBack<Void, Void> callback = new WorkCallback(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                context.switchEnabled(false);
+        OnEventCallBack<Void, Void> callback = new WorkCallback(
+            new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    context.switchEnabled(false);
+                }
+            }, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    context.switchEnabled(true);
+                    notifiable.updateCardState();
+                }
+            }, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    context.switchEnabled(true);
+                    localPanel.refresh();
+                    notifiable.updateCardState();
+                }
             }
-        }, new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                context.switchEnabled(true);
-            }
-        }, new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                context.switchEnabled(true);
-                localPanel.refresh();
-            }
-        });
+        );
 
         localPanel = new LocalWindowPane(callback);
         storePanel = new StoreWindowManager(callback);

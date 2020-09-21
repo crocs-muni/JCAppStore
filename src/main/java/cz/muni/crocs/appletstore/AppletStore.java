@@ -31,7 +31,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final int PREFFERED_WIDTH = 1100;
     private static final int PREFFERED_HEIGHT = 550;
 
-    private volatile boolean windowOpened = true;
     private MainPanel window;
     private Menu menu;
     private final GlassPaneBlocker blocker = new GlassPaneBlocker();
@@ -55,7 +54,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 OptionsFactory.getOptions().save();
-                windowOpened = false;
             }
         });
         setBar();
@@ -72,10 +70,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         //todo uncomment for apple branch
 //        Application.getApplication().setDockIconImage(
 //                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
-    }
-
-    public synchronized boolean isWindowOpened() {
-        return windowOpened;
     }
 
     public Menu getMenu() {
@@ -111,7 +105,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      */
     private void initComponents(Exception fromLoading) {
         setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
-        window = new MainPanel(this);
+        window = new MainPanel(this, () -> menu.setCard(CardManagerFactory.getManager().getCard()));
         setContentPane(window);
 
         if (fromLoading != null) {
@@ -152,4 +146,5 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     public void setDisabledMessage(String message) {
         blocker.setMessage(message);
     }
+
 }

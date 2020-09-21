@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.card.UnknownKeyException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.HtmlText;
+import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -127,12 +128,19 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
             if (image != null) caught(title, loggerMessage, image, ex);
             else caught(title, loggerMessage, ex);
         } catch (UnknownKeyException ex) {
-            ex.printStackTrace();
-            logger.error("UnknownKeyException after key was set. Should not even get here.", ex);
+            logger.warn("Card key failure: 2nd time. Running unauthorized version.", ex);
             SwingUtilities.invokeLater(call::onFail);
-            InformerFactory.getInformer().showFullScreenInfo(
-                    new ErrorPane(textSrc.getString("E_authentication"),
-                            textSrc.getString("E_master_key_not_found"), "lock.png"));
+
+            try {
+                //attempt to load unauthorized card
+                CardManagerFactory.getManager().loadCardUnauthorized();
+                InformerFactory.getInformer().showInfo(textSrc.getString("E_master_key_not_found"),
+                        Notice.Importance.SEVERE, Notice.CallBackIcon.CLOSE, null);
+            } catch (LocalizedCardException unauthFail) {
+                InformerFactory.getInformer().showFullScreenInfo(
+                        new ErrorPane(textSrc.getString("E_authentication"),
+                                textSrc.getString("E_master_key_not_found"), "lock.png"));
+            }
         }
     }
 

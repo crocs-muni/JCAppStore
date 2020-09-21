@@ -32,9 +32,9 @@ public class SplashScreen extends JWindow {
 
     private Timer timer;
     private int progress = 0;
-    private Random r = new Random();
-    private ProcessTrackable loader;
-    private Font font = new Font("Courier", Font.PLAIN, 14);
+    private final Random r = new Random();
+    private final ProcessTrackable loader;
+    private final Font font = new Font("Courier", Font.PLAIN, 14);
     private boolean update;
     private String numbers = "";
 

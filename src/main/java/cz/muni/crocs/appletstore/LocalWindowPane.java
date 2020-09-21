@@ -16,6 +16,7 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.smartcardio.Card;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -34,18 +35,19 @@ import java.util.*;
 public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalWindowPane.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private LocalSubMenu submenu;
-    private LocalItemInfo infoLayout;
-    private JPanel windowLayout;
-    private JScrollPane windowScroll;
+    private final LocalSubMenu submenu;
+    private final LocalItemInfo infoLayout;
+    private final JPanel windowLayout;
+    private final JScrollPane windowScroll;
 
     private SearchBar searchBar;
-    private TreeSet<LocalItem> items = new TreeSet<>();
-    private LocalInstallItem installCmd = new LocalInstallItem();
+    private final TreeSet<LocalItem> items = new TreeSet<>();
+    private final LocalInstallItem installCmd = new LocalInstallItem();
 
-    private GridBagConstraints constraints;
+    private final GridBagConstraints constraints;
 
     /**
      * Local panel
@@ -125,7 +127,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             return;
         }
 
-        if (verifyCardLifeState(card.getLifeCycle())) {
+        if (!card.isAuthenticated() || verifyCardLifeState(card.getLifeCycle())) {
             Set<AppletInfo> cardApplets = card.getCardMetadata().getApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
@@ -306,7 +308,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                     windowLayout.add(item);
             }
         }
-        windowLayout.add(installCmd);
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        if (card != null && card.isAuthenticated()) windowLayout.add(installCmd);
         windowLayout.revalidate();
         windowLayout.repaint();
     }

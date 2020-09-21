@@ -39,7 +39,7 @@ public class CardManagerImpl implements CardManager {
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final Terminals terminals = new Terminals();
-    private CardInstanceImpl card;
+    private CardInstanceManagerExtension card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
     private String[] lastInstalledAIDs = null;
@@ -131,6 +131,7 @@ public class CardManagerImpl implements CardManager {
                     CardDetails details = getCardDetails(terminals.getTerminal());
                     lastCardId = CardDetails.getId(details);
                     card = new CardInstanceImpl(details, terminals.getTerminal(), tryGeneric);
+                    logger.info("Card successfully refreshed.");
                 } else {
                     card = null;
                 }
@@ -144,14 +145,13 @@ public class CardManagerImpl implements CardManager {
             } finally {
                 tryGeneric = false;
             }
-            logger.info("Card successfully refreshed.");
 
             if (card != null && card.shouldJCAlgTestFinderRun()) getJCAlgTestDependencies();
         }
     }
 
     @Override
-    public void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException {
+    public void loadCardUnauthorized() throws LocalizedCardException {
         synchronized(lock) {
             lastInstalledAIDs = null;
             selectedAID = null;
@@ -159,7 +159,8 @@ public class CardManagerImpl implements CardManager {
                 if (terminals.getState() == Terminals.TerminalState.OK) {
                     CardDetails details = getCardDetails(terminals.getTerminal());
                     lastCardId = CardDetails.getId(details);
-                    //todo instantiate new card without ability to perform secured actions (new CardInstance impl?)
+                    card = new CardInstanceUnauthorizedImpl(details, terminals.getTerminal());
+                    logger.info("Card - unauthorized - loaded.");
                 } else {
                     card = null;
                 }
@@ -169,7 +170,6 @@ public class CardManagerImpl implements CardManager {
             } finally {
                 tryGeneric = false;
             }
-            logger.info("Card - unauthorized - loaded.");
         }
     }
 

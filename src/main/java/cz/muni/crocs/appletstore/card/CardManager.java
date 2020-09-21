@@ -121,7 +121,7 @@ public interface CardManager {
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessary steps to be ready to work with this card. No authorization (to SD) is required.
      */
-    void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException;
+    void loadCardUnauthorized() throws LocalizedCardException;
 
     /**
      * Invalidates the card instance data

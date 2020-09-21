@@ -32,6 +32,8 @@ public class Menu extends JMenuBar {
 
     private static final ImageIcon CARD_OK = new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png");
     private static final ImageIcon CARD_UNKNOWN = new ImageIcon(Config.IMAGE_DIR + "creditcard-white-exclamation.png");
+    private static final ImageIcon CARD_LOCKED = new ImageIcon(Config.IMAGE_DIR + "creditcard-locked.png");
+    private static final ImageIcon CARD_NOT_PRESENT = new ImageIcon(Config.IMAGE_DIR + "creditcard-missing.png");
 
     private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
         @Override
@@ -69,21 +71,28 @@ public class Menu extends JMenuBar {
     /**
      * Set new name of the card inserted in the application bar
      *
-     * @param card       custom card name provided by user OR obtained from database when inserted
-     * @param identifier card identifier, null or empty string if no card present
+     * @param card card instance
      */
-    public void setCard(String card, String identifier, boolean hasDetails) {
-        if (identifier == null || identifier.isEmpty()) {
-            card = textSrc.getString("no_card");
+    public void setCard(CardInstance card, boolean hasDetails) {
+        String cardName;
+        if (card == null) {
+            cardName = textSrc.getString("no_card");
+            currentCardImg.setIcon(CARD_NOT_PRESENT);
+            currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         } else {
-            card += (card != null && !card.isEmpty()) ?
-                    " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
+            cardName = card.getName();
+            cardName += ((cardName != null && !cardName.isEmpty()) ?
+                    " <font color='#a3a3a3'>[" + card.getId() + "]</font>" : card.getId());
+            ImageIcon toSet = hasDetails ? (card.isAuthenticated() ? CARD_OK : CARD_LOCKED) : CARD_UNKNOWN;
+            currentCardImg.setIcon(toSet);
+            currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            if (toSet == CARD_UNKNOWN) currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            else currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
 
-        currentCardImg.setIcon(hasDetails ? CARD_OK : CARD_UNKNOWN);
         currentCardImg.setToolTipText(hasDetails ? null : textSrc.getString("jc_unknown"));
 
-        currentCard.setText(card);
+        currentCard.setText(cardName);
         revalidate();
         repaint();
     }
@@ -95,9 +104,9 @@ public class Menu extends JMenuBar {
      */
     public void setCard(CardInstance card) {
         if (card == null) {
-            setCard(null, null, true);
+            setCard(null, true);
         } else {
-            setCard(card.getName(), card.getId(), card.getCardMetadata().getJCData() != null);
+            setCard(card, card.getCardMetadata().getJCData() != null);
         }
     }
 
@@ -291,7 +300,7 @@ public class Menu extends JMenuBar {
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
-        currentCardImg = new Text(CARD_OK);
+        currentCardImg = new Text(CARD_NOT_PRESENT);
         currentCardImg.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -302,7 +311,6 @@ public class Menu extends JMenuBar {
                 testing.mouseClicked(e);
             }
         });
-        currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         midContainer.add(currentCardImg);
         currentCard = new HtmlText();
         currentCard.setForeground(Color.white);
@@ -322,7 +330,6 @@ public class Menu extends JMenuBar {
                 }
             }
         });
-        currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         midContainer.add(currentCard);
         add(midContainer);
     }

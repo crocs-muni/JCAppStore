@@ -31,11 +31,12 @@ import java.util.*;
 /**
  * Card instance of card inserted in selected terminal
  * provides all functionality over card communication
+ * todo: introduce base class that implements functionality of both authorized and unauthorized card instances
  *
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardInstanceImpl implements CardInstance {
+public class CardInstanceImpl implements CardInstanceManagerExtension {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceImpl.class);
     private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
             OptionsFactory.getOptions().getLanguageLocale());
@@ -171,28 +172,33 @@ public class CardInstanceImpl implements CardInstance {
         return task != null && !task.finished();
     }
 
+    @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
-    ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
+    ///////////////////  CardInstanceManagerExtension        ///////////////////
     ////////////////////////////////////////////////////////////////////////////
 
-    CardDetails getDetails() {
+    @Override
+    public CardDetails getDetails() {
         return details;
     }
 
-    /**
-     * Set default selected applet of the card
-     * @param defaultSelected applet that is default selected on card
-     */
-    void setDefaultSelected(AID defaultSelected) {
+    @Override
+    public void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
     }
 
-    void saveInfoData() throws LocalizedCardException {
+    @Override
+    public void saveInfoData() throws LocalizedCardException {
         AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
         serializer.serialize(metadata, new File(Config.APP_DATA_DIR + Config.S + getId()));
     }
 
-    void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
+    @Override
+    public void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
         metadata.removeInvalidApplets();
         for (AppletInfo info : toSave) {
             metadata.insertOrRewriteApplet(info);
@@ -200,12 +206,13 @@ public class CardInstanceImpl implements CardInstance {
         saveInfoData();
     }
 
-    void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
+    @Override
+    public void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
         deleteAppletData(pkg, false);
     }
 
-    //delete applet metadata when uninstalling, presumes applet not to be package
-    void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+    @Override
+    public void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
         metadata.deleteAppletInfo(applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -216,13 +223,8 @@ public class CardInstanceImpl implements CardInstance {
         saveInfoData();
     }
 
-    /**
-     * Executes any desired command without establishing secure channel
-     * @param commands commands to execute
-     * @throws LocalizedCardException unable to perform command
-     * @throws CardException unable to perform command
-     */
-    void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+    @Override
+    public void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         Card card;
         APDUBIBO channel;
 
@@ -259,12 +261,8 @@ public class CardInstanceImpl implements CardInstance {
         }
     }
 
-    /**
-     * Executes any desired command using secure channel
-     * @param commands commands to execute
-     * @throws CardException unable to perform command
-     */
-    void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+    @Override
+    public void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         executeCommands(new GPCommand<Void>() {
             @Override
             public String getDescription() {
@@ -314,19 +312,18 @@ public class CardInstanceImpl implements CardInstance {
         });
     }
 
-    /**
-     * Used to update applet list on install
-     * @param metadata applet info list and other information to set
-     */
-    void setMetaData(CardInstanceMetaData metadata) {
+    @Override
+    public void setMetaData(CardInstanceMetaData metadata) {
         this.metadata = metadata;
     }
 
-    void disableTemporarilyJCAlgTestFinder() {
+    @Override
+    public void disableTemporarilyJCAlgTestFinder() {
         doJCAlgTestFinder = false;
     }
 
-    boolean shouldJCAlgTestFinderRun() {
+    @Override
+    public boolean shouldJCAlgTestFinderRun() {
         return doJCAlgTestFinder;
     }
 

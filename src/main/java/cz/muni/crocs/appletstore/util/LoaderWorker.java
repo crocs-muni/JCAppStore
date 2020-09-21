@@ -32,6 +32,7 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
         //first get options will force to initialize
         final CardManager manager = CardManagerFactory.getManager();
 
+        //todo make use of loader action instead of implementing this once again...
         try {
             info = textSrc.getString("detect_cards");
             manager.needsCardRefresh();
@@ -53,14 +54,29 @@ public abstract class LoaderWorker extends SwingWorker<Exception, Void> implemen
                     ex.setImageName("plug-in-out.jpg");
                     return ex;
                 } catch (UnknownKeyException ex) {
-                    update("failed_detect", 200, getMaximum());
-                    return new LocalizedCardException("WARNING: Card loading failed, should've not happened!",
-                            "E_master_key_not_found");
+                    try {
+                        //attempt to load unauthorized card
+                        manager.loadCardUnauthorized();
+                        update("launch", 100, getMaximum());
+                        return null;
+                    } catch (LocalizedCardException unauthFail) {
+                        update("failed_detect", 200, getMaximum());
+                        return new LocalizedCardException("WARNING: Card loading failed, should've not happened!",
+                                "E_master_key_not_found");
+                    }
                 }
             } else {
-                update("E_unknown_key", 200, getMaximum());
-                return new LocalizedCardException("Card auth failed: user refused to use default test key.",
-                        "E_master_key_not_found", "lock.png");
+                try {
+                    //attempt to load unauthorized card
+                    manager.loadCardUnauthorized();
+                    update("launch", 100, getMaximum());
+                    return null;
+                } catch (LocalizedCardException unauthFail) {
+                    update("E_unknown_key", 200, getMaximum());
+                    return new LocalizedCardException("Card auth failed: user refused to use default test key.",
+                            "E_master_key_not_found", "lock.png");
+                }
+
             }
         } catch (LocalizedException | GPException e) {
             update("failed_detect", 200, getMaximum());

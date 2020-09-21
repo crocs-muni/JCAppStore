@@ -26,20 +26,21 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalItemInfo extends HintPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private HintLabel name = new HintTitle();
-    private JLabel author = new Text();
-    private HintLabel version = new HintText();
-    private HintLabel sdk = new HintText();
-    private HintLabel id = new HintText();;
-    private HintLabel type = new HintText();
-    private HintLabel domain = new HintText();
-    private JLabel uninstall;
-    private HintLabel rawApdu;
+    private final HintLabel name = new HintTitle();
+    private final JLabel author = new Text();
+    private final HintLabel version = new HintText();
+    private final HintLabel sdk = new HintText();
+    private final HintLabel id = new HintText();;
+    private final HintLabel type = new HintText();
+    private final HintLabel domain = new HintText();
+    private final JLabel uninstall;
+    private final HintLabel rawApdu;
 
-    private SendApduAction send;
-    private DeleteAction delete;
+    private final SendApduAction send;
+    private final DeleteAction delete;
 
     /**
      * Create a local applet detailed info panel

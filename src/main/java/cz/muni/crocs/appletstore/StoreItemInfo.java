@@ -318,6 +318,12 @@ public class StoreItemInfo extends HintPanel {
 
     private static void fireInstall(JsonObject dataPack, AppletInfo info, OnEventCallBack<Void, Void> call,
                                     boolean installed, MouseEvent e) {
+        if (!CardManagerFactory.getManager().getCard().isAuthenticated()) {
+            InformerFactory.getInformer().showInfo(textSrc.getString("E_install"), Notice.Importance.SEVERE,
+                    Notice.CallBackIcon.CLOSE, null);
+            return;
+        }
+
         String name = dataPack.get(JsonParser.TAG_NAME).getAsString();
         String signer = dataPack.get(JsonParser.TAG_PGP_SIGNER).getAsString();
         String fingerprint = dataPack.get(JsonParser.TAG_PGP_FINGERPRINT).getAsString();
