@@ -372,7 +372,7 @@ public class CardManagerImpl implements CardManager {
                         try {
                             card.saveInfoData();
                         } catch (LocalizedCardException e) {
-                            //todo
+                            logger.error("Failed to save card info data when adding package info metadata.", e);
                         }
                         return false;
                     }
@@ -401,7 +401,7 @@ public class CardManagerImpl implements CardManager {
                             try {
                                 card.saveInfoData();
                             } catch (LocalizedCardException e) {
-                                //todo
+                                logger.error("Failed to save card info data when adding applet info metadata.", e);
                             }
                             return false;
                         }
@@ -421,7 +421,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     //deleting without synchronization, card re-listing and other stuff - use with caution
-    private void tryDeletePackageByAID(final CAPFile file) throws CardException, LocalizedCardException {
+    private void tryDeletePackageByAID(final CAPFile file) {
         if (!card.getCardMetadata().isPackagePresent(file.getPackageAID())) return;
         logger.info("Package present - try to uninstall in simple mode.");
         try {

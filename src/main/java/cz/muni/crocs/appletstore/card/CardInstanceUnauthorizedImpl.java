@@ -270,34 +270,6 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
         }
     }
 
-    //todo save this card to cards.ini?
-    private boolean saveDetails() throws LocalizedCardException {
-//        IniCardTypesParserImpl parser;
-//        try {
-//            parser = new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
-//            if (parser.isHeaderPresent()) {
-//                logger.info("Card " + id + " metadata found.");
-//                name = parser.getValue(IniCardTypesParser.TAG_NAME);
-//                return true;
-//            }
-//
-//            logger.info("Card " + id + " saved into card list database.");
-//            parser.addValue(IniCardTypesParser.TAG_NAME, name)
-//                    .addValue(IniCardTypesParser.TAG_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
-//                    .addValue(IniCardTypesParser.TAG_CIN, details.getCin())
-//                    .addValue(IniCardTypesParser.TAG_IIN, details.getIin())
-//                    .addValue(IniCardTypesParser.TAG_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
-//                    .addValue(IniCardTypesParser.TAG_DATA, details.getCardData())
-//                    .addValue(IniCardTypesParser.TAG_CAPABILITIES, details.getCardCapabilities())
-//                    .addValue(IniCardTypesParser.TAG_KEY_INFO, details.getKeyInfo())
-//                    .store();
-//            return false;
-//        } catch (IOException e) {
-//            throw new LocalizedCardException("Unable to save new card details.", "E_card_details_failed");
-//        }
-        return false;
-    }
-
     @Override
     public int hashCode() {
         return id.hashCode();

@@ -68,6 +68,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                     if (form.isShareTestResultsSelected() && !shareTestResults(testResults)) {
                         //todo notify user or just ignore?
+                        logger.warn("Failed to share test results. You can upload them manually. See official JCAlgTest website.");
                     }
 
                     propagateTestResults(testResults);
