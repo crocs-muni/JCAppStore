@@ -39,21 +39,16 @@ public class LocalItemInfo extends HintPanel {
     private final JLabel uninstall;
     private final HintLabel rawApdu;
 
-    private final SendApduAction send;
-    private final DeleteAction delete;
+    private AppletInfo appletinfo = null;
 
     /**
      * Create a local applet detailed info panel
-     * @param call callback to forward to actions performed from this panel (send APDU/delete applet)
      */
-    public LocalItemInfo(OnEventCallBack<Void, Void> call) {
+    public LocalItemInfo() {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
         setOpaque(false);
         setLayout(new MigLayout());
-
-        send = new SendApduAction(null, call);
-        delete = new DeleteAction(null, call);
 
         JLabel close = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
         close.addMouseListener(new MouseAdapter() {
@@ -94,14 +89,24 @@ public class LocalItemInfo extends HintPanel {
         uninstall = new HintText(textSrc.getString("uninstall"), "", new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        uninstall.addMouseListener(delete);
+        uninstall.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new DeleteAction(appletinfo, GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         uninstall.setToolTipText(uninstall.getText());
         add(uninstall, "span2, wrap");
 
         rawApdu = new HintText(textSrc.getString("custom_command"),
                 textSrc.getString("H_custom_command"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        rawApdu.addMouseListener(send);
+        rawApdu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new SendApduAction(appletinfo, GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         rawApdu.setToolTipText(rawApdu.getText());
         add(rawApdu, "span2, wrap");
     }
@@ -115,8 +120,7 @@ public class LocalItemInfo extends HintPanel {
             unset();
             return;
         }
-        delete.setInfo(info);
-        send.setInfo(info);
+        appletinfo = info;
 
         setLabel(name, info.getName() == null ? info.getAid().toString() : info.getName(), "H_name");
         setLabel(author, textSrc.getString("author") + getValue(info.getAuthor()));

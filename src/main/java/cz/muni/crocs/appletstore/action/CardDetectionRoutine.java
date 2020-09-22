@@ -1,6 +1,6 @@
 package cz.muni.crocs.appletstore.action;
 
-import cz.muni.crocs.appletstore.AppletStore;
+import cz.muni.crocs.appletstore.GUIFactory;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.InformerFactory;
@@ -23,11 +23,8 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
     private static final Logger logger = LoggerFactory.getLogger(CardDetectionRoutine.class);
     private static final int DELAY = 2;
 
-    private final AppletStore main;
-
-    public CardDetectionRoutine(AppletStore main, OnEventCallBack<Void, Void> call) {
+    public CardDetectionRoutine(OnEventCallBack<Void, Void> call) {
         super(call, DELAY, TimeUnit.SECONDS);
-        this.main = main;
     }
 
     @Override
@@ -43,11 +40,11 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                             SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
                                     textSrc.getString("H_service"), Notice.Importance.FATAL,
                                     Notice.CallBackIcon.RETRY, () -> {
-                                        new CardDetectionRoutine(main, OnEventCallBack.empty()).start();
+                                        new CardDetectionRoutine(call).start();
                                         return null;
                                     }));
                             logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
-                            main.getWindow().getRefreshablePane().refresh();
+                            GUIFactory.Components().getStoreWindows().refreshCardPanel();
                             breakExecution();
                         }
 
@@ -58,12 +55,9 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
 
                             SwingUtilities.invokeLater(() -> {
                                 if (result == 2) {
-                                    main.getWindow().getRefreshablePane().refresh();
-                                    main.getMenu().setCard(manager.getCard());
-                                } else {
-                                    main.getMenu().setCard(null, true);
+                                    GUIFactory.Components().getStoreWindows().refreshCardPanel();
                                 }
-                                main.getMenu().resetTerminalButtonGroup();
+                                GUIFactory.Components().getCardStatusNotifiable().updateCardState();
                                 call.onFinish();
                             });
                         }

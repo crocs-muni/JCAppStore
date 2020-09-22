@@ -20,11 +20,10 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Menu extends JMenuBar {
+public class Menu extends JMenuBar implements CardStatusNotifiable {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private final AppletStore context;
     private int lastNumOfReadersConnected = 0;
     private CustomNotifiableJmenu readers;
     private JLabel currentCard;
@@ -38,34 +37,40 @@ public class Menu extends JMenuBar {
     private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
         @Override
         public void onStart() {
+            BackgroundChangeable context = GUIFactory.Components().getBackgroundChangeable();
             context.setDisabledMessage(textSrc.getString("jcdia_runmsg"));
             context.switchEnabled(false);
         }
 
         @Override
         public void onFail() {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
         }
 
         @Override
         public Void onFinish() {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
             return null;
         }
 
         @Override
         public Void onFinish(byte[] bytes) {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
             return null;
         }
     });
 
-    public Menu(AppletStore parent) {
-        context = parent;
+    public Menu() {
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
         setBorder(null);
         buildMenu();
+    }
+
+    @Override
+    public void updateCardState() {
+        setCard(CardManagerFactory.getManager().getCard());
+        resetTerminalButtonGroup();
     }
 
     /**
@@ -73,7 +78,7 @@ public class Menu extends JMenuBar {
      *
      * @param card card instance
      */
-    public void setCard(CardInstance card, boolean hasDetails) {
+    private void setCard(CardInstance card, boolean hasDetails) {
         String cardName;
         if (card == null) {
             cardName = textSrc.getString("no_card");
@@ -102,7 +107,7 @@ public class Menu extends JMenuBar {
      *
      * @param card       card isntance
      */
-    public void setCard(CardInstance card) {
+    private void setCard(CardInstance card) {
         if (card == null) {
             setCard(null, true);
         } else {
@@ -113,7 +118,7 @@ public class Menu extends JMenuBar {
     /**
      * Reset if new card readers found
      */
-    public void resetTerminalButtonGroup() {
+    private void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
 
@@ -178,7 +183,7 @@ public class Menu extends JMenuBar {
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Settings settings = new Settings(context);
+                Settings settings = new Settings();
                 Object[] options = {textSrc.getString("ok"), textSrc.getString("cancel")};
                 int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
@@ -207,7 +212,7 @@ public class Menu extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(null,
-                        new CardInfoPanel(context, context.getWindow().getRefreshablePane()), textSrc.getString("card_info"),
+                        new CardInfoPanel(), textSrc.getString("card_info"),
                         JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
             }
         }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
@@ -229,7 +234,7 @@ public class Menu extends JMenuBar {
         submenu.add(selectableMenuItem(new AbstractAction(textSrc.getString("logger")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                context.getWindow().toggleLogger();
+               GUIFactory.Components().getStoreWindows().toggleLogger();
             }
         }, "", KeyEvent.VK_L, InputEvent.ALT_MASK));
 
@@ -296,7 +301,6 @@ public class Menu extends JMenuBar {
     private void buildReadersItem() {
         readers = new CustomNotifiableJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
         add(readers);
-        resetTerminalButtonGroup();
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);

@@ -11,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Ref;
 import java.util.ResourceBundle;
 
 /**
@@ -26,15 +27,16 @@ public class CardInfoPanel extends JPanel {
 
     /**
      * Crate a card info panel
-     * @param changeable background component
-     * @param refreshable refreshable panel component
      */
-    public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
+    public CardInfoPanel() {
         setLayout(new MigLayout());
         add(new JLabel(textSrc.getString("working")));
         final CardInfoPanel self = this;
 
         if (CardManagerFactory.getManager().isCard()) {
+            BackgroundChangeable changeable = GUIFactory.Components().getBackgroundChangeable();
+            Refreshable refreshable = GUIFactory.Components().getRefreshable();
+
             new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
                 @Override
                 public void onStart() {

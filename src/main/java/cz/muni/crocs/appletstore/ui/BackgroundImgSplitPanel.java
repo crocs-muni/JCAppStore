@@ -17,12 +17,14 @@ import java.io.IOException;
 
 /**
  * Background panel used as a base class for MainPanel, displays the background image
+ * can display two panels - main application GUI and logger (default:hidden)
+ *
  *
  * @author Jiří Horák
  * @version 1.0
  */
 public class BackgroundImgSplitPanel extends JSplitPane {
-    private static Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
+    private static final Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
     private Image bg;
     private int width = -1, height = -1;
 

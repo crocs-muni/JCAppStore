@@ -13,7 +13,7 @@ import java.awt.*;
  */
 public class StoreTitle extends Title implements Item {
 
-    private int position;
+    private final int position;
 
     /**
      * Create a category name

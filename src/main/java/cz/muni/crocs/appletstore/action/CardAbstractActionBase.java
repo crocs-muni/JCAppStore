@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.action;
 
+import cz.muni.crocs.appletstore.CardStatusNotifiable;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.GUIFactory;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;

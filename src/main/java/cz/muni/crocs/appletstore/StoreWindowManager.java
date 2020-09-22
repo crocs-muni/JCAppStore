@@ -31,24 +31,20 @@ import java.util.concurrent.TimeoutException;
  * @version 1.0
  */
 public class StoreWindowManager extends JPanel implements CallBack<Void>, Searchable, Store {
-    private static Logger logger = LoggerFactory.getLogger(StoreWindowManager.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(StoreWindowManager.class);
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private OnEventCallBack<Void, Void> callbackOnAction;
     private Component currentComponent = null;
     private Searchable store;
     private volatile State state = State.UNINITIALIZED;
-    private GridBagConstraints constraints;
-    private StoreSubMenu submenu;
+    private final GridBagConstraints constraints;
+    private final StoreSubMenu submenu;
     private SearchBar searchBar;
 
     /**
      * Store behaviour manager
-     * @param callbackOnAction callback forwarded to inner children, it can disable the panel (defined in MainPanel)
      */
-    public StoreWindowManager(OnEventCallBack<Void, Void> callbackOnAction) {
-        this.callbackOnAction = callbackOnAction;
-
+    public StoreWindowManager() {
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
@@ -254,7 +250,7 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             setFailed();
             return;
         }
-        StoreWindowPane store = new StoreWindowPane(data, callbackOnAction);
+        StoreWindowPane store = new StoreWindowPane(data);
         store.registerSearchBar(searchBar);
         this.store = store;
 

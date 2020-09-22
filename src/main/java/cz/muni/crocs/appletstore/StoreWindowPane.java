@@ -22,21 +22,18 @@ import java.util.List;
  * @version 1.0
  */
 public class StoreWindowPane extends JScrollPane implements Searchable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private OnEventCallBack<Void, Void> callback;
-    private JPanel storeLayout = new JPanel();
-    private TreeSet<Item> items = new TreeSet<>();
-    private List<JsonObject> data;
+    private final JPanel storeLayout = new JPanel();
+    private final TreeSet<Item> items = new TreeSet<>();
+    private final List<JsonObject> data;
     private JsonObject currentlyShown;
     private SearchBar searchBar;
 
     /**
      * Store panel
-     * @param callback callback forwarded to inner children, it can disable the panel (defined in MainPanel)
      */
-    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
+    public StoreWindowPane(List<JsonObject> data) {
         this.data = data;
-        this.callback = callback;
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder());
         setViewportBorder(null);
@@ -94,7 +91,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private void showInfo(JsonObject dataSet) {
         currentlyShown = dataSet;
-        setViewportView(new StoreItemInfo(dataSet, this, callback));
+        setViewportView(new StoreItemInfo(dataSet));
     }
 
     private void showPanel(SortedSet<Item> sortedItems) {

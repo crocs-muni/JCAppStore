@@ -17,7 +17,7 @@ import java.io.File;
  */
 public class StoreItem extends JPanel implements Item {
 
-    private String searchQuery;
+    private final String searchQuery;
     private int position;
 
     /**

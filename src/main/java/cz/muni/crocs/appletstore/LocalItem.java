@@ -27,20 +27,21 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalItem extends JPanel implements Item {
-    private static Logger logger = LoggerFactory.getLogger(LocalItem.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private static BufferedImage issuer = getIssuerImg();
+    private static final Logger logger = LoggerFactory.getLogger(LocalItem.class);
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final BufferedImage issuer = getIssuerImg();
     private static final int LABELDIMEN = 40;
 
     private static BufferedImage newItem;
     private static BufferedImage superSelected;
 
-    private String searchQuery;
-    private JPanel container;
-    private String name; //either name or AID if name missing
+    private final String searchQuery;
+    private final JPanel container;
+    private final String name; //either name or AID if name missing
     public final AppletInfo info;
-    private Color selected = new Color(207, 244, 210);
-    private CardManager manager;
+    private final Color selected = new Color(207, 244, 210);
+    private final CardManager manager;
 
     /**
      * Create an applet instance item from its info

@@ -41,7 +41,7 @@ public class StoreItemInfo extends HintPanel {
             OptionsFactory.getOptions().getLanguageLocale());
 
     private boolean installed = false;
-    private boolean allowInstall; //JCMemory will be blocked
+    private final boolean allowInstall; //JCMemory will be blocked
     private JComboBox<String> versionComboBox;
     private JComboBox<String> compilerVersionComboBox;
     private static final ImageIcon website = new ImageIcon(Config.IMAGE_DIR + "web.png");
@@ -49,10 +49,8 @@ public class StoreItemInfo extends HintPanel {
     /**
      * Create a detailed store info
      * @param dataSet json object from info_[lang].json file
-     * @param store parent store panel
-     * @param callBack callback to forward to install action
      */
-    public StoreItemInfo(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callBack) {
+    public StoreItemInfo(JsonObject dataSet) {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
         allowInstall = !dataSet.get(JsonParser.TAG_TITLE).getAsString().equals("JCMemory");
@@ -65,14 +63,14 @@ public class StoreItemInfo extends HintPanel {
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new MigLayout());
 
-        buildHeader(dataSet, store, callBack);
+        buildHeader(dataSet);
         buildDescription(dataSet);
         buildWebsites(dataSet);
         checkDefaultSelected(dataSet);
-        buildVersionAndCustomInstall(dataSet, new JsonStoreParser(), callBack);
+        buildVersionAndCustomInstall(dataSet);
     }
 
-    private void buildHeader(JsonObject dataSet, Searchable store, OnEventCallBack<Void, Void> callback) {
+    private void buildHeader(JsonObject dataSet) {
         JLabel icon = new JLabel(getIcon(dataSet.get(JsonParser.TAG_ICON).getAsString()));
         icon.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(icon, "span 2 2, gapleft 50");
@@ -83,7 +81,7 @@ public class StoreItemInfo extends HintPanel {
         add(name, "align left, gaptop 40, width ::350, id title");
 
         if (allowInstall) {
-            buildMainInstallButton(dataSet, callback);
+            buildMainInstallButton(dataSet);
         } else {
             add(getButton("noinstall", new Color(162, 165, 162)), "align right, span 1 2, wrap");
         }
@@ -93,7 +91,7 @@ public class StoreItemInfo extends HintPanel {
         add(author, "align left, gapbottom 40, width ::350, wrap");
     }
 
-    private void buildMainInstallButton(JsonObject dataSet, OnEventCallBack<Void, Void> callback) {
+    private void buildMainInstallButton(JsonObject dataSet) {
         //get latest version info
         final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
         final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
@@ -120,7 +118,7 @@ public class StoreItemInfo extends HintPanel {
                 new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        fireInstall(dataSet, getInfoPack(dataSet, latestV, sdks, sdks.size() - 1), callback,
+                        fireInstall(dataSet, getInfoPack(dataSet, latestV, sdks, sdks.size() - 1),
                                 installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE), e);
                     }
                 });
@@ -178,7 +176,7 @@ public class StoreItemInfo extends HintPanel {
         }
     }
 
-    private void buildVersionAndCustomInstall(JsonObject dataSet, JsonParser parser, OnEventCallBack<Void, Void> call) {
+    private void buildVersionAndCustomInstall(JsonObject dataSet) {
         if (!allowInstall) return;
 
         addSubTitle("custom_install", "H_custom_install");
@@ -221,7 +219,7 @@ public class StoreItemInfo extends HintPanel {
                         JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                                 .get(version).getAsJsonArray();
 
-                        fireInstall(dataSet, getInfoPack(dataSet, version, sdks, compilerIdx), call,
+                        fireInstall(dataSet, getInfoPack(dataSet, version, sdks, compilerIdx),
                                 installed && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE), e);
                     }
                 });
@@ -316,8 +314,7 @@ public class StoreItemInfo extends HintPanel {
                 appletName + Config.S + appletName + "_v" + version + "_sdk" + sdkVersion + ".cap";
     }
 
-    private static void fireInstall(JsonObject dataPack, AppletInfo info, OnEventCallBack<Void, Void> call,
-                                    boolean installed, MouseEvent e) {
+    private static void fireInstall(JsonObject dataPack, AppletInfo info, boolean installed, MouseEvent e) {
         if (!CardManagerFactory.getManager().getCard().isAuthenticated()) {
             InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_install"), Notice.Importance.SEVERE, 15000);
             return;
@@ -350,7 +347,8 @@ public class StoreItemInfo extends HintPanel {
 
         new InstallAction(new InstallBundle(info.getName() + info.getVersion() + ", sdk " + info.getSdk(),
                 info, file, signer, fingerprint, appletNamesData, Config.APP_STORE_CAPS_DIR + Config.S +
-                name + Config.S, dataPack), installed, defaultSelected, call).mouseClicked(e);
+                name + Config.S, dataPack), installed, defaultSelected,
+                GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
     }
 
     private JButton getButton(String translationKey, Color background) {

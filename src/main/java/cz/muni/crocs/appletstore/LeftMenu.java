@@ -24,30 +24,27 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LeftMenu extends JPanel implements SearchBar {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private JPanel container = new JPanel(new GridBagLayout());
+    private final JPanel container = new JPanel(new GridBagLayout());
 
     private InputHintTextField searchInput;
     private JLabel searchIcon;
     private boolean close = false;
 
-    private ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
-    private ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
+    private final ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
+    private final ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
 
     private LeftMenuButton local;
     private LeftMenuButton remote;
     private boolean isLocal = true;
 
-    private MainPanel parent;
 
     /**
      * Create a left menu
-     * @param parent MainPanel parent
      */
-    public LeftMenu(MainPanel parent) {
-        this.parent = parent;
-
+    public LeftMenu() {
         setOpaque(false);
         setBackground(new Color(255, 255, 255, 65));
         container.setOpaque(false);
@@ -137,7 +134,7 @@ public class LeftMenu extends JPanel implements SearchBar {
                 if (!isLocal) {
                     isLocal = true;
                     setChoosed();
-                    parent.setLocalPanelVisible();
+                    GUIFactory.Components().getStoreWindows().setCardPanelVisible();
                 }
             }
         });
@@ -147,11 +144,11 @@ public class LeftMenu extends JPanel implements SearchBar {
                 if (isLocal) {
                     isLocal = false;
                     setChoosed();
-                    parent.setStorePaneVisible();
-                    parent.getSearchablePane().refresh();
+                    GUIFactory.Components().getStoreWindows().setStorePanelVisible();
+                    GUIFactory.Components().getSearchable().refresh();
                 } else {
                     //to re-load the store (clickg store closes details)
-                    parent.getSearchablePane().showItems(null);
+                    GUIFactory.Components().getSearchable().showItems(null);
                 }
             }
         });
@@ -161,14 +158,14 @@ public class LeftMenu extends JPanel implements SearchBar {
             @Override
             public void mouseClicked(MouseEvent e) {
                 resetSearch();
-                parent.getSearchablePane().showItems(null);
+                GUIFactory.Components().getSearchable().showItems(null);
             }
         });
         //searching on enter press
         searchInput.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
                 checkIfSetClose();
             }
         });
@@ -176,26 +173,25 @@ public class LeftMenu extends JPanel implements SearchBar {
         searchInput.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
                 checkIfSetClose();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
                 checkIfSetClose();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-
+                //do nothing
             }
         });
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         g.setColor( getBackground() );
         g.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g);

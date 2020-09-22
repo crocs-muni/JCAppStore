@@ -19,11 +19,12 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class DeleteDialogWindow extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private JCheckBox forceUninstall = new JCheckBox();
-    private KeysPresence keys;
-    private GPRegistryEntry.Kind kind;
+    private final JCheckBox forceUninstall = new JCheckBox();
+    private final KeysPresence keys;
+    private final GPRegistryEntry.Kind kind;
 
     /**
      * Create a new deletion dialog panel

@@ -51,9 +51,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
     /**
      * Local panel
-     * @param callback callback forwarded to inner children, it can disable the panel (defined in MainPanel)
      */
-    public LocalWindowPane(OnEventCallBack<Void, Void> callback) {
+    public LocalWindowPane() {
         setOpaque(false);
 
         submenu = new LocalSubMenu();
@@ -64,21 +63,21 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         this.setLayout(gb);
 
         constraints = new GridBagConstraints();
+//
+//        submenu.setOnSubmit(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                showItems(null);
+//            }
+//        });
+//        submenu.setOnReload(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                new ReloadAction(callback).start();
+//            }
+//        });
 
-        submenu.setOnSubmit(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showItems(null);
-            }
-        });
-        submenu.setOnReload(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ReloadAction(callback).start();
-            }
-        });
-
-        infoLayout = new LocalItemInfo(callback);
+        infoLayout = new LocalItemInfo();
         windowLayout = new JPanel();
         windowScroll = new JScrollPane();
         windowScroll.setViewportBorder(null);
@@ -96,7 +95,12 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         windowLayout.setBorder(new EmptyBorder(10, 50, 50, 50));
         windowLayout.setOpaque(false);
 
-        installCmd.addMouseListener(new InstallAction(callback));
+        installCmd.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new InstallAction(GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         refresh();
 
         CardManagerFactory.getManager().setCallbackOnFailure(() -> {

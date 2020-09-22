@@ -21,7 +21,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class StoreSubMenu extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private JLabel back;
     private BufferedImage storeTitle;
     private JButton reload;
