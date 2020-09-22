@@ -63,19 +63,6 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         this.setLayout(gb);
 
         constraints = new GridBagConstraints();
-//
-//        submenu.setOnSubmit(new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                showItems(null);
-//            }
-//        });
-//        submenu.setOnReload(new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                new ReloadAction(callback).start();
-//            }
-//        });
 
         infoLayout = new LocalItemInfo();
         windowLayout = new JPanel();
@@ -149,6 +136,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             constraints.gridx = 0;
             constraints.gridy = 0;
             constraints.gridwidth = 2;
+            submenu.showPackagesButton(manager.getCard().isAuthenticated());
             add(submenu, constraints);
 
             constraints.gridy = 1;

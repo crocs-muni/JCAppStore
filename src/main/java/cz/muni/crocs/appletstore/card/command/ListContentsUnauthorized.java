@@ -23,7 +23,8 @@ import java.util.HashSet;
 import java.util.ResourceBundle;
 
 /**
- * Try to detect installed applets without authenticating to ISD.
+ * Try to detect installed applets without authenticating to ISD. The search is done based on well_known_aids list in
+ * resources/data/ folder.
  *
  * @author Jiří Horák
  * @version 1.0

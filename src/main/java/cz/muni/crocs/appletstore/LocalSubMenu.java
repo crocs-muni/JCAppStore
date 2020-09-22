@@ -24,8 +24,7 @@ public class LocalSubMenu extends JPanel {
     private final JCheckBox sd = new JCheckBox();
     private final JCheckBox app = new JCheckBox();
     private final JCheckBox pkg = new JCheckBox();
-
-    private final JButton reload;
+    private final JLabel pkgTitle;
 
     /**
      * Create a local submenu
@@ -34,7 +33,7 @@ public class LocalSubMenu extends JPanel {
         setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
         setOpaque(false);
 
-        reload = getButton("card_refresh");
+        JButton reload = getButton("card_refresh");
         reload.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -61,7 +60,9 @@ public class LocalSubMenu extends JPanel {
         add(getLabel("sds"));
         add(sd);
         add(Box.createRigidArea(new Dimension(6, 0)));
-        add(getLabel("packages"));
+
+        pkgTitle = getLabel("packages");
+        add(pkgTitle);
         add(pkg);
         add(Box.createRigidArea(new Dimension(15, 0)));
 
@@ -95,6 +96,11 @@ public class LocalSubMenu extends JPanel {
      */
     public boolean showPackage() {
         return pkg.isSelected();
+    }
+
+    public void showPackagesButton(boolean doShow) {
+        pkg.setVisible(doShow);
+        pkgTitle.setVisible(doShow);
     }
 
     /**
