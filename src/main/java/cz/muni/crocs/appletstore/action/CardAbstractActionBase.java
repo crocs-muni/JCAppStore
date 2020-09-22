@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.CardStatusNotifiable;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.GUIComponents;
 import cz.muni.crocs.appletstore.GUIFactory;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.iface.CallBack;
@@ -199,32 +200,8 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
     protected ErrorPane getErrorPaneWithOperation(String title, String image, LocalizedException e) {
         return new ErrorPane(title, e.getLocalizedMessage(), image, e.getOperationLocalizedMsg(),
                 (CallBack<Void>) () -> {
-//                    new UnsafeCardOperationWrapper(new OnEventCallBack<Void, Void>() {
-//                        @Override
-//                        public void onStart() {
-//                            call.onStart();
-//                        }
-//
-//                        @Override
-//                        public void onFail() {
-//                            call.onFail();
-//                        }
-//
-//                        @Override
-//                        public Void onFinish() {
-//                            call.onFinish();
-//                            return null;
-//                        }
-//
-//                        @Override
-//                        public Void onFinish(Void aVoid) {
-//                            call.onFinish(null);
-//                            return null;
-//                        }
-//                    }, e.getUnsafeOperation()).mouseClicked(null);
-
-                    //todo find solution how to get deafult OnEventCallBack running
-                    InformerFactory.getInformer().showMessage("Not working yet as intended. Re-plug card to perform this operation.");
+                    new UnsafeCardOperationWrapper(GUIFactory.Components().defaultActionEventCallback(),
+                            e.getUnsafeOperation()).mouseClicked(null);
                     return null;
                 });
     }
