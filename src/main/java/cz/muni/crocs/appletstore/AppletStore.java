@@ -31,8 +31,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
-    private static final int PREFFERED_WIDTH = 1100;
-    private static final int PREFFERED_HEIGHT = 550;
+    private static final int PREFERRED_WIDTH = 1100;
+    private static final int PREFERRED_HEIGHT = 550;
 
     private MainPanel window;
     private Menu menu;
@@ -52,11 +52,27 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
             }
         });
         setBar();
+        buildComponents();
         initComponents();
     }
 
-    public MainPanel getWindow() {
-        return window;
+    @Override
+    public void updateBackground(BufferedImage image) {
+        ((BackgroundImgSplitPanel) getContentPane()).setNewBackground(image);
+    }
+
+    @Override
+    public void switchEnabled(boolean enabled) {
+        if (enabled == isEnabled()) return;
+        if (enabled) blocker.setMessage(textSrc.getString("working"));
+        setEnabled(enabled);
+        getGlassPane().setVisible(!enabled);
+        revalidate();
+    }
+
+    @Override
+    public void setDisabledMessage(String message) {
+        blocker.setMessage(message);
     }
 
     private void setBar() {
@@ -65,10 +81,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         //todo uncomment for apple branch
 //        Application.getApplication().setDockIconImage(
 //                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
-    }
-
-    public Menu getMenu() {
-        return menu;
     }
 
     /**
@@ -96,10 +108,10 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     }
 
     /**
-     * Build Swing components and start routine
+     * Build Swing components
      */
-    private void initComponents() {
-        setSize(PREFFERED_WIDTH, PREFFERED_HEIGHT);
+    private void buildComponents() {
+        setSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
 
         menu = new Menu();
         // menu.setCard(CardManagerFactory.getManager().getCard());
@@ -109,7 +121,13 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
         window = new MainPanel();
         setContentPane(window);
+    }
 
+    /**
+     * Initialize GUI components and start routine. The order call is IMPORTANT!
+     * Some components rely on other to be instantiated, all rely on GUIComponents factory.
+     */
+    private void initComponents() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -117,29 +135,10 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         GUIComponents components = GUIFactory.Components();
         components.init(this, menu, window, window.localPanel, window, window);
 
-        InformerFactory.setInformer(window);
-        new CardDetectionRoutine(components.defaultActionEventCallback()).start();
+        InformerFactory.setInformer(components.getInformable());
         components.getCardStatusNotifiable().updateCardState();
+        new CardDetectionRoutine(components.defaultActionEventCallback()).start();
         setVisible(true);
-    }
-
-    @Override
-    public void updateBackground(BufferedImage image) {
-        ((BackgroundImgSplitPanel) getContentPane()).setNewBackground(image);
-    }
-
-    @Override
-    public void switchEnabled(boolean enabled) {
-        if (enabled == isEnabled()) return;
-        if (enabled) blocker.setMessage(textSrc.getString("working"));
-        setEnabled(enabled);
-        getGlassPane().setVisible(!enabled);
-        revalidate();
-    }
-
-    @Override
-    public void setDisabledMessage(String message) {
-        blocker.setMessage(message);
     }
 
     /**
@@ -148,7 +147,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
      *
      *  content: switches between two panels (StoreWindows iface)
      *
-     *  In AppletStore class because of close ties to this class
+     *  In AppletStore class because of close ties to this class - there are some not-pretty things done, but in only
+     *  one - root class. Others are separated by interfaces.
      */
     public static class MainPanel extends BackgroundImgSplitPanel implements Informable, Searchable, StoreWindows {
         private JPanel content;
@@ -259,14 +259,6 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
          */
         private Searchable getSearchablePane() {
             return (storePanel.isVisible()) ? storePanel : localPanel;
-        }
-
-        /**
-         * Get 'my card' panel
-         * @return panel for 'my card'
-         */
-        private LocalWindowPane getRefreshablePane() {
-            return localPanel;
         }
 
         /**
