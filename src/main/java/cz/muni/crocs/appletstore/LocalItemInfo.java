@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardInstance;
+import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.DeleteAction;
 import cz.muni.crocs.appletstore.action.SendApduAction;
@@ -43,6 +45,8 @@ public class LocalItemInfo extends HintPanel {
 
     /**
      * Create a local applet detailed info panel
+     *
+     * todo disable unisntall atd for unauthorized
      */
     public LocalItemInfo() {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
@@ -92,7 +96,8 @@ public class LocalItemInfo extends HintPanel {
         uninstall.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new DeleteAction(appletinfo, GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+                if (uninstall.getToolTipText().equals("enabled")) new DeleteAction(appletinfo,
+                        GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
             }
         });
         uninstall.setToolTipText(uninstall.getText());
@@ -104,7 +109,8 @@ public class LocalItemInfo extends HintPanel {
         rawApdu.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new SendApduAction(appletinfo, GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+                if (rawApdu.getToolTipText().equals("enabled")) new SendApduAction(appletinfo,
+                        GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
             }
         });
         rawApdu.setToolTipText(rawApdu.getText());
@@ -122,6 +128,8 @@ public class LocalItemInfo extends HintPanel {
         }
         appletinfo = info;
 
+        CardInstance card = CardManagerFactory.getManager().getCard(); // can't be null, we can see installed sw
+
         setLabel(name, info.getName() == null ? info.getAid().toString() : info.getName(), "H_name");
         setLabel(author, textSrc.getString("author") + getValue(info.getAuthor()));
         setLabel(version, textSrc.getString("version") + getValue(info.getVersion()), "H_version");
@@ -130,8 +138,9 @@ public class LocalItemInfo extends HintPanel {
         setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
         setLabel(domain, textSrc.getString("sd_assigned") +
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
-        setEnabled(uninstall, info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
-                || info.getKind() == GPRegistryEntry.Kind.Application);
+
+        setEnabled(uninstall, card.isAuthenticated() && (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
+                || info.getKind() == GPRegistryEntry.Kind.Application));
         setEnabled(rawApdu, info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }
@@ -187,12 +196,14 @@ public class LocalItemInfo extends HintPanel {
             component.setText(component.getToolTipText());
             component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             component.setForeground(Color.BLACK);
+            component.setToolTipText("enabled");
+
         } else {
             component.setText(textSrc.getString("unavailbale"));
             component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             component.setForeground(Color.DARK_GRAY);
+            component.setToolTipText("disabled");
         }
-        component.setFocusable(enabled);
     }
 
     private String getType(GPRegistryEntry.Kind kind) {

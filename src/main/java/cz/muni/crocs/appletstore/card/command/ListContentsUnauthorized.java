@@ -68,7 +68,7 @@ public class ListContentsUnauthorized extends GPCommand<CardInstanceMetaData> {
         String unknown = textSrc.getString("unknown");
 
         walkTree((prefix, at) -> {
-            //odd numbers != bytes
+            //odd numbers != bytes, todo add skip (do not test each level, skip by 2/3...)K
             if (prefix.length() % 2 == 1 || prefix.length() < DETECTION_FROM_AID_PREFIX_BYTES_LEN * 2) return true;
             try {
                 logger.info("Detect AID at prefix: " + prefix);

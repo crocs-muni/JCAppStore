@@ -285,15 +285,15 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
         exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
         submenu.add(exclusive);
 
-        JMenuItem jcmemory = selectableMenuItem(new AbstractAction(textSrc.getString("enable_jcmemory")) {
+        JMenuItem keepAutoInstall = selectableMenuItem(new AbstractAction(textSrc.getString("keep_auto_install")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY,
-                        OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY) ? "false" : "true");
+                OptionsFactory.getOptions().addOption(Options.KEY_KEEP_AUTO_INSTALLED,
+                        OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED) ? "false" : "true");
             }
         }, "", KeyEvent.VK_J, InputEvent.ALT_MASK);
-        jcmemory.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
-        submenu.add(jcmemory);
+        keepAutoInstall.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED));
+        submenu.add(keepAutoInstall);
 
         return submenu;
     }

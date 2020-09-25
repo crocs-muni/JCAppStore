@@ -60,36 +60,40 @@ public class StoreSubMenu extends JPanel {
         });
     }
 
+    private void setup() {
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        setOpaque(true);
+        setBackground(Color.WHITE);
+
+        setupBackLabelButton();
+        add(back);
+
+        add(Box.createHorizontalGlue());
+
+        setupReloadButton();
+        add(reload);
+    }
+
     private void setupWithoutImage() {
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-        setOpaque(false);
+        setOpaque(true);
+        setBackground(Color.black);
 
         back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "store_back.png"));
         add(back);
 
         Title t = new Title(textSrc.getString("jcappstore"), 30f, SwingConstants.LEFT);
         t.setForeground(Color.white);
-        t.setBorder(BorderFactory.createEmptyBorder(10, 40, 5, 0));
+        t.setBorder(BorderFactory.createEmptyBorder(0, 40, 5, 0));
         add(t);
 
-        add(Box.createHorizontalStrut(200));
+        add(Box.createHorizontalGlue());
 
         setupReloadButton();
-        reload.setForeground(Color.WHITE);
-        reload.setAlignmentY(Component.TOP_ALIGNMENT);
-        reload.setMaximumSize(new Dimension(250, reload.getMaximumSize().height));
+        reload.setForeground(Color.white);
         add(reload);
     }
 
-    private void setup() {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setOpaque(true);
-        setupBackLabelButton();
-        add(back);
-        setBackground(Color.WHITE);
-        setupReloadButton();
-        add(reload);
-    }
 
     private void setupBackLabelButton() {
         back = new JLabel(new ImageIcon(Config.IMAGE_DIR + "store_back.png"));
@@ -102,9 +106,11 @@ public class StoreSubMenu extends JPanel {
         reload.setUI(new CustomButtonUI());
         reload.setFont(OptionsFactory.getOptions().getFont(Font.BOLD, 12f));
         reload.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        reload.setAlignmentX(Component.RIGHT_ALIGNMENT);
         reload.setBorder(BorderFactory.createEmptyBorder(15, 20, 13, 0));
         reload.setOpaque(false);
+        reload.setMaximumSize(new Dimension(200, getMaximumSize().height));
+        reload.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+
     }
 
     @Override

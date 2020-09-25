@@ -18,7 +18,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class TextField {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     /**
      * Get application default styled text field

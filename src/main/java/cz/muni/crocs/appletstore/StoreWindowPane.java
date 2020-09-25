@@ -77,10 +77,8 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     @Override
     public void refresh() {
-        if (currentlyShown == null)
-            showItems(searchBar.getQuery());
-        else
-            showInfo(currentlyShown);
+        if (currentlyShown == null) showItems(searchBar.getQuery());
+        else showInfo(currentlyShown);
     }
 
     @Override

@@ -78,6 +78,6 @@ public class JCAlgTest extends AppletBase<Void> {
 
     @Override
     protected Void executeAppletCommunication(CardManager manager) {
-        throw new UnsupportedOperationException("Use non-default call with custom implementation.");
+        throw new UnsupportedOperationException("Use non-default call with custom implementation instead.");
     }
 }

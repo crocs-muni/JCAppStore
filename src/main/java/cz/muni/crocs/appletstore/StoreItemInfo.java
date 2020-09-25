@@ -68,6 +68,8 @@ public class StoreItemInfo extends HintPanel {
         buildWebsites(dataSet);
         checkDefaultSelected(dataSet);
         buildVersionAndCustomInstall(dataSet);
+
+        requestFocusInWindow();
     }
 
     private void buildHeader(JsonObject dataSet) {
@@ -93,7 +95,6 @@ public class StoreItemInfo extends HintPanel {
 
     private void buildMainInstallButton(JsonObject dataSet) {
         //get latest version info
-        final String appletName = dataSet.get(JsonParser.TAG_NAME).getAsString();
         final String latestV = dataSet.get(JsonParser.TAG_LATEST).getAsString();
         final JsonArray sdks = dataSet.get(JsonParser.TAG_BUILD).getAsJsonObject()
                 .get(latestV).getAsJsonArray();

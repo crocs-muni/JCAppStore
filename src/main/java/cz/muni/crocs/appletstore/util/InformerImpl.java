@@ -17,11 +17,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @version 1.0
  */
 public class InformerImpl implements Informer, CallBack<Void> {
-    private Thread current;
     private static final Integer DELAY = 8000;
 
     private Informable context;
-    private final Deque<Tuple<Notice, Integer>> queue = new LinkedBlockingDeque<>();
+    private final ArrayList<Tuple<Notice, Integer>> queue = new ArrayList<>();
     private volatile Boolean busy = false;
 
     private String lastNotDisplayedMessage;
@@ -32,7 +31,7 @@ public class InformerImpl implements Informer, CallBack<Void> {
         this.context = delegate;
 
         //some notifications?
-        fireInfo();
+        for (Tuple<Notice, Integer> info : queue) delegate.showInfo(info.first, info.second);
 
         //some messages?
         if (lastNotDisplayedMessage != null) {
@@ -75,15 +74,15 @@ public class InformerImpl implements Informer, CallBack<Void> {
         if (callable == null) {
             showInfoToClose(msg, status, milis);
         } else {
-            queue.add(new Tuple<>(new Notice(msg, status, icon, callable, this), milis));
-            if (context != null) fireInfo();
+            if (context != null) context.showInfo(new Notice(msg, status, icon, callable, this), milis);
+            else queue.add(new Tuple<>(new Notice(msg, status, icon, callable, this), milis));
         }
     }
 
     @Override
     public void showInfoToClose(String msg, Notice.Importance status, Integer milis) {
-        queue.add(new Tuple<>(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis));
-        if (context != null) fireInfo();
+        if (context != null) context.showInfo(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis);
+        else queue.add(new Tuple<>(new Notice(msg, status, Notice.CallBackIcon.CLOSE, this), milis));
     }
 
     @Override
@@ -94,46 +93,6 @@ public class InformerImpl implements Informer, CallBack<Void> {
     @Override
     public Void callBack() {
         closeInfo();
-        current.interrupt();
         return null;
-    }
-
-    private Thread getNewNoticeSwitcherThread() {
-        return new Thread(() -> {
-            while (true) {
-                if (queue.isEmpty()) {
-                    current = null;
-                    busy = false;
-                    return;
-                }
-                final Tuple<Notice, Integer> next = queue.pop();
-                SwingUtilities.invokeLater(() -> {
-                    context.showInfo(next.first);
-                });
-
-                if (next.second != null) {
-                    try {
-                        Thread.sleep(next.second);
-                    } catch (InterruptedException e) {
-                        continue;
-                    }
-                    SwingUtilities.invokeLater(this::closeInfo);
-                } else {
-                    try {
-                        Thread.currentThread().wait();
-                    } catch (InterruptedException e) {
-                        //do nothing
-                    }
-                }
-            }
-        });
-    }
-
-    private synchronized void fireInfo() {
-        if (busy || queue.isEmpty())
-            return;
-        busy = true;
-        current = getNewNoticeSwitcherThread();
-        current.start();
     }
 }

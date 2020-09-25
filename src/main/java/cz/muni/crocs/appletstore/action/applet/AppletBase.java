@@ -95,7 +95,6 @@ public abstract class AppletBase<T> {
      * Tries to USE applet and install it in case it fails. Uninstalls applets unless keepJCMemory is enabled.
      * @param operation operation to perform
      * @throws LocalizedCardException the command could not be performed
-     * @throws UnknownKeyException if the key to the card is unknown
      */
     protected T performAppletOperation(AppletAction<T> operation) throws LocalizedException {
         return performAppletOperation(operation, null);
@@ -106,7 +105,6 @@ public abstract class AppletBase<T> {
      * @param operation operation to perform
      * @param installFailureMessage message for the user when installation fails
      * @throws LocalizedCardException the command could not be performed
-     * @throws UnknownKeyException if the key to the card is unknown
      */
     protected T performAppletOperation(AppletAction<T> operation, String installFailureMessage)
             throws LocalizedException {
@@ -151,7 +149,7 @@ public abstract class AppletBase<T> {
     private void uninstallIfNotKeep(CardManager manager, boolean refresh)
             throws LocalizedException {
         try {
-            if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY)) {
+            if (!OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED)) {
                 logger.info(getAppletName() + " removed because of the mode disabled.");
                 manager.uninstall(getPackageInfo(), true);
             } else if (refresh) { //refresh is implicit when uninstalling

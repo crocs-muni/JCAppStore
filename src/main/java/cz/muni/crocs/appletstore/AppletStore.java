@@ -4,10 +4,8 @@ import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.LoggerConsole;
-import cz.muni.crocs.appletstore.util.LoggerConsoleImpl;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.ui.Notice;
+import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +16,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.Queue;
 import java.util.ResourceBundle;
+import java.util.concurrent.*;
 
 /**
  * App main window
@@ -138,7 +138,9 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         InformerFactory.setInformer(components.getInformable());
         components.getCardStatusNotifiable().updateCardState();
         new CardDetectionRoutine(components.defaultActionEventCallback()).start();
+
         setVisible(true);
+        requestFocusInWindow();
     }
 
     /**
@@ -154,8 +156,13 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         private JPanel content;
         private final LocalWindowPane localPanel;
         private final StoreWindowManager storePanel;
-        private Component current = null;
+        private JComponent lastInfo = null;
+        private int lastInfoDuration = 0;
         private LoggerConsole console;
+
+        private final Queue<Tuple<JComponent, Integer>> delayed = new ConcurrentLinkedQueue<>();
+        private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        private ScheduledFuture<?> job;
 
         /**
          * Create a main panel containing left menu, store, my card panels
@@ -220,20 +227,36 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         }
 
         @Override
-        public void showInfo(JComponent component) {
-            current = component;
-            content.add(current, BorderLayout.NORTH);
+        public void showInfo(JComponent component, int milis) {
+            if (lastInfo != null) {
+                delayed.add(new Tuple<>(lastInfo, lastInfoDuration));
+                job.cancel(true);
+                content.remove(lastInfo);
+            }
+
+            lastInfo = component;
+            lastInfoDuration = milis;
+            if (milis > 0) job = executor.schedule(() ->
+                    SwingUtilities.invokeLater(this::hideInfo), milis, TimeUnit.MILLISECONDS);
+
+            content.add(lastInfo, BorderLayout.NORTH);
             content.revalidate();
+            content.repaint();
         }
 
         @Override
         public void hideInfo() {
-            if (current == null) return;
-            content.remove(current);
-            content.revalidate();
-            content.repaint();
+            if (lastInfo == null) return;
+            content.remove(lastInfo);
+            lastInfo = null;
 
-            current = null;
+            Tuple<JComponent, Integer> prev = delayed.poll();
+            if (prev != null) {
+                showInfo(prev.first, prev.second);
+            } else {
+                content.revalidate();
+                content.repaint();
+            }
         }
 
         @Override
