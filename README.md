@@ -1,6 +1,6 @@
 # JCAppStore 
 
-Have you ever wondered how to manage your passwords? Or would you like to have your own virtual wallet, but do not know what to do? Then it is time for you to discover JCAppStore, first open source smart card store and GUI tool.
+Have you ever wondered how to manage your passwords? Or would you like to have your own virtual wallet, but do not know what to do? Then it is time for you to discover JCAppStore, first open source smart card store and GUI tool. Our goal is to push open-source smart card development by introducing intuitive smart card distribution platform that can be used by anyone!
 
 #### I am in! ####
 
@@ -74,3 +74,11 @@ You can browse the store using search bar in the left menu. You can search eithe
     5) the applet requires a technology not suported by your card (NFC for example) - find your card [here](https://www.fi.muni.cz/~xsvenda/jcalgtest/),
     6) you modified advanced install section with incorrect values.
 6) Enjoy!    
+
+___
+
+## Contribute
+If you like our goal, you can support us or help us in following ways:
+- we are looking for open-source, intuitive smart card applets to include in our database
+- we are looking for translation volunteers who want to bring the store to broader variety of users
+- we are looking for users - start using our platform and introduce it to others! let's push the open-source smart card community and support its developers
