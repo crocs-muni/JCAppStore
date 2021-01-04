@@ -4,13 +4,13 @@ plugins {
     id 'java'
     id 'edu.sc.seis.launch4j' version '2.4.6'
     id 'com.bmuschko.izpack' version '3.0'
+    id 'org.openjfx.javafxplugin' version '0.0.9'
 }
-
 
 group 'cz.muni.crocs.appletstore'
 project.version = '1.2'
 
-sourceCompatibility = 1.8
+//sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.1'
 
@@ -40,7 +41,15 @@ dependencies {
     compile group: 'com.googlecode.concurrent-trees', name: 'concurrent-trees', version: '2.6.1'
     implementation 'edu.sc.seis.gradle:launch4j:2.4.6'
     izpack 'org.codehaus.izpack:izpack-dist:5.1.3'
+
 }
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.graphics', 'javafx.swing', 'javafx.base', 'javafx.fxml', 'javafx.web' ]
+    //configuration = 'compileOnly'
+    version = '11.0.2'
+}
+
 
 
 ///////////////////////////

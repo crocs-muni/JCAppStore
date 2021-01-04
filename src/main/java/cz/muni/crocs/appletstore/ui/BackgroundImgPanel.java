@@ -1,8 +1,6 @@
 package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.util.Informer;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -23,8 +21,8 @@ import java.io.IOException;
  * @author Jiří Horák
  * @version 1.0
  */
-public class BackgroundImgSplitPanel extends JSplitPane {
-    private static final Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
+public class BackgroundImgPanel extends JPanel {
+    private static final Logger logger = LoggerFactory.getLogger(BackgroundImgPanel.class);
     private Image bg;
     private Image orig;
     private int iWidth, iHeight;
@@ -33,42 +31,12 @@ public class BackgroundImgSplitPanel extends JSplitPane {
     /**
      * Default split panel initialization
      */
-    public BackgroundImgSplitPanel() {
-        super(JSplitPane.VERTICAL_SPLIT);
-        setup();
-    }
-
-    /**
-     * Split panel initialization with custom directon
-     * @param direction split panel direction, JSplitPane constant VERTICAL_SPLIT or HORIZONTAL_SPLIT
-     */
-    public BackgroundImgSplitPanel(int direction) {
-        super(direction);
-        setup();
-    }
-
-    /**
-     * Set new background dimage
-     * @param newBackground image to set
-     */
-    public void setNewBackground(BufferedImage newBackground) {
-        width = getWidth();
-        height = getHeight();
-        orig = newBackground;
-        updateBg(width, height);
-        revalidate();
-        repaint();
-    }
-    
-    private void setup() {
-        setContinuousLayout(true);
-        setUI(new CustomSplitPaneUI());
+    public BackgroundImgPanel(String imgPath) {
         setBorder(null);
 
-        String bgImagname = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-        File f = new File(bgImagname);
+        File f = findImageByExtension(imgPath);
 
-        if (bgImagname.isEmpty() || !f.exists()) {
+        if (f == null) {
             loadDefault();
         } else {
             try {
@@ -83,18 +51,22 @@ public class BackgroundImgSplitPanel extends JSplitPane {
         }
     }
 
-    private void loadDefault() {
-        try {
-            orig = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
-            iWidth = ((BufferedImage)orig).getWidth();
-            iHeight = ((BufferedImage)orig).getHeight();
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.warn("Failed to load default background image, failsafe to plain color.", e);
-            bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
-            iWidth = 690;
-            iHeight = 540;
+    private File findImageByExtension(String path) {
+        if (path.isEmpty()) return null;
+
+        int i = 0;
+        while (i < Config.IMAGE_EXTENSIONS.length) {
+            File f = new File(path + Config.IMAGE_EXTENSIONS[i]);
+            if (f.exists()) return f;
+            i++;
         }
+        return null;
+    }
+
+    private void loadDefault() {
+        orig = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
+        iWidth = 690;
+        iHeight = 540;
     }
 
     private void updateBg(float w, float h) {

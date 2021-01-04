@@ -60,6 +60,11 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
     }
 
     @Override
+    public boolean byDefaultHidden() {
+        return false;
+    }
+
+    @Override
     public void paint(Graphics g) {
         ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
         super.paint(g);

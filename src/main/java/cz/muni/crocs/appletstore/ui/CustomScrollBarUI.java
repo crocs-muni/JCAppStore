@@ -15,7 +15,8 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
     private short opacity = 0;
 
     public CustomScrollBarUI() {
-        minimumThumbSize = new Dimension(20, 20);
+        minimumThumbSize = new Dimension(15, 15);
+        maximumThumbSize = new Dimension(15, 15);
     }
 
     @Override
@@ -27,23 +28,26 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
 
         if (!scrollBar.isEnabled()) return;
         if (scrollBar.getOrientation() == Adjustable.HORIZONTAL) {
-            if (isDragging) {
-                g2.setPaint(new Color(120, 120, 120, alpha(true)));
-            } else if (isThumbRollover() || (r.x > 0)) {
-                g2.setPaint(new Color(255, 255, 255, alpha(true)));
-            } else {
-                g2.setPaint(new Color(60, 60, 60, alpha(false)));
-            }
-            g2.fillRect(r.x + 4, r.y, Math.max(20, r.width - 8), r.height);
+//            if (isDragging) {
+//                g2.setPaint(new Color(120, 120, 120, alpha(true)));
+//            } else if (isThumbRollover() || (r.x > 0)) {
+//                g2.setPaint(new Color(255, 255, 255, alpha(true)));
+//            } else {
+//                g2.setPaint(new Color(60, 60, 60, alpha(false)));
+//            }
+
+            g2.setPaint(new Color(120, 120, 120, alpha(true)));
+            g2.fillRoundRect(r.x + 4, r.y, Math.max(15, r.width - 8), r.height, 13, 13);
         } else {
-            if (isDragging) {
-                g2.setPaint(new Color(120, 120, 120, alpha(true)));
-            } else if (isThumbRollover() || (r.y > 0)) {
-                g2.setPaint(new Color(255, 255, 255, alpha(true)));
-            } else {
-                g2.setPaint(new Color(60, 60, 60, alpha(false)));
-            }
-            g2.fillRect(r.x, r.y + 4, r.width, Math.max(20, r.height - 8));
+//            if (isDragging) {
+//                g2.setPaint(new Color(120, 120, 120, alpha(true)));
+//            } else if (isThumbRollover() || (r.y > 0)) {
+//                g2.setPaint(new Color(255, 255, 255, alpha(true)));
+//            } else {
+//                g2.setPaint(new Color(60, 60, 60, alpha(false)));
+//            }
+            g2.setPaint(new Color(120, 120, 120, alpha(true)));
+            g2.fillRoundRect(r.x, r.y + 4, r.width, Math.max(15, r.height - 8), 13, 13);
         }
         g2.dispose();
     }

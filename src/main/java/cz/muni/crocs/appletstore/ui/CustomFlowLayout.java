@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.ui;
 
 import java.awt.*;
+import java.util.regex.Matcher;
 
 /**
  * Idea from https://stackoverflow.com/questions/3679886/how-can-i-let-jtoolbars-wrap-to-the-next-line-flowlayout-without-them-being-hi/4611117
@@ -13,8 +14,19 @@ import java.awt.*;
  */
 public class CustomFlowLayout extends FlowLayout {
 
-    public CustomFlowLayout(int align, int hgap, int vgap) {
+    private final int maxWidth;
+
+    /**
+     *
+     * @param align alignment direction
+     * @param hgap gap in horizontal direction
+     * @param vgap gap inv ertical direction
+     * @param maxWidth positive number to limit the width of layout (used in scrollpane)
+     *                 or negative to not to use
+     */
+    public CustomFlowLayout(int align, int hgap, int vgap, int maxWidth) {
         super(align, hgap, vgap);
+        this.maxWidth = maxWidth;
     }
 
     @Override
@@ -43,11 +55,17 @@ public class CustomFlowLayout extends FlowLayout {
             ComponentOrientation orient = parent.getComponentOrientation();
             boolean left_to_right = orient.isLeftToRight();
 
-            int y = ins.top + getVgap();
+            //a bit dirty hack to not to center first title (spawns to whole container width)
+            boolean applyFirstOffset = false;
+
+            int offset = maxWidth > 0 ? Math.max((d.width - maxWidth) / 2, 0) : 0;
+
+            int y = ins.top;
+
             int i = 0;
             while (i < num) {
                 // Find the components which go in the current row.
-                int new_w = ins.left + getHgap() + ins.right;
+                int new_w = 2*offset + ins.left + getHgap() + ins.right;
                 int new_h = 0;
                 int j;
                 boolean found_one = false;
@@ -100,15 +118,18 @@ public class CustomFlowLayout extends FlowLayout {
 
                         //if last component is CENTERED
                         if (k + 1 == j && comps[k].getAlignmentX() == Component.CENTER_ALIGNMENT) {
+
                             //if only one component in row is CENTERED
                             if (i != k) {
                                 y += new_h + getVgap();
                             }
-                            comps[k].setBounds(ins.left, y, c.width, c.height);
+
+                            comps[k].setBounds(ins.left + (applyFirstOffset ? offset : 0), y, c.width, c.height);
                             new_h = c.height;
+                            applyFirstOffset = true;
                             break;
                         }
-                        comps[k].setBounds(x, y + (new_h - c.height) / 2, c.width, c.height);
+                        comps[k].setBounds(x + offset, y + (new_h - c.height) / 2, c.width, c.height);
                         x += c.width + getHgap();
                     }
                 }
@@ -129,7 +150,8 @@ public class CustomFlowLayout extends FlowLayout {
             if (insets == null) insets = new Insets(0, 0, 0, 0);
 
             int reqdWidth = 0;
-            int maxWidth = (width - (insets.left + insets.right + hgap * 2)) / 2;
+            int availWidth = (width - (insets.left + insets.right + hgap * 2)) / 2;
+            int maxWidth = this.maxWidth > 0 ? Math.min(availWidth, this.maxWidth) : availWidth;
 
             int x = 0;
             int y = insets.top;
@@ -140,7 +162,7 @@ public class CustomFlowLayout extends FlowLayout {
                 if (c.isVisible()) {
                     Dimension preferred = c.getPreferredSize();
                     if (c.getAlignmentX() == Component.CENTER_ALIGNMENT) {  //center component reserve all row
-                        x = maxWidth;
+                        x = 0;
                         if (!newLine) {
                             y += vgap + rowHeight;
                         }
@@ -155,9 +177,9 @@ public class CustomFlowLayout extends FlowLayout {
                         rowHeight = Math.max(rowHeight, preferred.height);
                         newLine = false;
                     } else { //begin new row
-                        x = preferred.width;
-                        y += vgap + rowHeight;
+                        x = 0;
                         rowHeight = preferred.height;
+                        y += vgap + rowHeight;
                         newLine = true;
                     }
                     reqdWidth = Math.max(reqdWidth, x);

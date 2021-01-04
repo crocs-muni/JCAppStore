@@ -31,6 +31,11 @@ public class NotFoundItem extends JPanel implements Item, Comparable<Item> {
     }
 
     @Override
+    public boolean byDefaultHidden() {
+        return false;
+    }
+
+    @Override
     public int compareTo(Item o) {
         return 1;
     }

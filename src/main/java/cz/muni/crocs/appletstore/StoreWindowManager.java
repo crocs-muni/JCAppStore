@@ -1,7 +1,6 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
@@ -16,9 +15,7 @@ import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * Applet store logic implementation
@@ -38,33 +35,34 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     private Searchable store;
     private volatile State state = State.UNINITIALIZED;
     private final GridBagConstraints constraints;
-    private final StoreSubMenu submenu;
+    //private final StoreSubMenu submenu;
     private SearchBar searchBar;
 
-    /**
-     * Store behaviour manager
-     */
+    private ScheduledFuture<?> loadingPaneUpdater;
+
     public StoreWindowManager() {
         setOpaque(false);
         setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
 
-        submenu = new StoreSubMenu();
-        submenu.setOnReload(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, "");
-                setState(State.UNINITIALIZED);
-                updateGUI();
-            }
-        });
-        submenu.setOnBack(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                store.showItems(null);
-            }
-        });
+//        submenu = new StoreSubMenu();
+//        submenu.setOnBack(new AbstractAction() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                store.showItems(null);
+//            }
+//        });
     }
+
+    public void redownload() {
+        OptionsFactory.getOptions().addOption(Options.KEY_GITHUB_LATEST_VERSION, "");
+        setState(State.UNINITIALIZED);
+        updateGUI();
+    }
+
+//    public void showBackMenu(boolean show) {
+//        submenu.setVisible(show);
+//    }
 
     /**
      * Set store state, called from worker
@@ -125,6 +123,11 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
     }
 
     private void update() {
+        if (loadingPaneUpdater != null && !loadingPaneUpdater.isCancelled()) {
+            loadingPaneUpdater.cancel(true);
+            loadingPaneUpdater = null;
+        }
+
         switch (state) {
             case OK:
             case WORKING:
@@ -168,6 +171,11 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             public void actionPerformed(ActionEvent e) {
                 workerThread.cancel(true);
                 setState(State.NO_CONNECTION);
+
+                if (loadingPaneUpdater != null && !loadingPaneUpdater.isCancelled()) {
+                    loadingPaneUpdater.cancel(true);
+                    loadingPaneUpdater = null;
+                }
             }
         });
         workerThread.execute();
@@ -215,19 +223,13 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         final LoadingPane loadingPane =
                 new LoadingPane(textSrc.getString("waiting_internet"));
         putNewPane(loadingPane, true);
-        new Thread(() -> {
-            int i = 0;
 
-            try {
-                while (loadingPane.update(downloader.getProgress())) {
-                    Thread.sleep(300);
-                    if (i == 15) loadingPane.showAbort(abortAction);
-                    i++;
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        loadingPaneUpdater = executor.scheduleAtFixedRate(() -> {
+            loadingPane.update(downloader.getProgress());
+            loadingPane.showAbort(abortAction, true);
+        }, 50, 300, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -250,19 +252,22 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             setFailed();
             return;
         }
-        StoreWindowPane store = new StoreWindowPane(data);
+        StoreWindowPane store = new StoreWindowPane(this, data);
         store.registerSearchBar(searchBar);
         this.store = store;
 
         removeAll();
         defaultConstraints();
-        constraints.weighty = 0.001;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        add(submenu, constraints);
-        constraints.gridy = 1;
-        constraints.weighty = 1.0;
 
+//        constraints.weighty = 0.001;
+//        constraints.gridx = 0;
+//        constraints.gridy = 0;
+//        submenu.setVisible(false);
+//        add(submenu, constraints);
+//         constraints.gridy = 0;
+
+        constraints.gridy = 0;
+        constraints.weighty = 1.0;
         currentComponent = store;
         add(store, constraints);
         revalidate();

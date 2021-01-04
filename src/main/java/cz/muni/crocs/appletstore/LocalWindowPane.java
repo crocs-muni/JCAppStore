@@ -16,7 +16,6 @@ import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.smartcardio.Card;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -78,7 +77,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         windowScroll.getVerticalScrollBar().setUnitIncrement(16);
         windowScroll.getVerticalScrollBar().setOpaque(false);
 
-        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
+        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20, -1));
         windowLayout.setBorder(new EmptyBorder(10, 50, 50, 50));
         windowLayout.setOpaque(false);
 

@@ -31,8 +31,8 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LoggerFactory.getLogger(AppletStore.class);
-    private static final int PREFERRED_WIDTH = 1100;
-    private static final int PREFERRED_HEIGHT = 550;
+    private static final int PREFERRED_WIDTH = 1250;
+    private static final int PREFERRED_HEIGHT = 650;
 
     private MainPanel window;
     private Menu menu;

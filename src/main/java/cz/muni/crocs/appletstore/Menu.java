@@ -34,7 +34,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
     private static final ImageIcon CARD_LOCKED = new ImageIcon(Config.IMAGE_DIR + "creditcard-locked.png");
     private static final ImageIcon CARD_NOT_PRESENT = new ImageIcon(Config.IMAGE_DIR + "creditcard-missing.png");
 
-    private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
+    private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<>() {
         @Override
         public void onStart() {
             BackgroundChangeable context = GUIFactory.Components().getBackgroundChangeable();
@@ -192,7 +192,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                     settings.apply();
                 }
             }
-        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK ));
 
         menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
@@ -211,18 +211,28 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
         submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,
-                        new CardInfoPanel(), textSrc.getString("card_info"),
-                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+                if (CardManagerFactory.getManager().isCard()) {
+                    JOptionPane.showMessageDialog(null,
+                            new CardInfoPanel(), textSrc.getString("card_info"),
+                            JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+                } else {
+                    InformerFactory.getInformer().showInfoToClose(textSrc.getString("no_card"),
+                            Notice.Importance.SEVERE, 5000);
+                }
             }
-        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_DOWN_MASK ));
 
         submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("test_card")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                testing.mouseClicked(null);
+                if (CardManagerFactory.getManager().isCard()) {
+                    testing.mouseClicked(null);
+                } else {
+                    InformerFactory.getInformer().showInfoToClose(textSrc.getString("no_card"),
+                            Notice.Importance.SEVERE, 5000);
+                }
             }
-        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_DOWN_MASK ));
 
         return submenu;
     }
@@ -236,7 +246,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
             public void actionPerformed(ActionEvent e) {
                GUIFactory.Components().getStoreWindows().toggleLogger();
             }
-        }, "", KeyEvent.VK_L, InputEvent.ALT_MASK));
+        }, "", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK ));
 
         JMenuItem hints = selectableMenuItem(new AbstractAction(textSrc.getString("enable_hints")) {
             @Override
@@ -245,7 +255,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
                 HintPanel.enableHint(OptionsFactory.getOptions().is(Options.KEY_HINT));
             }
-        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK );
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
         submenu.add(hints);
         return submenu;
@@ -261,7 +271,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE,
                         OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_V, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_V, InputEvent.ALT_DOWN_MASK );
         verbose.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
         submenu.add(verbose);
 
@@ -271,7 +281,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE,
                         OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_E, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_E, InputEvent.ALT_DOWN_MASK );
         intuitive.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
         submenu.add(intuitive);
 
@@ -281,7 +291,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 OptionsFactory.getOptions().addOption(Options.KEY_EXCLUSIVE_CARD_CONNECT,
                         OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK );
         exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
         submenu.add(exclusive);
 
@@ -291,7 +301,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 OptionsFactory.getOptions().addOption(Options.KEY_KEEP_AUTO_INSTALLED,
                         OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_J, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_J, InputEvent.ALT_DOWN_MASK );
         keepAutoInstall.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED));
         submenu.add(keepAutoInstall);
 

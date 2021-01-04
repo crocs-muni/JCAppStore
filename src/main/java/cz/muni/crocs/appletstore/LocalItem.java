@@ -63,6 +63,11 @@ public class LocalItem extends JPanel implements Item {
     }
 
     @Override
+    public boolean byDefaultHidden() {
+        return false;
+    }
+
+    @Override
     public int compareTo(Item o) {
         if (!(o instanceof LocalItem))
             return 1;

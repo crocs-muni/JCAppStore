@@ -14,16 +14,16 @@ public enum LanguageImpl implements Language {
     ENGLISH("en", "en.jpg","English");
     //CZECH("cs", "cs.jpg", "Česky");
 
-    private LanguageImpl(String locale, String image, String name) {
+    LanguageImpl(String locale, String image, String name) {
         this.locale = locale;
         this.name = name;
         this.image = image;
     }
 
     public static Language DEFAULT = ENGLISH;
-    private String locale;
-    private String name;
-    private String image;
+    private final String locale;
+    private final String name;
+    private final String image;
 
     @Override
     public String getLocaleString() {
@@ -71,7 +71,11 @@ public enum LanguageImpl implements Language {
 
     @Override
     public boolean has(Language other) {
-        return (Arrays.asList(LanguageImpl.values()).contains(other));
+        for (Language l : LanguageImpl.values()) {
+            if (l.equals(other))
+                return true;
+        }
+        return false;
     }
 
     @Override
