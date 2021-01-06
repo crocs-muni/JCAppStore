@@ -392,11 +392,11 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private KeysPresence hasKey(String data) {
-        return switch (data.trim().toLowerCase()) {
-            case "true" -> KeysPresence.PRESENT;
-            case "false" -> KeysPresence.NO_KEYS;
-            default -> KeysPresence.UNKNOWN;
-        };
+        switch (data.trim().toLowerCase()) {
+            case "true": return KeysPresence.PRESENT;
+            case "false": return KeysPresence.NO_KEYS;
+            default: return KeysPresence.UNKNOWN;
+        }
     }
 
     private AppletInfo getInfoPack(JsonObject dataSet, String version, JsonArray sdks, int sdkIdx) {
