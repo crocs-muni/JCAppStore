@@ -115,13 +115,13 @@ public interface CardManager {
      * @link Terminals::checkTerminals()
      * @see CardManager::setReloadCard()
      */
-    void loadCard() throws LocalizedCardException, UnknownKeyException;
+    void loadCard() throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException;
 
     /**
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
      * makes necessary steps to be ready to work with this card. No authorization (to SD) is required.
      */
-    void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException;
+    void loadCardUnauthorized() throws LocalizedCardException;
 
     /**
      * Invalidates the card instance data
@@ -150,7 +150,7 @@ public interface CardManager {
      * @throws LocalizedCardException exception with localized text on failure
      * @throws IOException when the file is incorrect or missing
      */
-    void install(File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException;
+    void install(File file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, IOException, CardNotAuthenticatedException;
 
     /**
      * Install new applet onto current card
@@ -158,7 +158,7 @@ public interface CardManager {
      * @param data data from install user, namely 3 items: install params, force install and custom AID
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException;
+    void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException;
     
     /**
      * Uninstall applet from the card
@@ -166,7 +166,7 @@ public interface CardManager {
      * @param force whether the uninstall is forced
      * @throws LocalizedCardException exception with localized text on failure
      */
-    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException;
+    void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException;
 
     /**
      * Perform SELECT operation

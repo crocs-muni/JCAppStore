@@ -26,16 +26,17 @@ public class CardInfoPanel extends JPanel {
 
     /**
      * Crate a card info panel
-     * @param changeable background component
-     * @param refreshable refreshable panel component
      */
-    public CardInfoPanel(BackgroundChangeable changeable, Refreshable refreshable) {
+    public CardInfoPanel() {
         setLayout(new MigLayout());
         add(new JLabel(textSrc.getString("working")));
         final CardInfoPanel self = this;
 
         if (CardManagerFactory.getManager().isCard()) {
-            new FreeMemoryAction(new OnEventCallBack<Void, byte[]>() {
+            BackgroundChangeable changeable = GUIFactory.Components().getBackgroundChangeable();
+            Refreshable refreshable = GUIFactory.Components().getRefreshable();
+
+            new FreeMemoryAction(new OnEventCallBack<>() {
                 @Override
                 public void onStart() {
                     changeable.switchEnabled(false);
@@ -80,7 +81,8 @@ public class CardInfoPanel extends JPanel {
                 }
             }).start();
         } else {
-            add(new Text(textSrc.getString("no_card")));
+            removeAll();
+            add(new JLabel(textSrc.getString("no_card")));
         }
     }
 }

@@ -17,7 +17,11 @@ import java.io.File;
  */
 public class StoreItem extends JPanel implements Item {
 
-    private String searchQuery;
+    private final static Color BORDER_COLOR = new Color(200,200,200);
+    private final static Color BORDER_COLOR_OUTER = new Color(214,214,214);
+
+    private final String searchQuery;
+    private final boolean isBydefaultHidden;
     private int position;
 
     /**
@@ -31,7 +35,8 @@ public class StoreItem extends JPanel implements Item {
                 dataSet.get(JsonParser.TAG_AUTHOR).getAsString(),
                 category,
                 dataSet.get(JsonParser.TAG_LATEST).getAsString(),
-                dataSet.get(JsonParser.TAG_ICON).getAsString()
+                dataSet.get(JsonParser.TAG_ICON).getAsString(),
+                dataSet.get(JsonParser.TAG_HIDDEN).getAsBoolean()
         );
         this.position = position;
     }
@@ -39,6 +44,11 @@ public class StoreItem extends JPanel implements Item {
     @Override
     public String getSearchQuery() {
         return searchQuery;
+    }
+
+    @Override
+    public boolean byDefaultHidden() {
+        return isBydefaultHidden;
     }
 
     @Override
@@ -63,11 +73,20 @@ public class StoreItem extends JPanel implements Item {
         return thisCode > otherCode ? 1 : -1;
     }
 
-    private StoreItem(String title, String author, String category, String version, String image) {
+    private StoreItem(String title, String author, String category,
+                      String version, String image, boolean defaultHidden) {
+        isBydefaultHidden = defaultHidden;
         searchQuery = title + author + category;
         setLayout(new GridBagLayout());
-        setBackground(new Color(255, 255, 255, 60));
+
+        setOpaque(false);
+       // setBackground(Color.WHITE);
         setAlignmentX(LEFT_ALIGNMENT);
+
+        setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR_OUTER),
+                BorderFactory.createLineBorder(BORDER_COLOR)
+        ));
 
         JPanel container = new JPanel();
         container.setLayout(new GridBagLayout());

@@ -27,6 +27,7 @@ public interface JsonParser {
     String TAG_PGP_FINGERPRINT = "pgp"; //can be email or key ID
     String TAG_PGP_SIGNER = "signed_by";
     String TAG_APPLET_INSTANCE_NAMES = "applet_instance_names";
+    String TAG_HIDDEN = "hidden_by_default";
 
     /**
      * Get a list of JSON objects of the store items

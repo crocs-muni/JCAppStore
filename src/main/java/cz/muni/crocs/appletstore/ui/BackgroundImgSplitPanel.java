@@ -17,13 +17,17 @@ import java.io.IOException;
 
 /**
  * Background panel used as a base class for MainPanel, displays the background image
+ * can display two panels - main application GUI and logger (default:hidden)
+ *
  *
  * @author Jiří Horák
  * @version 1.0
  */
 public class BackgroundImgSplitPanel extends JSplitPane {
-    private static Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
+    private static final Logger logger = LoggerFactory.getLogger(BackgroundImgSplitPanel.class);
     private Image bg;
+    private Image orig;
+    private int iWidth, iHeight;
     private int width = -1, height = -1;
 
     /**
@@ -50,7 +54,8 @@ public class BackgroundImgSplitPanel extends JSplitPane {
     public void setNewBackground(BufferedImage newBackground) {
         width = getWidth();
         height = getHeight();
-        bg = newBackground.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        orig = newBackground;
+        updateBg(width, height);
         revalidate();
         repaint();
     }
@@ -67,7 +72,9 @@ public class BackgroundImgSplitPanel extends JSplitPane {
             loadDefault();
         } else {
             try {
-                bg = ImageIO.read(f);
+                orig = ImageIO.read(f);
+                iWidth = ((BufferedImage)orig).getWidth();
+                iHeight = ((BufferedImage)orig).getHeight();
             } catch (IOException e) {
                 e.printStackTrace();
                 logger.warn("Could not open background image file " + bg, e);
@@ -78,12 +85,24 @@ public class BackgroundImgSplitPanel extends JSplitPane {
 
     private void loadDefault() {
         try {
-            bg = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
+            orig = ImageIO.read(new File(Config.IMAGE_DIR + "bg.jpg"));
+            iWidth = ((BufferedImage)orig).getWidth();
+            iHeight = ((BufferedImage)orig).getHeight();
         } catch (IOException e) {
             e.printStackTrace();
             logger.warn("Failed to load default background image, failsafe to plain color.", e);
             bg = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
+            iWidth = 690;
+            iHeight = 540;
         }
+    }
+
+    private void updateBg(float w, float h) {
+        float wscale = w / iWidth;
+        float hscale = h / iHeight;
+        float scale = Math.max(wscale, hscale);
+
+        bg = orig.getScaledInstance((int)(iWidth*scale),(int)(iHeight*scale),Image.SCALE_SMOOTH);
     }
 
     @Override
@@ -93,7 +112,7 @@ public class BackgroundImgSplitPanel extends JSplitPane {
         int h = getHeight();
 
         if (width != w || height != h) {
-            bg = bg.getScaledInstance(w,h,Image.SCALE_SMOOTH);
+            updateBg(w, h);
             width = w;
             height = h;
         }

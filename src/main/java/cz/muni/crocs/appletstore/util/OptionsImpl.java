@@ -23,7 +23,7 @@ public class OptionsImpl implements Options<String> {
 
     private final String HEADER = "JCAppStore";
 
-    private HashMap<String, String> options;
+    private final HashMap<String, String> options;
     private StyleSheet sheet;
     private Language language;
     private Font text;
@@ -52,7 +52,7 @@ public class OptionsImpl implements Options<String> {
         addIfMissing(Options.KEY_PGP_LOCATION, "");
         addIfMissing(Options.KEY_SIMPLE_USE, "true");
         addIfMissing(Options.KEY_VERBOSE_MODE, "false");
-        addIfMissing(Options.KEY_KEEP_JCMEMORY, "true");
+        addIfMissing(Options.KEY_KEEP_AUTO_INSTALLED, "true");
         addIfMissing(Options.KEY_EXCLUSIVE_CARD_CONNECT, "false");
         addIfMissing(Options.KEY_WARN_FORCE_INSTALL, "true");
         addIfMissing(Options.KEY_LAST_SELECTION_LOCATION, Config.APP_LOCAL_DIR.getAbsolutePath());

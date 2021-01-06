@@ -39,7 +39,7 @@ public class CardManagerImpl implements CardManager {
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final Terminals terminals = new Terminals();
-    private CardInstanceImpl card;
+    private CardInstanceManagerExtension card;
     private String lastCardId = textSrc.getString("no_last_card");
     private AID selectedAID = null;
     private String[] lastInstalledAIDs = null;
@@ -122,7 +122,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void loadCard() throws LocalizedCardException, UnknownKeyException {
+    public void loadCard() throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         synchronized(lock) {
             lastInstalledAIDs = null;
             selectedAID = null;
@@ -131,11 +131,12 @@ public class CardManagerImpl implements CardManager {
                     CardDetails details = getCardDetails(terminals.getTerminal());
                     lastCardId = CardDetails.getId(details);
                     card = new CardInstanceImpl(details, terminals.getTerminal(), tryGeneric);
+                    logger.info("Card successfully refreshed.");
                 } else {
                     card = null;
                 }
 
-            } catch (UnknownKeyException | LocalizedCardException ex) {
+            } catch (UnknownKeyException | CardNotAuthenticatedException | LocalizedCardException ex) {
                 card = null;
                 throw ex;
             } catch (Exception e) {
@@ -144,14 +145,13 @@ public class CardManagerImpl implements CardManager {
             } finally {
                 tryGeneric = false;
             }
-            logger.info("Card successfully refreshed.");
 
             if (card != null && card.shouldJCAlgTestFinderRun()) getJCAlgTestDependencies();
         }
     }
 
     @Override
-    public void loadCardUnauthorized() throws LocalizedCardException, UnknownKeyException {
+    public void loadCardUnauthorized() throws LocalizedCardException {
         synchronized(lock) {
             lastInstalledAIDs = null;
             selectedAID = null;
@@ -159,7 +159,8 @@ public class CardManagerImpl implements CardManager {
                 if (terminals.getState() == Terminals.TerminalState.OK) {
                     CardDetails details = getCardDetails(terminals.getTerminal());
                     lastCardId = CardDetails.getId(details);
-                    //todo instantiate new card without ability to perform secured actions (new CardInstance impl?)
+                    card = new CardInstanceUnauthorizedImpl(details, terminals.getTerminal());
+                    logger.info("Card - unauthorized - loaded.");
                 } else {
                     card = null;
                 }
@@ -169,7 +170,6 @@ public class CardManagerImpl implements CardManager {
             } finally {
                 tryGeneric = false;
             }
-            logger.info("Card - unauthorized - loaded.");
         }
     }
 
@@ -211,12 +211,12 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException {
+    public void install(File file, InstallOpts data) throws LocalizedCardException, IOException, UnknownKeyException, CardNotAuthenticatedException {
         install(toCapFile(file), data);
     }
 
     @Override
-    public void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException {
+    public void install(final CAPFile file, InstallOpts data) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         try {
             installImpl(file, data);
         } catch (CardException e) {
@@ -231,7 +231,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException {
+    public void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         if (card == null) {
             throw new LocalizedCardException("No card recognized.", "no_card");
         }
@@ -372,7 +372,7 @@ public class CardManagerImpl implements CardManager {
                         try {
                             card.saveInfoData();
                         } catch (LocalizedCardException e) {
-                            //todo
+                            logger.error("Failed to save card info data when adding package info metadata.", e);
                         }
                         return false;
                     }
@@ -401,7 +401,7 @@ public class CardManagerImpl implements CardManager {
                             try {
                                 card.saveInfoData();
                             } catch (LocalizedCardException e) {
-                                //todo
+                                logger.error("Failed to save card info data when adding applet info metadata.", e);
                             }
                             return false;
                         }
@@ -421,7 +421,7 @@ public class CardManagerImpl implements CardManager {
     }
 
     //deleting without synchronization, card re-listing and other stuff - use with caution
-    private void tryDeletePackageByAID(final CAPFile file) throws CardException, LocalizedCardException {
+    private void tryDeletePackageByAID(final CAPFile file) {
         if (!card.getCardMetadata().isPackagePresent(file.getPackageAID())) return;
         logger.info("Package present - try to uninstall in simple mode.");
         try {

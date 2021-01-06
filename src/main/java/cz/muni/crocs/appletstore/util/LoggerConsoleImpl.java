@@ -70,7 +70,7 @@ public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
         return console.getDocument();
     }
 
-    private class Console extends JTextArea {
+    private static class Console extends JTextArea {
         Console() {
             super(12, 0);
             setLineWrap(false);
@@ -82,7 +82,7 @@ public class LoggerConsoleImpl extends JScrollPane implements LoggerConsole {
 
             JMenuItem item = new JMenuItem(new DefaultEditorKit.CopyAction());
             item.setIcon(new ImageIcon(Config.IMAGE_DIR + "copy.png"));
-            item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+            item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
             item.setText("Copy");
             menu.add(item);
             setComponentPopupMenu(menu);

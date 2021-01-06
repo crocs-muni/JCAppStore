@@ -3,7 +3,6 @@ package cz.muni.crocs.appletstore.action;
 import algtestprocess.SupportTable;
 import apdu4j.HexUtils;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.action.applet.Applets;
@@ -68,6 +67,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                     if (form.isShareTestResultsSelected() && !shareTestResults(testResults)) {
                         //todo notify user or just ignore?
+                        logger.warn("Failed to share test results. You can upload them manually. See official JCAlgTest website.");
                     }
 
                     propagateTestResults(testResults);
@@ -97,7 +97,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                 if (p.get() != null) p.get().destroy();
             }
             return null;
-        }, "", "");
+        }, "Failed to run JCAlgTest testing.", textSrc.getString("E_jc_run"));
     }
 
     private Process runJcAlgTestClient(TestForm form)

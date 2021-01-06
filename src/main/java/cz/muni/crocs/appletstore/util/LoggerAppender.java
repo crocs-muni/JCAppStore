@@ -16,7 +16,7 @@ import javax.swing.*;
  */
 public class LoggerAppender extends AbstractAppender {
 
-    private volatile LoggerConsole appender;
+    private final LoggerConsole appender;
     public static final int LINES = 150;
 
     public LoggerAppender(LoggerConsole console) {

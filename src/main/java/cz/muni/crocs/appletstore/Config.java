@@ -11,7 +11,7 @@ import java.io.File;
  * @version 1.0
  */
 public class Config {
-    public static final String VERSION = "1.2";
+    public static final String VERSION = "1.3";
 
     //system path separator
     public static final String S = File.separator;
@@ -28,6 +28,7 @@ public class Config {
     public static final String LOG_FILENAME_EXT = ".log";
 
     public static final File APP_STORE_CAPS_DIR = new File(APP_ROOT_DIR + S + "store" + S + "JCApplets");
+    public static final String APP_STORE_BGIMG_RELPATH = "background";
 
     //app internal dirs
     public static final String RESOURCES_DIR = "src"+S+"main"+S+"resources"+S;
@@ -49,9 +50,11 @@ public class Config {
 
     public static final String RESOURCES = APP_STORE_DIR + S + "Resources" + S;
 
+    public static final String[] IMAGE_EXTENSIONS = new String[] {".png", ".jpg", ".jpeg"};
+
     /**
      * Gets the default app folder root location
-     * @return
+     * @return default root app folder
      */
     public static String getDefaultAppRootFolder() {
         //from  https://stackoverflow.com/questions/8782797/creating-directory-in-application-support-or-appdata

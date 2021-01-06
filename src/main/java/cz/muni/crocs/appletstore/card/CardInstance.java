@@ -86,4 +86,10 @@ public interface CardInstance {
      * @return true if task running
      */
     boolean isTask();
+
+    /**
+     * Check whether the card can use secure-channel
+     * @return true if card was authenticated to
+     */
+    boolean isAuthenticated();
 }

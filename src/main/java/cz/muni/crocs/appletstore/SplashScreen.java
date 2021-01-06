@@ -32,9 +32,9 @@ public class SplashScreen extends JWindow {
 
     private Timer timer;
     private int progress = 0;
-    private Random r = new Random();
-    private ProcessTrackable loader;
-    private Font font = new Font("Courier", Font.PLAIN, 14);
+    private final Random r = new Random();
+    private final ProcessTrackable loader;
+    private final Font font = new Font("Courier", Font.PLAIN, 14);
     private boolean update;
     private String numbers = "";
 
@@ -63,18 +63,7 @@ public class SplashScreen extends JWindow {
 
         Container container = getContentPane();
         container.setLayout(null);
-        loader = new LoaderWorker() {
-            @Override
-            protected void done() {
-                try {
-                    runMainApp(get());
-                } catch (InterruptedException | ExecutionException e) {
-                    runMainApp(e);
-                } catch (Exception all) {
-                    showCrashReporter(all);
-                }
-            }
-        };
+        loader = new LoaderWorker(() -> {runMainApp(); return null;});
 
         JLabel bg = new JLabel(new ImageIcon(Config.IMAGE_DIR + "splash.png")) {
             @Override
@@ -104,7 +93,7 @@ public class SplashScreen extends JWindow {
         setSize(370, 215);
         setLocationRelativeTo(null);
         setVisible(true);
-        ((SwingWorker)loader).execute();
+        loader.run();
     }
 
     /**
@@ -145,11 +134,11 @@ public class SplashScreen extends JWindow {
         new CrashReporter(textSrc.getString("reporter"), e.getMessage(), null);
     }
 
-    private void runMainApp(Exception fromLoad) {
+    private void runMainApp() {
         try {
             if (!INITIALIZED) throw new RuntimeException("Logging not initialized properly.");
 
-            new AppletStore(fromLoad);
+            new AppletStore();
         } catch (Exception e) {
             showCrashReporter(e);
         }

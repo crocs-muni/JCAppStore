@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.GUIFactory;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
 import cz.muni.crocs.appletstore.util.GitHubApiGetter;
 import org.slf4j.Logger;
@@ -218,6 +219,8 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
         card.getCardMetadata().setJCData(data);
         try {
             card.saveInfoData();
+            //todo somehow update GUI without this ugly dependency --> update card but do not call it from card package
+            GUIFactory.Components().getCardStatusNotifiable().updateCardState();
             logger.info("JCAlgtest data saved.");
         } catch (LocalizedCardException e) {
             logger.error("Failed to save smart card metadata after successful jcalgtest database match.", e);

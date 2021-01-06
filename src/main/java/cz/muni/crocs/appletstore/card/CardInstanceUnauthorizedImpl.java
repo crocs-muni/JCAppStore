@@ -4,7 +4,7 @@ import apdu4j.APDUBIBO;
 import apdu4j.CardChannelBIBO;
 import apdu4j.TerminalManager;
 import cz.muni.crocs.appletstore.Config;
-import cz.muni.crocs.appletstore.card.command.DetectUnauthorized;
+import cz.muni.crocs.appletstore.card.command.ListContentsUnauthorized;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
@@ -33,7 +33,7 @@ import java.util.*;
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardInstanceUnauthorizedImpl implements CardInstance {
+public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtension {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceUnauthorizedImpl.class);
     private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
             OptionsFactory.getOptions().getLanguageLocale());
@@ -63,7 +63,7 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
 
         this.terminal = terminal;
         this.details = newDetails;
-        id = CardDetails.getId(newDetails) + "::unauthorized";
+        id = "Unauthorized::" + CardDetails.getId(newDetails);
         logger.info("Card plugged in:" + id);
 
         reload();
@@ -119,7 +119,6 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
 
     @Override
     public void foreachAppletOf(GPRegistryEntry.Kind kind, CallableParam<Boolean, AppletInfo> call) {
-        //todo supported?
         Set<AppletInfo> applets = getCardMetadata().getApplets();
         if (applets == null) return;
         for (AppletInfo nfo : getCardMetadata().getApplets()) {
@@ -142,28 +141,33 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
         return task != null && !task.finished();
     }
 
+    @Override
+    public boolean isAuthenticated() {
+        return false;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
-    ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
+    ///////////////////  CardInstanceManagerExtension        ///////////////////
     ////////////////////////////////////////////////////////////////////////////
 
-    CardDetails getDetails() {
+    @Override
+    public CardDetails getDetails() {
         return details;
     }
 
-    /**
-     * Set default selected applet of the card
-     * @param defaultSelected applet that is default selected on card
-     */
-    void setDefaultSelected(AID defaultSelected) {
+    @Override
+    public void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
     }
 
-    void saveInfoData() throws LocalizedCardException {
+    @Override
+    public void saveInfoData() throws LocalizedCardException {
         AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
         serializer.serialize(metadata, new File(Config.APP_DATA_DIR + Config.S + getId()));
     }
 
-    void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
+    @Override
+    public void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
         metadata.removeInvalidApplets();
         for (AppletInfo info : toSave) {
             metadata.insertOrRewriteApplet(info);
@@ -171,12 +175,13 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
         saveInfoData();
     }
 
-    void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
+    @Override
+    public void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
         deleteAppletData(pkg, false);
     }
 
-    //delete applet metadata when uninstalling, presumes applet not to be package
-    void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+    @Override
+    public void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
         metadata.deleteAppletInfo(applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -187,13 +192,8 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
         saveInfoData();
     }
 
-    /**
-     * Executes any desired command without establishing secure channel
-     * @param commands commands to execute
-     * @throws LocalizedCardException unable to perform command
-     * @throws CardException unable to perform command
-     */
-    void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+    @Override
+    public void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         Card card;
         APDUBIBO channel;
 
@@ -230,26 +230,36 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
         }
     }
 
-    /**
-     * Used to update applet list on install
-     * @param metadata applet info list and other information to set
-     */
-    void setMetaData(CardInstanceMetaData metadata) {
+    @Override
+    public void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException {
+        throw new LocalizedCardException("secureExecuteCommands() call not allowed.", "E_unauthorized");
+    }
+
+    @Override
+    public void setMetaData(CardInstanceMetaData metadata) {
         this.metadata = metadata;
+    }
+
+    @Override
+    public void disableTemporarilyJCAlgTestFinder() {
+        //do nothing
+    }
+
+    @Override
+    public boolean shouldJCAlgTestFinderRun() {
+        return false;
     }
 
     ////////////////////////////////////////////////////////////////////////////
     ///////////////////    PRIVATE ONLY (INTERNAL LOGIC)     ///////////////////
     ////////////////////////////////////////////////////////////////////////////
 
-    private void reload()
-            throws LocalizedCardException, CardException {
-
-        DetectUnauthorized cmd = new DetectUnauthorized(new File(Config.DATA_DIR + "well_known_aids.ini"));
+    private void reload() throws LocalizedCardException, CardException {
+        ListContentsUnauthorized cmd =
+                new ListContentsUnauthorized(new File(Config.DATA_DIR + "well_known_aids.ini"));
         executeCommands(cmd);
-        metadata = new CardInstanceMetaData(cmd.getResults(), new HashMap<>());
+        metadata = cmd.getResult();
     }
-
 
     private void updateCardName(String name) throws LocalizedCardException {
         try {
@@ -257,38 +267,6 @@ public class CardInstanceUnauthorizedImpl implements CardInstance {
                     .addValue(IniCardTypesParser.TAG_NAME, name).store();
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
-        }
-    }
-
-    /**
-     * Open the ini file and try to find our card,
-     * possibly save the card info
-     *
-     * @return true if card info present and custom master key is set
-     */
-    private boolean saveDetailsAndCheckMasterKey() throws LocalizedCardException {
-        IniCardTypesParserImpl parser;
-        try {
-            parser = new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"));
-            if (parser.isHeaderPresent()) {
-                logger.info("Card " + id + " metadata found.");
-                name = parser.getValue(IniCardTypesParser.TAG_NAME);
-                return true;
-            }
-
-            logger.info("Card " + id + " saved into card list database.");
-            parser.addValue(IniCardTypesParser.TAG_NAME, name)
-                    .addValue(IniCardTypesParser.TAG_ATR, CardDetails.byteArrayToHexSpaces(details.getAtr().getBytes()))
-                    .addValue(IniCardTypesParser.TAG_CIN, details.getCin())
-                    .addValue(IniCardTypesParser.TAG_IIN, details.getIin())
-                    .addValue(IniCardTypesParser.TAG_CPLC, (details.getCplc() == null) ? null : details.getCplc().toString())
-                    .addValue(IniCardTypesParser.TAG_DATA, details.getCardData())
-                    .addValue(IniCardTypesParser.TAG_CAPABILITIES, details.getCardCapabilities())
-                    .addValue(IniCardTypesParser.TAG_KEY_INFO, details.getKeyInfo())
-                    .store();
-            return false;
-        } catch (IOException e) {
-            throw new LocalizedCardException("Unable to save new card details.", "E_card_details_failed");
         }
     }
 

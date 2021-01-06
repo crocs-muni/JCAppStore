@@ -24,30 +24,27 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LeftMenu extends JPanel implements SearchBar {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private JPanel container = new JPanel(new GridBagLayout());
+    private final JPanel container = new JPanel(new GridBagLayout());
 
     private InputHintTextField searchInput;
     private JLabel searchIcon;
     private boolean close = false;
 
-    private ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
-    private ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
+    private final ImageIcon searchImage = new ImageIcon(Config.IMAGE_DIR + "search.png");
+    private final ImageIcon closeImage = new ImageIcon(Config.IMAGE_DIR + "close_black.png");
 
     private LeftMenuButton local;
     private LeftMenuButton remote;
     private boolean isLocal = true;
 
-    private MainPanel parent;
 
     /**
      * Create a left menu
-     * @param parent MainPanel parent
      */
-    public LeftMenu(MainPanel parent) {
-        this.parent = parent;
-
+    public LeftMenu() {
         setOpaque(false);
         setBackground(new Color(255, 255, 255, 65));
         container.setOpaque(false);
@@ -56,6 +53,110 @@ public class LeftMenu extends JPanel implements SearchBar {
         setLayout(new BorderLayout());
         buildMenuComponents();
         setListeners();
+    }
+
+    @Override
+    public void resetSearch() {
+        close = false;
+        searchIcon.setIcon(searchImage);
+        searchInput.setText("");
+        searchInput.focusLost(null);
+    }
+
+    @Override
+    public String getQuery() {
+        return searchInput.getText();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        g.setColor( getBackground() );
+        g.fillRect(0, 0, getWidth(), getHeight());
+        super.paintComponent(g);
+    }
+
+    private void checkIfSetClose() {
+        boolean hasSearchText = !searchInput.getText().isEmpty();
+        if (close != hasSearchText) {
+            searchIcon.setIcon(hasSearchText ? closeImage : searchImage);
+        }
+        close = hasSearchText;
+    }
+
+    /**
+     * Setup actions for the buttons
+     */
+    private void setListeners() {
+        local.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!isLocal) {
+                    isLocal = true;
+                    setChoosed();
+                    GUIFactory.Components().getStoreWindows().setCardPanelVisible();
+                }
+            }
+        });
+        remote.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (isLocal) {
+                    isLocal = false;
+                    setChoosed();
+                    GUIFactory.Components().getStoreWindows().setStorePanelVisible();
+                    GUIFactory.Components().getSearchable().refresh();
+                } else {
+                    //to re-load the store (clickg store closes details)
+                    GUIFactory.Components().getSearchable().showItems(null);
+                }
+            }
+        });
+
+        //searching icon on click search
+        searchIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                resetSearch();
+                GUIFactory.Components().getSearchable().showItems(null);
+            }
+        });
+        //searching on enter press
+        searchInput.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
+                checkIfSetClose();
+            }
+        });
+
+        searchInput.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
+                checkIfSetClose();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                GUIFactory.Components().getSearchable().showItems(searchInput.getText());
+                checkIfSetClose();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                //do nothing
+            }
+        });
+    }
+
+    /**
+     * Sets the "choosed button" border
+     */
+    private void setChoosed() {
+        local.setSelectedBorder(isLocal);
+        remote.setSelectedBorder(!isLocal);
+        local.setSelectedBackground(isLocal);
+        remote.setSelectedBackground(!isLocal);
     }
 
     private void buildMenuComponents() {
@@ -97,108 +198,6 @@ public class LeftMenu extends JPanel implements SearchBar {
         searchIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchPane.add(searchIcon);
         return searchPane;
-    }
-
-    /**
-     * Sets the "choosed button" border
-     */
-    private void setChoosed() {
-        local.setSelectedBorder(isLocal);
-        remote.setSelectedBorder(!isLocal);
-        local.setSelectedBackground(isLocal);
-        remote.setSelectedBackground(!isLocal);
-    }
-
-    public void resetSearch() {
-        close = false;
-        searchIcon.setIcon(searchImage);
-        searchInput.setText("");
-    }
-
-    public String getQuery() {
-        return searchInput.getText();
-    }
-
-    private void checkIfSetClose() {
-        boolean hasSearchText = !searchInput.getText().isEmpty();
-        if (close != hasSearchText) {
-            searchIcon.setIcon(hasSearchText ? closeImage : searchImage);
-        }
-        close = hasSearchText;
-    }
-
-    /**
-     * Setup actions for the buttons
-     */
-    private void setListeners() {
-        local.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!isLocal) {
-                    isLocal = true;
-                    setChoosed();
-                    parent.setLocalPanelVisible();
-                }
-            }
-        });
-        remote.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (isLocal) {
-                    isLocal = false;
-                    setChoosed();
-                    parent.setStorePaneVisible();
-                    parent.getSearchablePane().refresh();
-                } else {
-                    //to re-load the store (clickg store closes details)
-                    parent.getSearchablePane().showItems(null);
-                }
-            }
-        });
-
-        //searching icon on click search
-        searchIcon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                resetSearch();
-                parent.getSearchablePane().showItems(null);
-            }
-        });
-        //searching on enter press
-        searchInput.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
-                checkIfSetClose();
-            }
-        });
-
-        searchInput.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
-                checkIfSetClose();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                parent.getSearchablePane().showItems(searchInput.getText());
-                checkIfSetClose();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-
-            }
-        });
-    }
-
-    @Override
-    protected void paintComponent(Graphics g)
-    {
-        g.setColor( getBackground() );
-        g.fillRect(0, 0, getWidth(), getHeight());
-        super.paintComponent(g);
     }
 }
 

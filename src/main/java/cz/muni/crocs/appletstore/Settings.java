@@ -27,27 +27,27 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class Settings extends JPanel {
-    private static Logger logger = LoggerFactory.getLogger(Settings.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private static final String DEFAULT_BG_PATH = Config.IMAGE_DIR + "bg.jpg";
 
     private JTextField pgp;
     private String bgImg = OptionsFactory.getOptions().getOption(Options.KEY_BACKGROUND);
-    private JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
+    private final JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 8, 1);
     private JComboBox<Language> languageBox;
     private final Settings self;
-    private BackgroundChangeable context;
-    private CompoundBorder frame = BorderFactory.createCompoundBorder(
+    private final BackgroundChangeable context;
+    private final CompoundBorder frame = BorderFactory.createCompoundBorder(
             new MatteBorder(new Insets(1, 1, 1, 1), Color.BLACK),
             new EmptyBorder(new Insets(4, 4, 4, 4)));
 
     /**
      * Create settings panel
-     * @param context parent with changeable background (settings can change it)
      */
-    public Settings(BackgroundChangeable context) {
-        this.context = context;
+    public Settings() {
+        this.context = GUIFactory.Components().getBackgroundChangeable();
         setLayout(new MigLayout("fillx, gap 5px 5px"));
         buildPGP();
         buildLanguage();

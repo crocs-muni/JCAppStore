@@ -13,24 +13,31 @@ import java.awt.*;
  */
 public class StoreTitle extends Title implements Item {
 
-    private int position;
+    private final int position;
+    private final boolean byDefaultHidden;
 
     /**
      * Create a category name
      * @param text category
      * @param position positiona s defined in json info_[lang].json file
      */
-    public StoreTitle(String text, int position) {
+    public StoreTitle(String text, int position, boolean byDefaultHidden) {
         super(text, 25f);
         this.position = position;
-        setForeground(Color.white);
-        setBorder(BorderFactory.createEmptyBorder(15, 15, 0, 0));
+        this.byDefaultHidden = byDefaultHidden;
+        setForeground(Color.black);
+        setBorder(BorderFactory.createEmptyBorder(20, 15, 5, 0));
         setAlignmentX(CENTER_ALIGNMENT);
     }
 
     @Override
     public String getSearchQuery() {
         return getText();
+    }
+
+    @Override
+    public boolean byDefaultHidden() {
+        return byDefaultHidden;
     }
 
     @Override

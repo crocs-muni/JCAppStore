@@ -23,17 +23,21 @@ public class CardDetectionAction extends CardAbstractAction<Void, Void> {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        final CardManager manager = CardManagerFactory.getManager();
         logger.info("Detecting card...");
         execute(() -> {
-                    manager.needsCardRefresh();
-                    if (manager.getTerminalState() != Terminals.TerminalState.NO_SERVICE) {
-                        manager.loadCard();
-                    } else {
-                        logger.info("No service enabled: card refresh not performed.");
-                    }
+                    detectUnsafe();
                     return null;
                 }, "Card detection on app startup failed.",
-                null, 10, TimeUnit.SECONDS);
+                textSrc.getString("failed_detect"), 10, TimeUnit.SECONDS);
+    }
+
+    public static void detectUnsafe() throws UnknownKeyException, LocalizedCardException, CardNotAuthenticatedException {
+        CardManager manager = CardManagerFactory.getManager();
+        manager.needsCardRefresh();
+        if (manager.getTerminalState() != Terminals.TerminalState.NO_SERVICE) {
+            manager.loadCard();
+        } else {
+            logger.info("No service enabled: card refresh not performed.");
+        }
     }
 }

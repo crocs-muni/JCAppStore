@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class CardAbstractAction<TRet, TArg> extends CardAbstractActionBase<TRet, TArg> {
 
     protected CardAbstractAction(OnEventCallBack<TRet, TArg> call) {
-        super(call);
+        super(call, true);
     }
 
     @Override

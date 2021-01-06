@@ -1,11 +1,11 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.ui.CustomJScrollPaneLayout;
 import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,40 +22,49 @@ import java.util.List;
  * @version 1.0
  */
 public class StoreWindowPane extends JScrollPane implements Searchable {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
-    private OnEventCallBack<Void, Void> callback;
-    private JPanel storeLayout = new JPanel();
-    private TreeSet<Item> items = new TreeSet<>();
-    private List<JsonObject> data;
+    private final StoreWindowManager manager;
+    private final JPanel storeLayout = new JPanel();
+    private final TreeSet<Item> items = new TreeSet<>();
+    private final List<JsonObject> data;
     private JsonObject currentlyShown;
     private SearchBar searchBar;
+    private final StoreHeader header;
+    private boolean showAll = false;
 
     /**
      * Store panel
-     * @param callback callback forwarded to inner children, it can disable the panel (defined in MainPanel)
      */
-    public StoreWindowPane(List<JsonObject> data, OnEventCallBack<Void, Void> callback) {
+    public StoreWindowPane(StoreWindowManager manager, List<JsonObject> data) {
+        this.manager = manager;
         this.data = data;
-        this.callback = callback;
-        setOpaque(false);
-        setBorder(BorderFactory.createEmptyBorder());
-        setViewportBorder(null);
-        getViewport().setOpaque(false);
+        setLayout(new CustomJScrollPaneLayout());
+        setOpaque(true);
+        setBackground(new Color(238, 238, 238));
 
-        setBorder(BorderFactory.createEmptyBorder());
+        setBorder(null);
+        setViewportBorder(null);
+
         setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         getVerticalScrollBar().setUI(new CustomScrollBarUI());
         getVerticalScrollBar().setUnitIncrement(16);
         getVerticalScrollBar().setOpaque(false);
 
-        storeLayout.setOpaque(false);
-        storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 11, 11));
-        storeLayout.setBorder(new EmptyBorder(0, 50, 50, 50));
+        getVerticalScrollBar().setBorder(null);
+        getHorizontalScrollBar().setBorder(null);
+
+        setComponentZOrder(getVerticalScrollBar(), 0);
+        setComponentZOrder(getViewport(), 1);
+
+        //storeLayout.setOpaque(false);
+        storeLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 9, 1, 1000));
+        storeLayout.setBorder(new EmptyBorder(0, 0, 50, 0));
+
+        this.header = new StoreHeader(this);
         loadStore();
     }
 
-    private void loadStore()  {
+    private void loadStore() {
         items.clear();
 
         int position = 0;
@@ -63,7 +72,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         for (JsonObject dataSet : data) {
             if (dataSet.get(JsonParser.TAG_TYPE).getAsString().equals("category")) {
                 category = dataSet.get(JsonParser.TAG_TITLE).getAsString();
-                items.add(new StoreTitle(category, position++));
+                items.add(new StoreTitle(category, position++, dataSet.get(JsonParser.TAG_HIDDEN).getAsBoolean()));
             } else {
                 StoreItem item = new StoreItem(dataSet, category, position++);
                 item.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -78,12 +87,24 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         }
     }
 
+    public void redownload() {
+        //delegate
+        manager.redownload();
+    }
+
+    public void setShowAll(boolean showAll) {
+        if (this.showAll == showAll) return;
+        this.showAll = showAll;
+        refresh();
+    }
+
     @Override
     public void refresh() {
-        if (currentlyShown == null)
+        if (currentlyShown == null) {
             showItems(searchBar.getQuery());
-        else
+        } else {
             showInfo(currentlyShown);
+        }
     }
 
     @Override
@@ -94,11 +115,18 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
     private void showInfo(JsonObject dataSet) {
         currentlyShown = dataSet;
-        setViewportView(new StoreItemInfo(dataSet, this, callback));
+
+        JPanel container = new JPanel();
+        container.setBackground(getBackground());
+        StoreItemInfo info = new StoreItemInfo(this, dataSet);
+        container.add(info);
+
+        setViewportView(container);
     }
 
     private void showPanel(SortedSet<Item> sortedItems) {
         storeLayout.removeAll();
+        storeLayout.add(header);
 
         if (sortedItems.size() == 0) {
             storeLayout.add(new NotFoundItem());
@@ -115,16 +143,21 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     @Override
     public void showItems(String query) {
         if (query == null) query = searchBar.getQuery();
+        TreeSet<Item> sortedIems = new TreeSet<>();
         if (query == null || query.isEmpty()) {
-            showPanel(items);
-        } else {
-            TreeSet<Item> sortedIems = new TreeSet<>();
             for (Item item : items) {
-                if (item.getSearchQuery().toLowerCase().contains(query.toLowerCase())) {
+                if (showAll || !item.byDefaultHidden()) {
                     sortedIems.add(item);
                 }
             }
-            showPanel(sortedIems);
+            showPanel(items);
+        } else {
+            for (Item item : items) {
+                if ((showAll || !item.byDefaultHidden()) && item.getSearchQuery().toLowerCase().contains(query.toLowerCase())) {
+                    sortedIems.add(item);
+                }
+            }
         }
+        showPanel(sortedIems);
     }
 }

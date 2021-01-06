@@ -18,7 +18,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     /**
      * Create a local item which is actually an custom applet INSTALL button
@@ -56,6 +57,11 @@ public class LocalInstallItem extends JPanel implements Item, Comparable<Item> {
     @Override
     public String getSearchQuery() {
         return textSrc.getString("install_kwords");
+    }
+
+    @Override
+    public boolean byDefaultHidden() {
+        return false;
     }
 
     @Override

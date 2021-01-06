@@ -17,7 +17,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class CrashReporter {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final String system =
             System.getProperty("os.name") + "_" +

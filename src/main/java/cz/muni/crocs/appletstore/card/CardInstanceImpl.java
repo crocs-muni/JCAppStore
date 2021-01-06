@@ -4,15 +4,13 @@ import apdu4j.APDUBIBO;
 import apdu4j.HexUtils;
 import apdu4j.*;
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.action.CardDetectionAction;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.card.command.GetDefaultSelected;
 import cz.muni.crocs.appletstore.card.command.ListContents;
 import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.util.IniCardTypesParser;
-import cz.muni.crocs.appletstore.util.IniCardTypesParserImpl;
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -31,11 +29,12 @@ import java.util.*;
 /**
  * Card instance of card inserted in selected terminal
  * provides all functionality over card communication
+ * todo: introduce base class that implements functionality of both authorized and unauthorized card instances
  *
  * @author Jiří Horák
  * @version 1.0
  */
-public class CardInstanceImpl implements CardInstance {
+public class CardInstanceImpl implements CardInstanceManagerExtension {
     private static final Logger logger = LoggerFactory.getLogger(CardInstanceImpl.class);
     private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang",
             OptionsFactory.getOptions().getLanguageLocale());
@@ -52,6 +51,7 @@ public class CardInstanceImpl implements CardInstance {
     private final CardTerminal terminal;
     private CardInstanceMetaData metadata;
     private AID defaultSelected;
+    private boolean authenticated = false;
 
     private ProcessTrackable task;
 
@@ -62,7 +62,7 @@ public class CardInstanceImpl implements CardInstance {
      * @param newDetails of the card: ATR is a must, other optional. Data from GET_CATA APDU command.
      */
     CardInstanceImpl(CardDetails newDetails, CardTerminal terminal)
-            throws LocalizedCardException, CardException, UnknownKeyException {
+            throws LocalizedCardException, CardException, UnknownKeyException, CardNotAuthenticatedException {
         this(newDetails, terminal, false);
     }
 
@@ -73,7 +73,7 @@ public class CardInstanceImpl implements CardInstance {
      * @param defaultTestKey default test key value
      */
     CardInstanceImpl(CardDetails newDetails, CardTerminal terminal, boolean defaultTestKey)
-            throws LocalizedCardException, CardException, UnknownKeyException {
+            throws LocalizedCardException, CardException, UnknownKeyException, CardNotAuthenticatedException {
         if (newDetails == null || terminal == null) {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
             throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg");
@@ -171,28 +171,33 @@ public class CardInstanceImpl implements CardInstance {
         return task != null && !task.finished();
     }
 
+    @Override
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
-    ///////////////////  PACKAGE VISIBLE ONLY (FOR MANAGER)  ///////////////////
+    ///////////////////  CardInstanceManagerExtension        ///////////////////
     ////////////////////////////////////////////////////////////////////////////
 
-    CardDetails getDetails() {
+    @Override
+    public CardDetails getDetails() {
         return details;
     }
 
-    /**
-     * Set default selected applet of the card
-     * @param defaultSelected applet that is default selected on card
-     */
-    void setDefaultSelected(AID defaultSelected) {
+    @Override
+    public void setDefaultSelected(AID defaultSelected) {
         this.defaultSelected = defaultSelected;
     }
 
-    void saveInfoData() throws LocalizedCardException {
+    @Override
+    public void saveInfoData() throws LocalizedCardException {
         AppletSerializer<CardInstanceMetaData> serializer = new AppletSerializerImpl();
         serializer.serialize(metadata, new File(Config.APP_DATA_DIR + Config.S + getId()));
     }
 
-    void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
+    @Override
+    public void saveInfoData(List<AppletInfo> toSave) throws LocalizedCardException {
         metadata.removeInvalidApplets();
         for (AppletInfo info : toSave) {
             metadata.insertOrRewriteApplet(info);
@@ -200,12 +205,13 @@ public class CardInstanceImpl implements CardInstance {
         saveInfoData();
     }
 
-    void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
+    @Override
+    public void deletePackageData(final AppletInfo pkg) throws LocalizedCardException {
         deleteAppletData(pkg, false);
     }
 
-    //delete applet metadata when uninstalling, presumes applet not to be package
-    void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
+    @Override
+    public void deleteAppletData(final AppletInfo applet, boolean force) throws LocalizedCardException {
         logger.info("Delete applet metadata: " + applet.toString());
         metadata.deleteAppletInfo(applet.getAid());
         if (force && applet.getKind().equals(GPRegistryEntry.Kind.ExecutableLoadFile)) {
@@ -216,13 +222,8 @@ public class CardInstanceImpl implements CardInstance {
         saveInfoData();
     }
 
-    /**
-     * Executes any desired command without establishing secure channel
-     * @param commands commands to execute
-     * @throws LocalizedCardException unable to perform command
-     * @throws CardException unable to perform command
-     */
-    void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+    @Override
+    public void executeCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         Card card;
         APDUBIBO channel;
 
@@ -259,12 +260,8 @@ public class CardInstanceImpl implements CardInstance {
         }
     }
 
-    /**
-     * Executes any desired command using secure channel
-     * @param commands commands to execute
-     * @throws CardException unable to perform command
-     */
-    void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
+    @Override
+    public void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException, CardException {
         executeCommands(new GPCommand<Void>() {
             @Override
             public String getDescription() {
@@ -279,7 +276,7 @@ public class CardInstanceImpl implements CardInstance {
                 } catch (IllegalArgumentException il) {
                     throw new LocalizedCardException(il.getMessage(), "no_channel", "plug-in-out.jpg", il);
                 } catch (GPException ex) {
-                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), "plug-in-out.jpg", ex);
+                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), "plug-in-out.png", ex);
                 } catch (IOException e) {
                     throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", "plug-in-out.jpg", e);
                 }
@@ -295,7 +292,8 @@ public class CardInstanceImpl implements CardInstance {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
-                        throw new LocalizedCardException(e.getMessage(), "H_authentication", "warn_white.png", e);
+                        throw new LocalizedCardException(e.getMessage(), "H_authentication", e, "lock_black.png",
+                               CardDetectionAction::detectUnsafe, textSrc.getString("E_nokey_retry"));
                     }
                     throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
                 }
@@ -314,19 +312,18 @@ public class CardInstanceImpl implements CardInstance {
         });
     }
 
-    /**
-     * Used to update applet list on install
-     * @param metadata applet info list and other information to set
-     */
-    void setMetaData(CardInstanceMetaData metadata) {
+    @Override
+    public void setMetaData(CardInstanceMetaData metadata) {
         this.metadata = metadata;
     }
 
-    void disableTemporarilyJCAlgTestFinder() {
+    @Override
+    public void disableTemporarilyJCAlgTestFinder() {
         doJCAlgTestFinder = false;
     }
 
-    boolean shouldJCAlgTestFinderRun() {
+    @Override
+    public boolean shouldJCAlgTestFinderRun() {
         return doJCAlgTestFinder;
     }
 
@@ -335,7 +332,7 @@ public class CardInstanceImpl implements CardInstance {
     ////////////////////////////////////////////////////////////////////////////
 
     private void reload(boolean useDefaultTestKey)
-            throws LocalizedCardException, CardException, UnknownKeyException {
+            throws LocalizedCardException, CardException, UnknownKeyException, CardNotAuthenticatedException {
         if (useDefaultTestKey) {
             setTestPassword404f();
         }
@@ -363,6 +360,8 @@ public class CardInstanceImpl implements CardInstance {
                     .addValue(IniCardTypesParser.TAG_DIVERSIFIER, diversifier)
                     .addValue(IniCardTypesParser.TAG_AUTHENTICATED, authenticated ? "true" : "false")
                     .store();
+
+            this.authenticated = authenticated;
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
         }
@@ -434,7 +433,7 @@ public class CardInstanceImpl implements CardInstance {
      *
      * @param useGeneric true if 40..4F key should be used
      */
-    private void getCardListWithDefaultPassword(boolean useGeneric) throws LocalizedCardException, UnknownKeyException, CardException {
+    private void getCardListWithDefaultPassword(boolean useGeneric) throws LocalizedCardException, UnknownKeyException, CardException, CardNotAuthenticatedException {
         if (!(new File(Config.CARD_TYPES_FILE).exists())) {
             logger.error("Cad types file not found");
             //todo add image file not found
@@ -472,9 +471,9 @@ public class CardInstanceImpl implements CardInstance {
     /**
      * Open card types INI and searches by ATR for default password
      */
-    private void getCardListWithSavedPassword() throws LocalizedCardException, CardException {
+    private void getCardListWithSavedPassword() throws LocalizedCardException, CardException, CardNotAuthenticatedException {
         //todo image that represents not trying to auth
-        if (!doAuth) throw new LocalizedCardException("Card not authenticated.", "H_not_authenticated");
+        if (!doAuth)  throw new CardNotAuthenticatedException(id);
 
         GPCommand<CardInstanceMetaData> listContents = new ListContents(id);
         GPCommand<Optional<AID>> selected = new GetDefaultSelected();

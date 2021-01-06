@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.action.ReloadAction;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -7,6 +8,7 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.ResourceBundle;
 
 /**
@@ -16,13 +18,13 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalSubMenu extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private JCheckBox sd = new JCheckBox();
-    private JCheckBox app = new JCheckBox();
-    private JCheckBox pkg = new JCheckBox();
-
-    private JButton reload;
+    private final JCheckBox sd = new JCheckBox();
+    private final JCheckBox app = new JCheckBox();
+    private final JCheckBox pkg = new JCheckBox();
+    private final JLabel pkgTitle;
 
     /**
      * Create a local submenu
@@ -31,11 +33,26 @@ public class LocalSubMenu extends JPanel {
         setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
         setOpaque(false);
 
-        reload = getButton("card_refresh");
+        JButton reload = getButton("card_refresh");
+        reload.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ReloadAction(GUIFactory.Components().defaultActionEventCallback()).start();
+            }
+        });
 
+        AbstractAction submit = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GUIFactory.Components().getSearchable().showItems(null);
+            }
+        };
         sd.setBorder(BorderFactory.createEmptyBorder());
+        sd.addActionListener(submit);
         app.setBorder(BorderFactory.createEmptyBorder());
+        app.addActionListener(submit);
         pkg.setBorder(BorderFactory.createEmptyBorder());
+        pkg.addActionListener(submit);
 
         add(getLabel("applets"));
         add(app);
@@ -43,9 +60,12 @@ public class LocalSubMenu extends JPanel {
         add(getLabel("sds"));
         add(sd);
         add(Box.createRigidArea(new Dimension(6, 0)));
-        add(getLabel("packages"));
+
+        pkgTitle = getLabel("packages");
+        add(pkgTitle);
         add(pkg);
         add(Box.createRigidArea(new Dimension(15, 0)));
+
         add(reload);
         add(Box.createRigidArea(new Dimension(10, 0)));
         app.setSelected(true);
@@ -78,6 +98,11 @@ public class LocalSubMenu extends JPanel {
         return pkg.isSelected();
     }
 
+    public void showPackagesButton(boolean doShow) {
+        pkg.setVisible(doShow);
+        pkgTitle.setVisible(doShow);
+    }
+
     /**
      * Check which kind is filtered
      * @param kind kind to check
@@ -96,17 +121,6 @@ public class LocalSubMenu extends JPanel {
                 return true;
         }
     }
-
-    /**
-     * Setup action for filtering
-     * @param a action to do once a filter checkbox is clicked
-     */
-    void setOnSubmit(Action a) {
-        app.addActionListener(a);
-        sd.addActionListener(a);
-        pkg.addActionListener(a);
-    }
-    void setOnReload(Action a) { reload.addActionListener(a); }
 
     private JLabel getLabel(String translateKey) {
         JLabel label = new Text(textSrc.getString(translateKey));

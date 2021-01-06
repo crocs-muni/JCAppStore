@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.card.CardInstance;
+import cz.muni.crocs.appletstore.card.CardManager;
 import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.DeleteAction;
 import cz.muni.crocs.appletstore.action.SendApduAction;
@@ -26,33 +28,31 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LocalItemInfo extends HintPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private HintLabel name = new HintTitle();
-    private JLabel author = new Text();
-    private HintLabel version = new HintText();
-    private HintLabel sdk = new HintText();
-    private HintLabel id = new HintText();;
-    private HintLabel type = new HintText();
-    private HintLabel domain = new HintText();
-    private JLabel uninstall;
-    private HintLabel rawApdu;
+    private final HintLabel name = new HintTitle();
+    private final JLabel author = new Text();
+    private final HintLabel version = new HintText();
+    private final HintLabel sdk = new HintText();
+    private final HintLabel id = new HintText();;
+    private final HintLabel type = new HintText();
+    private final HintLabel domain = new HintText();
+    private final JLabel uninstall;
+    private final HintLabel rawApdu;
 
-    private SendApduAction send;
-    private DeleteAction delete;
+    private AppletInfo appletinfo = null;
 
     /**
      * Create a local applet detailed info panel
-     * @param call callback to forward to actions performed from this panel (send APDU/delete applet)
+     *
+     * todo disable unisntall atd for unauthorized
      */
-    public LocalItemInfo(OnEventCallBack<Void, Void> call) {
+    public LocalItemInfo() {
         super(OptionsFactory.getOptions().getOption(Options.KEY_HINT).equals("true"));
 
         setOpaque(false);
         setLayout(new MigLayout());
-
-        send = new SendApduAction(null, call);
-        delete = new DeleteAction(null, call);
 
         JLabel close = new JLabel(new ImageIcon(Config.IMAGE_DIR + "close_black.png"));
         close.addMouseListener(new MouseAdapter() {
@@ -93,14 +93,26 @@ public class LocalItemInfo extends HintPanel {
         uninstall = new HintText(textSrc.getString("uninstall"), "", new ImageIcon(
                 Config.IMAGE_DIR + "delete.png"));
         uninstall.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        uninstall.addMouseListener(delete);
+        uninstall.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (uninstall.getToolTipText().equals("enabled")) new DeleteAction(appletinfo,
+                        GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         uninstall.setToolTipText(uninstall.getText());
         add(uninstall, "span2, wrap");
 
         rawApdu = new HintText(textSrc.getString("custom_command"),
                 textSrc.getString("H_custom_command"), new ImageIcon(Config.IMAGE_DIR + "raw_apdu.png"));
         rawApdu.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        rawApdu.addMouseListener(send);
+        rawApdu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (rawApdu.getToolTipText().equals("enabled")) new SendApduAction(appletinfo,
+                        GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         rawApdu.setToolTipText(rawApdu.getText());
         add(rawApdu, "span2, wrap");
     }
@@ -114,8 +126,9 @@ public class LocalItemInfo extends HintPanel {
             unset();
             return;
         }
-        delete.setInfo(info);
-        send.setInfo(info);
+        appletinfo = info;
+
+        CardInstance card = CardManagerFactory.getManager().getCard(); // can't be null, we can see installed sw
 
         setLabel(name, info.getName() == null ? info.getAid().toString() : info.getName(), "H_name");
         setLabel(author, textSrc.getString("author") + getValue(info.getAuthor()));
@@ -125,8 +138,9 @@ public class LocalItemInfo extends HintPanel {
         setLabel(type, textSrc.getString("type") + getType(info.getKind()), "H_type");
         setLabel(domain, textSrc.getString("sd_assigned") +
                 ((info.getDomain() == null) ? textSrc.getString("unknown") : info.getDomain().toString()), "H_sd_assinged");
-        setEnabled(uninstall, info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
-                || info.getKind() == GPRegistryEntry.Kind.Application);
+
+        setEnabled(uninstall, card.isAuthenticated() && (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile
+                || info.getKind() == GPRegistryEntry.Kind.Application));
         setEnabled(rawApdu, info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile);
         setVisible(true);
     }
@@ -182,12 +196,14 @@ public class LocalItemInfo extends HintPanel {
             component.setText(component.getToolTipText());
             component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             component.setForeground(Color.BLACK);
+            component.setToolTipText("enabled");
+
         } else {
             component.setText(textSrc.getString("unavailbale"));
             component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             component.setForeground(Color.DARK_GRAY);
+            component.setToolTipText("disabled");
         }
-        component.setFocusable(enabled);
     }
 
     private String getType(GPRegistryEntry.Kind kind) {

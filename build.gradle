@@ -6,11 +6,20 @@ plugins {
     id 'com.bmuschko.izpack' version '3.0'
 }
 
-
 group 'cz.muni.crocs.appletstore'
-project.version = '1.2'
+project.version = '1.3'
+sourceCompatibility = 1.11
+tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 
-sourceCompatibility = 1.8
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+def platform
+if (currentOS.isWindows()) {
+    platform = 'win'
+} else if (currentOS.isLinux()) {
+    platform = 'linux'
+} else if (currentOS.isMacOsX()) {
+    platform = 'mac'
+}
 
 repositories {
     mavenCentral()
@@ -25,6 +34,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.1'
 
@@ -32,15 +42,25 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 
-    compile group: 'com.github.martinpaljak', name: 'globalplatformpro', version: '19.06.16'
-    compile group: 'com.github.martinpaljak', name: 'apdu4j-core', version: '19.05.08'
     compile group: 'com.github.martinpaljak', name: 'apdu4j-pcsc', version: '19.05.08'
+    compile group: 'com.github.martinpaljak', name: 'apdu4j-core', version: '19.05.08'
+    compile group: 'com.github.martinpaljak', name: 'globalplatformpro', version: '19.06.16'
+
+
     compile group: 'com.miglayout', name: 'miglayout', version: '3.7.4'
     compile group: 'org.ini4j', name: 'ini4j', version: '0.5.4'
+    compile group: 'com.googlecode.concurrent-trees', name: 'concurrent-trees', version: '2.6.1'
     implementation 'edu.sc.seis.gradle:launch4j:2.4.6'
     izpack 'org.codehaus.izpack:izpack-dist:5.1.3'
-}
 
+    // gradle javafx plugin addds the javafx as module path dependency, not classpath
+    compile "org.openjfx:javafx-base:11:${platform}"
+    compile "org.openjfx:javafx-graphics:11:${platform}"
+    compile "org.openjfx:javafx-controls:11:${platform}"
+    compile "org.openjfx:javafx-media:11:${platform}"
+    compile "org.openjfx:javafx-swing:11:${platform}"
+    compile "org.openjfx:javafx-web:11:${platform}"
+}
 
 ///////////////////////////
 //tasks meant to be executed
@@ -131,14 +151,21 @@ task createAppExe(type: Launch4jLibraryTask, dependsOn: jar) {
     copyConfigurable = []
 }
 
+
 jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+
+    //do not add certain resources, these are used from external folder instead for better accessibility
+    //todo move images back to resources and load them from there (not visible from outside)
+    //todo move lang properties OUTSIDE and make them updateable/modifiable
+    processResources.exclude('css/**')
+    processResources.exclude('data/**')
+    processResources.exclude('fonts/**')
+    processResources.exclude('host/**')
+    processResources.exclude('img/**')
+
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     manifest {
         attributes 'Main-Class': 'cz.muni.crocs.appletstore.SplashScreen'
     }
 }
-
-
-
-

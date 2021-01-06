@@ -34,24 +34,24 @@ import java.util.*;
 public class LocalWindowPane extends DisablePanel implements Searchable, Refreshable {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalWindowPane.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private LocalSubMenu submenu;
-    private LocalItemInfo infoLayout;
-    private JPanel windowLayout;
-    private JScrollPane windowScroll;
+    private final LocalSubMenu submenu;
+    private final LocalItemInfo infoLayout;
+    private final JPanel windowLayout;
+    private final JScrollPane windowScroll;
 
     private SearchBar searchBar;
-    private TreeSet<LocalItem> items = new TreeSet<>();
-    private LocalInstallItem installCmd = new LocalInstallItem();
+    private final TreeSet<LocalItem> items = new TreeSet<>();
+    private final LocalInstallItem installCmd = new LocalInstallItem();
 
-    private GridBagConstraints constraints;
+    private final GridBagConstraints constraints;
 
     /**
      * Local panel
-     * @param callback callback forwarded to inner children, it can disable the panel (defined in MainPanel)
      */
-    public LocalWindowPane(OnEventCallBack<Void, Void> callback) {
+    public LocalWindowPane() {
         setOpaque(false);
 
         submenu = new LocalSubMenu();
@@ -63,20 +63,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
 
         constraints = new GridBagConstraints();
 
-        submenu.setOnSubmit(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showItems(null);
-            }
-        });
-        submenu.setOnReload(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ReloadAction(callback).start();
-            }
-        });
-
-        infoLayout = new LocalItemInfo(callback);
+        infoLayout = new LocalItemInfo();
         windowLayout = new JPanel();
         windowScroll = new JScrollPane();
         windowScroll.setViewportBorder(null);
@@ -90,11 +77,16 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
         windowScroll.getVerticalScrollBar().setUnitIncrement(16);
         windowScroll.getVerticalScrollBar().setOpaque(false);
 
-        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20));
+        windowLayout.setLayout(new CustomFlowLayout(FlowLayout.LEFT, 20, 20, -1));
         windowLayout.setBorder(new EmptyBorder(10, 50, 50, 50));
         windowLayout.setOpaque(false);
 
-        installCmd.addMouseListener(new InstallAction(callback));
+        installCmd.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new InstallAction(GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
+            }
+        });
         refresh();
 
         CardManagerFactory.getManager().setCallbackOnFailure(() -> {
@@ -125,7 +117,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             return;
         }
 
-        if (verifyCardLifeState(card.getLifeCycle())) {
+        if (!card.isAuthenticated() || verifyCardLifeState(card.getLifeCycle())) {
             Set<AppletInfo> cardApplets = card.getCardMetadata().getApplets();
             if (cardApplets == null) {
                 showError("failed_to_list_aps", null, "no-card.png");
@@ -143,6 +135,7 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
             constraints.gridx = 0;
             constraints.gridy = 0;
             constraints.gridwidth = 2;
+            submenu.showPackagesButton(manager.getCard().isAuthenticated());
             add(submenu, constraints);
 
             constraints.gridy = 1;
@@ -306,7 +299,8 @@ public class LocalWindowPane extends DisablePanel implements Searchable, Refresh
                     windowLayout.add(item);
             }
         }
-        windowLayout.add(installCmd);
+        CardInstance card = CardManagerFactory.getManager().getCard();
+        if (card != null && card.isAuthenticated()) windowLayout.add(installCmd);
         windowLayout.revalidate();
         windowLayout.repaint();
     }

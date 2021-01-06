@@ -18,8 +18,9 @@ public interface Informable {
     /**
      * Show supplied component to user
      * @param component component to show
+     * @param milis how long the info lasts, 0 if forever
      */
-    void showInfo(JComponent component);
+    void showInfo(JComponent component, int milis);
 
     /**
      * Hide supplied component if shown

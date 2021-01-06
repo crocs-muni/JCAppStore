@@ -111,6 +111,7 @@ public class Notice extends JPanel {
     private JLabel addIcon(String imgName, MouseAdapter callback) {
         JLabel icon = addIcon(imgName);
         icon.addMouseListener(callback);
+        icon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return icon;
     }
 

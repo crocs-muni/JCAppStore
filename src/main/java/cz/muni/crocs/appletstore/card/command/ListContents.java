@@ -28,7 +28,7 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
     }
 
     @Override
-    public boolean execute() throws CardException, GPException, IOException {
+    public boolean execute() throws GPException, IOException {
         result = CardInstanceMetaData.empty();
         GPRegistry registry = context.getRegistry();
         if (registry == null || cardId == null) return false;

@@ -26,7 +26,7 @@ public interface Options<ValueType> {
     String KEY_PGP_LOCATION = "gpg";
     String KEY_VERBOSE_MODE = "verbose";
     String KEY_SIMPLE_USE = "simple_usage";
-    String KEY_KEEP_JCMEMORY = "jcmemory_keep";
+    String KEY_KEEP_AUTO_INSTALLED = "jcmemory_keep";
     String KEY_WARN_FORCE_INSTALL = "warn_force_install";
     String KEY_LAST_SELECTION_LOCATION = "custom_applet_folder";
     String KEY_STORE_FINGERPRINT = "public_key_fingerprint";

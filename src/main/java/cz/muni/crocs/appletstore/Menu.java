@@ -20,11 +20,10 @@ import java.util.ResourceBundle;
  * @author Jiří Horák
  * @version 1.0
  */
-public class Menu extends JMenuBar {
+public class Menu extends JMenuBar implements CardStatusNotifiable {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private final AppletStore context;
     private int lastNumOfReadersConnected = 0;
     private CustomNotifiableJmenu readers;
     private JLabel currentCard;
@@ -32,58 +31,73 @@ public class Menu extends JMenuBar {
 
     private static final ImageIcon CARD_OK = new ImageIcon(Config.IMAGE_DIR + "creditcard-white.png");
     private static final ImageIcon CARD_UNKNOWN = new ImageIcon(Config.IMAGE_DIR + "creditcard-white-exclamation.png");
+    private static final ImageIcon CARD_LOCKED = new ImageIcon(Config.IMAGE_DIR + "creditcard-locked.png");
+    private static final ImageIcon CARD_NOT_PRESENT = new ImageIcon(Config.IMAGE_DIR + "creditcard-missing.png");
 
-    private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<Void, byte[]>() {
+    private final JCAlgTestAction testing = new JCAlgTestAction(new OnEventCallBack<>() {
         @Override
         public void onStart() {
+            BackgroundChangeable context = GUIFactory.Components().getBackgroundChangeable();
             context.setDisabledMessage(textSrc.getString("jcdia_runmsg"));
             context.switchEnabled(false);
         }
 
         @Override
         public void onFail() {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
         }
 
         @Override
         public Void onFinish() {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
             return null;
         }
 
         @Override
         public Void onFinish(byte[] bytes) {
-            context.switchEnabled(true);
+            GUIFactory.Components().getBackgroundChangeable().switchEnabled(true);
             return null;
         }
     });
 
-    public Menu(AppletStore parent) {
-        context = parent;
+    public Menu() {
         setBackground(new Color(0, 0, 0));
         setMargin(new Insets(10, 100, 5, 5));
         setBorder(null);
         buildMenu();
     }
 
+    @Override
+    public void updateCardState() {
+        setCard(CardManagerFactory.getManager().getCard());
+        resetTerminalButtonGroup();
+    }
+
     /**
      * Set new name of the card inserted in the application bar
      *
-     * @param card       custom card name provided by user OR obtained from database when inserted
-     * @param identifier card identifier, null or empty string if no card present
+     * @param card card instance
      */
-    public void setCard(String card, String identifier, boolean hasDetails) {
-        if (identifier == null || identifier.isEmpty()) {
-            card = textSrc.getString("no_card");
+    private void setCard(CardInstance card, boolean hasDetails) {
+        String cardName;
+        if (card == null) {
+            cardName = textSrc.getString("no_card");
+            currentCardImg.setIcon(CARD_NOT_PRESENT);
+            currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         } else {
-            card += (card != null && !card.isEmpty()) ?
-                    " <font color='#a3a3a3'>[" + identifier + "]</font>" : identifier;
+            cardName = card.getName();
+            cardName += ((cardName != null && !cardName.isEmpty()) ?
+                    " <font color='#a3a3a3'>[" + card.getId() + "]</font>" : card.getId());
+            ImageIcon toSet = hasDetails ? (card.isAuthenticated() ? CARD_OK : CARD_LOCKED) : CARD_UNKNOWN;
+            currentCardImg.setIcon(toSet);
+            currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            if (toSet == CARD_UNKNOWN) currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            else currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
 
-        currentCardImg.setIcon(hasDetails ? CARD_OK : CARD_UNKNOWN);
         currentCardImg.setToolTipText(hasDetails ? null : textSrc.getString("jc_unknown"));
 
-        currentCard.setText(card);
+        currentCard.setText(cardName);
         revalidate();
         repaint();
     }
@@ -93,18 +107,18 @@ public class Menu extends JMenuBar {
      *
      * @param card       card isntance
      */
-    public void setCard(CardInstance card) {
+    private void setCard(CardInstance card) {
         if (card == null) {
-            setCard(null, null, true);
+            setCard(null, true);
         } else {
-            setCard(card.getName(), card.getId(), card.getCardMetadata().getJCData() != null);
+            setCard(card, card.getCardMetadata().getJCData() != null);
         }
     }
 
     /**
      * Reset if new card readers found
      */
-    public void resetTerminalButtonGroup() {
+    private void resetTerminalButtonGroup() {
         CardManager manager = CardManagerFactory.getManager();
         readers.removeAll();
 
@@ -169,7 +183,7 @@ public class Menu extends JMenuBar {
         menu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("settings")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Settings settings = new Settings(context);
+                Settings settings = new Settings();
                 Object[] options = {textSrc.getString("ok"), textSrc.getString("cancel")};
                 int result = JOptionPane.showOptionDialog(null, settings, textSrc.getString("settings"),
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
@@ -178,7 +192,7 @@ public class Menu extends JMenuBar {
                     settings.apply();
                 }
             }
-        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK ));
 
         menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
@@ -197,18 +211,28 @@ public class Menu extends JMenuBar {
         submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("get_memory")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,
-                        new CardInfoPanel(context, context.getWindow().getRefreshablePane()), textSrc.getString("card_info"),
-                        JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+                if (CardManagerFactory.getManager().isCard()) {
+                    JOptionPane.showMessageDialog(null,
+                            new CardInfoPanel(), textSrc.getString("card_info"),
+                            JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+                } else {
+                    InformerFactory.getInformer().showInfoToClose(textSrc.getString("no_card"),
+                            Notice.Importance.SEVERE, 5000);
+                }
             }
-        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "memory.png", "", KeyEvent.VK_I, InputEvent.ALT_DOWN_MASK ));
 
         submenu.add(menuItemWithKeyShortcutAndIcon(new AbstractAction(textSrc.getString("test_card")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                testing.mouseClicked(null);
+                if (CardManagerFactory.getManager().isCard()) {
+                    testing.mouseClicked(null);
+                } else {
+                    InformerFactory.getInformer().showInfoToClose(textSrc.getString("no_card"),
+                            Notice.Importance.SEVERE, 5000);
+                }
             }
-        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_MASK));
+        }, Config.IMAGE_DIR + "test.png", "", KeyEvent.VK_T, InputEvent.ALT_DOWN_MASK ));
 
         return submenu;
     }
@@ -220,9 +244,9 @@ public class Menu extends JMenuBar {
         submenu.add(selectableMenuItem(new AbstractAction(textSrc.getString("logger")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                context.getWindow().toggleLogger();
+               GUIFactory.Components().getStoreWindows().toggleLogger();
             }
-        }, "", KeyEvent.VK_L, InputEvent.ALT_MASK));
+        }, "", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK ));
 
         JMenuItem hints = selectableMenuItem(new AbstractAction(textSrc.getString("enable_hints")) {
             @Override
@@ -231,7 +255,7 @@ public class Menu extends JMenuBar {
                         OptionsFactory.getOptions().is(Options.KEY_HINT) ? "false" : "true");
                 HintPanel.enableHint(OptionsFactory.getOptions().is(Options.KEY_HINT));
             }
-        }, "", KeyEvent.VK_D, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK );
         hints.setSelected(OptionsFactory.getOptions().is(Options.KEY_HINT));
         submenu.add(hints);
         return submenu;
@@ -247,7 +271,7 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_VERBOSE_MODE,
                         OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_V, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_V, InputEvent.ALT_DOWN_MASK );
         verbose.setSelected(OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE));
         submenu.add(verbose);
 
@@ -257,7 +281,7 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_SIMPLE_USE,
                         OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_E, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_E, InputEvent.ALT_DOWN_MASK );
         intuitive.setSelected(OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE));
         submenu.add(intuitive);
 
@@ -267,19 +291,19 @@ public class Menu extends JMenuBar {
                 OptionsFactory.getOptions().addOption(Options.KEY_EXCLUSIVE_CARD_CONNECT,
                         OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_S, InputEvent.ALT_MASK);
+        }, "", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK );
         exclusive.setSelected(OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT));
         submenu.add(exclusive);
 
-        JMenuItem jcmemory = selectableMenuItem(new AbstractAction(textSrc.getString("enable_jcmemory")) {
+        JMenuItem keepAutoInstall = selectableMenuItem(new AbstractAction(textSrc.getString("keep_auto_install")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OptionsFactory.getOptions().addOption(Options.KEY_KEEP_JCMEMORY,
-                        OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY) ? "false" : "true");
+                OptionsFactory.getOptions().addOption(Options.KEY_KEEP_AUTO_INSTALLED,
+                        OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED) ? "false" : "true");
             }
-        }, "", KeyEvent.VK_J, InputEvent.ALT_MASK);
-        jcmemory.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_JCMEMORY));
-        submenu.add(jcmemory);
+        }, "", KeyEvent.VK_J, InputEvent.ALT_DOWN_MASK );
+        keepAutoInstall.setSelected(OptionsFactory.getOptions().is(Options.KEY_KEEP_AUTO_INSTALLED));
+        submenu.add(keepAutoInstall);
 
         return submenu;
     }
@@ -287,11 +311,10 @@ public class Menu extends JMenuBar {
     private void buildReadersItem() {
         readers = new CustomNotifiableJmenu(textSrc.getString("readers"), "", KeyEvent.VK_R);
         add(readers);
-        resetTerminalButtonGroup();
 
         JPanel midContainer = new JPanel();
         midContainer.setBackground(Color.black);
-        currentCardImg = new Text(CARD_OK);
+        currentCardImg = new Text(CARD_NOT_PRESENT);
         currentCardImg.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -302,7 +325,6 @@ public class Menu extends JMenuBar {
                 testing.mouseClicked(e);
             }
         });
-        currentCardImg.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         midContainer.add(currentCardImg);
         currentCard = new HtmlText();
         currentCard.setForeground(Color.white);
@@ -322,7 +344,6 @@ public class Menu extends JMenuBar {
                 }
             }
         });
-        currentCard.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         midContainer.add(currentCard);
         add(midContainer);
     }

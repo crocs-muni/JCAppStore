@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.action.UnsafeCardOperation;
 import cz.muni.crocs.appletstore.util.LocalizedException;
+import pro.javacard.gp.GPException;
 
 /**
  * Class to separate different exception types
@@ -44,5 +46,15 @@ public class LocalizedCardException extends LocalizedException {
 
     public LocalizedCardException(String cause, String translated, String image, Throwable ex) {
         super(cause, translated, image, ex);
+    }
+
+    public LocalizedCardException(String message, String translated, String imgName,
+                                  UnsafeCardOperation unsafeOperation, String translatedOperationMsg) {
+        super(message, translated, imgName, unsafeOperation, translatedOperationMsg);
+    }
+
+    public LocalizedCardException(String message, String translated, Throwable e, String imgName,
+                                  UnsafeCardOperation unsafeOperation, String translatedOperationMsg) {
+        super(message, translated, e, imgName, unsafeOperation, translatedOperationMsg);
     }
 }

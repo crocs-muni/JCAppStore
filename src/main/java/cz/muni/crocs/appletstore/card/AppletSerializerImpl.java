@@ -20,7 +20,8 @@ public class AppletSerializerImpl implements AppletSerializer<CardInstanceMetaDa
             out.writeObject(data);
 
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to save applets into file.", "E_serialize_applets", e);
+            throw new LocalizedCardException("Unable to save card meta-data. JCAppStore will work but the applets" +
+                    "data such as images or installed versions will be lost.", "E_deserialize_applets", e);
         }
     }
 
@@ -34,10 +35,14 @@ public class AppletSerializerImpl implements AppletSerializer<CardInstanceMetaDa
 
             return (CardInstanceMetaData) in.readObject();
 
+
+        } catch (ClassNotFoundException e) {
+            throw new LocalizedCardException("Unable to deserialize: class not present.", "E_deserialize_applets", e);
+        } catch (InvalidClassException e) {
+            throw new LocalizedCardException("It seems the JCAppStore was upgraded to newer version. Unable to parse old" +
+                    "card cache data.", "E_deserialize_applets", e);
         } catch (IOException e) {
             throw new LocalizedCardException("Failed to save applets into file.", "E_deserialize_applets", e);
-        } catch (ClassNotFoundException e) {
-            throw new LocalizedCardException("Unable to serialize: class not present.", "E_deserialize_applets", e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.Informable;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 
@@ -12,6 +13,13 @@ import javax.swing.*;
 public interface Informer {
 
     int INFINITY = Integer.MAX_VALUE;
+
+    /**
+     * Set informable isntance - this will take care of displaying all messages.
+     * Up until now, if some messages were introduced, these are stored and displayed until first call of this function.
+     * @param delegate delegate that can take care of message displays
+     */
+    void setInformableDelegate(Informable delegate);
 
     /**
      * Show ingo to the user

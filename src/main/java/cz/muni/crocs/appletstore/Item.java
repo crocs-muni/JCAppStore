@@ -13,6 +13,8 @@ public interface Item extends Comparable<Item> {
      */
     String getSearchQuery();
 
+    boolean byDefaultHidden();
+
     default String adjustLength(String value, int length) {
         if (value.length() <= length) return value;
         return value.substring(0, length - 3) + "...";

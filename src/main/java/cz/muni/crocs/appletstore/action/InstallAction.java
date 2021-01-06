@@ -375,8 +375,8 @@ public class InstallAction extends CardAbstractAction<Void, Void> {
         execute(() -> {
             manager.install(code, opts);
             SwingUtilities.invokeLater(() ->
-                    InformerFactory.getInformer().showInfo(textSrc.getString("installed"),
-                            Notice.Importance.INFO, Notice.CallBackIcon.CLOSE, null, 4000));
+                    InformerFactory.getInformer().showInfoToClose(textSrc.getString("installed"),
+                            Notice.Importance.INFO, 4000));
             data.setCapfile(null);
             return null;
         }, "Failed to install applet.", textSrc.getString("install_failed"), 5, TimeUnit.MINUTES);

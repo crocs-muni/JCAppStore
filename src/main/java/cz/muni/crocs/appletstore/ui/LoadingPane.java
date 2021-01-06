@@ -17,15 +17,18 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LoadingPane extends JPanel {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+
+    private int abortDelay = 15;
 
     private final int width = 300;
     private final int height = 5;
     private int progress = 0;
     private String message;
-    private Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
+    private final Rectangle outline = new Rectangle(-(width/2), -(height/2), width, height);
 
-    private GridBagConstraints constraints;
+    private final GridBagConstraints constraints;
 
     /**
      * Create a loading panel
@@ -62,7 +65,7 @@ public class LoadingPane extends JPanel {
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.translate(this.getWidth() / 2, this.getHeight() / 2);
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(Color.WHITE);;
+        graphics2D.setColor(Color.WHITE);
         graphics2D.draw(outline);
 
         Rectangle inline = new Rectangle(-(width/2), -(height/2), width * progress / 100, height);
@@ -76,7 +79,12 @@ public class LoadingPane extends JPanel {
         }
     }
 
-    public void showAbort(AbstractAction abstractAction) {
+    public void showAbort(AbstractAction abstractAction, boolean delayed) {
+        if (delayed) {
+            abortDelay -= 1;
+            if (abortDelay > 0) return;
+        }
+
         removeAll();
         JButton abort = new JButton(abstractAction);
         abort.setText(textSrc.getString("abort"));
