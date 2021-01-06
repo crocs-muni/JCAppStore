@@ -1,6 +1,6 @@
 # JCAppStore 
 
-Have you ever wondered how to manage your passwords? Or would you like to have your own virtual wallet, but do not know what to do? Then it is time for you to discover JCAppStore, first open source smart card store and GUI tool.
+Have you ever wondered how to manage your passwords? Or would you like to have your own virtual wallet, but do not know what to do? Then it is time for you to discover JCAppStore, first open source smart card store and GUI tool. Our goal is to push open-source smart card development by introducing intuitive smart card distribution platform that can be used by anyone!
 
 #### I am in! ####
 
@@ -73,3 +73,25 @@ You can browse the store using search bar in the left menu. You can search eithe
     5) the applet requires a technology not suported by your card (NFC for example) - find your card [here](https://www.fi.muni.cz/~xsvenda/jcalgtest/),
     6) you modified advanced install section with incorrect values.
 6) Enjoy!    
+
+___
+
+## Contribute
+If you like our goal, you can support us or help us in following ways:
+- we are looking for open-source, intuitive smart card applets to include in our database
+- we are looking for translation volunteers who want to bring the store to broader variety of users
+- we are looking for users - start using our platform and introduce it to others! let's push the open-source smart card community and support its developers
+
+
+Build (Advanced)
+-----
+You are encouraged to build your own executable. For IntelliJ IDEA make sure that:
+ - your project language is at least java 11 and your gradle JVM is using also at least java 11
+ - 'Use Gradle from' option is set to: **wrapper** task in Gradle build script
+ - add module JCAppStore for base project (pointing to the repository root)
+ - add module JCAppStore.main pointing to the src/main folder
+ - inside JCAppStore.main, mark appropriate directories as sources/resources (main/java and main/resources)
+ - you can repeat similar process for test folder (to main), but it is not required
+ - for unix systems, gradle runs some `.sh` scripts - don't forget to run `chmod u+x <script name>.sh`  otherwise, the _Permission denied_ message will pop up
+ - when running the jar file, make sure src/main/resources folder is copied to the same directory as executed `.jar` - otherwise, 
+ assets will not be recognized (they are intentionally excluded from the `.jar` file to be modifiable easily)
