@@ -3,16 +3,15 @@ package cz.muni.crocs.appletstore;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.googlecode.concurrenttrees.suffix.SuffixTree;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.action.InstallAction;
 import cz.muni.crocs.appletstore.action.InstallBundle;
 import cz.muni.crocs.appletstore.ui.*;
 import cz.muni.crocs.appletstore.ui.TextField;
 import cz.muni.crocs.appletstore.util.*;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebHistory;
+import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import net.miginfocom.swing.MigLayout;
 import org.apache.logging.log4j.Level;
@@ -22,28 +21,15 @@ import pro.javacard.gp.GPRegistryEntry;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-
-import javafx.application.Platform;
-import javafx.collections.ObservableList;
-
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-
-import javafx.stage.Stage;
-
 
 /**
  * Item detail in store
@@ -406,14 +392,11 @@ public class StoreItemInfo extends HintPanel {
     }
 
     private KeysPresence hasKey(String data) {
-        switch (data.trim().toLowerCase()) {
-            case "true":
-                return KeysPresence.PRESENT;
-            case "false":
-                return KeysPresence.NO_KEYS;
-            default:
-                return KeysPresence.UNKNOWN;
-        }
+        return switch (data.trim().toLowerCase()) {
+            case "true" -> KeysPresence.PRESENT;
+            case "false" -> KeysPresence.NO_KEYS;
+            default -> KeysPresence.UNKNOWN;
+        };
     }
 
     private AppletInfo getInfoPack(JsonObject dataSet, String version, JsonArray sdks, int sdkIdx) {

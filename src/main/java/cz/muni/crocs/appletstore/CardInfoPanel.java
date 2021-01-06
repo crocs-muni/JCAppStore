@@ -4,16 +4,13 @@ import cz.muni.crocs.appletstore.card.CardManagerFactory;
 import cz.muni.crocs.appletstore.action.FreeMemoryAction;
 import cz.muni.crocs.appletstore.action.applet.JCMemory;
 import cz.muni.crocs.appletstore.ui.HtmlText;
-import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.Text;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Ref;
 import java.util.ResourceBundle;
 
 /**

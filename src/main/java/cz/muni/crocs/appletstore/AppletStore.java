@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
@@ -77,6 +78,13 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
     private void setBar() {
         setTitle("JCAppStore");
+
+        //TODO resources are now duplicated
+//        URL icon = getClass().getClassLoader().getResource("img/icon.png");
+//        ImageIcon storeIcon = icon == null ? new ImageIcon() : new ImageIcon(icon);
+//        setIconImage(storeIcon.getImage());
+
+
         setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
         //todo uncomment for apple branch
 //        Application.getApplication().setDockIconImage(

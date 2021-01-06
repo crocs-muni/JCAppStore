@@ -58,7 +58,7 @@ public class TextField {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem item = new JMenuItem(new DefaultEditorKit.CopyAction());
         item.setIcon(new ImageIcon(Config.IMAGE_DIR + "copy.png"));
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
         item.setText(textSrc.getString("copy"));
         menu.add(item);
         return menu;

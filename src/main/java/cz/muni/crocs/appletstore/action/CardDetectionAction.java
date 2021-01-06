@@ -2,8 +2,6 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.ui.Notice;
-import cz.muni.crocs.appletstore.util.InformerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #This file generates the tarball.
-VERSION=1.2
+VERSION=1.3
 FILE=JCAppStore-${VERSION}
 
 if ls ../build/libs/${FILE}.jar > /dev/null  2>&1 ; then

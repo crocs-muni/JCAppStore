@@ -1,16 +1,7 @@
 package cz.muni.crocs.appletstore.action;
 
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
-import cz.muni.crocs.appletstore.card.CardNotAuthenticatedException;
-import cz.muni.crocs.appletstore.card.LocalizedCardException;
-import cz.muni.crocs.appletstore.card.UnknownKeyException;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.ui.ErrorPane;
-import cz.muni.crocs.appletstore.ui.Notice;
-import cz.muni.crocs.appletstore.util.InformerFactory;
-import cz.muni.crocs.appletstore.util.LocalizedException;
 
-import javax.swing.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
