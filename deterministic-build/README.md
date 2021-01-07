@@ -16,3 +16,27 @@ some other tools:
  
  Note: some applets were missing some stuff and had to be adjusted in order to compile
  (missing short casts mostly). Check the applet pull requests from Aiosa user (if not accepted)!
+ 
+In case you run to same difficulties, we used java 8 to build the applets. Some applets also have
+a difficult build systems - in case of doubt, ask me for help at _horakj7@gmail.com_.
+
+#### The actual verification
+is pretty simple - we are in Java. Open the `.cap` file and compare sources. The usual tree is:
+```
+ -- META-INF 
+        | -- MANIFEST.mf
+    the
+        | -- package
+                  | -- path
+                           | -- file1.cap
+                           | -- file2.cap
+              
+```
+Compare only the files in package name tree structure - avoid MANIFEST.mf as it contains various meta data such as the time of the compilation.
+
+To compare two `.cap` files (and avoid the manifest), you can use [python script jcapsum.py](https://gist.github.com/walterschell/3c4350c1aeb660d175a330ec151b1f5f) made by [walterschell](https://gist.github.com/walterschell):
+```
+$ python jcapsum.py store/JCApplets/AnssiSmartPGP/AnssiSmartPGP_v1.13_sdk3.0.4.cap ../../temp/ansismartpgp.cap
+Total Hash of store/JCApplets/AnssiSmartPGP/AnssiSmartPGP_v1.13_sdk3.0.4.cap: eed8f40879e06a32cde06c268c023ce6a94c2cc8abeb493f5023fd8c54bdb871
+Total Hash of ../../temp/ansismartpgp.cap: eed8f40879e06a32cde06c268c023ce6a94c2cc8abeb493f5023fd8c54bdb871
+```
