@@ -4,13 +4,7 @@ DIR='./'
 
 if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 
-	#'sudo chown -R' stuff must have root
-        if [[ $EUID -ne 0 ]]; then
-             echo "You must run JCAppStore as a superuser for the first time."
-             exit 2;
-        fi
-
-        #check GPG presence
+  #check GPG presence
 	if ! gpg --help > /dev/null 2&>1 ; then
 	   echo "You don't have GnuPG installed, the store will be unable to verify software integrity.\
 	      this can be fixed anytime by GnuPG installation and JCAppStore key import."
@@ -38,25 +32,6 @@ if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
               fi
 	fi
 
-
-	#change owner to current user for jcappstore
-	if sudo chown ${SUDO_USER}: /usr/bin/jcapp ; then
-		echo "Setting shell executable rights to ${SUDO_USER}."
-	else
-		echo "Failed to set current user's ownership for /usr/bin/jcapp" \
-		": Either do this manually or use \"sudo jcapp\" to run the store each time."
-		echo "Use \"sudo chown -R [your user name]: /usr/bin/jcapp\""
-	fi
-	if sudo chown -R ${SUDO_USER}: /usr/share/java/jcappstore ; then
-		echo "Setting access rights to ${SUDO_USER}."
-		echo "The store has been succesfully set. Run jcapp again, now without super user."
-	        touch ${DIR}jcappstore-do-not-ask${VERSION}.info
-		exit 0;
-	else
-		echo "Failed to set current user's ownership for /usr/share/java/jcappstore" \
-		": Either do this manually or use \"sudo jcapp\" to run the store each time."
-		echo "Use \"sudo chown -R [your user name]: /usr/share/java/jcappstore\""
-	fi
 	touch ${DIR}jcappstore-do-not-ask${VERSION}.info
 fi
 cd $DIR
