@@ -18,7 +18,7 @@ screen, charger and so on. Smart cards have their own terms too.
 How to get the store
 -----
 
-**The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version of java 11+ should be convenient. [The store was developed using java 8](https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
+**The store runs on java, make sure you have Java Runtime Environment (JRE) first.** Any version of java 11+ should be convenient. [The store was developed using java 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 More information on how to install the store [see wiki](https://github.com/crocs-muni/JCAppStore/wiki/Installation). 
 
 Unix users also need BASH as we run command line tools from time to time. We will work on this to make the JCAppStore more portable in the future.
