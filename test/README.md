@@ -1,4 +1,4 @@
-### Testing with JUBULA
+### Testing with JUBULA (up to version v1.1, not updated further)
 
 Due to the GUI testing problems described in the documentation, the following preconditions must be met before the test suite is executed. 
 The following section also describes some conditions common to all Jubula tests, such as the Application Under Test 
