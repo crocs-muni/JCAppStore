@@ -54,10 +54,11 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                             if (result == 2) manager.loadCard();
 
                             SwingUtilities.invokeLater(() -> {
-                                if (result == 2) {
-                                    GUIFactory.Components().getStoreWindows().refreshCardPanel();
-                                }
-                                GUIFactory.Components().getCardStatusNotifiable().updateCardState();
+                                //already performed in GUIComponentsImpl class
+//                                if (result == 2) {
+//                                    GUIFactory.Components().getStoreWindows().refreshCardPanel();
+//                                }
+//                                GUIFactory.Components().getCardStatusNotifiable().updateCardState();
                                 call.onFinish();
                             });
                         }
