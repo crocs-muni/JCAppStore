@@ -167,6 +167,7 @@ public class AppletInfo implements Serializable, Cloneable {
     }
 
     private String getDefaultName(GPRegistryEntry registry) {
+        if (registry.getType() == GPRegistryEntry.Kind.ExecutableLoadFile) return null; //will be filled from instance
         return registry.getAID().toString();
     }
 
@@ -237,9 +238,12 @@ public class AppletInfo implements Serializable, Cloneable {
         this.aid = aid;
     }
 
-    public void setAppletInstanceName(String name) {
-        if (name != null && !name.isEmpty())
-            this.name = this.name + ": " + name;
+    public void setAppletName(String name) {
+        if (name != null && !name.isEmpty()) this.name = name;
+    }
+
+    public void setAddAppletInstanceName(String name) {
+        if (name != null && !name.isEmpty()) this.name = this.name + ": " + name;
     }
 
     public int compareAIDs(AppletInfo other) {

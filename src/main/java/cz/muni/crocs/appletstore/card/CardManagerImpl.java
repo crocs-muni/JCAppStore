@@ -322,6 +322,8 @@ public class CardManagerImpl implements CardManager {
         CardDetails details = command.getResult();
         details.setAtr(card.getATR());
         return details;
+
+        //TODO what of some packages without modules? show too!!!
     }
 
     //applet deletion implementation
@@ -368,7 +370,7 @@ public class CardManagerImpl implements CardManager {
 
                     @Override
                     public boolean execute() throws GPException {
-                        card.getCardMetadata().addAppletIgnoreModulesIfPkg(getPackageInfo(data.getInfo(), file));
+                        card.getCardMetadata().addAppletPacakgeUnsafe(getPackageInfo(data.getInfo(), file));
                         try {
                             card.saveInfoData();
                         } catch (LocalizedCardException e) {
@@ -397,7 +399,7 @@ public class CardManagerImpl implements CardManager {
                         public boolean execute() throws GPException {
                             AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult(),
                                     data.getAppletNames() != null ? data.getAppletNames()[appidx] : "");
-                            card.getCardMetadata().addAppletIgnoreModulesIfPkg(installed);
+                            card.getCardMetadata().addAppletPacakgeUnsafe(installed);
                             try {
                                 card.saveInfoData();
                             } catch (LocalizedCardException e) {
@@ -456,7 +458,7 @@ public class CardManagerImpl implements CardManager {
         try {
             clone = (AppletInfo)from.clone();
             clone.setAID(realInstalledAID.toString());
-            if (!appletName.isEmpty()) clone.setAppletInstanceName(appletName);
+            if (!appletName.isEmpty()) clone.setAddAppletInstanceName(appletName);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             logger.warn("Unable to save applet info data: " + realInstalledAID, e);

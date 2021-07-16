@@ -50,9 +50,20 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
             saved = CardInstanceMetaData.empty();
         }
 
+        ArrayList<AppletInfo> packages = new ArrayList<>();
         for (GPRegistryEntry entry : registry) {
-            result.addAppletRequireModulesIfPkg(new AppletInfo(entry, saved.getApplets()));
+            AppletInfo info = new AppletInfo(entry, saved.getApplets());
+            if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
+                packages.add(info);
+            } else {
+                result.addAppletInstance(info);
+            }
         }
+
+        for (AppletInfo pkg : packages) {
+            result.addAppletPackage(pkg);
+        }
+
         result.setJCData(saved.getJCData());
         return true;
     }
