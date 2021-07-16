@@ -178,6 +178,20 @@ public interface CardManager {
     boolean select(String AID) throws LocalizedCardException;
 
     /**
+     * Perform callback action when card reloaded, performed probably on different thread
+     *  - use SwingUtilities.invokeLater() for example if necessary
+     * @param callBack callback to perform
+     * @param tag tag to uniquely identify the callback
+     */
+    void onReload(CallBack<?> callBack, String tag);
+
+    /**
+     * Clear callback by tag
+     * @param tag tag to clear
+     */
+    void clearOnReloadByTag(String tag);
+
+    /**
      * Send command to applet
      * @param AID target applet AID to send the command to
      * @param APDU commandAPDU to send

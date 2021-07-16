@@ -46,6 +46,7 @@ public class CardManagerImpl implements CardManager {
     private boolean tryGeneric = false;
 
     private CallBack<Void> notifier;
+    private Map<String, CallBack<?>> onCardReload = new HashMap<>();
 
     private static final Object lock = new Object();
 
@@ -144,6 +145,10 @@ public class CardManagerImpl implements CardManager {
                 throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
             } finally {
                 tryGeneric = false;
+
+                for (CallBack<?> call : onCardReload.values()) {
+                    call.callBack();
+                }
             }
 
             if (card != null && card.shouldJCAlgTestFinderRun()) getJCAlgTestDependencies();
@@ -263,6 +268,17 @@ public class CardManagerImpl implements CardManager {
                 throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
             }
         }
+    }
+
+    @Override
+    public void clearOnReloadByTag(String tag) {
+        onCardReload.remove(tag);
+    }
+
+    @Override
+    public void onReload(CallBack<?> callBack, String tag) {
+        onCardReload.remove(tag); //if exists
+        onCardReload.put(tag, callBack);
     }
 
     @Override
