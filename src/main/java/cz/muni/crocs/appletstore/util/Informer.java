@@ -9,6 +9,8 @@ import javax.swing.*;
 /**
  * Informer that uses Informable instance inside to display the messages.
  * should be able to handle more messages at once
+ *
+ * TODO: should also handle confirm dialog and other dialog options? not only messages?
  */
 public interface Informer {
 
@@ -24,8 +26,15 @@ public interface Informer {
     /**
      * Show ingo to the user
      * @param info string text to show
+     * @param image image name (relative path to image src dir)
      */
-    void showMessage(String info);
+    void showInfoMessage(Object info, String image);
+
+
+    void showMessage(String title, Object message, String image);
+
+
+    void showQuestion(String title, Object message, String image);
 
     /**
      * Show info that replaces the screen

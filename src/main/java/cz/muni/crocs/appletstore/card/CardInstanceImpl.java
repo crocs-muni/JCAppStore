@@ -76,7 +76,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
             throws LocalizedCardException, CardException, UnknownKeyException, CardNotAuthenticatedException {
         if (newDetails == null || terminal == null) {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
-            throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg");
+            throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg", ErrDisplay.FULL_SCREEN);
         }
 
         this.terminal = terminal;
@@ -237,7 +237,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
 
         } catch (CardException e) {
             throw new LocalizedCardException("Could not connect to selected reader: " +
-                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail", ErrDisplay.FULL_SCREEN);
         }
 
         try {
@@ -250,9 +250,10 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
                 command.execute();
             }
         } catch (GPException e) {
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), "error.png", e);
+            Tuple<String, ErrDisplay> swDesc = SW.getErrorCauseKey(e.sw, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), swDesc.first, "error.png", e, swDesc.second);
         } catch (IOException e) {
-            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e);
+            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e, ErrDisplay.FULL_SCREEN);
         } finally {
             if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
                 card.endExclusive();
@@ -274,11 +275,12 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
                     logger.info("Discovering channel.");
                     context = GPSession.discover(channel);
                 } catch (IllegalArgumentException il) {
-                    throw new LocalizedCardException(il.getMessage(), "no_channel", "plug-in-out.jpg", il);
+                    throw new LocalizedCardException(il.getMessage(), "no_channel", "plug-in-out.jpg", il, ErrDisplay.FULL_SCREEN);
                 } catch (GPException ex) {
-                    throw new LocalizedCardException(ex.getMessage(), SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd"), "plug-in-out.png", ex);
+                    Tuple<String, ErrDisplay> swDesc = SW.getErrorCauseKey(ex.sw, "E_fail_to_detect_sd");
+                    throw new LocalizedCardException(ex.getMessage(), swDesc.first, "plug-in-out.png", ex, swDesc.second);
                 } catch (IOException e) {
-                    throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", "plug-in-out.jpg", e);
+                    throw new LocalizedCardException(e.getMessage(), "E_fail_to_detect_sd", "plug-in-out.jpg", e, ErrDisplay.FULL_SCREEN);
                 }
 
                 try {
@@ -287,15 +289,16 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
                     context.openSecureChannel(key, null, null, GPSession.defaultMode.clone());
                     logger.info("Secure channel established.");
                 } catch (IllegalArgumentException e) {
-                    throw new LocalizedCardException(e.getMessage(), textSrc.getString("wrong_kcv"), e);
+                    throw new LocalizedCardException(e.getMessage(), textSrc.getString("wrong_kcv"), e, ErrDisplay.FULL_SCREEN);
                 } catch (GPException e) {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
                         throw new LocalizedCardException(e.getMessage(), "H_authentication", e, "lock_black.png",
-                               CardDetectionAction::detectUnsafe, textSrc.getString("E_nokey_retry"));
+                               CardDetectionAction::detectUnsafe, textSrc.getString("E_nokey_retry"), ErrDisplay.FULL_SCREEN);
                     }
-                    throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), e);
+                    Tuple<String, ErrDisplay> swDesc = SW.getErrorCauseKey(e.sw, "E_unknown_error");
+                    throw new LocalizedCardException(e.getMessage(), swDesc.first, e, swDesc.second);
                 }
 
                 for (GPCommand<?> command : commands) {
@@ -363,7 +366,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
 
             this.authenticated = authenticated;
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
+            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e, ErrDisplay.BANNER);
         }
     }
 
@@ -372,7 +375,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
             new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
                     .addValue(name, value).store();
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
+            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e, ErrDisplay.BANNER);
         }
     }
 
@@ -417,7 +420,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
                     .store();
             return false;
         } catch (IOException e) {
-            throw new LocalizedCardException("Unable to save new card details.", "E_card_details_failed");
+            throw new LocalizedCardException("Unable to save new card details.", "E_card_details_failed", ErrDisplay.BANNER);
         }
     }
 
@@ -437,7 +440,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
         if (!(new File(Config.CARD_TYPES_FILE).exists())) {
             logger.error("Cad types file not found");
             //todo add image file not found
-            throw new LocalizedCardException("No types present.", "E_missing_types");
+            throw new LocalizedCardException("No types present.", "E_missing_types", ErrDisplay.BANNER);
         }
 
         if (!useGeneric) {

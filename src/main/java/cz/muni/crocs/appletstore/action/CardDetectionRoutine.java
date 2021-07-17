@@ -53,20 +53,8 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
                             SwingUtilities.invokeLater(call::onStart);
                             if (result == 2) manager.loadCard();
 
-                            SwingUtilities.invokeLater(() -> {
-                                //already performed in GUIComponentsImpl class
-//                                if (result == 2) {
-//                                    GUIFactory.Components().getStoreWindows().refreshCardPanel();
-//                                }
-//                                GUIFactory.Components().getCardStatusNotifiable().updateCardState();
-                                call.onFinish();
-                            });
+                            SwingUtilities.invokeLater(call::onFinish);
                         }
-//                    } catch (UnknownKeyException ex) {
-//                        handleUnknownKey(CardExecutableIdle.get(),
-//                                "ERROR: failed to authenticate card. The routine should be error prone!",
-//                                "lock.png", textSrc.getString("E_routine"), ex);
-//                    }
             return null;
         }, "Error loading a card.", textSrc.getString("E_loading_failed"));
     }

@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.AppletInfo;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class Delete extends GPCommand<Void> {
 
         if (!reg.allAIDs().contains(aid)) {
             logger.warn("Applet not present when deletion requested.");
-            throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card");
+            throw new LocalizedCardException("Could not delete AID because not present on card: " + aid, "E_no_aid_on_card", ErrDisplay.POPUP);
         }
 
         try {
@@ -52,7 +53,7 @@ public class Delete extends GPCommand<Void> {
         } catch (GPException e) {
             logger.error("Failed to uninstall applet: " + e.sw, e);
             if (e.sw == 0x6985) {
-                throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed", e);
+                throw new LocalizedCardException("Deletion not allowed. Some app still active?", "E_delete_not_allowed", e, ErrDisplay.POPUP);
             } else {
                 throw e;
             }

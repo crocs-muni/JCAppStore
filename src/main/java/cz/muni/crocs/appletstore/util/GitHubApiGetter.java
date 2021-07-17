@@ -13,7 +13,7 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 
 /**
- * Check GitHubConnection and get latest release name
+ * Check GitHub connection and get latest release name
  *
  * @author Jiří Horák
  * @version 1.0

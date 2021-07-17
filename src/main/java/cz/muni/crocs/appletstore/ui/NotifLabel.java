@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.ui;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.LeftMenu;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -28,11 +28,11 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class NotifLabel extends JLabel {
-    private static Logger logger = LoggerFactory.getLogger(NotifLabel.class);
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final Logger logger = LoggerFactory.getLogger(NotifLabel.class);
+    private static final ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private Shape close = new Rectangle(202, 6, 12, 12);
-    private NotifLabel self = this;
+    private final Shape close = new Rectangle(202, 6, 12, 12);
+    private final NotifLabel self = this;
     private BufferedImage closeIcon;
 
     public NotifLabel(String msg, LeftMenu parent) {
@@ -55,10 +55,7 @@ public class NotifLabel extends JLabel {
                     parent.remove(self);
                     parent.revalidate();
                 } else {
-                    JOptionPane.showMessageDialog(
-                            parent.getParent(), new HtmlText("<p width=\"250\">" + msg + "</p>"),
-                            textSrc.getString("event"),
-                            JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "label.png"));
+                    InformerFactory.getInformer().showMessage(textSrc.getString("event"), msg, "label.png");
                 }
             }
         });

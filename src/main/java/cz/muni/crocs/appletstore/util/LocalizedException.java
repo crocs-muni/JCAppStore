@@ -16,23 +16,26 @@ public class LocalizedException extends Exception {
     private boolean isKey = true;
     private UnsafeCardOperation performer = null;
     private String performerMsg = null;
+    private ErrDisplay displayStyle = ErrDisplay.NO_DISPLAY;
 
     /**
      * Create an exception
      * @param cause cause, translated string
      */
-    public LocalizedException(String cause) {
+    public LocalizedException(String cause, ErrDisplay displayStyle) {
         super(cause);
         this.translated = cause;
         isKey = false;
+        this.displayStyle = displayStyle;
     }
 
     /**
      * Create an exception
      * @param cause exception to encapsulate
      */
-    public LocalizedException(Throwable cause) {
+    public LocalizedException(Throwable cause, ErrDisplay displayStyle) {
         super(cause);
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -40,10 +43,11 @@ public class LocalizedException extends Exception {
      * @param cause cause, translated string
      * @param ex exception to encapsulate
      */
-    public LocalizedException(String cause, Throwable ex) {
+    public LocalizedException(String cause, Throwable ex, ErrDisplay displayStyle) {
         super(cause, ex);
         this.translated = cause;
         isKey = false;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -51,9 +55,10 @@ public class LocalizedException extends Exception {
      * @param cause cause, english cause description
      * @param translated translated cause description
      */
-    public LocalizedException(String cause, String translated) {
+    public LocalizedException(String cause, String translated, ErrDisplay displayStyle) {
         super(cause);
         this.translated = translated;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -61,9 +66,10 @@ public class LocalizedException extends Exception {
      * @param cause cause, english cause description
      * @param translated translated cause description
      */
-    public LocalizedException(Throwable cause, String translated) {
+    public LocalizedException(Throwable cause, String translated, ErrDisplay displayStyle) {
         super(cause);
         this.translated = translated;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -72,9 +78,10 @@ public class LocalizedException extends Exception {
      * @param translated translated cause description
      * @param ex exception to encapsulate
      */
-    public LocalizedException(String cause, String translated, Throwable ex) {
+    public LocalizedException(String cause, String translated, Throwable ex, ErrDisplay displayStyle) {
         super(cause, ex);
         this.translated = translated;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -83,10 +90,11 @@ public class LocalizedException extends Exception {
      * @param translated translated cause description
      * @param image image to display along with an error
      */
-    public LocalizedException(String cause, String translated, String image) {
+    public LocalizedException(String cause, String translated, String image, ErrDisplay displayStyle) {
         super(cause);
         this.translated = translated;
         this.image = image;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -95,10 +103,11 @@ public class LocalizedException extends Exception {
      * @param translated translated cause description
      * @param image image to display along with an error
      */
-    public LocalizedException(Throwable cause, String translated, String image) {
+    public LocalizedException(Throwable cause, String translated, String image, ErrDisplay displayStyle) {
         super(cause);
         this.translated = translated;
         this.image = image;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -108,10 +117,11 @@ public class LocalizedException extends Exception {
      * @param image image to display along with an error
      * @param ex exception to encapsulate
      */
-    public LocalizedException(String cause, String translated, String image, Throwable ex) {
+    public LocalizedException(String cause, String translated, String image, Throwable ex, ErrDisplay displayStyle) {
         super(cause, ex);
         this.translated = translated;
         this.image = image;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -123,12 +133,13 @@ public class LocalizedException extends Exception {
      * @param performerTranslatedMsg string message accompanying the operation - translated
      */
     public LocalizedException(String cause, String translated, Throwable ex, String imgName,
-                              UnsafeCardOperation op, String performerTranslatedMsg) {
+                              UnsafeCardOperation op, String performerTranslatedMsg, ErrDisplay displayStyle) {
         super(cause, ex);
         this.translated = translated;
         this.image = imgName;
         this.performer = op;
         this.performerMsg = performerTranslatedMsg;
+        this.displayStyle = displayStyle;
     }
 
     /**
@@ -139,23 +150,24 @@ public class LocalizedException extends Exception {
      * @param performerTranslatedMsg string message accompanying the operation - translated
      */
     public LocalizedException(String cause, String translated, String imgName,
-                              UnsafeCardOperation op, String performerTranslatedMsg) {
+                              UnsafeCardOperation op, String performerTranslatedMsg, ErrDisplay displayStyle) {
         super(cause);
         this.translated = translated;
         this.image = imgName;
         this.performer = op;
         this.performerMsg = performerTranslatedMsg;
+        this.displayStyle = displayStyle;
     }
 
-    public static LocalizedException from(Exception e) {
-        LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(), e.getCause());
+    public static LocalizedException from(Exception e, ErrDisplay displayStyle) {
+        LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(), e.getCause(), displayStyle);
         result.isKey = false;
         return result;
     }
 
-    public static LocalizedException from(LocalizedException e) {
+    public static LocalizedException from(LocalizedException e, ErrDisplay displayStyle) {
         LocalizedException result = new LocalizedException(e.getMessage(), e.getLocalizedMessage(),
-                e.getImageName(), e.getCause());
+                e.getImageName(), e.getCause(), displayStyle);
         result.isKey = false;
         return result;
     }
@@ -215,6 +227,15 @@ public class LocalizedException extends Exception {
      */
     public String getOperationLocalizedMsg() {
         return performerMsg;
+    }
+
+    /**
+     * If exception forwarded to user in GUI, should it be
+     * used in (mostly generic cases) as full screen error or only a popup message?
+     * @return true if full screen
+     */
+    public ErrDisplay getDisplayStyle() {
+        return displayStyle;
     }
 
     @Override

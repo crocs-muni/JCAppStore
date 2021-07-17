@@ -25,12 +25,10 @@ import java.awt.Dialog;
 import java.awt.HeadlessException;
 import java.awt.Container;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.swing.JOptionPane.*;
 import static pro.javacard.gp.GPRegistryEntry.Kind;
@@ -159,13 +157,13 @@ public class InstallAction extends CardAbstractAction<Void, Void> {
                 case JOptionPane.YES_OPTION:
                     //invalid data
                     if (!dialog.validCustomAIDs() || !dialog.validInstallParams()) {
-                        InformerFactory.getInformer().showMessage(textSrc.getString("E_install_invalid_data"));
+                        InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_install_invalid_data"), "error.png");
                         showInstallDialog(pane);
                         return null;
                     } else if (!dialog.getInstallOpts().isForce()) { //check if custom AID is not conflicting
                         logger.info("No force install: check the applets");
                         if (someCustomAppletAIDsConflicts(dialog.getInstallOpts().getCustomAIDs())) {
-                            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_already_present"));
+                            InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_install_already_present"), "warn.png");
                             showInstallDialog(pane);
                             return null;
                         }
@@ -373,12 +371,21 @@ public class InstallAction extends CardAbstractAction<Void, Void> {
         }
         opts.setDefalutSelected(defaultSelected);
         execute(() -> {
-            manager.install(code, opts);
+            try {
+                manager.install(code, opts);
+            } catch (Exception e) {
+                SwingUtilities.invokeLater(() ->
+                        InformerFactory.getInformer().showInfoToClose(textSrc.getString("install_failed"),
+                                Notice.Importance.SEVERE, 4000));
+                throw e;
+            }
+
             SwingUtilities.invokeLater(() ->
                     InformerFactory.getInformer().showInfoToClose(textSrc.getString("installed"),
                             Notice.Importance.INFO, 4000));
             data.setCapfile(null);
             return null;
+
         }, "Failed to install applet.", textSrc.getString("install_failed"), 5, TimeUnit.MINUTES);
     }
 

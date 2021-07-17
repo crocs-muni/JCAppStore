@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.util;
 
+import cz.muni.crocs.appletstore.ui.Notice;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class URLAdapter extends MouseAdapter {
             browse(urlAddress);
         } catch (IOException | URISyntaxException ex) {
             logger.warn("Could not open URL + " + urlAddress, ex);
-            InformerFactory.getInformer().showMessage(textSrc.getString("E_no_browser"));
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_no_browser"), Notice.Importance.SEVERE, 10000);
         }
     }
 

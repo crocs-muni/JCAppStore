@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.CAPFile;
@@ -31,7 +32,7 @@ public class Load extends GPCommand<Void> {
     public boolean execute() throws LocalizedCardException, GPException {
         if (data == null) {
             logger.info("Installing params are missing");
-            throw new LocalizedCardException("No install data.", "E_notify_us");
+            throw new LocalizedCardException("No install data.", "E_notify_us", ErrDisplay.POPUP);
         }
         logger.info("Installing params: " + data.toString());
 
@@ -40,7 +41,7 @@ public class Load extends GPCommand<Void> {
             registry = context.getRegistry();
         } catch (IOException e) {
             //todo message?
-            throw new LocalizedCardException("Could not load cap.", "E_load_failed_io", e);
+            throw new LocalizedCardException("Could not load cap.", "E_load_failed_io", e, ErrDisplay.POPUP);
         }
 
         // Remove existing default app
@@ -59,11 +60,11 @@ public class Load extends GPCommand<Void> {
         } catch (GPException e) {
             if (e.sw == 0x00) {
                 //todo collsiion image
-                throw new LocalizedCardException("Package already present", "E_pkg_present", e);
+                throw new LocalizedCardException("Package already present", "E_pkg_present", e, ErrDisplay.POPUP);
             }
-            throw new LocalizedCardException("Package load failed", "E_load_failed", e);
+            throw new LocalizedCardException("Package load failed", "E_load_failed", e, ErrDisplay.POPUP);
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e);
+            throw new LocalizedCardException("Failed to load cap file onto card", "E_install_load_failed", e, ErrDisplay.POPUP);
         }
 
         return true;
