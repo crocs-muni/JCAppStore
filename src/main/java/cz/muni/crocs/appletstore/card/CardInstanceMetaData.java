@@ -11,6 +11,14 @@ import java.util.*;
  * with executable load file with modules -> if contains and we found module version
  * replace
  *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *              CAUTION
+ * ANY UPDATE TO THIS CLASS WILL MAKE SERIALIZATION OF OLD FILES
+ * FAIL. USERS WILL LOSE ALL THE CARD METADATA.
+ *
+ * CHANGE serialVersionUID IF YOU MAKE ANY CHANGES TO THE MEMBER VARIABLES
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -18,6 +26,7 @@ public class CardInstanceMetaData implements Serializable {
 
     private final HashSet<AppletInfo> applets;
     private HashMap<String, HashMap<String, String>> jcAlgTestData;
+    private static final long serialVersionUID = 2021071800000000001L;
 
     private CardInstanceMetaData() {
         this(new HashSet<>(), null);

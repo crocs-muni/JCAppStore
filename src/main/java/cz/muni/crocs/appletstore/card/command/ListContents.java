@@ -8,7 +8,6 @@ import pro.javacard.gp.GPException;
 import pro.javacard.gp.GPRegistry;
 import pro.javacard.gp.GPRegistryEntry;
 
-import javax.smartcardio.CardException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -42,6 +41,9 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
             try {
                 saved = savedData.deserialize(file);
             } catch (LocalizedCardException e) {
+                //todo show user info that card metadata was unable to parse the old data?
+                // TODO: any change to the metadata class will cause this issue and users will lose
+                // all the metadata
                 e.printStackTrace();
                 logger.warn("Failed to obtain card cache file", e);
                 saved = CardInstanceMetaData.empty();
