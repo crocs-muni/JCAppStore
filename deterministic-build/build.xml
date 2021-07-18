@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="../../../Downloads" default="jcmemory" name="AppletPlayground build">
+  <!-- Applet building dependencies -->
+  <property name="JC222" value="ext/java_card_kit-2_2_2"/>
+  <property name="JC221" value="ext/java_card_kit-2_2_1"/>
+  <property name="JC212" value="ext/java_card_kit-2_1_2"/>
+  <property name="JC303" value="ext/java_card_kit-3_0_3"/>
+  <property name="JC304" value="ext/java_card_kit-3_0_4"/>
+  <property name="OP20" value="ext/visa_openplatform-2_0"/>
+  <property name="GP211" value="ext/globalplatform-2_1_1"/>
+
+  <property name="U-JC222" value="ext/sdk-win-2_2_2"/>
+  <property name="U-JC221" value="ext/sdk-win-2_2_1"/>
+  <property name="U-JC212" value="ext/sdk-win-2_1_2"/>
+  <property name="U-JC302" value="ext/sdk-win-3_0_2"/>
+  <property name="U-JC303" value="ext/sdk-win-3_0_3"/>
+  <property name="U-JC304" value="ext/sdk-win-3_0_4"/>
+  <property name="U-JC305" value="ext/sdk-win-3_0_5"/>
+
+  <property name="LIB" value="lib"/>
+
+  <!-- ant-javacard task from javacard.pro -->
+  <taskdef name="javacard" classname="pro.javacard.ant.JavaCard" classpath="ext/ant-javacard.jar"/>
+
+  <target name="jcmemory">
+    <javacard jckit="${U-JC221}">
+      <cap output="JCMemory.cap" sources="src/JCMemory" aid="4A43416C6754657375">
+        <applet class="JCMemory.JCMemoryApplet" aid="4A43416C675465737531"/>
+      </cap>
+	</javacard>
+  </target>
+
+  <target name="ykneo-openpgpcard">
+    <javacard jckit="${U-JC222}">
+      <cap output="openpgpcard.cap" sources="src/openpgpcard" aid="D27600012401">
+        <applet class="openpgpcard.OpenPGPApplet" aid="D2760001240102000000000000010000"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="smartpgp">
+    <javacard jckit="${U-JC304}">
+      <cap output="smartpgp.cap" sources="src/fr/anssi/smartpgp" aid="D27600012401">
+        <applet class="fr.anssi.smartpgp.SmartPGPApplet" aid="D276000124010304AFAF000000000000"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="gids">
+    <javacard jckit="${U-JC221}">
+      <cap output="gids.cap" sources="src/com/mysmartlogon/gidsApplet" aid="A00000039742544659">
+        <applet class="com.mysmartlogon.gidsApplet.GidsApplet" aid="A000000397425446590201"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--older sdks than 305 not supported (javacard.security.RandomData different API-->
+  <!--moved to old package (the newest version 3.0.5 api that does not run on our cards-->
+<!--  <target name="ledger-u2f">-->
+<!--    <javacard jckit="${U-JC305}">-->
+<!--      <cap output="ledgeru2f.cap" sources="src/com/ledger/u2f" aid="a0:00:00:06:17:00:4f:97:a2:e9:50:01">-->
+<!--        <applet class="com.ledger.u2f.U2FApplet" aid="a0:00:00:06:17:00:4f:97:a2:e9:49:01"/>-->
+<!--      </cap>-->
+<!--    </javacard>-->
+<!--  </target>-->
+  <!--5.2.2020-->
+  <target name="ledger-u2f">
+    <javacard jckit="${U-JC302}">
+      <cap output="ledgeru2f.cap" sources="src/com/ledger/u2f" aid="a0:00:00:06:17:00:4f:97:a2:e9:50:01">
+        <applet class="com.ledger.u2f.U2FApplet" aid="a0:00:00:06:17:00:4f:97:a2:e9:49:01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--15.2.2020  was DISCONTINUED,
+    <target name="ledger-wallet">
+      <javacard jckit="${U-JC304}">
+        <cap output="ledgerwallet.cap" sources="src/com/ledger/wallet" aid="a0:00:00:06:17:00:4f:97:a2:e9:50:01">
+          <applet class="com.ledger.wallet.LedgerWalletApplet" aid="a0:00:00:06:17:00:4f:97:a2:e9:49:01"/>
+        </cap>
+      </javacard>
+    </target>
+-->
+<!--29.2.2020 derived from ledger-->
+  <target name="bitcoin-(ledger)-wallet">
+    <javacard jckit="${U-JC304}">
+      <cap output="ledgerwallet.cap" sources="src/com/ledger/wallet" aid="a0:00:00:06:17:00:4f:97:a2:e9:50:01">
+        <applet class="com.ledger.wallet.LedgerWalletApplet" aid="a0:00:00:06:17:00:4f:97:a2:e9:49:01"/>
+        <applet class="com.ledger.wallet.LWNFCForumApplet" aid="a0:00:00:06:17:00:4f:97:a2:e9:49:02"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--29.2.2020 -->
+  <target name="secure-btc-wallet">
+    <javacard jckit="${U-JC304}">
+      <cap output="secure-btc-wallet.cap" sources="src/de/tum/in/securebitcoinwallet/javacardapplet" aid="01020304050607080900">
+        <applet class="de.tum.in.securebitcoinwallet.javacardapplet.SecureBitcoinWalletJavaCardApplet" aid="0102030405060708090000"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="openEmv">
+    <javacard jckit="${U-JC221}">
+      <cap output="openemv.cap" sources="src/openemv" aid="0x45:0x4d:0x56:0x00:0x00">
+        <applet class="openemv.SimpleEMVApplet" aid="0x45:0x4d:0x56:0x00:0x00:0x01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="keepassNFC">
+    <javacard jckit="${U-JC221}">
+      <cap output="keepasnfc.cap" sources="src/net/lardcave/keepassnfcapplet" aid="F0375472804FD5FA0F243E42C1B638">
+        <applet class="net.lardcave.keepassnfcapplet.KeepassNFC" aid="F0375472804FD5FA0F243E42C1B63825"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--sos.orig Need to comment the filed in EvilInterface when downloading stuff... or delete the evil* things-->
+  <!--both need to remove interface, no AEC version from https://github.com/walterschell/jmrtd-noeac/ -->
+  <target name="sosPassport">
+    <javacard jckit="${U-JC221}">
+      <cap output="sospassport.cap" sources="src/sos/passportapplet" aid="0xA0:0x00:0x00:0x02:0x47:0x10">
+        <applet class="sos.passportapplet.PassportApplet" aid="0xA0:0x00:0x00:0x02:0x47:0x10:0x01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--22.2.2020-->
+  <target name="driverslicence">
+    <javacard jckit="${U-JC222}">
+      <cap output="DriversLicense.cap" sources="src/org/isodl" aid="a00000024802">
+        <applet class="org.isodl.applet.LicenseApplet" aid="a0000002480200"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="openjavacard-ndef-tiny">
+    <javacard jckit="${U-JC222}">
+      <cap output="open_ndef_tiny.cap" sources="src/org/openjavacard/ndef/tiny" aid="D276000177100211030001">
+        <applet class="org.openjavacard.ndef.tiny.NdefApplet" aid="D27600017710021101000101"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <target name="openjavacard-ndef-full">
+    <javacard jckit="${U-JC222}">
+      <cap output="open_ndef_full.cap" sources="src/org/openjavacard/ndef/full" aid="D276000177100211110001">
+        <applet class="org.openjavacard.ndef.full.NdefApplet" aid="D27600017710021103000101"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--5.2.2020, after tracing the apple AID is expected to be as set in applet-->
+  <property name="yubikey_project_WRONG_PACKAGE_AID" value="0xa0:0x00:0x00:0x05:0x27:0x21:0x01"/>
+  <property name="yubikey_project_WRONG_APPLET_AID" value="0xa0:0x00:0x00:0x05:0x27:0x21:0x01:0x01"/>
+  <target name="yubikey-oath">
+    <javacard jckit="${U-JC222}">
+      <cap output="yubikey-oath.cap" sources="src/pkgYkneoOath" aid="0xa0:0x00:0x00:0x05:0x27:0x21:0x01">
+        <applet class="pkgYkneoOath.YkneoOath" aid="0xa0:0x00:0x00:0x05:0x27:0x47:0x11:0x17"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--5.2.2020-->
+  <target name="yubikey-YkOtp">
+    <javacard jckit="${U-JC222}">
+      <cap output="yubikey-ykOtp.cap" sources="src/net/cooperi/ykotpapplet" aid="a0:00:00:05:27:20">
+        <applet class="net.cooperi.ykotpapplet.YkOtpApplet" aid="a0:00:00:05:27:20:01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--5.2.2020-->
+  <target name="isoApplet">
+    <javacard jckit="${U-JC222}">
+      <cap output="isoaplet.cap" sources="src/net/pwendland/javacard/pki/isoapplet" aid="f2:76:a2:88:bc:fb:a6:9d:34:f3:10">
+        <applet class="net.pwendland.javacard.pki.isoapplet.IsoApplet" aid="f2:76:a2:88:bc:fb:a6:9d:34:f3:10:01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--6.2.2020, no package AID! (first 5 bytes of the applet id)-->
+  <target name="ndef-hotp-applet">
+    <javacard jckit="${U-JC222}">
+      <cap output="ndef-hotp-muni.cap" sources="src/cz/muni/fi/crocs/javacard/ndefOtpGenerator">
+        <applet class="cz.muni.fi.crocs.javacard.ndefOtpGenerator.NdefApplet" aid="D2760000850101"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--7.2.2020  failed to compile due errors-->
+  <target name="cool-key">
+    <javacard jckit="${U-JC222}">
+      <cap output="cool-key-muscle.cap" sources="src/com/redhat/ckey/applet" aid="627601FF0000">
+        <applet class="com.redhat.ckey.applet.CardEdge" aid="627601FF000000"/>
+        <import exps="${LIB}" jar="${LIB}/vjcre.jar"/> <!-- from https://github.com/martinpaljak/vJCRE/releases -->
+        <import exps="${OP20}" jar="${OP20}/visaop20.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+
+  <!--8.2.2020  java preprocessor and compilation-->
+  <!--PIV_SUPPORT_*: choose whether RSA/EC family algorithms are supported.-->
+  <property name="PIV_SUPPORT_RSA" value="true" />
+  <property name="PIV_SUPPORT_EC" value="true" />
+  <!--
+    PIV_USE_EC_PRECOMPHASH: build with support for using signPreComputedHash()
+    for EC signing. This can only work with JC3.0.5, but will build an applet
+    that is capable of PIV standards-compliant EC signing.
+  -->
+  <property name="PIV_USE_EC_PRECOMPHASH" value="false" />
+  <!--
+    PIV_STRICT_CONTACTLESS: if true, strictly enforce the PIV spec requirements
+    around which slots and keys are allowed to be used over the contactless
+    interface. If false, allow anything to be used over contactless.
+  -->
+  <property name="PIV_STRICT_CONTACTLESS" value="true" />
+  <!--
+    YKPIV_ATTESTATION: whether to build support for YubicoPIV attestation.
+    Without this, the attestation slots and commands will all return
+    unsupported errors.
+  -->
+  <property name="YKPIV_ATTESTATION" value="true" />
+  <!--
+    APPLET_EXTLEN: build with support for extended length APDUs. This doesn't
+    work properly on all cards and some may need to use an applet built without
+    support for this (due to bugs in getOffsetCdata()).
+  -->
+  <property name="APPLET_EXTLEN" value="true" />
+  <!--
+    APPLET_USE_RESET_MEM: use CLEAR_ON_RESET memory in cipher and signature
+    instances (rather than CLEAR_ON_DESELECT). Only set this if you trust other
+    applets on the card not to leak info left in RAM after deselect (e.g.
+    PivApplet is the only applet installed). Some cards are very short on
+    CLEAR_ON_DESELECT memory and need this to use RSA.
+  -->
+  <property name="APPLET_USE_RESET_MEM" value="false" />
+  <!--
+    APPLET_SIMULATOR: tries to pretend we have memory limits like a real card
+    when running in the simulator. Useful for testing/debugging SGList code.
+  -->
+  <property name="APPLET_SIMULATOR" value="false" />
+  <target name="preprocess-piv" description="proprocess java source">
+    <taskdef resource="jpp.xml" classpath="ext/jpp-1.0.3.jar" />
+    <jpp destdir="build/pivapplet" readonly="true" verbose="false">
+      <fileset dir="src/net/cooperi/pivapplet" includes="**/*.java" />
+    </jpp>
+  </target>
+  <target name="pivapplet" depends="preprocess-piv">
+    <javacard jckit="${U-JC222}">
+      <cap output="pivapplet.cap" sources="build/pivapplet" aid="a0:00:00:03:08:00:00:10">
+        <applet class="net.cooperi.pivapplet.PivApplet" aid="a0:00:00:03:08:00:00:10:00:01:00"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--8.2.2020-->
+  <target name="openfipls-piv-applet">
+    <javacard jckit="${U-JC222}">
+      <cap output="openFIPS.cap" sources="src/com/makina/security/OpenFIPS201" aid="A00000030800001000">
+        <applet class="com.makina.security.OpenFIPS201.OpenFIPS201" aid="A000000308000010000100"/>
+        <import exps="${GP211}" jar="${GP211}/gp211.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--9.2.2020 cap aid from applet aid, todo deleted @Override from source code-->
+  <target name="cprytonit-applet">
+    <javacard jckit="${U-JC222}">
+      <cap output="cryptonit-applet.cap" sources="src/org/cryptonit" >
+        <applet class="org.cryptonit.CryptonitApplet" aid="A0:00:00:03:08:00:00:10:00"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--10.2.2020 could not compile due to missing import NXP jar library, not even tried - limited version of u2f-->
+<!--  <target name="ccu2f">-->
+<!--    <javacard jckit="${U-JC303}">-->
+<!--      <cap output="cculf-applet.cap" sources="src/de/tsenger/u2f" aid="A000000647">-->
+<!--        <applet class="de.tsenger.u2f.U2FApplet" aid="A0000006472F0001"/>-->
+<!--      </cap>-->
+<!--    </javacard>-->
+<!--  </target>-->
+
+  <!--10.2.2020-->
+  <target name="u2f-japan">
+    <javacard jckit="${U-JC302}">
+      <cap output="u2f-japan.cap" sources="src/com/esec/u2ftoken" aid="A000000647">
+        <applet class="com.esec.u2ftoken.U2FToken" aid="A0000006472F0001"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--13.2.2020 modified the applet, see issues on github (missing cast to short)-->
+  <target name="fluffy-pgp">
+    <javacard jckit="${U-JC222}">
+      <cap output="fluffy-pgp.cap" sources="src/net/ss3t/javacard/gpg" aid="D27600012401020000000000000000">
+        <applet class="net.ss3t.javacard.gpg.Gpg" aid="D2760001240102000000000000000000"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--14.2.2020 -->
+  <target name="jc-open-pgp">
+    <javacard jckit="${U-JC222}">
+      <cap output="jc-open-pgp.cap" sources="src/JCOpenPGP" aid="D27600012400">
+        <applet class="JCOpenPGP.JCOpenPGP" aid="D2760001240102000000000000010000"/>
+        <import exps="${OP20}" jar="${OP20}/visaop20.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+    <!--15.2.2020-->
+    <target name="keycard">
+        <javacard jckit="${U-JC304}">
+            <cap output="keycard.cap" sources="src/im/status/keycard" aid="0xA0:0x00:0x00:0x08:0x04:0x00:0x01">
+                <applet class="im.status.keycard.KeycardApplet" aid="0xA0:0x00:0x00:0x08:0x04:0x00:0x01:0x01"/>
+                <applet class="im.status.keycard.NDEFApplet" aid="0xA0:0x00:0x00:0x08:0x04:0x00:0x01:0x02"/>
+                <!--removed: cashapplet supports only signature<applet class="im.status.keycard.CashApplet" aid="0xA0:0x00:0x00:0x08:0x04:0x00:0x01:0x03"/>-->
+            </cap>
+        </javacard>
+    </target>
+
+  <!--15.2.2020 todo modified code - added one cast to short, the places modified are in the repo issues-->
+  <target name="satochip">
+    <javacard jckit="${U-JC304}">
+      <cap output="satochip.cap" sources="src/org/satochip/applet" aid="5361746F43686970">
+        <applet class="org.satochip.applet.CardEdge" aid="5361746F4368697000"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--22.2.2020-->
+  <target name="fakeesteid">
+    <javacard jckit="${U-JC222}">
+      <cap output="fakeest.cap" sources="src/org/esteid/applet" >
+        <applet class="org.esteid.applet.FakeEstEID" aid="D23300000045737445494420763335"/>
+        <import exps="${OP20}" jar="${OP20}/visaop20.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--22.2.2020, has files in org.globalplatform -->
+  <target name="preprocess-befedict" description="preprocess java source">
+    <taskdef resource="jpp.xml" classpath="ext/jpp-1.0.3.jar" />
+    <jpp destdir="build/src/be/fedict/eidapplet" readonly="true" verbose="false">
+      <fileset dir="src/be/fedict/eidapplet" includes="**/*.java" />
+    </jpp>
+    <jpp destdir="build/src/org/globalplatform" readonly="true" verbose="false">
+      <fileset dir="src/org/globalplatform" includes="**/*.java" />
+    </jpp>
+  </target>
+  <target name="be.fedict-exp" depends="preprocess-befedict">
+    <jar destfile="build/src/gpeid.jar"
+         basedir="build/src/org/globalplatform"
+         includes="**"
+    />
+  </target>
+  <target name="be.fedict" depends="be.fedict-exp">
+    <javacard jckit="${U-JC222}">
+      <cap output="eidfeedict.cap" sources="build/src" aid="0xA0:0x00:0x00:0x01:0x77:0x50:0x4B:0x43:0x53:0x2D:0x31">
+        <applet class="be.fedict.eidapplet.EidCard" aid="0xA0:0x00:0x00:0x01:0x77:0x50:0x4B:0x43:0x53:0x2D:0x31:0x35"/>
+        <import exps="build/src/" jar="build/src/gpeid.jar"/>
+        <import exps="${GP211}" jar="${GP211}/gp211.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--23.2.2020  v1.0-->
+  <target name="yubisec">
+    <javacard jckit="${U-JC222}">
+      <cap output="yubisc.cap" sources="src/com/cayennegraphics/yubisec" aid="797562696F7470">
+        <applet class="com.cayennegraphics.yubisec.Yubisec" aid="797562696F74700001"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--29.2.2020 -->
+  <target name="lamassu">
+    <javacard jckit="${U-JC304}">
+      <cap output="lamassu.cap" sources="src/is/lamassu" >
+        <applet class="is.lamassu.Test" aid="A00000000107"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--23.2.2020  missing import sim toolkit old technology do not run
+  <target name="otp">
+    <javacard jckit="${U-JC222}">
+      <cap output="otp.cap" sources="src/com/ng/otp" aid="A0000000185000000000000052414450">
+        <applet class="com.ng.otp.otp" aid="A0000000185000000000000052414441"/>
+      </cap>
+    </javacard>
+  </target>
+  -->
+
+  <!--24.2.2020  v1.0-->
+  <target name="epurse">
+    <javacard jckit="${U-JC222}">
+      <cap output="epursehw.cap" sources="src/ePurse" aid="A04041424344454610">
+        <applet class="ePurse.Epurse" aid="A0404142434445461001"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--24.2.2020  v1.0-->
+  <target name="monpackage-javacardwallet">
+    <javacard jckit="${U-JC222}">
+      <cap output="javacardwallet.cap" sources="src/monpackage" aid="0x01:0x02:0x03:0x04:0x05:0x06:0x07:0x08:0x09:0x00">
+        <applet class="monpackage.MyServer" aid="0x01:0x02:0x03:0x04:0x05:0x06:0x07:0x08:0x09:0x00:0x00"/>
+      </cap>
+    </javacard>
+  </target>
+
+    <!--25.2.2020  v1.0-->
+    <target name="loyalty-card">
+        <javacard jckit="${U-JC222}">
+            <cap output="loyalty.cap" sources="src/card" aid="1186868135">
+                <applet class="card.Card" aid="118686813524"/>
+            </cap>
+        </javacard>
+    </target>
+
+  <!--25.2.2020  v1.0-->
+  <target name="simwallet">
+    <javacard jckit="${U-JC221}">
+      <cap output="simwallet.cap" sources="src/fr/bmartel/smartcard/passwordwallet" aid="D2:76:00:01:18:00:02:FF:49:50:25:89:C0:01:00:00">
+        <applet class="fr.bmartel.smartcard.passwordwallet.PasswordWalletApplet" aid="D2:76:00:01:18:00:02:FF:49:50:25:89:C0:01:9B:01"/>
+        <import exps="${GP211}" jar="${GP211}/gp211.jar"/>
+      </cap>
+    </javacard>
+  </target>
+
+    <!--25.2.2020  v1.0-->
+    <target name="passmg">
+        <javacard jckit="${U-JC222}">
+            <cap output="passmg.cap" sources="src/passmg" >
+                <applet class="passmg.passmg" aid="A10000000003"/>
+                <import exps="${OP20}" jar="${OP20}/visaop20.jar"/>
+            </cap>
+        </javacard>
+    </target>
+
+    <!--25.2.2020  todo unknown aids
+    <target name="stegopassapplet">
+        <javacard jckit="${U-JC222}">
+            <cap output="stegopassapplet.cap" sources="src/stegopassapplet"  aid="">
+                <applet class="stegopassapplet.StegoPassApplet" aid=""/>
+            </cap>
+        </javacard>
+    </target>
+-->
+  <!--27.2.2020-->
+  <target name="sim-password-manager">
+    <javacard jckit="${U-JC221}">
+      <cap output="sim-passwordmg.cap" sources="src/org/nick/passman/sim"  aid="0x73:0x69:0x6d:0x70:0x61:0x73:0x73:0x6d:0x61:0x6e">
+        <applet class="org.nick.passman.sim.PasswordManagerApplet" aid="0x73:0x69:0x6d:0x70:0x61:0x73:0x73:0x6d:0x61:0x6e:0x01"/>
+      </cap>
+    </javacard>
+  </target>
+
+  <!--27.2.2020, packages: allergies, appointment, card, cardServices, commons, diagnostics, medicines, personal, treatment, vaccines
+  <target name="healthcard">
+    <javacard jckit="${U-JC222}">
+      <cap output="health.cap" sources="src/allergies;src/appointments;src/healthcard;src/cardServices;src/commons;src/diagnostics;src/medicines;src/personal;src/treatments;src/vaccines">
+        <applet class="healthcard.HealthApplet" aid="0x1:0x2:0x3:0x4:0x5:0x6:0x7:0x8:0x9:0x1"/>
+      </cap>
+    </javacard>
+  </target>
+  removed
+-->
+ <!-- 0.7.2020, versions replaced-->
+  <target name="jcalgtest">
+    <javacard jckit="${JC222}">
+      <cap output="AlgTest_222.cap" sources="src/AlgTest/" aid="4a43416c6754657374" >
+        <applet class="algtest.JCAlgTestApplet" aid="4a43416c675465737431"/>
+      </cap>
+    </javacard>
+  </target>
+</project>
