@@ -45,6 +45,7 @@ public class OptionsImpl implements Options<String> {
         addIfMissing(Options.KEY_LANGUAGE, Locale.getDefault().toString());
         addIfMissing(Options.KEY_BACKGROUND, Config.IMAGE_DIR + "bg.jpg");
         addIfMissing(Options.KEY_GITHUB_LATEST_VERSION, "none");
+        addIfMissing(Options.KEY_GITHUB_VERSION_DATE, "2021-01-01T00:00:00Z");
         addIfMissing(Options.KEY_HINT, "true");
         addIfMissing(Options.KEY_STYLESHEET, "src"+S+"main"+S+"resources"+S+"css"+S+"default.css");
         addIfMissing(Options.KEY_FONT, "src"+S+"main"+S+"resources"+S+"fonts"+S+"text.ttf");

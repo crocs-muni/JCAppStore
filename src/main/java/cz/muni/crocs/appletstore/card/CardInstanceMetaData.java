@@ -1,11 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
 import pro.javacard.gp.GPRegistryEntry;
 
-import java.io.Console;
 import java.io.Serializable;
 import java.util.*;
 
@@ -86,7 +83,8 @@ public class CardInstanceMetaData implements Serializable {
         applets.add(info);
     }
 
-    protected void addAppletPacakgeUnsafe(AppletInfo info) {
+    protected void addAppletMetadataUnsafe(AppletInfo info) {
+        applets.remove(info); //in case it is already present
         applets.add(info);
     }
 

@@ -387,7 +387,7 @@ public class CardManagerImpl implements CardManager {
 
                     @Override
                     public boolean execute() throws GPException {
-                        card.getCardMetadata().addAppletPacakgeUnsafe(getPackageInfo(data.getInfo(), file));
+                        card.getCardMetadata().addAppletMetadataUnsafe(getPackageInfo(data.getInfo(), file));
                         try {
                             card.saveInfoData();
                         } catch (LocalizedCardException e) {
@@ -416,7 +416,7 @@ public class CardManagerImpl implements CardManager {
                         public boolean execute() throws GPException {
                             AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult(),
                                     data.getAppletNames() != null ? data.getAppletNames()[appidx] : "");
-                            card.getCardMetadata().addAppletPacakgeUnsafe(installed);
+                            card.getCardMetadata().addAppletMetadataUnsafe(installed);
                             try {
                                 card.saveInfoData();
                             } catch (LocalizedCardException e) {

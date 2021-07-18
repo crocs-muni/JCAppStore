@@ -3,7 +3,7 @@ package cz.muni.crocs.appletstore;
 public interface Store {
 
     enum State {
-        UNINITIALIZED, NO_CONNECTION, WORKING, OK, INSTALLING, REBUILD, FAILED, TIMEOUT
+        UNINITIALIZED, NO_CONNECTION, WORKING, OK, INSTALLING, REBUILD, FAILED, TIMEOUT, INVALID
     }
 
     /**

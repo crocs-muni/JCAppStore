@@ -17,6 +17,7 @@ public interface Options<ValueType> {
     String KEY_SHOW_WELCOME = "welcome_screen";
     String KEY_LANGUAGE = "lang";
     String KEY_GITHUB_LATEST_VERSION = "github.latest.version";
+    String KEY_GITHUB_VERSION_DATE = "github.latest.publish.date";
     String KEY_BACKGROUND = "background";
     String KEY_HINT = "hint";
     String KEY_STYLESHEET = "stylesheet";

@@ -71,7 +71,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
         try {
             Future<JsonElement> future = executor.submit(() ->
                     GitHubApiGetter.getJsonContents(Config.JCALGTEST_RESULTS_DIR));
-            JsonElement root = null;
+            JsonElement root;
 
             try {
                 root = future.get(30, TimeUnit.SECONDS);
@@ -84,7 +84,10 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 return;
             }
 
-            if (root == null) return;
+            if (root == null) {
+                logger.warn("The card type was probably not found in the database.");
+                return;
+            }
 
             ATR cardATR = card.getCardATR();
             if (cardATR == null) {
@@ -124,6 +127,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 safeSetProgress(progress * (files.size() / ++i));
             }
             card.disableTemporarilyJCAlgTestFinder();
+            logger.warn("No results found in JcAlgTest database for this card.");
         } finally {
             updateProgress(getMaximum());
             executor.shutdownNow();

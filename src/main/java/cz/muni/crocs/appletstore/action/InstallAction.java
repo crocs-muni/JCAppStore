@@ -163,6 +163,7 @@ public class InstallAction extends CardAbstractAction<Void, Void> {
                     } else if (!dialog.getInstallOpts().isForce()) { //check if custom AID is not conflicting
                         logger.info("No force install: check the applets");
                         if (someCustomAppletAIDsConflicts(dialog.getInstallOpts().getCustomAIDs())) {
+                            //todo show option to force re-install instead of forxing user to manually tick in dialog? or rather not?
                             InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_install_already_present"), "warn.png");
                             showInstallDialog(pane);
                             return null;
