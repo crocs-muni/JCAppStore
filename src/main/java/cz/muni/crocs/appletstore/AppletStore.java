@@ -67,7 +67,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         if (enabled == isEnabled()) return;
         if (enabled) blocker.setMessage(textSrc.getString("working"));
         setEnabled(enabled);
-        getGlassPane().setVisible(!enabled);
+        blocker.setVisible(!enabled);
         revalidate();
     }
 

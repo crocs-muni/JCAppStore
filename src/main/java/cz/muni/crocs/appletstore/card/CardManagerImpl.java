@@ -143,7 +143,7 @@ public class CardManagerImpl implements CardManager {
                 throw ex;
             } catch (Exception e) {
                 card = null;
-                throw new LocalizedCardException(e.getMessage(), "E_card_default", e, ErrDisplay.FULL_SCREEN);
+                throw new LocalizedCardException(e.getMessage(), "E_card_default", "plug-in-out.png", e, ErrDisplay.FULL_SCREEN);
             } finally {
                 tryGeneric = false;
 
