@@ -62,8 +62,10 @@ public class StoreDownloader {
             parent.setLoaderMessage(textSrc.getString("failed"));
             return false;
         }
+
         parent.setLoaderMessage(textSrc.getString("done"));
         zipFile.delete();
+
         return true;
     }
 

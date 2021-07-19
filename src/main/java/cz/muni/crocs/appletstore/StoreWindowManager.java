@@ -6,6 +6,7 @@ import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.LoadingPane;
+import io.github.g00fy2.versioncompare.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
@@ -126,6 +130,22 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         if (loadingPaneUpdater != null && !loadingPaneUpdater.isCancelled()) {
             loadingPaneUpdater.cancel(true);
             loadingPaneUpdater = null;
+        }
+
+        try {
+            String version = Files.readString(Paths.get(Config.APP_STORE_DIR.getAbsolutePath(), ".version"));
+            if (version != null && !version.isEmpty()) {
+                if (!new Version(Config.VERSION).isAtLeast(version)) {
+                    setState(State.UNINITIALIZED);
+                    putNewPane(new ErrorPane(textSrc.getString("E_store_jcapp_outdated") + " " + version,
+                            "update.png"), false);
+                    return;
+                }
+            } else {
+                logger.warn("The store version file is empty. Store might not work correctly.");
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to check the store version. Store might not work correctly.", e);
         }
 
         switch (state) {
