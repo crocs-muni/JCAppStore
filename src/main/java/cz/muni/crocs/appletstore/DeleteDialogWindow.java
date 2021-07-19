@@ -42,21 +42,22 @@ public class DeleteDialogWindow extends JPanel {
         String question;
         if (!implicit) {
                 question = textSrc.getString("H_uninstall_pkg");
-                question += (pkg) ? textSrc.getString("H_uninstall_apk_pkg_remain") : "";
+                question += (pkg) ? "" : textSrc.getString("H_uninstall_apk_pkg_remain");
         } else {
-            question = textSrc.getString("H_uninstall_apk");
+            question = pkg? textSrc.getString("H_uninstall_pkg_simple") : textSrc.getString("H_uninstall_apk");
         }
 
         add(new HtmlText("<p width=\"600\">" + question + "</p>"), "wrap, span 5, gapbottom 10");
         add(new HtmlText("<p width=\"600\">" + textSrc.getString(pkg && !implicit ? "pkg_id" : "app_id") + aid + "</p>"),
                 "wrap, span 5, gapbottom 20");
 
+        //TODO remove 'force' mode from all the deletion? seems force mode does nothing with applet deletion
         //enable force uninstall on applets only, packages are treated afterwards when found dependencies
-        if (!implicit && kind == GPRegistryEntry.Kind.Application) {
-            add(forceUninstall);
-            add(new Text(textSrc.getString("chbox_force_delete")), "span 4, wrap");
-            add(getHint("chbox_force_delete_expl"), "span 5, wrap");
-        }
+//        if (!implicit && kind == GPRegistryEntry.Kind.ExecutableLoadFile) {
+//            add(forceUninstall);
+//            add(new Text(textSrc.getString("chbox_force_delete")), "span 4, wrap");
+//            add(getHint("chbox_force_delete_expl"), "span 5, wrap");
+//        }
     }
 
     private JLabel getHint(String key) {
@@ -69,12 +70,16 @@ public class DeleteDialogWindow extends JPanel {
      * Get confirm dialog msg
      * @return null if ok, otherwise msg warning
      */
-    public String confirm() {
+    public String confirm(String nameOfInstance) {
         if (keys == KeysPresence.PRESENT) {
-            return textSrc.getString("applet_uninstall") + textSrc.getString("contains") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall_1") + "<b>" + nameOfInstance + "</b> "
+                    + textSrc.getString("applet_uninstall_2") + textSrc.getString("contains")
+                    + textSrc.getString("W_personal_data");
         }
         if (keys == KeysPresence.UNKNOWN) {
-            return textSrc.getString("applet_uninstall") + textSrc.getString("may_contain") + textSrc.getString("W_personal_data");
+            return textSrc.getString("applet_uninstall_1") + "<b>" + nameOfInstance + "</b> "
+                    + textSrc.getString("applet_uninstall_2") + textSrc.getString("may_contain")
+                    + textSrc.getString("W_personal_data");
         }
         if (kind == GPRegistryEntry.Kind.SecurityDomain || kind == GPRegistryEntry.Kind.IssuerSecurityDomain) {
             return textSrc.getString("E_delete_sd");
