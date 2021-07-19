@@ -211,7 +211,7 @@ public class Settings extends JPanel {
             } catch (IOException e) {
                 e.printStackTrace();
                 logger.warn("Failed to load custom image " + bgImg, e);
-                InformerFactory.getInformer().showMessage(textSrc.getString("E_background"));
+                InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_background"), Notice.Importance.SEVERE, 5000);
             }
         } else {
             BackgroundImageLoader loader = new BackgroundImageLoader(bgImg, this, slider.getValue());
@@ -242,9 +242,6 @@ public class Settings extends JPanel {
      * display: changes will apply
      */
     private void showAlertChange() {
-        JOptionPane.showMessageDialog(null,
-                textSrc.getString("reset_to_apply"),
-                textSrc.getString("reset_to_apply_title"),
-                JOptionPane.INFORMATION_MESSAGE);
+        InformerFactory.getInformer().showMessage(textSrc.getString("reset_to_apply_title"), textSrc.getString("reset_to_apply"), "info.png");
     }
 }

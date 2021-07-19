@@ -37,8 +37,8 @@ public class CapFileChooser {
         } catch (IOException e) {
             e.printStackTrace();
             logger.warn("Could not load CAP file " + from, e);
-            InformerFactory.getInformer().showMessage(textSrc.getString("E_install_no_file_1") +
-                    from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+            InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_install_no_file_1") +
+                    from.getAbsolutePath() + textSrc.getString("E_install_no_file_2"), "error.png");
         }
         return instcap;
     }
@@ -63,8 +63,8 @@ public class CapFileChooser {
         if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File cap = fileChooser.getSelectedFile();
             if (!cap.exists()) {
-                InformerFactory.getInformer().showMessage(textSrc.getString("E_install_no_file_1") +
-                        cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"));
+                InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_install_no_file_1") +
+                        cap.getAbsolutePath() + textSrc.getString("E_install_no_file_2"), "error.png");
                 return null;
             }
             OptionsFactory.getOptions().addOption(Options.KEY_LAST_SELECTION_LOCATION, dir.getAbsolutePath());

@@ -8,10 +8,7 @@ import cz.muni.crocs.appletstore.card.command.ListContentsUnauthorized;
 import cz.muni.crocs.appletstore.card.command.GPCommand;
 import cz.muni.crocs.appletstore.iface.CallableParam;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
-import cz.muni.crocs.appletstore.util.IniCardTypesParser;
-import cz.muni.crocs.appletstore.util.IniCardTypesParserImpl;
-import cz.muni.crocs.appletstore.util.Options;
-import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -58,7 +55,7 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
             throws LocalizedCardException, CardException {
         if (newDetails == null || terminal == null) {
             logger.warn("NewDetails loaded " + (newDetails != null) + ", terminal: " + (terminal != null));
-            throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg");
+            throw new LocalizedCardException("Invalid arguments.", "E_load_card", "plug-in-out.jpg", ErrDisplay.FULL_SCREEN);
         }
 
         this.terminal = terminal;
@@ -207,7 +204,7 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
 
         } catch (CardException e) {
             throw new LocalizedCardException("Could not connect to selected reader: " +
-                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail", ErrDisplay.FULL_SCREEN);
         }
 
         try {
@@ -220,9 +217,10 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
                 command.execute();
             }
         } catch (GPException e) {
-            throw new LocalizedCardException(e.getMessage(), SW.getErrorCauseKey(e.sw, "E_unknown_error"), "error.png", e);
+            Tuple<String, ErrDisplay> swDesc = SW.getErrorCauseKey(e.sw, "E_unknown_error");
+            throw new LocalizedCardException(e.getMessage(), swDesc.first, "error.png", e, swDesc.second);
         } catch (IOException e) {
-            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e);
+            throw new LocalizedCardException(e.getMessage(), "E_unknown_error", "plug-in-out.jpg", e, ErrDisplay.FULL_SCREEN);
         } finally {
             if (OptionsFactory.getOptions().is(Options.KEY_EXCLUSIVE_CARD_CONNECT))
                 card.endExclusive();
@@ -232,7 +230,7 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
 
     @Override
     public void secureExecuteCommands(GPCommand<?>... commands) throws LocalizedCardException {
-        throw new LocalizedCardException("secureExecuteCommands() call not allowed.", "E_unauthorized");
+        throw new LocalizedCardException("secureExecuteCommands() call not allowed.", "E_unauthorized", ErrDisplay.FULL_SCREEN);
     }
 
     @Override
@@ -266,7 +264,7 @@ public class CardInstanceUnauthorizedImpl implements CardInstanceManagerExtensio
             new IniCardTypesParserImpl(Config.CARD_LIST_FILE, id, textSrc.getString("ini_commentary"))
                     .addValue(IniCardTypesParser.TAG_NAME, name).store();
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e);
+            throw new LocalizedCardException("Failed to save card info.", "E_card_details_failed", e, ErrDisplay.BANNER);
         }
     }
 

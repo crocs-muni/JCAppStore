@@ -8,9 +8,11 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.ui.TextField;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
+import cz.muni.crocs.appletstore.util.Tuple;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,21 +205,18 @@ public class SendApduAction extends CardAbstractAction<Void, ResponseAPDU> {
         @Override
         public Void onFinish(ResponseAPDU response) {
             if (response.getSW() == 0x9000) {
-                showMessage(getSucceedReturnMsg(response), textSrc.getString("custom_command_ok"), "done.png");
+                InformerFactory.getInformer().showMessage(textSrc.getString("custom_command_ok"), getSucceedReturnMsg(response), "done.png");
             } else {
-                showMessage(getErrorReturnMsg(response), textSrc.getString("custom_command_fail") +
-                        Integer.toHexString(response.getSW()), "close.png");
+                InformerFactory.getInformer().showMessage(textSrc.getString("custom_command_fail") +
+                        Integer.toHexString(response.getSW()), getErrorReturnMsg(response), "close.png");
             }
             return defaultEvent.onFinish();
         }
 
-        private void showMessage(Object msg, String title, String image) {
-            JOptionPane.showMessageDialog(null, msg, title, JOptionPane.INFORMATION_MESSAGE,
-                    new ImageIcon(Config.IMAGE_DIR + image));
-        }
-
         private Object getErrorReturnMsg(ResponseAPDU apdu) {
-            String error = textSrc.getString(SW.getErrorVerbose(apdu.getSW(), "custom_command_fail_generic"));
+            Tuple<String, ErrDisplay> swDesc = SW.getErrorVerbose(apdu.getSW(), "custom_command_fail_generic");
+
+            String error = textSrc.getString(swDesc.first);
             return new HtmlText("<p width=\"300px\">" +  error + "</p>");
         }
 

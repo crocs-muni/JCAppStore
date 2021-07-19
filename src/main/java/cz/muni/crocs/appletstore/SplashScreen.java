@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
@@ -43,7 +44,7 @@ public class SplashScreen extends JWindow {
                 " by " +  System.getProperty("java.vendor") + " in " + System.getProperty("java.vm.info"));
 
         if (! new File(Config.RESOURCES).exists()) {
-            throw new LocalizedException("No sources available.", textSrc.getString("E_no_resources"));
+            throw new LocalizedException("No sources available.", textSrc.getString("E_no_resources"), ErrDisplay.POPUP);
         }
 
         try {

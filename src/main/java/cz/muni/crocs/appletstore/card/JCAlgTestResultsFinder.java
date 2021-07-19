@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.GUIFactory;
 import cz.muni.crocs.appletstore.iface.ProcessTrackable;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.GitHubApiGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,10 @@ import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Searching for JCAlgTest results in the official repository: having the
+ * algorithm support for inserted card without actually performing the test.
+ */
 public class JCAlgTestResultsFinder implements ProcessTrackable {
     private static final Logger logger = LoggerFactory.getLogger(JCAlgTestResultsFinder.class);
 
@@ -66,7 +71,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
         try {
             Future<JsonElement> future = executor.submit(() ->
                     GitHubApiGetter.getJsonContents(Config.JCALGTEST_RESULTS_DIR));
-            JsonElement root = null;
+            JsonElement root;
 
             try {
                 root = future.get(30, TimeUnit.SECONDS);
@@ -79,7 +84,10 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 return;
             }
 
-            if (root == null) return;
+            if (root == null) {
+                logger.warn("The card type was probably not found in the database.");
+                return;
+            }
 
             ATR cardATR = card.getCardATR();
             if (cardATR == null) {
@@ -119,6 +127,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 safeSetProgress(progress * (files.size() / ++i));
             }
             card.disableTemporarilyJCAlgTestFinder();
+            logger.warn("No results found in JcAlgTest database for this card.");
         } finally {
             updateProgress(getMaximum());
             executor.shutdownNow();
@@ -139,7 +148,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
                 if (!parseFromStreamReader(reader, data)) return false;
             }
         } catch(IOException ex) {
-            throw new LocalizedCardException("Unable to load data from the file.", "E_jcdia_parse_file", ex);
+            throw new LocalizedCardException("Unable to load data from the file.", "E_jcdia_parse_file", ex, ErrDisplay.BANNER);
         }
 
         if (!validSDK(data, card)) return false;
@@ -223,6 +232,7 @@ public class JCAlgTestResultsFinder implements ProcessTrackable {
             GUIFactory.Components().getCardStatusNotifiable().updateCardState();
             logger.info("JCAlgtest data saved.");
         } catch (LocalizedCardException e) {
+            //allways ignore
             logger.error("Failed to save smart card metadata after successful jcalgtest database match.", e);
         }
     }

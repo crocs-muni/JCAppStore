@@ -25,6 +25,7 @@ public class FreeMemoryAction extends CardAbstractAction<Void, byte[]> {
                     try {
                         return Applets.JCMEMORY.performDefault();
                     } catch (LocalizedException ex) {
+                        //allways do not show
                         logger.warn("Failed to measure the memory.", ex);
                         return null;
                     }

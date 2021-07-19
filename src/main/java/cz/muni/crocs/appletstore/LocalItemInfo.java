@@ -100,7 +100,7 @@ public class LocalItemInfo extends HintPanel {
                         GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
             }
         });
-        uninstall.setToolTipText(uninstall.getText());
+        uninstall.setName(uninstall.getText());
         add(uninstall, "span2, wrap");
 
         rawApdu = new HintText(textSrc.getString("custom_command"),
@@ -113,7 +113,7 @@ public class LocalItemInfo extends HintPanel {
                         GUIFactory.Components().defaultActionEventCallback()).mouseClicked(e);
             }
         });
-        rawApdu.setToolTipText(rawApdu.getText());
+        rawApdu.setName(rawApdu.getText());
         add(rawApdu, "span2, wrap");
     }
 
@@ -193,7 +193,7 @@ public class LocalItemInfo extends HintPanel {
             component.setToolTipText(component.getText());
         }
         if (enabled) {
-            component.setText(component.getToolTipText());
+            component.setText(component.getName());
             component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             component.setForeground(Color.BLACK);
             component.setToolTipText("enabled");

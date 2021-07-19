@@ -1,5 +1,7 @@
 package cz.muni.crocs.appletstore.card;
 
+import cz.muni.crocs.appletstore.util.ErrDisplay;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Set;
@@ -21,28 +23,27 @@ public class AppletSerializerImpl implements AppletSerializer<CardInstanceMetaDa
 
         } catch (IOException e) {
             throw new LocalizedCardException("Unable to save card meta-data. JCAppStore will work but the applets" +
-                    "data such as images or installed versions will be lost.", "E_deserialize_applets", e);
+                    "data such as images or installed versions will be lost.", "E_deserialize_applets", e, ErrDisplay.BANNER);
         }
     }
 
     @Override
     public CardInstanceMetaData deserialize(File file) throws LocalizedCardException {
         if (!file.exists())
-            throw new LocalizedCardException("No file.", "E_no_applets_file");
+            throw new LocalizedCardException("No file.", "E_no_applets_file", ErrDisplay.BANNER);
 
         try (FileInputStream fis = new FileInputStream(file);
              ObjectInputStream in = new ObjectInputStream(fis)) {
 
             return (CardInstanceMetaData) in.readObject();
 
-
         } catch (ClassNotFoundException e) {
-            throw new LocalizedCardException("Unable to deserialize: class not present.", "E_deserialize_applets", e);
+            throw new LocalizedCardException("Unable to deserialize: class not present.", "E_deserialize_applets", e, ErrDisplay.BANNER);
         } catch (InvalidClassException e) {
             throw new LocalizedCardException("It seems the JCAppStore was upgraded to newer version. Unable to parse old" +
-                    "card cache data.", "E_deserialize_applets", e);
+                    "card cache data.", "E_deserialize_applets", e, ErrDisplay.BANNER);
         } catch (IOException e) {
-            throw new LocalizedCardException("Failed to save applets into file.", "E_deserialize_applets", e);
+            throw new LocalizedCardException("Failed to save applets into file.", "E_deserialize_applets", e, ErrDisplay.BANNER);
         }
     }
 }

@@ -20,6 +20,11 @@ some other tools:
 In case you run to same difficulties, we used java 8 to build the applets. Some applets also have
 a difficult build systems - in case of doubt, ask me for help at _horakj7@gmail.com_.
 
+##### _build.xml_
+A messy build file from Applet Playground given to you for better insight on compilation of various applets. There are dates of compilation
+included and other useful information (AIDs etc.) included. It is just provided AS-IS to help you with compilation.
+
+
 #### The actual verification
 is pretty simple - we are in Java. Open the `.cap` file and compare sources. The usual tree is:
 ```

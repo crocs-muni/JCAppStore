@@ -8,6 +8,7 @@ import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.ErrorPane;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.ui.Notice;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -100,11 +101,24 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
             } catch (CardNotAuthenticatedException ex) {
                 tryListUnauthenticated();
             } catch (LocalizedCardException ex) {
-                if (ex.getImageName() != null) caughtGoFullScreen(title, loggerMessage, ex.getImageName(), ex);
-                else caughtGoMessage(title, loggerMessage, ex);
+                switch (ex.getDisplayStyle()) {
+                    case POPUP:
+                        caughtGoPopup(title, loggerMessage, ex);
+                        break;
+                    case BANNER:
+                        caughtGoBanner(title, loggerMessage, ex);
+                        break;
+                    case FULL_SCREEN:
+                        caughtGoFullScreen(title, loggerMessage, ex.getImageName(), ex);
+                        break;
+                    case NO_DISPLAY:
+                    default:
+                        break;
+                }
+
             } catch (Exception e) {
-                caughtGoMessage(null, "Unknown exception: " + e.getMessage(),
-                        new LocalizedCardException(e, "E_unknown_error"));
+                caughtGoPopup(null, "Unknown exception: " + e.getMessage(),
+                        new LocalizedCardException(e, "E_unknown_error", ErrDisplay.POPUP));
             }
         };
     }
@@ -148,11 +162,20 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
         handleUnknownKey(toExecute, loggerMessage, title, "error_white.png", e);
     }
 
-    protected void caughtGoMessage(String title, String loggerMessage, LocalizedException e) {
+    protected void caughtGoBanner(String title, String loggerMessage, LocalizedException e) {
         e.printStackTrace();
         logger.warn(loggerMessage, e);
         if (title != null) {
-            SwingUtilities.invokeLater(() -> showFailed(title, e.getLocalizedMessage()));
+            InformerFactory.getInformer().showInfoToClose(title, Notice.Importance.FATAL);
+        }
+        SwingUtilities.invokeLater(call::onFail);
+    }
+
+    protected void caughtGoPopup(String title, String loggerMessage, LocalizedException e) {
+        e.printStackTrace();
+        logger.warn(loggerMessage, e);
+        if (title != null) {
+            InformerFactory.getInformer().showMessage(title, e.getLocalizedMessage(), "error.png");
         }
         SwingUtilities.invokeLater(call::onFail);
     }
@@ -160,6 +183,9 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
     protected void caughtGoFullScreen(String title, String loggerMessage, String image, LocalizedException e) {
         e.printStackTrace();
         logger.warn(loggerMessage + e.getMessage());
+
+        if (image == null) image = "error.png";
+
         if (title != null) {
             ErrorPane err = null;
 
@@ -188,6 +214,7 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
             SwingUtilities.invokeLater(call::onFinish);
 
         } catch (LocalizedCardException unauthFail) {
+            //allways fullscreen
             InformerFactory.getInformer().showFullScreenInfo(
                     new ErrorPane(textSrc.getString("E_authentication"),
                             textSrc.getString("E_master_key_not_found"), "lock.png"));
@@ -202,12 +229,6 @@ public abstract class CardAbstractActionBase<TRet, TArg> extends MouseAdapter im
                             e.getUnsafeOperation()).mouseClicked(null);
                     return null;
                 });
-    }
-
-    protected static void showFailed(String title, String message) {
-        JOptionPane.showMessageDialog(null,
-                "<html><div width=\"350\">" + message + "</div></html>",
-                title, JOptionPane.ERROR_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "error.png"));
     }
 
     /**

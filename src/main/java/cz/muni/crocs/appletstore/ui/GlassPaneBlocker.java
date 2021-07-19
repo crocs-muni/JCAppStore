@@ -12,6 +12,9 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * "working..." pane blocker that blocks user interaction while card is being used
@@ -24,6 +27,12 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
         ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
     private final JLabel working;
+    private final JLabel details;
+    private ScheduledExecutorService executor;
+    private final static String[] DELAY_MESSAGES = new String[]{"T_delay_too_long",
+            "T_delay_do_not_pull", "T_delay_while", "T_delay_test", "T_delay_finish"};
+    private int delay_msgs_idx = 0;
+
 
     public GlassPaneBlocker() {
         setLayout(new MigLayout("align center center, gapy 15"));
@@ -33,9 +42,18 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
         working.setFont(OptionsFactory.getOptions().getTitleFont(20f));
         add(working, "align center, wrap");
 
+        //space
+        add(new JLabel(), "wrap");
+
+        details = new JLabel("   ");
+        details.setFont(OptionsFactory.getOptions().getTitleFont(14f));
+        add(details, "align center, wrap");
+
         setOpaque(false);
         addMouseListener(this);
         addFocusListener(this);
+
+
     }
 
     public void setMessage(String msg) {
@@ -74,6 +92,28 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
 
     @Override
     public void focusLost(FocusEvent e) {
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        if (visible) {
+            executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(() -> {
+                if (delay_msgs_idx >= DELAY_MESSAGES.length) return;
+
+                SwingUtilities.invokeLater(() -> {
+                    details.setText(textSrc.getString(DELAY_MESSAGES[delay_msgs_idx++]));
+                    revalidate();
+                });
+            }, 7, 20, TimeUnit.SECONDS);
+        } else {
+            if (executor != null) {
+                executor.shutdown();
+                executor = null;
+            }
+            delay_msgs_idx = 0;
+        }
+        super.setVisible(visible);
     }
 
     @Override

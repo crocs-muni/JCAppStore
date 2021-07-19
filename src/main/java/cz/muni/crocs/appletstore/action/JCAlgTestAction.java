@@ -46,7 +46,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
     public void mouseClicked(MouseEvent e) {
         CardManager manager = CardManagerFactory.getManager();
         if (manager.getCard() == null) {
-            InformerFactory.getInformer().showMessage(textSrc.getString("no_card"));
+            InformerFactory.getInformer().showInfoMessage(textSrc.getString("no_card"), "no-card-black.png");
             return;
         }
 
@@ -60,7 +60,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                     try {
                         p.set(runJcAlgTestClient(form));
                     } catch (LocalizedSignatureException esig) {
-                        throw LocalizedException.from(esig);
+                        throw LocalizedException.from(esig, ErrDisplay.POPUP);
                     }
 
                     File testResults = getResultsFile(); //call first to delete JCAlgTest logs
@@ -74,7 +74,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                     try {
                         URLAdapter.browse(getHTMLTestResults());
                     } catch (IOException | URISyntaxException ex) {
-                        throw new LocalizedCardException("Unable to show the test results.", "E_jcdia_show", ex);
+                        throw new LocalizedCardException("Unable to show the test results.", "E_jcdia_show", ex, ErrDisplay.POPUP);
                     }
 
                     return null;
@@ -86,13 +86,14 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
                                 Desktop.getDesktop().open(Config.APP_DATA_DIR);
                             } catch (IOException ex) {
                                 logger.warn("Failed to open test results dir.", ex);
-                                InformerFactory.getInformer().showMessage(textSrc.getString("E_jcdia_open_dir"));
+                                InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_jcdia_open_dir"), "warn.png");
                             }
                             return null;
                         }, 15000);
             } catch (LocalizedException ex) {
+                //allways banner
                 logger.error("Failed to run JCAlgTest.", ex);
-                InformerFactory.getInformer().showMessage(ex.getLocalizedMessage());
+                InformerFactory.getInformer().showInfoMessage(ex.getLocalizedMessage(), "error.png");
             } finally {
                 if (p.get() != null) p.get().destroy();
             }
@@ -105,7 +106,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
         Options<String> opts = OptionsFactory.getOptions();
 
         if (!verifyJavaPresence(opts.getOption(Options.KEY_JAVA_EXECUTABLE))) {
-            throw new LocalizedCardException("No java found.", "E_no_java");
+            throw new LocalizedCardException("No java found.", "E_no_java", ErrDisplay.POPUP);
         }
 
         String cardName = form.getCardName().replaceAll("'", "");
@@ -125,7 +126,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
             process.waitFor();
             return process;
         } catch (IOException | InterruptedException e) {
-            throw new LocalizedCardException("Failed to run JCAlgTest client.", "E_jcdia_fire_client", e);
+            throw new LocalizedCardException("Failed to run JCAlgTest client.", "E_jcdia_fire_client", e, ErrDisplay.POPUP);
         }
     }
 
@@ -151,7 +152,7 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     File jre = chooser.getSelectedFile();
-                    if (!jre.exists()) throw new LocalizedCardException("Invalid file.", "E_no_java_executable");
+                    if (!jre.exists()) throw new LocalizedCardException("Invalid file.", "E_no_java_executable", ErrDisplay.POPUP);
 
                     return verifyJavaPresence(jre.getAbsolutePath());
                 } else return false;
@@ -172,9 +173,9 @@ public class JCAlgTestAction extends CardAbstractAction<Void, byte[]> {
 
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 File chosed = chooser.getSelectedFile();
-                if (!chosed.exists()) throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file");
+                if (!chosed.exists()) throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file", ErrDisplay.POPUP);
                 return chosed;
-            } else throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file");
+            } else throw new LocalizedCardException("Invalid file.", "E_jcdia_parse_file", ErrDisplay.POPUP);
         }
         return results;
     }

@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 /**
@@ -58,17 +61,29 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
             setProgress(100);
             setLoaderMessage(textSrc.getString("E_no_internet"));
             return Store.State.NO_CONNECTION;
-        } else if (storeInfo[0].equals("ok") && checkValidStoreDir()) {
+        }
+
+        // if up-to-date, everything is fine
+        if (storeInfo[0].equals("ok") && checkValidStoreDir()) {
             setProgress(100);
             setLoaderMessage(textSrc.getString("done"));
             return Store.State.REBUILD;
         }
+
+        // otherwise force re-download
         StoreDownloader downloader = new StoreDownloader(storeInfo[1], this);
         if (!downloader.run()) {
-            return Store.State.FAILED;
-        }
-        else {
+            Date latestUpdate = new Date();
+            try {
+                latestUpdate = parseISO8601Date(options.getOption(Options.KEY_GITHUB_VERSION_DATE));
+            } catch (ParseException e) {
+                logger.warn("Failed to parse the latest store publish date from app options - ignoring.", e);
+            }
+            // if the required date is newer than latest update, the store is invalid and not displayed at all
+            return latestUpdate.before(Config.requiredStoreUpdateAfter) ? Store.State.INVALID : Store.State.FAILED;
+        } else {
             options.addOption(Options.KEY_GITHUB_LATEST_VERSION, storeInfo[2]);
+            options.addOption(Options.KEY_GITHUB_VERSION_DATE, storeInfo[3]);
             return Store.State.REBUILD;
         }
     }
@@ -117,22 +132,43 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
     /**
      * Check for the latest version and internet connection as well
      * @param currentVersion string of the latest version downloaded
-     * @return url for download if not up to date, "ok" if up to date, null if no internet connection
+     * @return array: ["ok"/"nok" - if update needed, url to latest zipball repo, altest version tag, date of publication]
      */
     private String[] checkAndGetLatestReleaseVersion(String currentVersion) {
-
         JsonElement root = GitHubApiGetter.getJsonContents(Config.REMOTE_STORE_LATEST_URL);
         setProgress(50);
         if (root == null) return null;
         JsonObject latest = root.getAsJsonObject();
-
         String latestVersion = latest.get("name").getAsString();
 
         return new String[] {
                 currentVersion.equals(latestVersion) ? "ok" : "nok",
                 latest.get("zipball_url").getAsString(),
-                latestVersion
+                latestVersion,
+                latest.get("published_at").getAsString()
         };
+    }
+
+    //from: http://www.java2s.com/Code/Java/Data-Type/ISO8601dateparsingutility.htm
+    private static Date parseISO8601Date( String input ) throws java.text.ParseException {
+
+        //NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
+        //things a bit.  Before we go on we have to repair this.
+        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssz" );
+
+        //this is zero time so we need to add that TZ indicator for
+        if ( input.endsWith( "Z" ) ) {
+            input = input.substring( 0, input.length() - 1) + "GMT-00:00";
+        } else {
+            int inset = 6;
+
+            String s0 = input.substring( 0, input.length() - inset );
+            String s1 = input.substring( input.length() - inset, input.length() );
+
+            input = s0 + "GMT" + s1;
+        }
+
+        return df.parse( input );
     }
 }
 

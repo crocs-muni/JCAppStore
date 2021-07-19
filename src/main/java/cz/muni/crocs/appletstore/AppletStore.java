@@ -67,7 +67,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         if (enabled == isEnabled()) return;
         if (enabled) blocker.setMessage(textSrc.getString("working"));
         setEnabled(enabled);
-        getGlassPane().setVisible(!enabled);
+        blocker.setVisible(!enabled);
         revalidate();
     }
 
@@ -219,14 +219,30 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
         }
 
         @Override
-        public void showMessage(String info) {
-            if (info == null || info.isEmpty())
-                return;
-            JOptionPane.showMessageDialog(this,
-                    "<html><div width=\"350\">" + info + "</div></html>",
-                    textSrc.getString("info"),
-                    JOptionPane.QUESTION_MESSAGE,
-                    new ImageIcon(Config.IMAGE_DIR + "info.png"));
+        public void showInfoMessage(Object info, String image) {
+            if (info instanceof String) {
+                info = "<html><div width=\"350\">" + info + "</div></html>";
+            }
+            JOptionPane.showMessageDialog(this, info, textSrc.getString("info"),
+                    JOptionPane.QUESTION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + image));
+        }
+
+        @Override
+        public void showMessage(String title, Object message, String image) {
+            if (message instanceof String) {
+                message = "<html><div width=\"350\">" + message + "</div></html>";
+            }
+            JOptionPane.showMessageDialog(null, message, title,
+                    JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + image));
+        }
+
+        @Override
+        public void showQuestion(String title, Object message, String image) {
+            if (message instanceof String) {
+                message = "<html><div width=\"350\">" + message + "</div></html>";
+            }
+            JOptionPane.showMessageDialog(null, message, title,
+                    JOptionPane.INFORMATION_MESSAGE, new ImageIcon(Config.IMAGE_DIR + image));
         }
 
         @Override

@@ -3,6 +3,10 @@ package cz.muni.crocs.appletstore;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Application global configurations
@@ -12,6 +16,17 @@ import java.io.File;
  */
 public class Config {
     public static final String VERSION = "1.3";
+
+    //upgrade purposes, refuse to display the store if date of the store older than this variable
+    public static Date requiredStoreUpdateAfter;
+    static {
+        try {
+            requiredStoreUpdateAfter = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
+                    .parse("January 1, 2021");
+        } catch (ParseException e) {
+            requiredStoreUpdateAfter = new Date(0);
+        }
+    }
 
     //system path separator
     public static final String S = File.separator;

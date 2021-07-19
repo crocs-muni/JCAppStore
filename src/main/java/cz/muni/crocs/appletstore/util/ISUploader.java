@@ -71,9 +71,9 @@ public class ISUploader {
             StringBuilder paramsBuilder = new StringBuilder();
             for (Tuple<String, String> param : params) {
                 if (paramsBuilder.length() != 0) paramsBuilder.append('&');
-                paramsBuilder.append(URLEncoder.encode(param.first, "UTF-8"))
+                paramsBuilder.append(URLEncoder.encode(param.first, StandardCharsets.UTF_8))
                         .append('=')
-                        .append(URLEncoder.encode(param.second, "UTF-8"));
+                        .append(URLEncoder.encode(param.second, StandardCharsets.UTF_8));
             }
 
             String boundary = UUID.randomUUID().toString();
@@ -131,8 +131,8 @@ public class ISUploader {
 
     private void sendFile(OutputStream out, String name, File input, String fileName) throws IOException {
         try (InputStream in = new FileInputStream(input)) {
-            String o = "Content-Disposition: form-data; name=\"" + URLEncoder.encode(name,"UTF-8")
-                    + "\"; filename=\"" + URLEncoder.encode(fileName,"UTF-8") + "\"\r\n\r\n";
+            String o = "Content-Disposition: form-data; name=\"" + URLEncoder.encode(name, StandardCharsets.UTF_8)
+                    + "\"; filename=\"" + URLEncoder.encode(fileName, StandardCharsets.UTF_8) + "\"\r\n\r\n";
             logger.info(o);
 
             out.write(o.getBytes(StandardCharsets.UTF_8));
@@ -145,11 +145,11 @@ public class ISUploader {
 
     private void sendField(OutputStream out, String name, String field) throws IOException {
         String o = "Content-Disposition: form-data; name=\""
-                + URLEncoder.encode(name,"UTF-8") + "\"\r\n\r\n";
+                + URLEncoder.encode(name, StandardCharsets.UTF_8) + "\"\r\n\r\n";
         logger.info(o);
 
         out.write(o.getBytes(StandardCharsets.UTF_8));
-        out.write(URLEncoder.encode(field,"UTF-8").getBytes(StandardCharsets.UTF_8));
+        out.write(URLEncoder.encode(field, StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8));
         out.write("\r\n".getBytes(StandardCharsets.UTF_8));
     }
 }

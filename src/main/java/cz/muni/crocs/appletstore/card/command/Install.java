@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card.command;
 
 import cz.muni.crocs.appletstore.card.InstallOpts;
 import cz.muni.crocs.appletstore.card.LocalizedCardException;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.javacard.AID;
@@ -59,7 +60,7 @@ public class Install extends GPCommand<AID> {
                     data.getInstallParams());
         } catch (IOException e) {
             logger.error("Unable to finish Install for install.");
-            throw new LocalizedCardException("IOException when install for install", "E_installforinstall", e);
+            throw new LocalizedCardException("IOException when install for install", "E_installforinstall", e, ErrDisplay.POPUP);
         }
         result = customAID;
         return true;

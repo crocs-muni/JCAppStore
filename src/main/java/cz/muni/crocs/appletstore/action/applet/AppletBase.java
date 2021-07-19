@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.action.applet;
 
 import apdu4j.ResponseAPDU;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
 import cz.muni.crocs.appletstore.util.LocalizedException;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.util.Options;
@@ -129,9 +130,10 @@ public abstract class AppletBase<T> {
                 manager.install(getSource(), getInstallOptions());
             } catch (Exception e) { //we want to catch any exception because we want to report this the same way
                 if (installFailureMessage == null || installFailureMessage.isEmpty()) {
-                    throw new LocalizedCardException("Failed to install " + getAppletName(), "generic_install_failure", e);
+                    throw new LocalizedCardException("Failed to install " + getAppletName(), "generic_install_failure", e,
+                            ErrDisplay.BANNER);
                 }
-                LocalizedCardException ex = new LocalizedCardException("Failed to install " + getAppletName(), e);
+                LocalizedCardException ex = new LocalizedCardException("Failed to install " + getAppletName(), e, ErrDisplay.BANNER);
                 String cause = e.getLocalizedMessage();
                 String verbose = OptionsFactory.getOptions().is(Options.KEY_VERBOSE_MODE) && cause != null && !cause.isEmpty() ?
                         "<br>" + textSrc.getString("cause") + "<br>" + cause : "";
@@ -157,7 +159,7 @@ public abstract class AppletBase<T> {
                 manager.loadCard();
             }
         } catch (UnknownKeyException | CardNotAuthenticatedException e) {
-            throw LocalizedException.from(e);
+            throw LocalizedException.from(e, ErrDisplay.FULL_SCREEN);
         }
     }
 

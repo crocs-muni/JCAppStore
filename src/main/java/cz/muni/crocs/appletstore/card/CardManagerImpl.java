@@ -27,6 +27,7 @@ import java.util.*;
 
 /**
  * Manager providing all functionality over card
+ * TODO unify callbacks and call them appropriatelly on various places (install fail, install OK, card loaded...)
  *
  * @author Jiří Horák
  * @version 1.0
@@ -46,6 +47,7 @@ public class CardManagerImpl implements CardManager {
     private boolean tryGeneric = false;
 
     private CallBack<Void> notifier;
+    private Map<String, CallBack<?>> onCardReload = new HashMap<>();
 
     private static final Object lock = new Object();
 
@@ -141,9 +143,13 @@ public class CardManagerImpl implements CardManager {
                 throw ex;
             } catch (Exception e) {
                 card = null;
-                throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
+                throw new LocalizedCardException(e.getMessage(), "E_card_default", "plug-in-out.png", e, ErrDisplay.FULL_SCREEN);
             } finally {
                 tryGeneric = false;
+
+                for (CallBack<?> call : onCardReload.values()) {
+                    call.callBack();
+                }
             }
 
             if (card != null && card.shouldJCAlgTestFinderRun()) getJCAlgTestDependencies();
@@ -166,7 +172,7 @@ public class CardManagerImpl implements CardManager {
                 }
             } catch (Exception e) {
                 card = null;
-                throw new LocalizedCardException(e.getMessage(), "E_card_default", e);
+                throw new LocalizedCardException(e.getMessage(), "E_card_default", e, ErrDisplay.FULL_SCREEN);
             } finally {
                 tryGeneric = false;
             }
@@ -222,7 +228,7 @@ public class CardManagerImpl implements CardManager {
         } catch (CardException e) {
             loadCard();
             if (notifier != null) notifier.callBack();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e, ErrDisplay.POPUP);
         } catch (LocalizedCardException e) {
             loadCard();
             if (notifier != null) notifier.callBack();
@@ -233,14 +239,14 @@ public class CardManagerImpl implements CardManager {
     @Override
     public void uninstall(AppletInfo nfo, boolean force) throws LocalizedCardException, UnknownKeyException, CardNotAuthenticatedException {
         if (card == null) {
-            throw new LocalizedCardException("No card recognized.", "no_card");
+            throw new LocalizedCardException("No card recognized.", "no_card", ErrDisplay.FULL_SCREEN);
         }
         try {
             uninstallImpl(nfo, force);
         } catch (CardException e) {
             loadCard();
             if (notifier != null) notifier.callBack();
-            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+            throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e, ErrDisplay.POPUP);
         } catch (LocalizedCardException ex) {
             loadCard();
             if (notifier != null) notifier.callBack();
@@ -252,7 +258,7 @@ public class CardManagerImpl implements CardManager {
     public boolean select(String AID) throws LocalizedCardException {
         synchronized(lock) {
             if (card == null) {
-                throw new LocalizedCardException("No card recognized.", "no_card");
+                throw new LocalizedCardException("No card recognized.", "no_card", ErrDisplay.FULL_SCREEN);
             }
 
             try {
@@ -260,16 +266,27 @@ public class CardManagerImpl implements CardManager {
                 card.executeCommands(select);
                 return select.getResult();
             } catch (CardException e) {
-                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e, ErrDisplay.POPUP);
             }
         }
+    }
+
+    @Override
+    public void clearOnReloadByTag(String tag) {
+        onCardReload.remove(tag);
+    }
+
+    @Override
+    public void onReload(CallBack<?> callBack, String tag) {
+        onCardReload.remove(tag); //if exists
+        onCardReload.put(tag, callBack);
     }
 
     @Override
     public ResponseAPDU sendApdu(String AID, String APDU) throws LocalizedCardException {
         synchronized(lock) {
             if (card == null) {
-                throw new LocalizedCardException("No card recognized.", "no_card");
+                throw new LocalizedCardException("No card recognized.", "no_card", ErrDisplay.FULL_SCREEN);
             }
 
             try {
@@ -277,14 +294,14 @@ public class CardManagerImpl implements CardManager {
                 card.executeCommands(send);
                 return send.getResult();
             } catch (CardException e) {
-                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e);
+                throw new LocalizedCardException(e.getMessage(), "unable_to_translate", e, ErrDisplay.POPUP);
             }
         }
     }
 
     private CAPFile toCapFile(File f) throws IOException, LocalizedCardException {
         if (!f.exists()) throw new LocalizedCardException(textSrc.getString("E_install_no_file_1") +
-                f.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"));
+                f.getCanonicalPath() + " " + textSrc.getString("E_install_no_file_2"), ErrDisplay.POPUP);
 
         try (FileInputStream fin = new FileInputStream(f)) {
             return CAPFile.fromStream(fin);
@@ -309,7 +326,7 @@ public class CardManagerImpl implements CardManager {
         } catch (CardException e) {
             //if (card != null) card.endExclusive();
             throw new LocalizedCardException("Could not connect to selected reader: " +
-                    TerminalManager.getExceptionMessage(e), "E_connect_fail");
+                    TerminalManager.getExceptionMessage(e), "E_connect_fail", ErrDisplay.FULL_SCREEN);
         }
 
         GPCommand<CardDetails> command = new GetDetails(channel);
@@ -322,6 +339,8 @@ public class CardManagerImpl implements CardManager {
         CardDetails details = command.getResult();
         details.setAtr(card.getATR());
         return details;
+
+        //TODO what of some packages without modules? show too!!!
     }
 
     //applet deletion implementation
@@ -350,7 +369,7 @@ public class CardManagerImpl implements CardManager {
     private void installImpl(final CAPFile file, InstallOpts data) throws CardException, LocalizedCardException {
         synchronized(lock) {
             if (card == null) {
-                throw new LocalizedCardException("No card recognized.", "no_card");
+                throw new LocalizedCardException("No card recognized.", "no_card", ErrDisplay.FULL_SCREEN);
             }
 
             if (!data.isForce() && OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) tryDeletePackageByAID(file);
@@ -368,7 +387,7 @@ public class CardManagerImpl implements CardManager {
 
                     @Override
                     public boolean execute() throws GPException {
-                        card.getCardMetadata().addAppletIgnoreModulesIfPkg(getPackageInfo(data.getInfo(), file));
+                        card.getCardMetadata().addAppletMetadataUnsafe(getPackageInfo(data.getInfo(), file));
                         try {
                             card.saveInfoData();
                         } catch (LocalizedCardException e) {
@@ -397,7 +416,7 @@ public class CardManagerImpl implements CardManager {
                         public boolean execute() throws GPException {
                             AppletInfo installed = getAppletInfo(data.getInfo(), command.getResult(),
                                     data.getAppletNames() != null ? data.getAppletNames()[appidx] : "");
-                            card.getCardMetadata().addAppletIgnoreModulesIfPkg(installed);
+                            card.getCardMetadata().addAppletMetadataUnsafe(installed);
                             try {
                                 card.saveInfoData();
                             } catch (LocalizedCardException e) {
@@ -456,7 +475,7 @@ public class CardManagerImpl implements CardManager {
         try {
             clone = (AppletInfo)from.clone();
             clone.setAID(realInstalledAID.toString());
-            if (!appletName.isEmpty()) clone.setAppletInstanceName(appletName);
+            if (!appletName.isEmpty()) clone.setAddAppletInstanceName(appletName);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             logger.warn("Unable to save applet info data: " + realInstalledAID, e);

@@ -11,6 +11,14 @@ import java.util.*;
  * with executable load file with modules -> if contains and we found module version
  * replace
  *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *              CAUTION
+ * ANY UPDATE TO THIS CLASS WILL MAKE SERIALIZATION OF OLD FILES
+ * FAIL. USERS WILL LOSE ALL THE CARD METADATA.
+ *
+ * CHANGE serialVersionUID IF YOU MAKE ANY CHANGES TO THE MEMBER VARIABLES
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
  * @author Jiří Horák
  * @version 1.0
  */
@@ -18,6 +26,7 @@ public class CardInstanceMetaData implements Serializable {
 
     private final HashSet<AppletInfo> applets;
     private HashMap<String, HashMap<String, String>> jcAlgTestData;
+    private static final long serialVersionUID = 2021071800000000001L;
 
     private CardInstanceMetaData() {
         this(new HashSet<>(), null);
@@ -40,17 +49,54 @@ public class CardInstanceMetaData implements Serializable {
         return Collections.unmodifiableSet(applets);
     }
 
-    public boolean addAppletRequireModulesIfPkg(AppletInfo info) {
-        if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile &&
-                (info.getModules() == null || info.getModules().isEmpty())) {
-            return false;
+    /**
+     * Add applet instance data
+     * @param info applet instance (application or SD/ISD) onůy
+     */
+    public void addAppletInstance(AppletInfo info) {
+        if (info.getKind() == GPRegistryEntry.Kind.ExecutableLoadFile) {
+            throw new RuntimeException("Invalid instance inserted.");
         }
-        return applets.add(info);
+        applets.add(info);
     }
 
-    public boolean addAppletIgnoreModulesIfPkg(AppletInfo info) {
-        return applets.add(info);
+    /**
+     * Add package data, package is tied to applet instance using its modules
+     * if not recognized
+     * @param info package instance (Executable load file) only
+     */
+    public void addAppletPackage(AppletInfo info) {
+        if (info.getKind() != GPRegistryEntry.Kind.ExecutableLoadFile) {
+            throw new RuntimeException("Invalid instance inserted.");
+        }
+
+        AppletInfo existing = getAppletInfo(info.getAid());
+        if (info.getModules() == null || info.getModules().isEmpty()) {
+            if (existing == null) applets.add(info);
+            return; // do not handle naming if no instance present in modules
+        }
+
+        //remove package without modules of the same AID (all packages are present twice, once without modules)
+        if (existing != null) applets.remove(existing);
+        for (AID aid : info.getModules()) {
+            //overwrite name regardless of existing one...
+            //if (info.getName() != null && !info.getName().isEmpty()) break;
+
+            AppletInfo instance = getAppletInfo(aid);
+
+            if (instance != null) {
+                info.setAppletName(instance.getName());
+                break;
+            }
+        }
+        applets.add(info);
     }
+
+    protected void addAppletMetadataUnsafe(AppletInfo info) {
+        applets.remove(info); //in case it is already present
+        applets.add(info);
+    }
+
 
     //delete single applet metadata
     void deleteAppletInfo(AID toDelete) {
@@ -114,7 +160,6 @@ public class CardInstanceMetaData implements Serializable {
             if (aid.equals(nfo.getAid())) {
                 return nfo;
             }
-        }
-        return null;
+        }return null;
     }
 }

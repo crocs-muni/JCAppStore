@@ -314,7 +314,7 @@ public class StoreItemInfo extends HintPanel {
                         int versionIdx = getComboBoxSelected(versionComboBox, "E_invalid_version");
                         int compilerIdx = getComboBoxSelected(compilerVersionComboBox, "E_invalid_compiler");
                         if (versionIdx < 0 || compilerIdx < 0) {
-                            InformerFactory.getInformer().showMessage(textSrc.getString("E_invalid_custom_install"));
+                            InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_invalid_custom_install"), "error.png");
                             return;
                         }
 

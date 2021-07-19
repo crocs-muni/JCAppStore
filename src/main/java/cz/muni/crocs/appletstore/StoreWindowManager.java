@@ -140,12 +140,17 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
             case TIMEOUT:
                 setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_timeout"),
-                        "error.png", this), false);
+                        "error_white.png", this), false);
                 return;
             case FAILED:
                 setState(State.UNINITIALIZED);
                 putNewPane(new ErrorPane(textSrc.getString("E_store_generic"),
-                        "error.png", this), false);
+                        "error_white.png", this), false);
+                return;
+            case INVALID:
+                setState(State.UNINITIALIZED);
+                putNewPane(new ErrorPane(textSrc.getString("E_store_outdated"),
+                        "offline.png", this), false);
                 return;
             case NO_CONNECTION:
                 InformerFactory.getInformer().showInfo(textSrc.getString("W_internet"),

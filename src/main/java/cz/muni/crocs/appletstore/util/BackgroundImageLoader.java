@@ -1,6 +1,7 @@
 package cz.muni.crocs.appletstore.util;
 
 import cz.muni.crocs.appletstore.Config;
+import cz.muni.crocs.appletstore.ui.Notice;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,14 +25,15 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class BackgroundImageLoader {
-    private static ResourceBundle textSrc = ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
+    private static final ResourceBundle textSrc =
+            ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
     private static final Logger logger = LogManager.getLogger(BackgroundImageLoader.class);
 
     private BufferedImage background = null;
-    private String imgName = "bg.jpg";
+    private final String imgName = "bg.jpg";
 
-    private int radius;
-    private int size;
+    private final int radius;
+    private final int size;
 
     /**
      * Create a loader instance
@@ -53,7 +55,7 @@ public class BackgroundImageLoader {
         } catch (InterruptedException e) {
             e.printStackTrace();
             logger.warn("Image loading interrupted. " + Config.IMAGE_DIR + imgName, e);
-            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
+            InformerFactory.getInformer().showInfoToClose(textSrc.getString("E_image"), Notice.Importance.SEVERE, 5000);
             defaultBg();
         }
     }
@@ -85,7 +87,7 @@ public class BackgroundImageLoader {
         try {
             background = ImageIO.read(new File(name));
         } catch (IOException e) {
-            InformerFactory.getInformer().showMessage(textSrc.getString("E_image"));
+            InformerFactory.getInformer().showInfoMessage(textSrc.getString("E_image"), "error.png");
             defaultBg();
         }
     }

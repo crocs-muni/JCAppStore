@@ -30,6 +30,13 @@ public interface Informable {
     /**
      * Show info to user
      * @param info information text
+     * @param image image name (relative path to image src dir)
      */
-    void showMessage(String info);
+    void showInfoMessage(Object info, String image);
+
+
+    void showMessage(String title, Object message, String image);
+
+
+    void showQuestion(String title, Object message, String image);
 }

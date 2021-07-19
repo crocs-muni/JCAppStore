@@ -1,11 +1,15 @@
 package cz.muni.crocs.appletstore;
 
 import com.google.gson.JsonObject;
+import cz.muni.crocs.appletstore.card.CardManager;
+import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.iface.CallBack;
 import cz.muni.crocs.appletstore.ui.CustomJScrollPaneLayout;
 import cz.muni.crocs.appletstore.util.JsonParser;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.CustomFlowLayout;
 import cz.muni.crocs.appletstore.ui.CustomScrollBarUI;
+import cz.muni.crocs.appletstore.util.OptionsFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,6 +34,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
     private SearchBar searchBar;
     private final StoreHeader header;
     private boolean showAll = false;
+    private static final String CALLBACK_TAG = "ITEM_DETAILS_JCAPPSTORETAG_REFTERSHCARD";
 
     /**
      * Store panel
@@ -62,7 +67,13 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
 
         this.header = new StoreHeader(this);
         loadStore();
+
+        CardManagerFactory.getManager().onReload(() -> {
+            SwingUtilities.invokeLater(this::refresh);
+            return null;
+        }, CALLBACK_TAG);
     }
+
 
     private void loadStore() {
         items.clear();
@@ -132,7 +143,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
             storeLayout.add(new NotFoundItem());
         } else {
             for (Item item : sortedItems) {
-                storeLayout.add((JComponent)item);
+                storeLayout.add((JComponent) item);
             }
         }
         storeLayout.revalidate();

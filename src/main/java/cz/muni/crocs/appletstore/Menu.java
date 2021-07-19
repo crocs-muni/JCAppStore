@@ -5,6 +5,7 @@ import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.help.*;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.ui.*;
+import cz.muni.crocs.appletstore.util.Informer;
 import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
@@ -212,9 +213,8 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (CardManagerFactory.getManager().isCard()) {
-                    JOptionPane.showMessageDialog(null,
-                            new CardInfoPanel(), textSrc.getString("card_info"),
-                            JOptionPane.PLAIN_MESSAGE, new ImageIcon(Config.IMAGE_DIR + "info.png"));
+                    InformerFactory.getInformer().showMessage(textSrc.getString("card_info"),
+                            new CardInfoPanel(), "info.png");
                 } else {
                     InformerFactory.getInformer().showInfoToClose(textSrc.getString("no_card"),
                             Notice.Importance.SEVERE, 5000);
@@ -338,6 +338,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                     try {
                         card.setName(newName);
                     } catch (LocalizedCardException ex) {
+                        //only banner here
                         InformerFactory.getInformer().showInfoToClose("E_save_card_name", Notice.Importance.SEVERE);
                     }
                     setCard(card);
