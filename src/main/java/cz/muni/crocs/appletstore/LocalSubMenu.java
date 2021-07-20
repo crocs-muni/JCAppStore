@@ -3,12 +3,15 @@ package cz.muni.crocs.appletstore;
 import cz.muni.crocs.appletstore.action.ReloadAction;
 import cz.muni.crocs.appletstore.ui.CustomButtonUI;
 import cz.muni.crocs.appletstore.ui.Text;
+import cz.muni.crocs.appletstore.util.InformerFactory;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import pro.javacard.gp.GPRegistryEntry;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
 
 /**
@@ -25,6 +28,7 @@ public class LocalSubMenu extends JPanel {
     private final JCheckBox app = new JCheckBox();
     private final JCheckBox pkg = new JCheckBox();
     private final JLabel pkgTitle;
+    private final JLabel authenticated;
 
     /**
      * Create a local submenu
@@ -32,6 +36,21 @@ public class LocalSubMenu extends JPanel {
     public LocalSubMenu() {
         setLayout(new FlowLayout(FlowLayout.TRAILING, 8, 2));
         setOpaque(false);
+
+        authenticated = new JLabel("<html>" + textSrc.getString("not_authenticated") + "</html>");
+        authenticated.setVisible(false);
+        authenticated.setFont(OptionsFactory.getOptions().getFont(14f));
+        authenticated.setForeground(Color.white);
+        authenticated.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                InformerFactory.getInformer().showMessage(textSrc.getString("not_authenticated_title"),
+                        "<html><div width=\"450px\">"+textSrc.getString("not_authenticated_desc")+"</div>", "lock_black.png");
+            }
+        });
+        authenticated.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        add(authenticated);
+        add(Box.createRigidArea(new Dimension(6, 0)));
 
         JButton reload = getButton("card_refresh");
         reload.addActionListener(new AbstractAction() {
@@ -101,6 +120,9 @@ public class LocalSubMenu extends JPanel {
     public void showPackagesButton(boolean doShow) {
         pkg.setVisible(doShow);
         pkgTitle.setVisible(doShow);
+
+        //packages hidden when card was not authenticated...
+        authenticated.setVisible(!doShow);
     }
 
     /**
