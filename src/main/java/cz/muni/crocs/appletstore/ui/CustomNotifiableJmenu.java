@@ -16,9 +16,7 @@ public class CustomNotifiableJmenu extends CustomJmenu {
     private boolean notify = false;
 
     private static final int DELAY = 250;
-    private Timer timer = new Timer(DELAY, e -> {
-        repaint();
-    });
+    private final Timer timer = new Timer(DELAY, e -> repaint());
 
     public CustomNotifiableJmenu(String title) {
         super(title);
@@ -37,10 +35,9 @@ public class CustomNotifiableJmenu extends CustomJmenu {
     }
 
     public void setNotify(boolean notify) {
-        if (!isOpaque()) return;
-
         this.notify = notify;
         if (this.notify && !timer.isRunning()) {
+            notifyColor = new Color(212, 164, 86);
             timer.start();
         } else if (this.notify) {
             notifyColor = new Color(212, 164, 86);
@@ -53,25 +50,25 @@ public class CustomNotifiableJmenu extends CustomJmenu {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (isOpaque()) {
-            if (notify) {
-                g.setColor(notifyColor);
-                notifyColor = darken(notifyColor);
-                if (notifyColor == Color.BLACK) {
-                    notifyColor = new Color(212, 164, 86);
-                    timer.stop();
-                    notify = false;
-                }
-            } else {
-                g.setColor(Color.BLACK);
+        if (notify) {
+            g.setColor(notifyColor);
+            notifyColor = darken(notifyColor);
+            if (notifyColor == Color.BLACK) {
+                notifyColor = new Color(212, 164, 86);
+                timer.stop();
+                notify = false;
             }
-            g.fillRect(0, 0, getWidth(), getHeight());
+        } else {
+            g.setColor(Color.BLACK);
         }
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+
         super.paintComponent(g);
     }
 
     private static int lower(int a) {
-        return Math.max(0, a - 2);
+        return Math.max(0, a - 4);
     }
 
     private static Color darken(Color c) {

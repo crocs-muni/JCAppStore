@@ -72,7 +72,7 @@
                     <platforms>windows</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>../build/deploy-win/scripts/keyring.bat</origin>
+                            <origin>installer-win/keyring.bat</origin>
                         </distributionFile>
                         <distributionDirectory>
                             <origin>../build/deploy-win/out/src</origin>
@@ -81,7 +81,7 @@
                             <origin>../build/deploy-win/out/JCAppStore.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>../build/deploy-win/scripts/store.asc</origin>
+                            <origin>store.asc</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -92,7 +92,7 @@
                     <platforms>windows-x64</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>../build/deploy-win/scripts/keyring.bat</origin>
+                            <origin>installer-win/keyring.bat</origin>
                         </distributionFile>
                         <distributionDirectory>
                             <origin>../build/deploy-win/out/src</origin>
@@ -101,7 +101,7 @@
                             <origin>../build/deploy-win/out/JCAppStore.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>../build/deploy-win/scripts/store.asc</origin>
+                            <origin>store.asc</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>

@@ -136,9 +136,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 readers.add(item);
                 readersFound++;
             }
-            if (lastNumOfReadersConnected < readersFound) {
-                readers.setNotify(true);
-            }
+            if (lastNumOfReadersConnected < readersFound) readers.setNotify(true);
             lastNumOfReadersConnected = readersFound;
         } else {
             JMenuItem item = menuItemDisabled(textSrc.getString("no_reader"), "");
