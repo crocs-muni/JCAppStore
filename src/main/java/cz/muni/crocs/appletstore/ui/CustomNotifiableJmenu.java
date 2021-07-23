@@ -37,6 +37,8 @@ public class CustomNotifiableJmenu extends CustomJmenu {
     }
 
     public void setNotify(boolean notify) {
+        if (!isOpaque()) return;
+
         this.notify = notify;
         if (this.notify && !timer.isRunning()) {
             timer.start();
@@ -51,18 +53,20 @@ public class CustomNotifiableJmenu extends CustomJmenu {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (notify) {
-            g.setColor(notifyColor);
-            notifyColor = darken(notifyColor);
-            if (notifyColor == Color.BLACK) {
-                notifyColor = new Color(212, 164, 86);
-                timer.stop();
-                notify = false;
+        if (isOpaque()) {
+            if (notify) {
+                g.setColor(notifyColor);
+                notifyColor = darken(notifyColor);
+                if (notifyColor == Color.BLACK) {
+                    notifyColor = new Color(212, 164, 86);
+                    timer.stop();
+                    notify = false;
+                }
+            } else {
+                g.setColor(Color.BLACK);
             }
-        } else {
-            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
         }
-        g.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g);
     }
 

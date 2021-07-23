@@ -49,10 +49,11 @@ public class CustomJmenu extends JMenu {
 
     @Override
     public void setContentAreaFilled(boolean b) {
+
     }
 
     private void uiSettings() {
-        setOpaque(true); //todo uncomment for mac
+        setOpaque(false); //todo uncomment for mac / apple
         setFocusPainted(false);
         setFont(OptionsFactory.getOptions().getFont(13f));
         setForeground(Color.WHITE);

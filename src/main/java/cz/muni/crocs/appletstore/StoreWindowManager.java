@@ -134,17 +134,15 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         try {
             String version = Files.readString(Paths.get(Config.APP_STORE_DIR.getAbsolutePath(), ".version"));
             if (version != null && !version.isEmpty()) {
+                version = version.trim();
                 if (ModuleDescriptor.Version.parse(Config.VERSION).compareTo(ModuleDescriptor.Version.parse(version)) < 0) {
-                    logger.info("Store verson FAIL;" + Config.VERSION);
-
+                    logger.warn("The JCAppStore version is too low: " + Config.VERSION +
+                            ". An update is required: JCAppStore version at least " + version);
                     setState(State.UNINITIALIZED);
                     putNewPane(new ErrorPane(textSrc.getString("E_store_jcapp_outdated") + " " + version,
                             "update.png"), false);
 
-                    logger.info("Store TOO OLD;");
-
                     return;
-
                 }
             } else {
                 logger.warn("The store version file is empty. Store might not work correctly.");

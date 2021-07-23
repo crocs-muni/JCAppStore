@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
@@ -43,8 +44,9 @@ public class SplashScreen extends JWindow {
         logger.info("Running on java " + System.getProperty("java.version") +
                 " by " +  System.getProperty("java.vendor") + " in " + System.getProperty("java.vm.info"));
 
-        if (! new File(Config.RESOURCES).exists()) {
-            throw new LocalizedException("No sources available.", textSrc.getString("E_no_resources"), ErrDisplay.POPUP);
+        if (! new File(Config.RESOURCES_DIR).exists()) {
+            throw new LocalizedException("No sources available. Current working directory: "
+                    + Paths.get("").toAbsolutePath().toString(), "E_no_resources", ErrDisplay.POPUP);
         }
 
         try {
