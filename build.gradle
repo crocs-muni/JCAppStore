@@ -1,13 +1,15 @@
 import edu.sc.seis.launch4j.tasks.Launch4jLibraryTask
 
+//when compiling, find and uncomment: UNCOMMENT FOR APPLE DISTRIBUTION
+
+
 plugins {
     id 'java'
     id 'edu.sc.seis.launch4j' version '2.4.6'
-    id 'com.bmuschko.izpack' version '3.0'
 }
 
 group 'cz.muni.crocs.appletstore'
-project.version = '2.0'
+project.version = '' //avoid versions in filenames
 sourceCompatibility = 1.11
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 
@@ -59,6 +61,8 @@ dependencies {
     compile "org.openjfx:javafx-media:11:${platform}"
     compile "org.openjfx:javafx-swing:11:${platform}"
     compile "org.openjfx:javafx-web:11:${platform}"
+
+
 }
 
 ///////////////////////////
@@ -79,34 +83,47 @@ task unixDeployment(dependsOn: jar) {
 }
 
 
-task prepareInstallBuilderForWin(dependsOn: 'createAppExe') {
+task prepareInstallBuilderForUNIX(dependsOn: jar) {
     //generate folders deploy, out, res, main
     doFirst {
-        def folder = file("$buildDir/deploy-win/out/src/main/resources")
+        def folder = file("$buildDir/deploy-unix/src/main/resources")
         if( !folder.exists() ) {
             folder.mkdirs()
-        }
-
-        def scripts = file("$buildDir/deploy-win/scripts")
-        if( !scripts.exists() ) {
-            scripts.mkdirs()
         }
     }
 
     doLast {
         copy {
             from "src/main/resources"
-            into "$buildDir/deploy-win/out/src/main/resources"
+            into "$buildDir/deploy-unix/src/main/resources"
         }
 
         copy {
-            from "installer-win/dependency"
-            into "$buildDir/deploy-win/scripts"
+            from file(jar.archiveFile)
+            into file("$buildDir/deploy-unix")
         }
+    }
+}
 
+
+task prepareInstallBuilderForWin(dependsOn: 'createAppExe') {
+    //generate folders deploy, out, res, main
+    doFirst {
+        def folder = file("$buildDir/deploy-win/src/main/resources")
+        if( !folder.exists() ) {
+            folder.mkdirs()
+        }
+    }
+
+    doLast {
+        copy {
+            from "src/main/resources"
+            into "$buildDir/deploy-win/src/main/resources"
+        }
+        
         copy {
             from file("$buildDir/libs/JCAppStore.exe")
-            into file("$buildDir/deploy-win/out")
+            into file("$buildDir/deploy-win")
         }
     }
 }
@@ -117,7 +134,7 @@ task prepareInstallBuilderForWin(dependsOn: 'createAppExe') {
 
 task createAppExe(type: Launch4jLibraryTask, dependsOn: jar) {
     outputDir="libs"
-    jar = "JCAppStore-${project.version}.jar"
+    jar = "JCAppStore.jar"
     outfile = "JCAppStore.exe"
 
     headerType = "gui"
@@ -128,7 +145,9 @@ task createAppExe(type: Launch4jLibraryTask, dependsOn: jar) {
 
 
 jar {
+    archivesBaseName = "JCAppStore"
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+
 
     //do not add certain resources, these are used from external folder instead for better accessibility
     //todo move images back to resources and load them from there (not visible from outside)
@@ -141,6 +160,7 @@ jar {
 
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     manifest {
-        attributes 'Main-Class': 'cz.muni.crocs.appletstore.SplashScreen'
+        attributes 'Main-Class': 'cz.muni.crocs.appletstore.SplashScreen',
+                    'Implementation-Title': 'JCAppStore'
     }
 }

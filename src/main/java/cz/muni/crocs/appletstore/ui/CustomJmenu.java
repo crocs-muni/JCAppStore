@@ -53,7 +53,7 @@ public class CustomJmenu extends JMenu {
     }
 
     private void uiSettings() {
-        setOpaque(false); //todo uncomment for mac / apple
+        setOpaque(false); //todo UNCOMMENT FOR APPLE DISTRIBUTION
         setFocusPainted(false);
         setFont(OptionsFactory.getOptions().getFont(13f));
         setForeground(Color.WHITE);

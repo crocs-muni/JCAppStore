@@ -86,7 +86,7 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
 
 
         setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
-        //todo uncomment for apple branch
+        //todo UNCOMMENT FOR APPLE DISTRIBUTION
 //        Application.getApplication().setDockIconImage(
 //                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
     }
