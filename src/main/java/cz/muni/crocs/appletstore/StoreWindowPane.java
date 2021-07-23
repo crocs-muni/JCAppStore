@@ -116,6 +116,7 @@ public class StoreWindowPane extends JScrollPane implements Searchable {
         } else {
             showInfo(currentlyShown);
         }
+        requestFocusInWindow();
     }
 
     @Override

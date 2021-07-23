@@ -32,29 +32,28 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
         final CardManager manager = CardManagerFactory.getManager();
         logger.info("------- Routine started -------");
         execute(() -> {
-//                    try {
-                        int result = manager.needsCardRefresh();
+            int result = manager.needsCardRefresh();
 
-                        if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
-                            //todo debug
-                            SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
-                                    textSrc.getString("H_service"), Notice.Importance.FATAL,
-                                    Notice.CallBackIcon.RETRY, () -> {
-                                        new CardDetectionRoutine(call).start();
-                                        return null;
-                                    }));
-                            logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
-                            GUIFactory.Components().getStoreWindows().refreshCardPanel();
-                            breakExecution();
-                        }
+            if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
+                //todo debug
+                SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
+                        textSrc.getString("H_service"), Notice.Importance.FATAL,
+                        Notice.CallBackIcon.RETRY, () -> {
+                            new CardDetectionRoutine(call).start();
+                            return null;
+                        }));
+                logger.info("[ROUTINE] Card routine detection killed: Smart card service manager offline.");
+                GUIFactory.Components().getStoreWindows().refreshCardPanel();
+                breakExecution();
+            }
 
-                        if (result > 0) {
+            if (result > 0) {
 
-                            SwingUtilities.invokeLater(call::onStart);
-                            if (result == 2) manager.loadCard();
+                SwingUtilities.invokeLater(call::onStart);
+                if (result == 2) manager.loadCard();
 
-                            SwingUtilities.invokeLater(call::onFinish);
-                        }
+                SwingUtilities.invokeLater(call::onFinish);
+            }
             return null;
         }, "Error loading a card.", textSrc.getString("E_loading_failed"));
     }

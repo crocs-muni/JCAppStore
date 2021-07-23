@@ -52,8 +52,6 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
         setOpaque(false);
         addMouseListener(this);
         addFocusListener(this);
-
-
     }
 
     public void setMessage(String msg) {
@@ -112,6 +110,7 @@ public class GlassPaneBlocker extends JPanel implements MouseListener, FocusList
                 executor = null;
             }
             delay_msgs_idx = 0;
+            details.setText("  ");
         }
         super.setVisible(visible);
     }

@@ -2,10 +2,7 @@ package cz.muni.crocs.appletstore.action;
 
 import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.DeleteDialogWindow;
-import cz.muni.crocs.appletstore.card.AppletInfo;
-import cz.muni.crocs.appletstore.card.CardInstance;
-import cz.muni.crocs.appletstore.card.CardManager;
-import cz.muni.crocs.appletstore.card.CardManagerFactory;
+import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.HtmlText;
 import cz.muni.crocs.appletstore.iface.OnEventCallBack;
 import cz.muni.crocs.appletstore.util.Options;
@@ -56,19 +53,25 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
 
         DeleteDialogWindow opts = showDeletionDialog();
         if (opts == null) return;
+
+        final boolean isInstance = info.getKind() == Kind.Application;
         boolean willForce = opts.willForce();
-        AppletInfo packageInfo = getPackageIfShouldBeUninstalled();
+        boolean alreadyConfirmedAppletInstanceDeletion = false;
+        AppletInfo packageInfo = isInstance ? getPackageIfShouldBeUninstalled() : null;
         String applets = findCollisions(willForce, manager);
 
-        //if found dependencies and  we do not try to uninstall package as a dependency from simple mode
+        //if deleting package and found dependencies
         if (!applets.isEmpty() && packageInfo == null) {
             logger.info("Found applet collisions: " + applets);
-            ConfirmDeletion confirm = new ConfirmDeletion(applets);
+            ConfirmDeletion confirm = new ConfirmDeletion(applets, opts);
             if (showDialog(textSrc.getString("W_"), confirm, "error.png", "delete_anyway")
                     != JOptionPane.YES_OPTION)  return;
-            willForce = confirm.agreed();
-            if (!willForce) return; //did not agreed
-        } else {
+            alreadyConfirmedAppletInstanceDeletion = confirm.agreed();
+            if (!alreadyConfirmedAppletInstanceDeletion) return; //did not agreed
+
+            willForce = alreadyConfirmedAppletInstanceDeletion;
+        } else { //either deleting empty package or deleting an applet instance
+
             //do not uninstall package dependency if more applets are still on the card
             if (!applets.isEmpty()) {
                 packageInfo = null;
@@ -76,12 +79,38 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
             }
             willForce = false;
         }
-        if (!confirmForceInstallWarnDialog(willForce, opts)) return;
+
+        if (!alreadyConfirmedAppletInstanceDeletion && !confirmForceInstallWarnDialog(willForce, opts)) return;
 
         final boolean finalWillForce = willForce;
         final AppletInfo finalPackage = packageInfo;
-         execute(() -> {
-            manager.uninstall(info, finalWillForce);
+
+        execute(() -> {
+
+            try {
+                manager.uninstall(info, finalWillForce);
+            } catch (LocalizedCardException ex) {
+                if (!OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
+                    throw ex; //simple mode only
+                }
+
+                //some applets refused to be uninstalled instance-first -> in case
+                // of fail, try to bluntly remove package... maybe bug in globalplatformpro
+                try {
+                    AppletInfo pkg = getPackageOf(info);
+                    //delete this obscure way only and only if the package has only this instance
+                    if (pkg != null && pkg.getModules().size() == 1 && pkg.getModules().get(0).equals(info.getAid())) {
+                        manager.uninstall(pkg, true);
+                        return null; //force uninstall took care of both package and instance...
+                    } else {
+                        throw ex; //invoke original exception
+                    }
+                } catch (Exception any) {
+                    throw ex; //invoke original exception
+                }
+            }
+
+            // package deletion in simple mode if there was only one active instance
             if (finalPackage != null) {
                 manager.uninstall(finalPackage, true);
             }
@@ -121,7 +150,7 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
     }
 
     private AppletInfo getPackageIfShouldBeUninstalled() {
-        if ((info.getKind() == Kind.Application) && (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE))) {
+        if (OptionsFactory.getOptions().is(Options.KEY_SIMPLE_USE)) {
             //implicit mode deletes package too
             AppletInfo packageInfo = getPackageOf(info);
             logger.info("Implicit delete package too: " +
@@ -133,8 +162,9 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
 
     private boolean confirmForceInstallWarnDialog(boolean isForce, DeleteDialogWindow options) {
         if (isForce || info.getKind() != Kind.ExecutableLoadFile) { //display notice if an applet instance is deleted
-            String msg = options.confirm();
+            String msg = options.confirm(info.getName());
             if (msg != null) {
+                msg = "<html><div width=\"450\">" + msg + "</div></html>";
                 switch (showDialog(textSrc.getString("W_"), msg, "error.png", "delete_anyway")) {
                     case JOptionPane.NO_OPTION:
                     case JOptionPane.CLOSED_OPTION:
@@ -177,10 +207,13 @@ public class DeleteAction extends CardAbstractAction<Void, Void> {
 
     private static class ConfirmDeletion extends JPanel {
         private final JCheckBox verify = new JCheckBox();
-        public ConfirmDeletion(String appletName) {
+        public ConfirmDeletion(String appletName, DeleteDialogWindow options) {
             super(new MigLayout());
-            add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion1")+appletName+"</div>"), "wrap");
-            add(new HtmlText("<div width=\"300\">"+textSrc.getString("W_applet_deletion2")+"</div>"), "wrap");
+            add(new HtmlText("<div width=\"350\">"+textSrc.getString("W_applet_deletion1")+"<b>"+appletName+"</b></div>"), "wrap");
+
+            add(new HtmlText("<div width=\"350\">"+textSrc.getString("W_applet_deletion2")+"</div>"), "wrap");
+            add(new HtmlText("<div width=\"350\">"+options.confirm(appletName)+"</div>"), "wrap");
+
             verify.setText("<html><div width=\"300\">" + textSrc.getString("W_confirm_applet_delete") + "</div></html>");
             add(verify);
         }

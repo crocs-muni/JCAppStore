@@ -52,6 +52,7 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
             saved = CardInstanceMetaData.empty();
         }
 
+        //add all instances
         ArrayList<AppletInfo> packages = new ArrayList<>();
         for (GPRegistryEntry entry : registry) {
             AppletInfo info = new AppletInfo(entry, saved.getApplets());
@@ -62,6 +63,7 @@ public class ListContents extends GPCommand<CardInstanceMetaData> {
             }
         }
 
+        //add packages afterwards
         for (AppletInfo pkg : packages) {
             result.addAppletPackage(pkg);
         }

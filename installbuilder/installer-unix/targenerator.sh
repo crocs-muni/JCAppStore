@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #This file generates the tarball.
-VERSION=1.3
+VERSION=2.0
 FILE=JCAppStore-${VERSION}
 
 ROOT=.;

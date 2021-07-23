@@ -294,7 +294,7 @@ public class CardInstanceImpl implements CardInstanceManagerExtension {
                     //ugly, but the GP is designed in a way it does not allow me to do otherwise
                     if (e.getMessage().startsWith("STRICT WARNING: ")) {
                         updateCardAuth(false);
-                        throw new LocalizedCardException(e.getMessage(), "H_authentication", e, "lock_black.png",
+                        throw new LocalizedCardException(e.getMessage(), "H_authentication", e, "lock.png",
                                CardDetectionAction::detectUnsafe, textSrc.getString("E_nokey_retry"), ErrDisplay.FULL_SCREEN);
                     }
                     Tuple<String, ErrDisplay> swDesc = SW.getErrorCauseKey(e.sw, "E_unknown_error");
