@@ -174,7 +174,7 @@
                 <actionGroup>
                     <actionList>
                         <showProgressDialog>
-                            <title>Downloading files</title>
+                            <title>Downloading dependencies: JAVA</title>
                             <actionList>
                                 <httpGet>
                                     <customErrorMessage>Could not download JAVA Liberica. You can try to download any java JDK 11+ manually.</customErrorMessage>
@@ -195,7 +195,7 @@
                 <actionGroup>
                     <actionList>
                         <showProgressDialog>
-                            <title>Downloading files</title>
+                            <title>Downloading dependencies: JAVA</title>
                             <actionList>
                                 <httpGet>
                                     <customErrorMessage>Could not download JAVA Liberica. You can try to download any java JDK 11+ manually.</customErrorMessage>
@@ -215,7 +215,9 @@
                 </actionGroup>
             </actionList>
             <ruleList>
-                <isFalse value="${java_autodetected}"/>
+                <isFalse value="${java_autodetected}">
+                    <negate>1</negate>
+                </isFalse>
             </ruleList>
         </actionGroup>
         <autodetectJava promptUser="0">

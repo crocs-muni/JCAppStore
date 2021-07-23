@@ -1,7 +1,7 @@
 TODO: rpm
 
 Name:           JCAppStore
-Version:        1.3
+Version:        2.0
 Release:        1%{?dist}
 Summary:        The open source Applet Store. Install anything onto your smartcard and secure your privacy.
 
