@@ -1,4 +1,5 @@
 #!/bin/bash
+#Outdated unix script launcher
 VERSION=2.0
 DIR='./'
 
