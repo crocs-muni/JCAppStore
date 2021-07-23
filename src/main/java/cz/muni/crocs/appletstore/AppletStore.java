@@ -1,25 +1,23 @@
 package cz.muni.crocs.appletstore;
 
 import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
-import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.ui.BackgroundImgSplitPanel;
-import cz.muni.crocs.appletstore.iface.OnEventCallBack;
-import cz.muni.crocs.appletstore.ui.Notice;
 import cz.muni.crocs.appletstore.util.*;
 import cz.muni.crocs.appletstore.ui.GlassPaneBlocker;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
+
 
 /**
  * App main window
@@ -79,16 +77,30 @@ public class AppletStore extends JFrame implements BackgroundChangeable {
     private void setBar() {
         setTitle("JCAppStore");
 
-        //TODO resources are now duplicated
-//        URL icon = getClass().getClassLoader().getResource("img/icon.png");
-//        ImageIcon storeIcon = icon == null ? new ImageIcon() : new ImageIcon(icon);
-//        setIconImage(storeIcon.getImage());
-
-
         setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
-        //todo UNCOMMENT FOR APPLE DISTRIBUTION
-//        Application.getApplication().setDockIconImage(
-//                new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+
+        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_MAC_OSX) {
+            //nice dirty hack because APPLE
+            //https://stackoverflow.com/questions/13400926/how-can-i-call-an-os-x-specific-method-for-my-cross-platform-jar/43873734
+            Image image = new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage();
+            try {
+                // Replace: import com.apple.eawt.Application
+                String className = "com.apple.eawt.Application";
+                Class<?> cls = Class.forName(className);
+
+                // Replace: Application application = Application.getApplication();
+                Object application = cls.getDeclaredConstructor().newInstance().getClass().getMethod("getApplication")
+                        .invoke(null);
+
+                // Replace: application.setDockIconImage(image);
+                application.getClass().getMethod("setDockIconImage", java.awt.Image.class)
+                        .invoke(application, image);
+            } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException
+                    | InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
