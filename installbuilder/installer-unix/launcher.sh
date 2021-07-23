@@ -1,7 +1,7 @@
 #!/bin/bash
-#Outdated unix script launcher
+#Script launcher for tar ball
 VERSION=2.0
-DIR='./'
+DIR='./' #set relative path from this script to the JCAppStore content folder
 
 if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 
@@ -36,4 +36,4 @@ if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 	touch ${DIR}jcappstore-do-not-ask${VERSION}.info
 fi
 cd $DIR
-java -jar ./JCAppStore-${VERSION}.jar
+java -jar ./JCAppStore.jar

@@ -35,7 +35,6 @@ public class CardDetectionRoutine extends CardAbstractRoutine<Void, Void> {
             int result = manager.needsCardRefresh();
 
             if (manager.getTerminalState() == Terminals.TerminalState.NO_SERVICE) {
-                //todo debug
                 SwingUtilities.invokeLater(() -> InformerFactory.getInformer().showInfo(
                         textSrc.getString("H_service"), Notice.Importance.FATAL,
                         Notice.CallBackIcon.RETRY, () -> {

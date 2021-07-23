@@ -2,9 +2,10 @@
 
 #This file generates the tarball.
 VERSION=2.0
-FILE=JCAppStore-${VERSION}
+FILE=JCAppStore
 
-ROOT=.;
+#change ROOT to '.' if you run it from gradle. This is meant for running the script manually from its folder.
+ROOT=../..;
 
 if ls ${ROOT}/build/libs/${FILE}.jar > /dev/null  2>&1 ; then
     echo "Source binary found!" ;

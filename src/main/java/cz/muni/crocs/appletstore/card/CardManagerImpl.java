@@ -119,8 +119,8 @@ public class CardManagerImpl implements CardManager {
     }
 
     @Override
-    public synchronized int needsCardRefresh() {
-         return terminals.checkTerminals();
+    public synchronized int needsCardRefresh() throws LocalizedCardException {
+        return terminals.checkTerminals();
     }
 
     @Override

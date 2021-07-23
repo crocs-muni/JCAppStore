@@ -116,6 +116,7 @@ task prepareInstallBuilderForWin(dependsOn: 'createAppExe') {
 }
 
 //multipurpose task, preserved for general compatibility: uncomment and run to create tarball
+//literally does nothing, just run targenerator.sh manually.
 task createUniversalUnixTar(dependsOn: jar) {
     //note if this task fails for you, just run the script manually (from the folder the script is in)
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
@@ -123,9 +124,10 @@ task createUniversalUnixTar(dependsOn: jar) {
         return 1
     }
 
-    exec {
-        commandLine "${projectDir}/installer-unix/targenerator.sh"
-    }
+    //creates problems in unix IDEs when running gradle
+//    exec {
+//        commandLine "${projectDir}/installer-unix/targenerator.sh"
+//    }
 }
 
 ///////////////////////////

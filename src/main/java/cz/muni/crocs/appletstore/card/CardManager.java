@@ -2,6 +2,7 @@ package cz.muni.crocs.appletstore.card;
 
 import apdu4j.ResponseAPDU;
 import cz.muni.crocs.appletstore.iface.CallBack;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import pro.javacard.AID;
 import pro.javacard.CAPFile;
 
@@ -106,7 +107,7 @@ public interface CardManager {
      * Evaluates the necessity of card refreshing
      * @return 0 no refresh /1 needs refresh no new card /2 needs refresh new card
      */
-    int needsCardRefresh();
+    int needsCardRefresh() throws LocalizedCardException;
 
     /**
      * Look into terminals for a card. If state changed, e.g. terminals / cards switched,
