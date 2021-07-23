@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Date;
 import java.util.ResourceBundle;
 
@@ -114,19 +116,23 @@ public class StoreWorker extends SwingWorker<Store.State, Object> implements Pro
      * @return true if not necessary to re-download
      */
     private static boolean checkValidStoreDir() {
+        if (!Config.APP_STORE_CAPS_DIR.exists()) return false;
+
         String[] files = Config.APP_STORE_DIR.list();
         if (files == null) {
             logger.error("Could not read store folder: " + Config.APP_ROOT_DIR);
             return false;
-        }  else if (files.length < 3) {
+        }
+
+        List<String> fileList = Arrays.asList(files);
+        if (files.length < 4 || !fileList.contains(".version")) {
             logger.error("Missing files in store folder: " + Config.APP_ROOT_DIR);
             return false;
-        } else {
-            return Config.APP_STORE_CAPS_DIR.exists() &&
-                    new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
-                            + OptionsFactory.getOptions().getLanguage().getLocaleString()
-                            + Config.FILE_INFO_SUFFIX).exists();
         }
+
+        return new File(Config.APP_STORE_DIR, Config.FILE_INFO_PREFIX
+                + OptionsFactory.getOptions().getLanguage().getLocaleString()
+                + Config.FILE_INFO_SUFFIX).exists();
     }
 
     /**
