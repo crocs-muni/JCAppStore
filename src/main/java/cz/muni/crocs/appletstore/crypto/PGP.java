@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.crypto;
 
+import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
@@ -17,7 +18,7 @@ import java.util.ResourceBundle;
  * export public:   gpg --armor --export you@example.com > you.asc
  * sign file:       gpg --output file.sig --detach-sign file
  * import & verify: if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --verify file.sig file
- *
+ * show key info (when changing the key for store for example)               gpg --list-signatures
  * @author Jiří Horák
  * @version 1.0
  */
@@ -91,7 +92,7 @@ public class PGP extends CmdTask {
         output = output.replaceAll("\\s", "");
 
         if (fingerprint == null) {
-            return (output.contains(OptionsFactory.getOptions().getOption(Options.KEY_STORE_FINGERPRINT)))
+            return (output.contains(OptionsFactory.getOptions().getOption(Config.STORE_KEY_FINGERPRINT)))
                     ? sig.exitValue() : 1;
         }
         return (output.contains(fingerprint.replaceAll("\\s", ""))) ? sig.exitValue() : 1;

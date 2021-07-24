@@ -1,12 +1,13 @@
 #!/bin/bash
 
 #This file generates the tarball.
-VERSION=1.3
-FILE=JCAppStore-${VERSION}
+VERSION=2.0
+FILE=JCAppStore
 
-ROOT=.;
+#change ROOT to '.' if you run it from gradle. This is meant for running the script manually from its folder.
+ROOT=../..;
 
-if ls ${ROOT}/build/libs/${FILE}.jar > /dev/null  2>&1 ; then
+if ls ${ROOT}/build/libs/${FILE}.jar > /dev/null 2>&1 ; then
     echo "Source binary found!" ;
 else
     echo "Unknown source: ${ROOT}/build/libs/${FILE}.jar. Run jar gradle target to generate the binary before tar ball target." >&2 &&
@@ -23,9 +24,9 @@ if ! mkdir -p ${ROOT}/${FILE}/src/main/ > /dev/null  2>&1 ; then
     exit 1 ;
 fi
 
-cp ${ROOT}/build/libs/${FILE}.jar ${FILE}/
-cp ${ROOT}/installer-unix/launcher.sh ${ROOT}/${FILE}/
-cp ${ROOT}/installer-unix/store.asc ${ROOT}/${FILE}/
+cp ${ROOT}/build/libs/${FILE}.jar ${ROOT}/${FILE}/
+cp ${ROOT}/installbuilder/installer-unix/launcher.sh ${ROOT}/${FILE}/
+cp ${ROOT}/installbuilder/store.asc ${ROOT}/${FILE}/
 chmod 0755 ${ROOT}/${FILE}/${FILE}.jar
 cp ${ROOT}/LICENSE ${ROOT}/${FILE}/
 cp -r ${ROOT}/src/main/resources/ ${ROOT}/${FILE}/src/main/

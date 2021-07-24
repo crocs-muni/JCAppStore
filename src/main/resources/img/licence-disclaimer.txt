@@ -4,4 +4,4 @@ package icon: http://www.softicons.com/object-icons/package-icons-by-thvg/packag
 install icon: http://www.softicons.com/computer-icons/disk-2-icons-by-thvg/diskimage-icon  for noncommercial use
 applet icon: http://www.softicons.com/toolbar-icons/blue-bits-icons-by-icojam/file-4-icon freeware, modified
 
-Other icons and images are created by the author.
+Other icons and images were created by the author.

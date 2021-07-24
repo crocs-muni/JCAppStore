@@ -34,7 +34,8 @@ public class ListContentsUnauthorized extends GPCommand<CardInstanceMetaData> {
     private static final ResourceBundle textSrc =
             ResourceBundle.getBundle("Lang", OptionsFactory.getOptions().getLanguageLocale());
 
-    private static final int DETECTION_FROM_AID_PREFIX_BYTES_LEN = 3;
+    // MUST BE AT LEAST 5 BYTES
+    private static final int DETECTION_FROM_AID_PREFIX_BYTES_LEN = 5;
 
     private final File aidList;
     private final HashSet<AppletInfo> found = new HashSet<>();
@@ -71,7 +72,6 @@ public class ListContentsUnauthorized extends GPCommand<CardInstanceMetaData> {
             //odd numbers != bytes, todo add skip (do not test each level, skip by 2/3...)K
             if (prefix.length() % 2 == 1 || prefix.length() < DETECTION_FROM_AID_PREFIX_BYTES_LEN * 2) return true;
             try {
-                logger.info("Detect AID at prefix: " + prefix);
                 ResponseAPDU response = channel.transmit(
                         new CommandAPDU(0x00, ISO7816.INS_SELECT, 0x04, 0x00, Hex.decode(prefix)));
 

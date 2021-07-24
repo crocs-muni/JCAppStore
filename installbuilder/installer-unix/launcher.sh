@@ -1,6 +1,7 @@
 #!/bin/bash
-VERSION=1.3
-DIR='./'
+#Script launcher for tar ball
+VERSION=2.0
+DIR='./' #set relative path from this script to the JCAppStore content folder
 
 if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 
@@ -11,7 +12,7 @@ if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
         echo "Next time, the application will start WITHOUT THIS NOTICE!"
         #import GPG key if possible
 	else
-              if ! gpg --list-keys 3D6FE2832EDFE9C9 > /dev/null 2&>1 ; then
+              if ! gpg --list-keys 7436D09AC9304C3F > /dev/null 2&>1 ; then
 		    echo "JCAppStore automatically verifies the software integrity for you. In order to do that" \
 		      "we need to import our public key to your keyring and set the ultimate trust."
 		    echo "You don't have to import the key, then the verification will not work. This can be" \
@@ -24,7 +25,7 @@ if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 		    done
 		    if [[ "$ANSWER" == "y" ]] ; then
 		       gpg --import ${DIR}/store.asc
-		       (echo 5 && echo y)|gpg --command-fd 0 --expert --edit-key 3D6FE2832EDFE9C9 trust
+		       (echo 5 && echo y)|gpg --command-fd 0 --expert --edit-key 7436D09AC9304C3F trust
 		       echo "The key has been imported."
 		    else
 		       echo "The key can be imported anytime. Next time, the application will start WITHOUT THIS NOTICE!"
@@ -35,4 +36,4 @@ if ! cat ${DIR}/jcappstore-do-not-ask-${VERSION}.info ; then
 	touch ${DIR}jcappstore-do-not-ask${VERSION}.info
 fi
 cd $DIR
-java -jar ./JCAppStore-${VERSION}.jar
+java -jar ./JCAppStore.jar

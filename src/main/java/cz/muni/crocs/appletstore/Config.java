@@ -15,18 +15,20 @@ import java.util.Locale;
  * @version 1.0
  */
 public class Config {
-    public static final String VERSION = "1.3";
+    public static final String VERSION = "2.0";
 
     //upgrade purposes, refuse to display the store if date of the store older than this variable
     public static Date requiredStoreUpdateAfter;
     static {
         try {
             requiredStoreUpdateAfter = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
-                    .parse("January 1, 2021");
+                    .parse("July 24, 2021");
         } catch (ParseException e) {
             requiredStoreUpdateAfter = new Date(0);
         }
     }
+
+    public static final String STORE_KEY_FINGERPRINT = "8F38117CEF7F90E956DA0F007436D09AC9304C3F";
 
     //system path separator
     public static final String S = File.separator;

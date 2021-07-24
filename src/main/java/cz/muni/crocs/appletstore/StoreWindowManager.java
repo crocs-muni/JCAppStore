@@ -13,6 +13,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.FileNotFoundException;
+import java.lang.module.ModuleDescriptor;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
@@ -126,6 +129,26 @@ public class StoreWindowManager extends JPanel implements CallBack<Void>, Search
         if (loadingPaneUpdater != null && !loadingPaneUpdater.isCancelled()) {
             loadingPaneUpdater.cancel(true);
             loadingPaneUpdater = null;
+        }
+
+        try {
+            String version = Files.readString(Paths.get(Config.APP_STORE_DIR.getAbsolutePath(), ".version"));
+            if (version != null && !version.isEmpty()) {
+                version = version.trim();
+                if (ModuleDescriptor.Version.parse(Config.VERSION).compareTo(ModuleDescriptor.Version.parse(version)) < 0) {
+                    logger.warn("The JCAppStore version is too low: " + Config.VERSION +
+                            ". An update is required: JCAppStore version at least " + version);
+                    setState(State.UNINITIALIZED);
+                    putNewPane(new ErrorPane(textSrc.getString("E_store_jcapp_outdated") + " " + version,
+                            "update.png"), false);
+
+                    return;
+                }
+            } else {
+                logger.warn("The store version file is empty. Store might not work correctly.");
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to check the store version. Store might not work correctly.", e);
         }
 
         switch (state) {

@@ -1,6 +1,8 @@
 package cz.muni.crocs.appletstore.card;
 
 import apdu4j.TerminalManager;
+import cz.muni.crocs.appletstore.util.ErrDisplay;
+import cz.muni.crocs.appletstore.util.LocalizedException;
 import jnasmartcardio.Smartcardio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class Terminals {
     private static final Logger logger = LoggerFactory.getLogger(Terminals.class);
 
     public enum TerminalState {
-        NO_READER, NO_CARD, LOADING, OK, NO_SERVICE
+        NO_READER, NO_CARD, LOADING, OK, NO_SERVICE, FAILURE
     }
 
     private TreeMap<String, CardTerminal> cardReaderMap = new TreeMap<>();
@@ -82,7 +84,7 @@ public class Terminals {
      * 2 if everything needs refresh
      * package-private: can be used through manager only
      */
-    int checkTerminals() {
+    int checkTerminals() throws LocalizedCardException {
         if (needsRefresh) {
             needsRefresh = false;
             return 2;
@@ -130,8 +132,8 @@ public class Terminals {
         } catch (CardException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             logger.warn("Failed to check terminal.", e);
-            state = TerminalState.NO_READER;
-            return (old != state) ? 2 : 0;
+            state = TerminalState.FAILURE;
+            throw new LocalizedCardException("Failed to check terminal.", "H_service_fail", "error_white.png", e, ErrDisplay.FULL_SCREEN);
         }
         if (needToRefresh || old != state) return 2;
         if (cardReaderMap.keySet().hashCode() != oldHash) return 1;

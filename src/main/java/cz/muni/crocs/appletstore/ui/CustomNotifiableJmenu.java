@@ -16,9 +16,7 @@ public class CustomNotifiableJmenu extends CustomJmenu {
     private boolean notify = false;
 
     private static final int DELAY = 250;
-    private Timer timer = new Timer(DELAY, e -> {
-        repaint();
-    });
+    private final Timer timer = new Timer(DELAY, e -> repaint());
 
     public CustomNotifiableJmenu(String title) {
         super(title);
@@ -39,6 +37,7 @@ public class CustomNotifiableJmenu extends CustomJmenu {
     public void setNotify(boolean notify) {
         this.notify = notify;
         if (this.notify && !timer.isRunning()) {
+            notifyColor = new Color(212, 164, 86);
             timer.start();
         } else if (this.notify) {
             notifyColor = new Color(212, 164, 86);
@@ -63,11 +62,13 @@ public class CustomNotifiableJmenu extends CustomJmenu {
             g.setColor(Color.BLACK);
         }
         g.fillRect(0, 0, getWidth(), getHeight());
+
+
         super.paintComponent(g);
     }
 
     private static int lower(int a) {
-        return Math.max(0, a - 2);
+        return Math.max(0, a - 4);
     }
 
     private static Color darken(Color c) {
