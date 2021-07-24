@@ -64,7 +64,7 @@ public class BackgroundImgPanel extends JPanel {
     }
 
     private void loadDefault() {
-        orig = new BufferedImage(690, 540,BufferedImage.TYPE_INT_RGB);
+        orig = new BufferedImage(690, 540, BufferedImage.TYPE_INT_RGB);
         iWidth = 690;
         iHeight = 540;
     }

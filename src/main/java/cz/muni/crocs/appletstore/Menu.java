@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore;
 
+import cz.muni.crocs.appletstore.action.CardDetectionRoutine;
 import cz.muni.crocs.appletstore.action.JCAlgTestAction;
 import cz.muni.crocs.appletstore.card.*;
 import cz.muni.crocs.appletstore.help.*;
@@ -161,7 +162,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
     }
 
     private void buildMenu() {
-        buildFileItem();
+        buildAppItem();
         buildReadersItem();
         buildHelpItem();
     }
@@ -170,7 +171,7 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
         return e -> CardManagerFactory.getManager().setSelectedTerminal(e.getActionCommand());
     }
 
-    private void buildFileItem() {
+    private void buildAppItem() {
         CustomJmenu menu = new CustomNotifiableJmenu(textSrc.getString("file"), "", KeyEvent.VK_A);
 
         menu.add(buildCardSubMenu());
@@ -192,6 +193,24 @@ public class Menu extends JMenuBar implements CardStatusNotifiable {
                 }
             }
         }, Config.IMAGE_DIR + "settings.png", "", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK ));
+
+        final Menu self = this;
+        menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("about")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame about = new JFrame();
+                about.setContentPane(new About());
+                about.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                about.setLocationRelativeTo(self);
+                about.requestFocusInWindow();
+                about.setResizable(false);
+                about.setIconImage(new ImageIcon(Config.IMAGE_DIR + "icon.png").getImage());
+                about.setTitle("JCAppStore " + Config.VERSION);
+                about.setPreferredSize(new Dimension(300, 220));
+                about.pack();
+                about.setVisible(true);
+            }
+        }, "", Config.IMAGE_DIR + "icon_small.png"));
 
         menu.add(menuItemNoShortcut(new AbstractAction(textSrc.getString("quit")) {
             @Override
