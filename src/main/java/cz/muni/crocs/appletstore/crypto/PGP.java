@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
  * export public:   gpg --armor --export you@example.com > you.asc
  * sign file:       gpg --output file.sig --detach-sign file
  * import & verify: if ! gpg --list-keys <keyID> do gpg --import key.asc else gpg --verify file.sig file
- *
+ * show key info (when changing the key for store for example)               gpg --list-signatures
  * @author Jiří Horák
  * @version 1.0
  */

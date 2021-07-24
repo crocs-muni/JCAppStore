@@ -22,7 +22,7 @@ public class Config {
     static {
         try {
             requiredStoreUpdateAfter = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
-                    .parse("January 1, 2021");
+                    .parse("July 24, 2021");
         } catch (ParseException e) {
             requiredStoreUpdateAfter = new Date(0);
         }
