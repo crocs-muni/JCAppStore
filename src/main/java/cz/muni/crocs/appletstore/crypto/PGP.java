@@ -1,5 +1,6 @@
 package cz.muni.crocs.appletstore.crypto;
 
+import cz.muni.crocs.appletstore.Config;
 import cz.muni.crocs.appletstore.util.Options;
 import cz.muni.crocs.appletstore.util.OptionsFactory;
 import cz.muni.crocs.appletstore.util.Tuple;
@@ -91,7 +92,7 @@ public class PGP extends CmdTask {
         output = output.replaceAll("\\s", "");
 
         if (fingerprint == null) {
-            return (output.contains(OptionsFactory.getOptions().getOption(Options.KEY_STORE_FINGERPRINT)))
+            return (output.contains(OptionsFactory.getOptions().getOption(Config.STORE_KEY_FINGERPRINT)))
                     ? sig.exitValue() : 1;
         }
         return (output.contains(fingerprint.replaceAll("\\s", ""))) ? sig.exitValue() : 1;

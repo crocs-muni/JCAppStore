@@ -28,6 +28,8 @@ public class Config {
         }
     }
 
+    public static final String STORE_KEY_FINGERPRINT = "8F38117CEF7F90E956DA0F007436D09AC9304C3F";
+
     //system path separator
     public static final String S = File.separator;
 

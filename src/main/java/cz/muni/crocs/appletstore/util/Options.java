@@ -30,7 +30,6 @@ public interface Options<ValueType> {
     String KEY_KEEP_AUTO_INSTALLED = "jcmemory_keep";
     String KEY_WARN_FORCE_INSTALL = "warn_force_install";
     String KEY_LAST_SELECTION_LOCATION = "custom_applet_folder";
-    String KEY_STORE_FINGERPRINT = "public_key_fingerprint";
     String KEY_JCALGTEST_CLIENT_PATH = "jcalgtest_client";
     String KEY_JAVA_EXECUTABLE = "java_executable";
 
