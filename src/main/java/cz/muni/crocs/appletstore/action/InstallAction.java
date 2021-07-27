@@ -443,8 +443,8 @@ public class InstallAction extends CardAbstractAction<Void, Void> {
             //todo do not bother the user if SDK version not found?
             //sdk.append("<br><p style='width:350px;'>").append(textSrc.getString("jcdia_nosdk")).append("</p>");
         } else if (!sdkVersion.equals(data.getInfo().getSdk())) {
-            sdk.append("<br><p>").append(textSrc.getString("your_sdk")).append(data.getInfo().getSdk())
-                    .append("</p><p>").append(textSrc.getString("applet_sdk")).append(sdkVersion).append("</p>");
+            sdk.append("<br><p>").append(textSrc.getString("your_sdk")).append(sdkVersion)
+                    .append("</p><p>").append(textSrc.getString("applet_sdk")).append(data.getInfo().getSdk()).append("</p>");
         } else if (result.isEmpty()) return null;
 
         return new Tuple<>(textSrc.getString((result.isEmpty() ? "not_found_sdk" : "unmet_requirements")),

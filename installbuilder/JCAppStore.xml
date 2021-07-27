@@ -185,7 +185,7 @@
                 <actionGroup>
                     <actionList>
                         <showWarning>
-                            <text>JCAppStore requires Java JDK 11.0.2+ in order to work. You can install java using terminal and continue (confirm this message) after Java is installed.</text>
+                            <text>JCAppStore requires Java JDK 11.0.2+ in order to work. You can install java using terminal and continue (confirm this message) after Java is installed. Example for Ubuntu: sudo apt install default-jdk</text>
                         </showWarning>
                     </actionList>
                     <ruleList>
@@ -198,17 +198,22 @@
                             <title>Downloading dependencies: JAVA</title>
                             <actionList>
                                 <httpGet>
-                                    <customErrorMessage>Could not download JAVA Liberica. Java 11.0.2+ is required for JCAppStore to run. You can try to download any java JDK 11.0.2+ manually.</customErrorMessage>
-                                    <filename>${system_temp_directory}/java.dmg</filename>
-                                    <url>https://download.bell-sw.com/java/16.0.2+7/bellsoft-jdk16.0.2+7-macos-amd64.dmg</url>
+                                    <customErrorMessage>Could not download JAVA Liberica. JDK Java 11.0.2+ is required for JCAppStore to run. You can try to download any java JDK 11.0.2+ manually.</customErrorMessage>
+                                    <filename>${system_temp_directory}/java.pkg</filename>
+                                    <url>https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_x64_mac_hotspot_16.0.1_9.pkg</url>
                                 </httpGet>
                             </actionList>
                         </showProgressDialog>
                         <runProgram>
-                            <program>${system_temp_directory}/java.dmg</program>
-                            <programArguments></programArguments>
+                            <program>installer</program>
+                            <programArguments>-pkg ${system_temp_directory}/java.pkg -target CurrentUserHomeDirectory</programArguments>
                         </runProgram>
                     </actionList>
+                    <onErrorActionList>
+                        <showWarning>
+                            <text>You need to have Java JDK 11.0.2+ to run this application.</text>
+                        </showWarning>
+                    </onErrorActionList>
                     <ruleList>
                         <platformTest type="osx"/>
                     </ruleList>
@@ -219,17 +224,22 @@
                             <title>Downloading dependencies: JAVA</title>
                             <actionList>
                                 <httpGet>
-                                    <customErrorMessage>Could not download JAVA Liberica. Java 11.0.2+ is required for JCAppStore to run. You can try to download any java JDK 11.0.2+ manually.</customErrorMessage>
-                                    <filename>${system_temp_directory}/java.exe</filename>
-                                    <url>https://download.bell-sw.com/java/16.0.2+7/bellsoft-jdk16.0.2+7-windows-amd64.msi</url>
+                                    <customErrorMessage>Could not download JAVA Liberica. JDK Java 11.0.2+ is required for JCAppStore to run. You can try to download any java JDK 11.0.2+ manually.</customErrorMessage>
+                                    <filename>${system_temp_directory}\java.msi</filename>
+                                    <url>https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_x64_windows_hotspot_16.0.1_9.msi</url>
                                 </httpGet>
                             </actionList>
                         </showProgressDialog>
                         <runProgram>
-                            <program>${system_temp_directory}/java.exe</program>
-                            <programArguments></programArguments>
+                            <program>msiexec</program>
+                            <programArguments>/i "${system_temp_directory}\java.msi" /qf</programArguments>
                         </runProgram>
                     </actionList>
+                    <onErrorActionList>
+                        <showWarning>
+                            <text>You need to have Java JDK 11.0.2+ to run this application.</text>
+                        </showWarning>
+                    </onErrorActionList>
                     <ruleList>
                         <platformTest type="windows"/>
                     </ruleList>
@@ -239,22 +249,6 @@
                 <isFalse value="${java_autodetected}"/>
             </ruleList>
         </actionGroup>
-        <autodetectJava promptUser="0">
-            <onErrorActionList>
-                <showInfo>
-                    <text>You need to have Java JDK 11.0.2+ to run this application.</text>
-                </showInfo>
-            </onErrorActionList>
-            <validVersionList>
-                <validVersion>
-                    <bitness></bitness>
-                    <maxVersion></maxVersion>
-                    <minVersion>11.0.11</minVersion>
-                    <requireJDK>1</requireJDK>
-                    <vendor></vendor>
-                </validVersion>
-            </validVersionList>
-        </autodetectJava>
     </readyToInstallActionList>
     <postInstallationActionList>
         <if>
@@ -282,6 +276,21 @@
             <actionList>
                 <actionGroup>
                     <actionList>
+                        <autodetectJava promptUser="0">
+                            <validVersionList>
+                                <validVersion>
+                                    <bitness></bitness>
+                                    <maxVersion></maxVersion>
+                                    <minVersion>11.0.11</minVersion>
+                                    <requireJDK>1</requireJDK>
+                                    <vendor></vendor>
+                                </validVersion>
+                            </validVersionList>
+                        </autodetectJava>
+                        <runProgram>
+                            <program>chmod</program>
+                            <programArguments>u+x ${installdir}/keyring.sh</programArguments>
+                        </runProgram>
                         <runProgram>
                             <program>${installdir}/keyring.sh</program>
                             <programArguments></programArguments>
@@ -296,6 +305,10 @@
                 </actionGroup>
                 <actionGroup>
                     <actionList>
+                        <runProgram>
+                            <program>chmod</program>
+                            <programArguments>u+x ${installdir}/keyring.sh</programArguments>
+                        </runProgram>
                         <runProgram>
                             <program>${installdir}/keyring.sh</program>
                             <programArguments></programArguments>
@@ -389,7 +402,8 @@ java -jar ./JCAppStore.jar
             </ruleList>
         </actionGroup>
     </postInstallationActionList>
-    <enableRollback>1</enableRollback>
+    <createOsxBundleDmg>1</createOsxBundleDmg>
+    <enableRollback>0</enableRollback>
     <enableSslSupport>1</enableSslSupport>
     <enableTimestamp>1</enableTimestamp>
     <saveRelativePaths>1</saveRelativePaths>
@@ -409,5 +423,13 @@ java -jar ./JCAppStore.jar
             <width>40</width>
         </directoryParameter>
     </parameterList>
+    <platformOptionsList>
+        <platformOptions>
+            <platform>osx</platform>
+        </platformOptions>
+        <platformOptions>
+            <platform>linux</platform>
+        </platformOptions>
+    </platformOptionsList>
 </project>
 
